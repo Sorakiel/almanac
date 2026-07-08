@@ -17,6 +17,7 @@
   --color-muted-strong: 133 129 122; /* #85817A */
   --color-accent: 239 136 87; /* #EF8857 */
   --color-accent-deep: 194 86 42; /* #C2562A */
+  --color-on-accent: 14 14 16; /* dark ink for text on the orange accent */
   --color-border: 255 255 255; /* used at low opacity for hairlines */
   --color-teal: 42 157 143; /* #2A9D8F */
   --color-amber: 199 154 58; /* #C79A3A */
@@ -34,6 +35,7 @@
   --color-muted-strong: 138 122 102; /* darker mute for AA on light */
   --color-accent: 239 136 87; /* #EF8857 shared brand accent */
   --color-accent-deep: 194 86 42; /* #C2562A */
+  --color-on-accent: 14 14 16; /* same dark ink — accent is identical in both themes */
   --color-border: 42 32 24; /* espresso hairline on light */
   --color-teal: 42 157 143;
   --color-amber: 199 154 58;

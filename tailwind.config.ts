@@ -22,6 +22,7 @@ export default {
         'muted-strong': withOpacity('--color-muted-strong'),
         accent: withOpacity('--color-accent'),
         'accent-deep': withOpacity('--color-accent-deep'),
+        'on-accent': withOpacity('--color-on-accent'),
         border: withOpacity('--color-border'),
         teal: withOpacity('--color-teal'),
         amber: withOpacity('--color-amber'),
