@@ -1,0 +1,16 @@
+# Supabase CLI project config. `project_id` links `supabase link` to your
+# remote project ref (Dashboard → Project Settings → General).
+project_id = "almanac"
+
+[db]
+major_version = 15
+
+[auth]
+# Email/password sign-in for the Phase-1 slice.
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+# Disable confirmation locally so the smoke test can sign in immediately.
+# Keep confirmations ON in production.
+enable_confirmations = false
