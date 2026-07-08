@@ -14,8 +14,10 @@ test('almanac phase-1 smoke', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveURL(/\/auth$/)
 
-  // 2. Sign up a fresh test user.
-  const email = `smoke-${Date.now()}@example.com`
+  // 2. Sign up a fresh test user. Note: Supabase's email validator rejects
+  // throwaway domains like example.com, and this flow assumes email
+  // confirmation is DISABLED so the sign-up issues a session immediately.
+  const email = `almanac.smoke.${Date.now()}@gmail.com`
   await page.getByRole('button', { name: /create one/i }).click()
   await page.getByLabel('Name').fill('Smoke Tester')
   await page.getByLabel('Email').fill(email)

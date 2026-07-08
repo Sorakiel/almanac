@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -8,6 +9,7 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
+import { useSession } from '@/hooks/useSession'
 
 const schema = z.object({
   displayName: z.string().trim().min(1, 'Required').optional(),
@@ -20,6 +22,7 @@ type Mode = 'signin' | 'signup'
 
 function AuthPage() {
   const [mode, setMode] = useState<Mode>('signin')
+  const { status } = useSession()
   const { signIn, signUp } = useAuthActions()
   const {
     register,
@@ -45,6 +48,11 @@ function AuthPage() {
       toast.error(error instanceof Error ? error.message : 'Something went wrong')
     }
   })
+
+  // Once authenticated, leave the public auth screen for the dashboard. This
+  // also covers sign-up when email confirmation is disabled (session is
+  // issued immediately).
+  if (status === 'authenticated') return <Navigate to="/" replace />
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-8 px-6 py-12">
