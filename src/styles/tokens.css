@@ -1,0 +1,43 @@
+/**
+ * Design tokens — the single source of color truth.
+ *
+ * Colors are stored as space-separated RGB channels (not hex) so Tailwind can
+ * apply opacity modifiers via `rgb(var(--token) / <alpha>)`. Themes switch on
+ * the `data-theme` attribute on <html>: `dark` (default) and `coffee` (warm
+ * light). Components reference only the semantic Tailwind tokens, never hex.
+ */
+
+:root,
+:root[data-theme='dark'] {
+  --color-bg: 27 27 29; /* #1B1B1D */
+  --color-bg-deep: 14 14 16; /* #0E0E10 */
+  --color-surface: 38 38 42; /* #26262A */
+  --color-foreground: 236 231 216; /* #ECE7D8 */
+  --color-muted: 168 165 158; /* #A8A59E */
+  --color-muted-strong: 133 129 122; /* #85817A */
+  --color-accent: 239 136 87; /* #EF8857 */
+  --color-accent-deep: 194 86 42; /* #C2562A */
+  --color-border: 255 255 255; /* used at low opacity for hairlines */
+  --color-teal: 42 157 143; /* #2A9D8F */
+  --color-amber: 199 154 58; /* #C79A3A */
+
+  --border-opacity: 0.08;
+  color-scheme: dark;
+}
+
+:root[data-theme='coffee'] {
+  --color-bg: 236 227 210; /* #ECE3D2 canvas */
+  --color-bg-deep: 224 210 188; /* #E0D2BC deep panel */
+  --color-surface: 244 236 221; /* #F4ECDD */
+  --color-foreground: 42 32 24; /* #2A2018 espresso */
+  --color-muted: 110 95 78; /* #6E5F4E */
+  --color-muted-strong: 138 122 102; /* darker mute for AA on light */
+  --color-accent: 239 136 87; /* #EF8857 shared brand accent */
+  --color-accent-deep: 194 86 42; /* #C2562A */
+  --color-border: 42 32 24; /* espresso hairline on light */
+  --color-teal: 42 157 143;
+  --color-amber: 199 154 58;
+
+  --border-opacity: 0.12;
+  color-scheme: light;
+}

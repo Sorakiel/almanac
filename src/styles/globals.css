@@ -1,0 +1,40 @@
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-color: rgb(var(--color-border) / var(--border-opacity));
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-bg text-foreground font-sans;
+    min-height: 100dvh;
+  }
+
+  /* Visible focus ring for keyboard users (accessibility is not optional). */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-bg;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply tracking-title font-semibold;
+  }
+}
+
+@layer components {
+  /* Mono micro-label: uppercase, wide tracking — used for section headers,
+     numbers, tags and timestamps per the design system. */
+  .label-mono {
+    @apply font-mono text-xs uppercase tracking-label text-muted;
+  }
+}
