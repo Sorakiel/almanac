@@ -9,165 +9,105 @@ One screen that answers _"where am I now, and where am I headed?"_ — every tim
 [![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
 [![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20RLS-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Supabase](https://img.shields.io/badge/Supabase-Postgres-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 
 </div>
 
 ---
 
-## Overview
+## What is Almanac?
 
-Almanac is a **dashboard-first "life OS"**: you _act_ on the dashboard — one-tap
-habit completion with instant, optimistic feedback — instead of just reading it.
-It starts with habits and workouts and is built to grow into a modular super app
-(finances, reading, goals, sleep) behind a modules hub.
+Almanac is a private daily companion for building good habits and staying on top
+of your training. Open it and one screen tells you where your day stands: the
+habits you've committed to, how many you've completed, and a nudge to keep going.
 
-It is **multi-user from day one**. Per-user data isolation is enforced by
-Supabase **Row-Level Security** at the database, not by application code — the
-browser only ever holds the public anon key.
+Most habit trackers fail for the same reason — they become a chore. Almanac is
+built around a single belief: **the biggest risk isn't a missing feature, it's
+that you stop opening the app.** So everything is tuned for a five-second daily
+visit rather than a lengthy one.
 
-> **Design north-star:** two themes — `dark` (default) and `coffee` (a warm
-> beige light theme) — sharing one brand accent, mono micro-labels, and block
-> progress bars (`▓▓▓▓░░░░`).
+## The problem it solves
+
+Keeping a routine takes momentum, and momentum dies when logging is slow, when
+the screen is cluttered, or when a missed day feels like failure. Almanac
+attacks that on three fronts:
+
+- **Friction kills habits, so logging is one tap.** Marking a habit done is a
+  single press, and the screen updates *instantly* — it never makes you wait for
+  the network before showing your progress.
+- **A wall of numbers is discouraging, so the dashboard leads with clarity.**
+  Today's habits, a simple completion ring, and a rotating quote — the answer to
+  "how am I doing?" at a glance, without digging.
+- **Life is more than one thing, so it's built to grow.** Habits and workouts
+  come first, with room to add finances, reading, goals, and sleep later — each
+  a self-contained module, so the app expands without becoming a mess.
+
+It's also **multi-user from day one**: you can share it with friends, and each
+person's data is fully private to them.
+
+## How it works
+
+Almanac runs entirely in your browser and talks directly to a hosted database —
+there's no separate server to maintain. That keeps it fast, cheap to run, and
+simple to reason about:
+
+- **The app** is a snappy single-page React app. Your progress appears the
+  instant you tap, then quietly syncs in the background; if something fails, it
+  gracefully rolls back.
+- **The data** lives in a Postgres database (via Supabase), which also handles
+  sign-in. Privacy is enforced at the database itself — every person can only
+  ever see their own rows — rather than trusting the app to be careful.
+- **The look** is a calm, focused interface with two hand-picked themes: a
+  default **dark** mode and a warm, beige **coffee** light mode, both designed
+  for daily comfort and readable contrast.
 
 ## Features
 
-- **🔐 Auth** — email/password sign-in; session handled entirely by `supabase-js`.
-- **📊 Dashboard** — today's habits, a completion donut, and a rotating quote.
-- **✅ Habits** — create / edit / archive, with **one-tap completion** that updates
-  optimistically and persists across reloads.
-- **🎨 Dual themes** — `dark` / `coffee` toggle via `data-theme`, AA-contrast in both.
-- **♿ Accessible** — semantic HTML, labels, visible focus, keyboard support.
-- **🧭 Roadmap-ready** — feature-first architecture; workouts, insights, reflect,
-  and admin modules are scaffolded for later phases.
+- ✅ **One-tap habits** — create, track, and complete daily or weekly habits with
+  instant feedback.
+- 📊 **A dashboard that answers "how's my day?"** — today's habits, a completion
+  ring, and a daily quote.
+- 🔐 **Private accounts** — email sign-in, with each user's data isolated from
+  everyone else's.
+- 🎨 **Two themes** — dark and coffee, switchable anytime.
+- ♿ **Accessible by default** — keyboard-friendly, screen-reader sane, and legible
+  in both themes.
 
 ## Tech stack
 
-| Concern            | Choice                                             |
-| ------------------ | -------------------------------------------------- |
-| Build / framework  | **Vite** + React 19 + **TypeScript** (strict)      |
-| Styling            | **Tailwind CSS** + shadcn/ui (Radix primitives)    |
-| Routing            | React Router                                        |
-| Backend            | **Supabase** — Postgres + Auth + RLS + Storage      |
-| Server state       | **TanStack Query** (React Query)                   |
-| UI / theme state   | React state + **Zustand**                          |
-| Charts             | Recharts                                           |
-| Forms + validation | react-hook-form + **zod**                          |
-| Dates / timezones  | date-fns                                           |
-| Testing            | **Playwright** (E2E) · Vitest (optional unit)      |
-| Hosting            | **Vercel** (static SPA)                            |
+| Area          | Built with                                          |
+| ------------- | --------------------------------------------------- |
+| Framework     | **Vite** + React + **TypeScript**                   |
+| Styling       | **Tailwind CSS** + shadcn/ui (Radix)                |
+| Data & auth   | **Supabase** (Postgres + Auth)                      |
+| Data fetching | **TanStack Query** (React Query)                    |
+| App state     | **Zustand**                                         |
+| Charts        | Recharts                                            |
+| Forms         | react-hook-form + **zod**                           |
+| Testing       | **Playwright**                                      |
+| Hosting       | **Vercel**                                          |
 
-**Why Vite SPA + Supabase, no custom server:** the Supabase JS client talks to
-Postgres directly and RLS enforces per-user security at the database — so there
-is no backend to run or pay for. The trade-off (no SSR/SEO) is irrelevant: the
-whole app sits behind auth.
-
-## Architecture
-
-- **Feature-first** — each life area is a self-contained module under `src/features/`.
-- **Dumb components, smart hooks** — UI is presentational; data access and logic
-  live in hooks (`useHabits`, `useToggleHabit`) over a thin `api/` layer.
-- **React Query is the single source of truth for server data** — no `useEffect` fetching.
-- **Components never import `supabase` directly** — they go through `api/` + `hooks/`.
-- **Every data view ships three states**: loading, empty, error.
-
-```
-src/
-├─ app/          # shell, providers, router
-├─ components/   # ui/ (primitives) + common/ (composites)
-├─ features/     # auth, dashboard, habits, workouts, …
-├─ lib/          # supabase, queryClient, date/tz, utils
-├─ hooks/        # cross-cutting (useTheme, useSession)
-├─ stores/       # zustand (theme, ui)
-├─ styles/       # tokens.css (themes) + globals.css
-└─ types/        # database.generated.ts
-```
-
-## Local setup
-
-**Prerequisites:** Node 20+ and npm.
+## Running it locally
 
 ```bash
 git clone https://github.com/Sorakiel/almanac.git
 cd almanac
 npm install
-cp .env.example .env.local   # then fill in your Supabase values (below)
-npm run dev                  # http://localhost:5173
+npm run dev
 ```
 
-### Environment variables
-
-Create `.env.local` (gitignored) with values from your Supabase project
-(**Dashboard → Project Settings → API**):
-
-| Variable                 | Description                                                  |
-| ------------------------ | ------------------------------------------------------------ |
-| `VITE_SUPABASE_URL`      | Project URL, e.g. `https://xxxx.supabase.co`                 |
-| `VITE_SUPABASE_ANON_KEY` | Public **anon** key — safe in the client because RLS is on.  |
-
-> ⚠️ Never put the `service_role` key in the client or the repo.
-
-### Supabase setup
-
-1. Create a project at [supabase.com](https://supabase.com).
-2. Apply the schema — either paste `supabase/migrations/0001_init.sql` into the
-   **SQL Editor**, or use the CLI:
-   ```bash
-   supabase link --project-ref <your-ref>
-   supabase db push
-   ```
-3. Load starter data: run `supabase/seed.sql` (adds quotes + a demo habit).
-4. (Recommended) regenerate DB types:
-   ```bash
-   supabase gen types typescript --linked > src/types/database.generated.ts
-   ```
-
-RLS is enabled on **every** table by the migration, with per-user "own rows"
-policies; admin access flows through a `security definer` function.
-
-## Scripts
-
-| Script                 | Purpose                              |
-| ---------------------- | ------------------------------------ |
-| `npm run dev`          | Start the Vite dev server            |
-| `npm run build`        | Type-check (`tsc -b`) + production build |
-| `npm run preview`      | Preview the production build         |
-| `npm run typecheck`    | Type-check only                      |
-| `npm run lint`         | ESLint                               |
-| `npm run format`       | Prettier write                       |
-
-## Testing
-
-End-to-end smoke tests run against the dev server with **Playwright**:
-
-```bash
-npm run dev            # in one terminal
-npx playwright test    # specs live in /tests
-```
-
-The smoke checklist covers: app loads with no console errors, sign-in, create +
-complete a habit (optimistic, persists on reload), theme toggle, and sign out.
-
-## Deployment (Vercel)
-
-1. Import the repo into [Vercel](https://vercel.com) — framework preset **Vite**,
-   output dir `dist`.
-2. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in **Project Settings →
-   Environment Variables**.
-3. Deploy. Every PR gets a preview deployment.
-
-Because Supabase's free tier pauses after ~7 days idle, a small daily keep-alive
-(GitHub Action doing one tiny read) is planned so the app never cold-starts.
+Almanac connects to a Supabase project for its data and sign-in. Copy
+`.env.example` to `.env.local` and add your own Supabase credentials — the setup
+steps are documented there and in the `supabase/` folder.
 
 ## Roadmap
 
-- **Phase 1 (this slice)** — auth → app shell → habits CRUD → one-tap completion →
-  basic dashboard. _Ship, then dogfood._
-- **Phase 2** — workouts + exercise library + sessions; habit-detail heatmap;
-  settings + timezone; keep-alive job.
-- **Phase 3** — insights/progress, reflect/journal, admin + feedback, polish.
-- **Phase 4+** — new modules (finances, reading, goals, sleep) behind a modules hub.
+- **Phase 1 (now)** — habits, one-tap completion, and the daily dashboard.
+- **Phase 2** — workouts and an exercise library; habit history; timezone-aware
+  streaks.
+- **Phase 3** — progress insights and a reflection journal.
+- **Beyond** — new life modules (finances, reading, goals, sleep).
 
 ## License
 
