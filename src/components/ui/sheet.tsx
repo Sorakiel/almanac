@@ -18,7 +18,7 @@ export function Sheet({ open, onOpenChange, title, description, children }: Shee
         <Dialog.Overlay className="fixed inset-0 z-50 bg-bg-deep/70 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in data-[state=closed]:fade-out" />
         <Dialog.Content
           className={cn(
-            'fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md rounded-t-sheet border border-border bg-surface p-6 pb-8 shadow-soft',
+            'fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md rounded-t-sheet border bg-surface p-6 pb-8 shadow-soft',
             'focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom',
           )}

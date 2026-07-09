@@ -1,9 +1,12 @@
-import { Check, Pencil } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
-import { ProgressBlocks } from '@/components/common/ProgressBlocks'
+import { IconTile } from '@/components/common/IconTile'
+import { Sparkline } from '@/components/common/Sparkline'
 import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
-import { useUiStore } from '@/stores/ui'
+import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
+import { frequencyLabel } from '@/features/habits/lib/frequency'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 
@@ -11,11 +14,15 @@ interface HabitCardProps {
   habit: HabitWithTodayLog
 }
 
-/** A single habit row: tap the check to complete, pencil to edit. */
+/** Rich habits-list card: icon, history stat, sparkline, one-tap check. */
 export function HabitCard({ habit }: HabitCardProps) {
+  const navigate = useNavigate()
   const toggle = useToggleHabit()
-  const openEditHabit = useUiStore((s) => s.openEditHabit)
-  const multi = habit.target_count > 1
+  const color = resolveHabitColor(habit.color)
+  const Icon = resolveHabitIcon(habit.icon)
+  const subtitle = habit.description
+    ? `${habit.description} · ${frequencyLabel(habit)}`
+    : frequencyLabel(habit)
 
   const handleToggle = () => {
     toggle.mutate(
@@ -28,54 +35,54 @@ export function HabitCard({ habit }: HabitCardProps) {
   }
 
   return (
-    <Card className="flex items-center gap-4 p-4">
-      <button
-        type="button"
-        onClick={handleToggle}
-        aria-pressed={habit.isComplete}
-        aria-label={habit.isComplete ? `Mark ${habit.name} incomplete` : `Complete ${habit.name}`}
-        className={cn(
-          'flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
-          habit.isComplete
-            ? 'border-accent bg-accent text-on-accent'
-            : 'border-border text-muted hover:border-accent hover:text-accent',
-        )}
-      >
-        <Check className="h-5 w-5" aria-hidden="true" />
-      </button>
-
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <p className={cn('truncate font-medium', habit.isComplete && 'text-muted line-through')}>
-            {habit.name}
-          </p>
-          {multi ? (
-            <span className="label-mono shrink-0">
-              {habit.todayCount}/{habit.target_count}
-            </span>
-          ) : null}
-        </div>
-        {multi ? (
-          <ProgressBlocks
-            value={habit.todayCount}
-            total={habit.target_count}
-            className="mt-2"
-            aria-label={`${habit.name}: ${habit.todayCount} of ${habit.target_count} today`}
-          />
-        ) : habit.description ? (
-          <p className="truncate text-sm text-muted">{habit.description}</p>
-        ) : null}
+    <Card className="p-4">
+      <div className="flex items-start gap-3">
+        <IconTile icon={Icon} tone={color.tile} />
+        <button
+          type="button"
+          onClick={() => navigate(`/habits/${habit.id}`)}
+          className="min-w-0 flex-1 text-left"
+        >
+          <p className="truncate font-semibold">{habit.name}</p>
+          <p className="truncate text-sm text-muted">{subtitle}</p>
+        </button>
+        <CheckToggle habit={habit} onToggle={handleToggle} />
       </div>
 
-      <button
-        type="button"
-        onClick={() => openEditHabit(habit.id)}
-        aria-label={`Edit ${habit.name}`}
-        className="shrink-0 rounded-full p-2 text-muted transition-colors hover:bg-surface hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-      >
-        <Pencil className="h-4 w-4" aria-hidden="true" />
-      </button>
+      <div className="mt-3 flex items-end justify-between gap-3">
+        <span className="label-mono normal-case tracking-normal">
+          <span className="tabular-nums">{habit.completedRecent}</span> of last {habit.windowDays}
+          {' · '}
+          <span className="text-accent">{Math.round(habit.rate * 100)}%</span>
+        </span>
+        <Sparkline values={habit.series} stroke={color.stroke} />
+      </div>
     </Card>
+  )
+}
+
+interface CheckToggleProps {
+  habit: HabitWithTodayLog
+  onToggle: () => void
+}
+
+/** Circular completion toggle used on cards and rows. */
+export function CheckToggle({ habit, onToggle }: CheckToggleProps) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={habit.isComplete}
+      aria-label={habit.isComplete ? `Mark ${habit.name} incomplete` : `Complete ${habit.name}`}
+      className={cn(
+        'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
+        habit.isComplete
+          ? 'border-accent bg-accent text-on-accent'
+          : 'text-transparent hover:border-accent hover:text-accent',
+      )}
+    >
+      <Check className="h-4 w-4" aria-hidden="true" />
+    </button>
   )
 }

@@ -11,15 +11,15 @@ interface ToggleArgs {
 
 /**
  * One-tap completion. A tap increments the day's count (so multi-target habits
- * fill up); tapping a completed habit clears it. The logs cache is updated
- * optimistically for instant feedback and rolled back on error.
+ * fill up); tapping a completed habit clears it. The recent-logs cache is
+ * updated optimistically for instant feedback and rolled back on error.
  */
 export function useToggleHabit() {
   const queryClient = useQueryClient()
   const { user } = useSession()
   const { dateKey } = useToday()
   const userId = user?.id ?? ''
-  const logsKey = habitKeys.logsForDate(userId, dateKey)
+  const logsKey = habitKeys.recentLogs(userId, dateKey)
 
   return useMutation({
     mutationFn: ({ habit }: ToggleArgs) => {
@@ -31,14 +31,15 @@ export function useToggleHabit() {
       const previous = queryClient.getQueryData<HabitLog[]>(logsKey) ?? []
       const nextCount = habit.isComplete ? 0 : habit.todayCount + 1
 
-      const others = previous.filter((log) => log.habit_id !== habit.id)
+      // Replace today's row for this habit (or drop it when cleared).
+      const others = previous.filter((log) => !(log.habit_id === habit.id && log.date === dateKey))
       const next: HabitLog[] =
         nextCount <= 0
           ? others
           : [
               ...others,
               {
-                id: `optimistic-${habit.id}`,
+                id: `optimistic-${habit.id}-${dateKey}`,
                 user_id: userId,
                 habit_id: habit.id,
                 date: dateKey,

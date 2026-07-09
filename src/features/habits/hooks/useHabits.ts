@@ -1,15 +1,35 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
-import { fetchHabits, fetchLogsForDate } from '@/features/habits/api/habits.api'
+import { lastNDateKeys } from '@/lib/date'
+import { fetchHabits, fetchLogsSince } from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
 import type { Habit, HabitLog, HabitWithTodayLog } from '@/features/habits/types'
 
-function join(habits: Habit[], logs: HabitLog[]): HabitWithTodayLog[] {
-  const byHabit = new Map(logs.map((log) => [log.habit_id, log]))
+const WINDOW_DAYS = 7
+
+function join(habits: Habit[], logs: HabitLog[], windowKeys: string[]): HabitWithTodayLog[] {
+  // Index counts by habit + date for O(1) lookup.
+  const counts = new Map<string, number>()
+  for (const log of logs) counts.set(`${log.habit_id}:${log.date}`, log.count)
+  const todayKey = windowKeys[windowKeys.length - 1]
+
   return habits.map((habit) => {
-    const todayCount = byHabit.get(habit.id)?.count ?? 0
-    return { ...habit, todayCount, isComplete: todayCount >= habit.target_count }
+    const series: number[] = windowKeys.map((key) => {
+      const count = counts.get(`${habit.id}:${key}`) ?? 0
+      return count >= habit.target_count ? 1 : 0
+    })
+    const todayCount = counts.get(`${habit.id}:${todayKey}`) ?? 0
+    const completedRecent = series.reduce((a, b) => a + b, 0)
+    return {
+      ...habit,
+      todayCount,
+      isComplete: todayCount >= habit.target_count,
+      series,
+      completedRecent,
+      windowDays: WINDOW_DAYS,
+      rate: completedRecent / WINDOW_DAYS,
+    }
   })
 }
 
@@ -20,12 +40,13 @@ interface UseHabitsResult {
   refetch: () => void
 }
 
-/** Active habits joined with today's completion state. */
+/** Active habits joined with today's completion and a 7-day history. */
 export function useHabits(): UseHabitsResult {
   const { user } = useSession()
   const { dateKey } = useToday()
   const userId = user?.id ?? ''
   const enabled = Boolean(userId)
+  const windowKeys = lastNDateKeys(dateKey, WINDOW_DAYS)
 
   const habitsQuery = useQuery({
     queryKey: habitKeys.all(userId),
@@ -34,13 +55,15 @@ export function useHabits(): UseHabitsResult {
   })
 
   const logsQuery = useQuery({
-    queryKey: habitKeys.logsForDate(userId, dateKey),
-    queryFn: () => fetchLogsForDate(userId, dateKey),
+    queryKey: habitKeys.recentLogs(userId, dateKey),
+    queryFn: () => fetchLogsSince(userId, windowKeys[0]!),
     enabled,
   })
 
   const habits =
-    habitsQuery.data && logsQuery.data ? join(habitsQuery.data, logsQuery.data) : []
+    habitsQuery.data && logsQuery.data
+      ? join(habitsQuery.data, logsQuery.data, windowKeys)
+      : []
 
   return {
     habits,

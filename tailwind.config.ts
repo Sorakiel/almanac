@@ -33,8 +33,9 @@ export default {
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       borderRadius: {
-        card: '24px',
-        sheet: '40px',
+        tile: '14px',
+        card: '22px',
+        sheet: '34px',
         pill: '999px',
       },
       letterSpacing: {

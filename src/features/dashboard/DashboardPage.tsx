@@ -1,14 +1,22 @@
+import { Link } from 'react-router-dom'
 import { Loader2, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Avatar } from '@/components/common/Avatar'
 import { EmptyState } from '@/components/common/EmptyState'
-import { CompletionDonut } from '@/features/dashboard/components/CompletionDonut'
+import { SectionLabel } from '@/components/common/SectionLabel'
+import { FocusBlock } from '@/features/dashboard/components/FocusBlock'
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
-import { HabitCard } from '@/features/habits/components/HabitCard'
+import { HabitRow } from '@/features/habits/components/HabitRow'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
+
+function greeting(hour: number): string {
+  if (hour < 12) return 'Good morning'
+  if (hour < 18) return 'Good afternoon'
+  return 'Good evening'
+}
 
 function DashboardPage() {
   const { user } = useSession()
@@ -16,14 +24,23 @@ function DashboardPage() {
   const { habits, isLoading, isError, refetch } = useHabits()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
 
+  const name = (user?.user_metadata.display_name as string | undefined) ?? 'there'
+  const firstName = name.split(' ')[0]
   const completed = habits.filter((h) => h.isComplete).length
-  const firstName = (user?.user_metadata.display_name as string | undefined)?.split(' ')[0]
+  const dateLabel = longDate.replace(/,/, ' ·').toUpperCase()
 
   return (
-    <div className="flex flex-col gap-5 pt-2">
-      <header>
-        <p className="label-mono">{longDate}</p>
-        <h1 className="text-2xl">{firstName ? `Hi, ${firstName}` : 'Today'}</h1>
+    <div className="flex flex-col gap-5 pt-1">
+      <header className="flex items-start justify-between">
+        <div>
+          <p className="label-mono">// {dateLabel}</p>
+          <h1 className="mt-1 text-2xl">
+            {greeting(new Date().getHours())}, {firstName}
+          </h1>
+        </div>
+        <Link to="/settings" aria-label="Profile and settings" className="rounded-tile">
+          <Avatar name={name} size="sm" />
+        </Link>
       </header>
 
       {isError ? (
@@ -43,31 +60,19 @@ function DashboardPage() {
         </div>
       ) : (
         <>
-          <Card className="flex items-center gap-5">
-            <CompletionDonut completed={completed} total={habits.length} />
-            <div className="flex flex-col gap-1">
-              <p className="label-mono">// progress</p>
-              <p className="text-lg font-semibold">
-                {habits.length === 0
-                  ? 'No habits yet'
-                  : completed === habits.length
-                    ? 'All done today 🎉'
-                    : `${completed} of ${habits.length} done`}
-              </p>
-              <p className="text-sm text-muted">Tap a habit below to log it.</p>
-            </div>
-          </Card>
-
           <QuoteCard />
 
-          <section className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <p className="label-mono">// today&apos;s habits</p>
-              <Button size="sm" variant="ghost" onClick={openNewHabit}>
-                <Plus className="h-4 w-4" />
-                Add
-              </Button>
+          {habits.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              <SectionLabel>NOW · FOCUS</SectionLabel>
+              <FocusBlock habits={habits} />
             </div>
+          ) : null}
+
+          <section className="flex flex-col gap-2">
+            <SectionLabel accessory={habits.length > 0 ? `${completed} / ${habits.length} done` : undefined}>
+              TODAY · HABITS
+            </SectionLabel>
 
             {habits.length === 0 ? (
               <EmptyState
@@ -81,10 +86,10 @@ function DashboardPage() {
                 }
               />
             ) : (
-              <ul className="flex flex-col gap-3">
+              <ul className="divide-y divide-border/10">
                 {habits.map((habit) => (
                   <li key={habit.id}>
-                    <HabitCard habit={habit} />
+                    <HabitRow habit={habit} />
                   </li>
                 ))}
               </ul>

@@ -7,6 +7,7 @@ import type { HabitInsert } from '@/features/habits/types'
 export interface HabitFormInput {
   name: string
   description?: string | null
+  icon?: string | null
   color?: string | null
   frequency: HabitInsert['frequency']
   target_count: number

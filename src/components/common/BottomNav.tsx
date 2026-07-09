@@ -1,15 +1,44 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, ListChecks, Plus } from 'lucide-react'
+import { Dumbbell, LayoutGrid, ListChecks, Plus, Sun } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useUiStore } from '@/stores/ui'
 import { cn } from '@/lib/utils'
 
-const navItemClass = ({ isActive }: { isActive: boolean }) =>
-  cn(
-    'flex flex-col items-center gap-1 px-4 py-2 text-xs transition-colors',
-    isActive ? 'text-accent' : 'text-muted hover:text-foreground',
-  )
+interface NavItem {
+  to: string
+  label: string
+  icon: LucideIcon
+  end?: boolean
+}
 
-/** Glassmorphism bottom nav with a central "+" action (add habit). */
+const ITEMS: NavItem[] = [
+  { to: '/', label: 'Today', icon: Sun, end: true },
+  { to: '/habits', label: 'Habits', icon: ListChecks },
+]
+const ITEMS_RIGHT: NavItem[] = [
+  { to: '/train', label: 'Train', icon: Dumbbell },
+  { to: '/more', label: 'More', icon: LayoutGrid },
+]
+
+function NavButton({ item }: { item: NavItem }) {
+  return (
+    <NavLink
+      to={item.to}
+      end={item.end}
+      className={({ isActive }) =>
+        cn(
+          'flex w-14 flex-col items-center gap-1 py-1 transition-colors',
+          isActive ? 'text-accent' : 'text-muted hover:text-foreground',
+        )
+      }
+    >
+      <item.icon className="h-[18px] w-[18px]" aria-hidden="true" />
+      <span className="font-mono text-[9px] uppercase tracking-label">{item.label}</span>
+    </NavLink>
+  )
+}
+
+/** Glassmorphism bottom nav: two tabs, a raised central +, two more tabs. */
 export function BottomNav() {
   const navigate = useNavigate()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
@@ -22,27 +51,25 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[max(env(safe-area-inset-bottom),0.75rem)]"
     >
-      <div className="mb-4 flex items-center gap-2 rounded-pill border border-border bg-surface/70 px-3 py-2 shadow-soft backdrop-blur-nav">
-        <NavLink to="/" className={navItemClass} end>
-          <LayoutDashboard className="h-5 w-5" aria-hidden="true" />
-          <span>Home</span>
-        </NavLink>
+      <div className="flex items-center gap-1 rounded-pill border bg-surface/75 px-3 py-2 shadow-soft backdrop-blur-nav">
+        {ITEMS.map((item) => (
+          <NavButton key={item.to} item={item} />
+        ))}
 
         <button
           type="button"
           onClick={handleAdd}
           aria-label="Add habit"
-          className="mx-1 flex h-12 w-12 items-center justify-center rounded-full bg-accent text-on-accent shadow-card transition-colors hover:bg-accent-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+          className="mx-1 -mt-6 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-on-accent shadow-soft ring-4 ring-bg transition-colors hover:bg-accent-deep focus-visible:outline-none focus-visible:ring-accent"
         >
           <Plus className="h-6 w-6" aria-hidden="true" />
         </button>
 
-        <NavLink to="/habits" className={navItemClass}>
-          <ListChecks className="h-5 w-5" aria-hidden="true" />
-          <span>Habits</span>
-        </NavLink>
+        {ITEMS_RIGHT.map((item) => (
+          <NavButton key={item.to} item={item} />
+        ))}
       </div>
     </nav>
   )

@@ -4,10 +4,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { Diamond } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Segmented } from '@/components/ui/segmented'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useSession } from '@/hooks/useSession'
 
@@ -22,6 +22,7 @@ type Mode = 'signin' | 'signup'
 
 function AuthPage() {
   const [mode, setMode] = useState<Mode>('signin')
+  const [showPassword, setShowPassword] = useState(false)
   const { status } = useSession()
   const { signIn, signUp } = useAuthActions()
   const {
@@ -49,71 +50,92 @@ function AuthPage() {
     }
   })
 
-  // Once authenticated, leave the public auth screen for the dashboard. This
-  // also covers sign-up when email confirmation is disabled (session is
-  // issued immediately).
   if (status === 'authenticated') return <Navigate to="/" replace />
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-8 px-6 py-12">
-      <header className="flex flex-col gap-2 text-center">
-        <p className="label-mono">// almanac</p>
-        <h1 className="text-3xl">Where am I headed?</h1>
-        <p className="text-sm text-muted">
-          {mode === 'signin' ? 'Sign in to your command center.' : 'Create your command center.'}
-        </p>
-      </header>
+    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 px-6 py-12">
+      <div className="flex flex-col gap-4">
+        <span className="flex h-12 w-12 items-center justify-center rounded-tile bg-accent text-on-accent">
+          <Diamond className="h-6 w-6" aria-hidden="true" />
+        </span>
+        <div>
+          <h1 className="text-3xl">{mode === 'signin' ? 'Welcome back' : 'Get started'}</h1>
+          <p className="mt-1 text-sm text-muted">
+            {mode === 'signin' ? 'Pick up where you left off.' : 'Build your command center.'}
+          </p>
+        </div>
+      </div>
 
-      <Card className="flex flex-col gap-4">
-        <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
-          {mode === 'signup' && (
-            <Field label="Name" error={errors.displayName?.message}>
-              <Input placeholder="Ada" autoComplete="name" {...register('displayName')} />
-            </Field>
-          )}
-          <Field label="Email" error={errors.email?.message}>
-            <Input type="email" placeholder="you@example.com" autoComplete="email" {...register('email')} />
-          </Field>
-          <Field label="Password" error={errors.password?.message}>
+      <Segmented
+        aria-label="Authentication mode"
+        value={mode}
+        onChange={setMode}
+        options={[
+          { value: 'signin', label: 'Sign in' },
+          { value: 'signup', label: 'Create account' },
+        ]}
+      />
+
+      <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+        {mode === 'signup' && (
+          <label className="flex flex-col gap-1.5">
+            <span className="label-mono">Name</span>
+            <Input placeholder="Ada Lovelace" autoComplete="name" {...register('displayName')} />
+            {errors.displayName ? (
+              <span className="text-xs text-accent">{errors.displayName.message}</span>
+            ) : null}
+          </label>
+        )}
+
+        <label className="flex flex-col gap-1.5">
+          <span className="label-mono">Email</span>
+          <Input type="email" placeholder="you@almanac.app" autoComplete="email" {...register('email')} />
+          {errors.email ? <span className="text-xs text-accent">{errors.email.message}</span> : null}
+        </label>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="label-mono">Password</span>
+          <div className="relative">
             <Input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
               autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+              className="pr-14"
               {...register('password')}
             />
-          </Field>
-          <Button type="submit" size="lg" disabled={pending} className="mt-1">
-            {pending ? 'One moment…' : mode === 'signin' ? 'Sign in' : 'Create account'}
-          </Button>
-        </form>
-      </Card>
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute inset-y-0 right-3 my-auto h-fit font-mono text-[10px] uppercase tracking-label text-muted hover:text-foreground"
+            >
+              {showPassword ? 'hide' : 'show'}
+            </button>
+          </div>
+          {errors.password ? (
+            <span className="text-xs text-accent">{errors.password.message}</span>
+          ) : null}
+        </label>
 
-      <button
-        type="button"
-        onClick={() => setMode((m) => (m === 'signin' ? 'signup' : 'signin'))}
-        className="text-sm text-muted underline-offset-4 hover:text-foreground hover:underline"
-      >
-        {mode === 'signin' ? 'No account? Create one' : 'Have an account? Sign in'}
-      </button>
+        <Button type="submit" size="lg" disabled={pending}>
+          {pending ? 'One moment…' : mode === 'signin' ? 'Sign in →' : 'Create account →'}
+        </Button>
+      </form>
+
+      <div className="flex items-center gap-3">
+        <span className="h-px flex-1 bg-border" />
+        <span className="label-mono">or</span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Button variant="surface" onClick={() => toast('Social sign-in is coming soon.')}>
+          Apple
+        </Button>
+        <Button variant="surface" onClick={() => toast('Social sign-in is coming soon.')}>
+          G · Google
+        </Button>
+      </div>
     </main>
-  )
-}
-
-interface FieldProps {
-  label: string
-  error?: string
-  children: React.ReactNode
-}
-
-function Field({ label, error, children }: FieldProps) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <Label asChild>
-        <span>{label}</span>
-      </Label>
-      {children}
-      {error ? <span className="text-xs text-accent">{error}</span> : null}
-    </label>
   )
 }
 

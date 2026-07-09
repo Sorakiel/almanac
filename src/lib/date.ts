@@ -29,3 +29,17 @@ export function formatLongDate(timezone: string, instant: Date = new Date()): st
     month: 'long',
   }).format(instant)
 }
+
+/**
+ * The last `n` local date keys ending at (and including) `endKey`, oldest→newest.
+ * Operates on the `YYYY-MM-DD` string via UTC math to avoid timezone drift.
+ */
+export function lastNDateKeys(endKey: string, n: number): string[] {
+  const [y, m, d] = endKey.split('-').map(Number)
+  const end = Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)
+  const keys: string[] = []
+  for (let i = n - 1; i >= 0; i--) {
+    keys.push(new Date(end - i * 86_400_000).toISOString().slice(0, 10))
+  }
+  return keys
+}

@@ -10,17 +10,13 @@ function HabitsPage() {
   const openNewHabit = useUiStore((s) => s.openNewHabit)
 
   return (
-    <section className="flex flex-col gap-4 pt-2">
-      <div className="flex items-center justify-between">
+    <section className="flex flex-col gap-4">
+      <header className="flex items-end justify-between">
         <div>
-          <p className="label-mono">// habits</p>
-          <h1 className="text-2xl">Your habits</h1>
+          <p className="label-mono">// {habits.length} active</p>
+          <h1 className="mt-1 text-2xl">Habits</h1>
         </div>
-        <Button size="sm" onClick={openNewHabit}>
-          <Plus className="h-4 w-4" />
-          New
-        </Button>
-      </div>
+      </header>
 
       {isLoading ? (
         <div className="flex justify-center py-16" role="status" aria-live="polite">
@@ -51,13 +47,19 @@ function HabitsPage() {
           }
         />
       ) : (
-        <ul className="flex flex-col gap-3">
-          {habits.map((habit) => (
-            <li key={habit.id}>
-              <HabitCard habit={habit} />
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className="flex flex-col gap-3">
+            {habits.map((habit) => (
+              <li key={habit.id}>
+                <HabitCard habit={habit} />
+              </li>
+            ))}
+          </ul>
+          <Button size="lg" onClick={openNewHabit} className="w-full">
+            <Plus className="h-4 w-4" />
+            New habit
+          </Button>
+        </>
       )}
     </section>
   )

@@ -25,6 +25,36 @@ export async function fetchLogsForDate(userId: string, date: string): Promise<Ha
   return data
 }
 
+/** Habit logs from `fromDate` (inclusive) onward — used for recent-history stats. */
+export async function fetchLogsSince(userId: string, fromDate: string): Promise<HabitLog[]> {
+  const { data, error } = await supabase
+    .from('habit_logs')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('date', fromDate)
+  if (error) throw error
+  return data
+}
+
+/** A single habit by id (own-rows RLS applies). */
+export async function fetchHabitById(id: string): Promise<Habit> {
+  const { data, error } = await supabase.from('habits').select('*').eq('id', id).single()
+  if (error) throw error
+  return data
+}
+
+/** All logs for one habit from `fromDate` onward, ascending by date. */
+export async function fetchHabitHistory(habitId: string, fromDate: string): Promise<HabitLog[]> {
+  const { data, error } = await supabase
+    .from('habit_logs')
+    .select('*')
+    .eq('habit_id', habitId)
+    .gte('date', fromDate)
+    .order('date', { ascending: true })
+  if (error) throw error
+  return data
+}
+
 export async function createHabit(input: HabitInsert): Promise<Habit> {
   const { data, error } = await supabase.from('habits').insert(input).select().single()
   if (error) throw error
