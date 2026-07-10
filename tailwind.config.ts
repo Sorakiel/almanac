@@ -45,6 +45,8 @@ export default {
       boxShadow: {
         soft: '0 20px 60px -20px rgb(0 0 0 / 0.45)',
         card: '0 8px 32px -12px rgb(0 0 0 / 0.35)',
+        // Accent glow under primary CTAs — the spec board's signature highlight.
+        glow: '0 12px 26px -8px rgb(var(--color-accent) / 0.55)',
       },
       backdropBlur: {
         nav: '20px',

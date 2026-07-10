@@ -78,7 +78,7 @@ export function CheckToggle({ habit, onToggle }: CheckToggleProps) {
         'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
         habit.isComplete
-          ? 'border-accent bg-accent text-on-accent'
+          ? 'border-accent/50 text-accent'
           : 'text-transparent hover:border-accent hover:text-accent',
       )}
     >
