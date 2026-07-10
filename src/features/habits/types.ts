@@ -4,6 +4,7 @@ export type Habit = Database['public']['Tables']['habits']['Row']
 export type HabitInsert = Database['public']['Tables']['habits']['Insert']
 export type HabitLog = Database['public']['Tables']['habit_logs']['Row']
 export type HabitFrequency = Database['public']['Enums']['habit_frequency']
+export type HabitTimeOfDay = Database['public']['Enums']['habit_time_of_day']
 
 /** A habit joined with today's log plus recent history — the render unit. */
 export interface HabitWithTodayLog extends Habit {
@@ -17,8 +18,8 @@ export interface HabitWithTodayLog extends Habit {
   windowDays: number
   /** Completion rate over the window, 0–1. */
   rate: number
-  /** Days until next due (every_n_days only; 0 for everything else). */
+  /** Days until next due (interval cadences only; 0 for everything else). */
   dueInDays: number
-  /** False only for an every_n_days habit still inside its rest interval. */
+  /** False for an interval habit still resting, or a weekdays habit on a weekend. */
   dueToday: boolean
 }

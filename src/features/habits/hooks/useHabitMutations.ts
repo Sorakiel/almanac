@@ -16,6 +16,7 @@ export interface HabitFormInput {
   color?: string | null
   frequency: HabitInsert['frequency']
   target_count: number
+  time_of_day: HabitInsert['time_of_day']
 }
 
 /** Create / edit / archive mutations, invalidating the habits list on settle. */

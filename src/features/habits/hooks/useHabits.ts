@@ -4,18 +4,19 @@ import { useToday } from '@/hooks/useToday'
 import { lastNDateKeys } from '@/lib/date'
 import { fetchHabits, fetchLogsSince } from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
-import { dailyTarget, dueInDays } from '@/features/habits/lib/frequency'
+import { dailyTarget, dueInDays, isDueOn } from '@/features/habits/lib/frequency'
 import type { Habit, HabitLog, HabitWithTodayLog } from '@/features/habits/types'
 
 const WINDOW_DAYS = 7
-/** Fetch window: long enough to resolve due-ness for every-N-days habits (N ≤ 30). */
-const FETCH_DAYS = 31
+/** Fetch window: long enough to resolve due-ness for the longest interval
+ *  cadence the form allows (every 8 weeks = 56 days), plus a small buffer. */
+const FETCH_DAYS = 64
 
 function join(habits: Habit[], logs: HabitLog[], windowKeys: string[]): HabitWithTodayLog[] {
   // Index counts by habit + date for O(1) lookup.
   const counts = new Map<string, number>()
   for (const log of logs) counts.set(`${log.habit_id}:${log.date}`, log.count)
-  const todayKey = windowKeys[windowKeys.length - 1]
+  const todayKey = windowKeys[windowKeys.length - 1]!
 
   return habits.map((habit) => {
     const target = dailyTarget(habit)
@@ -44,7 +45,7 @@ function join(habits: Habit[], logs: HabitLog[], windowKeys: string[]): HabitWit
       windowDays: WINDOW_DAYS,
       rate: completedRecent / WINDOW_DAYS,
       dueInDays: dueIn,
-      dueToday: dueIn === 0,
+      dueToday: isDueOn(habit, todayKey, daysSinceLastDone),
     }
   })
 }

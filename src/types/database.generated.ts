@@ -115,6 +115,7 @@ export type Database = {
           name: string
           sort_order: number
           target_count: number
+          time_of_day: Database["public"]["Enums"]["habit_time_of_day"]
           user_id: string
         }
         Insert: {
@@ -128,6 +129,7 @@ export type Database = {
           name: string
           sort_order?: number
           target_count?: number
+          time_of_day?: Database["public"]["Enums"]["habit_time_of_day"]
           user_id: string
         }
         Update: {
@@ -141,6 +143,7 @@ export type Database = {
           name?: string
           sort_order?: number
           target_count?: number
+          time_of_day?: Database["public"]["Enums"]["habit_time_of_day"]
           user_id?: string
         }
         Relationships: []
@@ -344,7 +347,14 @@ export type Database = {
     }
     Enums: {
       feedback_status: "open" | "planned" | "done" | "closed"
-      habit_frequency: "daily" | "weekly" | "x_per_week" | "every_n_days"
+      habit_frequency:
+        | "daily"
+        | "weekly"
+        | "x_per_week"
+        | "every_n_days"
+        | "weekdays"
+        | "every_n_weeks"
+      habit_time_of_day: "anytime" | "morning" | "afternoon" | "evening"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -474,7 +484,15 @@ export const Constants = {
   public: {
     Enums: {
       feedback_status: ["open", "planned", "done", "closed"],
-      habit_frequency: ["daily", "weekly", "x_per_week", "every_n_days"],
+      habit_frequency: [
+        "daily",
+        "weekly",
+        "x_per_week",
+        "every_n_days",
+        "weekdays",
+        "every_n_weeks",
+      ],
+      habit_time_of_day: ["anytime", "morning", "afternoon", "evening"],
       user_role: ["user", "admin"],
     },
   },

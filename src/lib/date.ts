@@ -15,6 +15,18 @@ export function localDateKey(timezone: string, instant: Date = new Date()): stri
   }).format(instant)
 }
 
+/** Day of week for a `YYYY-MM-DD` key: 0 = Sunday … 6 = Saturday (UTC-safe). */
+export function weekdayOfKey(dateKey: string): number {
+  const [y, m, d] = dateKey.split('-').map(Number)
+  return new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)).getUTCDay()
+}
+
+/** True when the date key falls on Saturday or Sunday. */
+export function isWeekendKey(dateKey: string): boolean {
+  const day = weekdayOfKey(dateKey)
+  return day === 0 || day === 6
+}
+
 /** Resolve the browser's IANA timezone, falling back to UTC. */
 export function browserTimezone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'

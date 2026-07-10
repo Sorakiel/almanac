@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, Loader2, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft, Check, Loader2, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Sheet } from '@/components/ui/sheet'
 import { IconTile } from '@/components/common/IconTile'
 import { StatTile } from '@/components/common/StatTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
@@ -14,7 +15,7 @@ import { useHabitDetail } from '@/features/habits/hooks/useHabitDetail'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
 import { setHabitCount } from '@/features/habits/api/habits.api'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
-import { dailyTarget, frequencyLabel } from '@/features/habits/lib/frequency'
+import { dailyTarget, frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
@@ -29,6 +30,7 @@ function HabitDetailPage() {
   const openEditHabit = useUiStore((s) => s.openEditHabit)
   const { habit, stats, isLoading, isError } = useHabitDetail(id)
   const { archive } = useHabitMutations()
+  const [menuOpen, setMenuOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   const handleDelete = async () => {
@@ -81,9 +83,11 @@ function HabitDetailPage() {
 
   const color = resolveHabitColor(habit.color)
   const Icon = resolveHabitIcon(habit.icon)
+  const timeLabel = timeOfDayLabel(habit.time_of_day)
+  const subtitle = [frequencyLabel(habit), timeLabel].filter(Boolean).join(' · ')
 
   return (
-    <div className="flex flex-col gap-5 pb-4">
+    <div className="flex flex-1 flex-col gap-5">
       <header className="flex items-center gap-3">
         <button
           type="button"
@@ -96,23 +100,15 @@ function HabitDetailPage() {
         <IconTile icon={Icon} tone={color.tile} size="sm" />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-xl">{habit.name}</h1>
-          <p className="label-mono">{frequencyLabel(habit)}</p>
+          <p className="label-mono">{subtitle}</p>
         </div>
         <button
           type="button"
-          onClick={() => openEditHabit(habit.id)}
-          aria-label="Edit habit"
+          onClick={() => setMenuOpen(true)}
+          aria-label="Habit options"
           className="rounded-full p-2 text-muted hover:bg-surface hover:text-foreground"
         >
-          <Pencil className="h-4 w-4" aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          onClick={() => setConfirmDelete(true)}
-          aria-label="Delete habit"
-          className="rounded-full p-2 text-muted hover:bg-surface hover:text-accent"
-        >
-          <Trash2 className="h-4 w-4" aria-hidden="true" />
+          <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
         </button>
       </header>
 
@@ -130,7 +126,7 @@ function HabitDetailPage() {
       {habit.description ? (
         <div className="flex flex-col gap-3">
           <SectionLabel>NOTES</SectionLabel>
-          <div className="rounded-card border-l-2 border-accent bg-surface px-4 py-3 text-sm leading-relaxed">
+          <div className="rounded-r-card border-l-2 border-accent bg-surface px-4 py-3 text-sm leading-relaxed">
             {habit.description}
           </div>
         </div>
@@ -139,13 +135,40 @@ function HabitDetailPage() {
       <Button
         size="lg"
         variant={stats.todayDone ? 'surface' : 'primary'}
-        className={cn('mt-2 w-full', !stats.todayDone && 'shadow-glow')}
+        className={cn('mt-auto w-full', !stats.todayDone && 'shadow-glow')}
         disabled={markDone.isPending}
         onClick={() => markDone.mutate(!stats.todayDone)}
       >
         <Check className="h-4 w-4" />
         {stats.todayDone ? 'Completed today' : 'Mark done for today'}
       </Button>
+
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen} title={habit.name}>
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setMenuOpen(false)
+              openEditHabit(habit.id)
+            }}
+            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium hover:bg-surface"
+          >
+            <Pencil className="h-4 w-4 text-muted" aria-hidden="true" />
+            Edit habit
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMenuOpen(false)
+              setConfirmDelete(true)
+            }}
+            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-accent hover:bg-surface"
+          >
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+            Delete habit
+          </button>
+        </div>
+      </Sheet>
 
       <ConfirmSheet
         open={confirmDelete}

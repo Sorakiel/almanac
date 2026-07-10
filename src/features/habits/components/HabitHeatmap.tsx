@@ -34,7 +34,7 @@ export function HabitHeatmap({ days }: HabitHeatmapProps) {
                   key={day.date}
                   title={day.date}
                   className={cn(
-                    'h-[7px] w-[7px] rounded-[2px]',
+                    'h-[6px] w-[6px] rounded-[2px]',
                     day.done ? 'bg-accent' : 'bg-foreground/10',
                   )}
                 />
@@ -45,10 +45,10 @@ export function HabitHeatmap({ days }: HabitHeatmapProps) {
       </div>
       <div className="flex items-center gap-1.5">
         <span className="label-mono normal-case tracking-normal">less</span>
-        <span className="h-[7px] w-[7px] rounded-[2px] bg-foreground/10" />
-        <span className="h-[7px] w-[7px] rounded-[2px] bg-accent/35" />
-        <span className="h-[7px] w-[7px] rounded-[2px] bg-accent/65" />
-        <span className="h-[7px] w-[7px] rounded-[2px] bg-accent" />
+        <span className="h-[9px] w-[9px] rounded-[2px] bg-foreground/10" />
+        <span className="h-[9px] w-[9px] rounded-[2px] bg-accent/35" />
+        <span className="h-[9px] w-[9px] rounded-[2px] bg-accent/65" />
+        <span className="h-[9px] w-[9px] rounded-[2px] bg-accent" />
         <span className="label-mono normal-case tracking-normal">more</span>
       </div>
     </div>

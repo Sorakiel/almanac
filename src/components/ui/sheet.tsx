@@ -7,16 +7,29 @@ interface SheetProps {
   onOpenChange: (open: boolean) => void
   title: string
   description?: string
+  /** Render the title as a mono `// SECTION` micro-label (spec-board modals). */
+  mono?: boolean
+  /** Skip Radix's focus-first-field on open — avoids a stray ring on the name input. */
+  preventInitialFocus?: boolean
   children: ReactNode
 }
 
 /** Bottom sheet built on Radix Dialog — used for forms and quick actions. */
-export function Sheet({ open, onOpenChange, title, description, children }: SheetProps) {
+export function Sheet({
+  open,
+  onOpenChange,
+  title,
+  description,
+  mono,
+  preventInitialFocus,
+  children,
+}: SheetProps) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-bg-deep/70 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in data-[state=closed]:fade-out" />
         <Dialog.Content
+          onOpenAutoFocus={preventInitialFocus ? (event) => event.preventDefault() : undefined}
           className={cn(
             'fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md rounded-t-sheet border bg-bg p-6 pb-8 shadow-soft',
             'focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out',
@@ -24,7 +37,13 @@ export function Sheet({ open, onOpenChange, title, description, children }: Shee
           )}
         >
           <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" aria-hidden="true" />
-          <Dialog.Title className="text-lg font-semibold tracking-title">{title}</Dialog.Title>
+          <Dialog.Title
+            className={cn(
+              mono ? 'label-mono' : 'text-lg font-semibold tracking-title',
+            )}
+          >
+            {mono ? `// ${title}` : title}
+          </Dialog.Title>
           {description ? (
             <Dialog.Description className="mt-1 text-sm text-muted">
               {description}

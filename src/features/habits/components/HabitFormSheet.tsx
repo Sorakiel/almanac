@@ -2,11 +2,10 @@ import { useEffect, useRef } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Minus, Plus } from 'lucide-react'
+import { ChevronDown, Minus, Plus } from 'lucide-react'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Segmented } from '@/components/ui/segmented'
 import { Sheet } from '@/components/ui/sheet'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
@@ -18,6 +17,7 @@ import {
   type HabitColor,
   type HabitIcon,
 } from '@/features/habits/lib/habitVisuals'
+import type { HabitFrequency, HabitTimeOfDay } from '@/features/habits/types'
 import { useUiStore } from '@/stores/ui'
 import { cn } from '@/lib/utils'
 
@@ -26,8 +26,16 @@ const schema = z.object({
   description: z.string().trim().max(160).optional(),
   icon: z.enum(HABIT_ICON_OPTIONS as [HabitIcon, ...HabitIcon[]]),
   color: z.enum(HABIT_COLOR_OPTIONS as [HabitColor, ...HabitColor[]]),
-  frequency: z.enum(['daily', 'weekly', 'x_per_week', 'every_n_days']),
+  frequency: z.enum([
+    'daily',
+    'weekly',
+    'weekdays',
+    'x_per_week',
+    'every_n_days',
+    'every_n_weeks',
+  ]),
   target_count: z.number().int().min(1).max(50),
+  time_of_day: z.enum(['anytime', 'morning', 'afternoon', 'evening']),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -39,9 +47,57 @@ const DEFAULTS: FormValues = {
   color: 'accent',
   frequency: 'daily',
   target_count: 1,
+  time_of_day: 'anytime',
 }
 
-/** Create/edit bottom sheet with icon, color, frequency, and target pickers. */
+// The "Repeats" control presents four presets; Custom expands into an
+// "Every N [unit]" row, where the unit chooses the underlying cadence.
+type Preset = 'daily' | 'weekdays' | 'weekly' | 'custom'
+type CustomUnit = 'days' | 'weeks' | 'per_week'
+
+const PRESETS: { value: Preset; label: string }[] = [
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekdays', label: 'Weekdays' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'custom', label: 'Custom' },
+]
+
+const UNIT_FREQ: Record<CustomUnit, HabitFrequency> = {
+  days: 'every_n_days',
+  weeks: 'every_n_weeks',
+  per_week: 'x_per_week',
+}
+const FREQ_UNIT: Partial<Record<HabitFrequency, CustomUnit>> = {
+  every_n_days: 'days',
+  every_n_weeks: 'weeks',
+  x_per_week: 'per_week',
+}
+const UNIT_RANGE: Record<CustomUnit, { min: number; max: number }> = {
+  days: { min: 2, max: 30 },
+  weeks: { min: 2, max: 8 },
+  per_week: { min: 2, max: 7 },
+}
+const UNIT_OPTIONS: { value: CustomUnit; label: string }[] = [
+  { value: 'days', label: 'days' },
+  { value: 'weeks', label: 'weeks' },
+  { value: 'per_week', label: '× / week' },
+]
+const TIME_OPTIONS: { value: HabitTimeOfDay; label: string }[] = [
+  { value: 'anytime', label: 'anytime' },
+  { value: 'morning', label: 'morning' },
+  { value: 'afternoon', label: 'afternoon' },
+  { value: 'evening', label: 'evening' },
+]
+
+function presetOf(frequency: HabitFrequency): Preset {
+  if (frequency === 'daily' || frequency === 'weekdays' || frequency === 'weekly') return frequency
+  return 'custom'
+}
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value))
+}
+
+/** Create/edit bottom sheet with icon, color, repeats, and time-of-day pickers. */
 export function HabitFormSheet() {
   const habitForm = useUiStore((s) => s.habitForm)
   const closeHabitForm = useUiStore((s) => s.closeHabitForm)
@@ -57,6 +113,9 @@ export function HabitFormSheet() {
   })
   const values = useWatch({ control }) as FormValues
   const pending = create.isPending || update.isPending
+
+  const preset = presetOf(values.frequency)
+  const unit: CustomUnit = FREQ_UNIT[values.frequency] ?? 'days'
 
   // Reset exactly once per open (or when the edited habit's data first
   // arrives). `editing` gets a fresh identity every render — depending on it
@@ -80,21 +139,37 @@ export function HabitFormSheet() {
             color: (editing.color as HabitColor) ?? 'accent',
             frequency: editing.frequency,
             target_count: editing.target_count,
+            time_of_day: editing.time_of_day ?? 'anytime',
           }
         : DEFAULTS,
     )
   }, [open, editing, reset])
 
+  const selectSimplePreset = (next: Exclude<Preset, 'custom'>) => {
+    setValue('frequency', next)
+    setValue('target_count', 1)
+  }
+  const selectCustom = () => {
+    const base = preset === 'custom' ? values.target_count : 3
+    setValue('frequency', 'every_n_days')
+    setValue('target_count', clamp(base, UNIT_RANGE.days.min, UNIT_RANGE.days.max))
+  }
+  const selectUnit = (next: CustomUnit) => {
+    setValue('frequency', UNIT_FREQ[next])
+    setValue('target_count', clamp(values.target_count, UNIT_RANGE[next].min, UNIT_RANGE[next].max))
+  }
+
   const onSubmit = handleSubmit(async (v) => {
+    // Only the Custom cadences carry a meaningful count; presets are once-per.
+    const isCustom = presetOf(v.frequency) === 'custom'
     const input = {
       name: v.name,
       description: v.description?.trim() || null,
       icon: v.icon,
       color: v.color,
       frequency: v.frequency,
-      // target_count doubles as the interval N for every_n_days habits.
-      target_count:
-        v.frequency === 'x_per_week' || v.frequency === 'every_n_days' ? v.target_count : 1,
+      target_count: isCustom ? v.target_count : 1,
+      time_of_day: v.time_of_day,
     }
     try {
       if (editing) {
@@ -115,11 +190,13 @@ export function HabitFormSheet() {
       open={open}
       onOpenChange={(next) => !next && closeHabitForm()}
       title={editing ? 'Edit habit' : 'New habit'}
+      mono
+      preventInitialFocus
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <label className="flex flex-col gap-1.5">
           <span className="label-mono">Name</span>
-          <Input placeholder="Cold shower" autoFocus {...register('name')} />
+          <Input placeholder="Cold shower" {...register('name')} />
           {formState.errors.name ? (
             <span className="text-xs text-accent">{formState.errors.name.message}</span>
           ) : null}
@@ -181,54 +258,63 @@ export function HabitFormSheet() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <span className="label-mono">Frequency</span>
-          <Segmented
-            aria-label="Frequency"
-            value={values.frequency}
-            onChange={(f) => {
-              setValue('frequency', f)
-              // The shared target slot means different things per mode — reset
-              // to a sensible floor when switching so values don't leak across.
-              if (f === 'every_n_days') setValue('target_count', Math.max(values.target_count, 2))
-              else if (f === 'x_per_week') setValue('target_count', Math.max(values.target_count, 1))
-              else setValue('target_count', 1)
-            }}
-            options={[
-              { value: 'daily', label: 'Daily' },
-              { value: 'weekly', label: 'Weekly' },
-              { value: 'x_per_week', label: 'N× / wk' },
-              { value: 'every_n_days', label: 'N days' },
-            ]}
-          />
-        </div>
-
-        {values.frequency === 'x_per_week' && (
-          <div className="flex items-center justify-between rounded-2xl border px-4 py-2">
-            <span className="text-sm font-medium">Target per week</span>
-            <Stepper
-              value={values.target_count}
-              onChange={(n) => setValue('target_count', n)}
-              min={1}
-              max={50}
-            />
+        <div className="flex flex-col gap-2">
+          <span className="label-mono">Repeats</span>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Repeats">
+            {PRESETS.map((option) => {
+              const active = preset === option.value
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() =>
+                    option.value === 'custom' ? selectCustom() : selectSimplePreset(option.value)
+                  }
+                  className={cn(
+                    'rounded-pill border px-4 py-2 text-sm font-medium transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                    active
+                      ? 'border-transparent bg-accent text-on-accent'
+                      : 'border-border text-muted hover:text-foreground',
+                  )}
+                >
+                  {option.label}
+                </button>
+              )
+            })}
           </div>
-        )}
 
-        {values.frequency === 'every_n_days' && (
-          <div className="flex items-center justify-between rounded-2xl border px-4 py-2">
-            <span className="text-sm font-medium">Every</span>
-            <div className="flex items-center gap-3">
+          {preset === 'custom' && (
+            <div className="mt-1 flex items-center gap-3 rounded-2xl border px-4 py-3">
+              {unit !== 'per_week' ? <span className="text-sm font-medium">Every</span> : null}
               <Stepper
                 value={values.target_count}
                 onChange={(n) => setValue('target_count', n)}
-                min={2}
-                max={30}
+                min={UNIT_RANGE[unit].min}
+                max={UNIT_RANGE[unit].max}
               />
-              <span className="label-mono normal-case tracking-normal">days</span>
+              <div className="ml-auto">
+                <Dropdown
+                  ariaLabel="Interval unit"
+                  value={unit}
+                  onChange={selectUnit}
+                  options={UNIT_OPTIONS}
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        <div className="flex items-center justify-between border-t border-border/60 pt-4">
+          <span className="label-mono normal-case">time of day</span>
+          <Dropdown
+            ariaLabel="Time of day"
+            value={values.time_of_day}
+            onChange={(next) => setValue('time_of_day', next)}
+            options={TIME_OPTIONS}
+          />
+        </div>
 
         <Button type="submit" size="lg" disabled={pending} className="mt-1">
           {pending ? 'Saving…' : editing ? 'Save changes' : 'Create habit'}
@@ -267,24 +353,55 @@ interface StepperProps {
 
 function Stepper({ value, onChange, min, max }: StepperProps) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-1 rounded-xl border bg-bg-deep px-1.5 py-1">
       <button
         type="button"
         aria-label="Decrease"
         onClick={() => onChange(Math.max(min, value - 1))}
-        className="flex h-8 w-8 items-center justify-center rounded-full border text-muted hover:text-foreground"
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <Minus className="h-4 w-4" aria-hidden="true" />
       </button>
-      <span className="w-6 text-center font-mono tabular-nums">{value}</span>
+      <span className="w-7 text-center font-mono tabular-nums">{value}</span>
       <button
         type="button"
         aria-label="Increase"
         onClick={() => onChange(Math.min(max, value + 1))}
-        className="flex h-8 w-8 items-center justify-center rounded-full border text-muted hover:text-foreground"
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-accent transition-colors hover:text-accent-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <Plus className="h-4 w-4" aria-hidden="true" />
       </button>
+    </div>
+  )
+}
+
+interface DropdownProps<T extends string> {
+  value: T
+  onChange: (value: T) => void
+  options: { value: T; label: string }[]
+  ariaLabel: string
+}
+
+/** Small native-select dropdown styled to the spec-board "value ▾" look. */
+function Dropdown<T extends string>({ value, onChange, options, ariaLabel }: DropdownProps<T>) {
+  return (
+    <div className="relative inline-flex items-center">
+      <select
+        aria-label={ariaLabel}
+        value={value}
+        onChange={(event) => onChange(event.target.value as T)}
+        className="appearance-none rounded-lg bg-transparent pr-6 text-sm font-medium text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value} className="bg-surface text-foreground">
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown
+        className="pointer-events-none absolute right-0 h-4 w-4 text-muted"
+        aria-hidden="true"
+      />
     </div>
   )
 }

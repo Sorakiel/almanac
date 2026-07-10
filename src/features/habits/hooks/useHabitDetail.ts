@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { useToday } from '@/hooks/useToday'
 import { lastNDateKeys } from '@/lib/date'
+import { weekdayOfKey } from '@/lib/date'
 import { fetchHabitById, fetchHabitHistory } from '@/features/habits/api/habits.api'
-import { dailyTarget } from '@/features/habits/lib/frequency'
+import { dailyTarget, intervalDays } from '@/features/habits/lib/frequency'
 import type { Habit } from '@/features/habits/types'
 
 const HEATMAP_DAYS = 371 // 53 weeks
@@ -76,10 +77,21 @@ function computeIntervalStats(completed: Set<string>, windowKeys: string[], n: n
 
 function computeStats(habit: Habit, completed: Set<string>, windowKeys: string[]): HabitDetailStats {
   const heatmap = windowKeys.map((date) => ({ date, done: completed.has(date) }))
-  const core =
-    habit.frequency === 'every_n_days'
-      ? computeIntervalStats(completed, windowKeys, habit.target_count)
-      : computeDailyStats(completed, windowKeys)
+  const interval = intervalDays(habit)
+
+  let core: { streak: number; best: number; ratePct: number }
+  if (interval !== null) {
+    core = computeIntervalStats(completed, windowKeys, interval)
+  } else if (habit.frequency === 'weekdays') {
+    // Weekends don't count against a weekdays streak — evaluate weekdays only.
+    const weekdayKeys = windowKeys.filter((k) => {
+      const day = weekdayOfKey(k)
+      return day !== 0 && day !== 6
+    })
+    core = computeDailyStats(completed, weekdayKeys)
+  } else {
+    core = computeDailyStats(completed, windowKeys)
+  }
 
   return { ...core, heatmap, todayDone: completed.has(windowKeys.at(-1)!) }
 }

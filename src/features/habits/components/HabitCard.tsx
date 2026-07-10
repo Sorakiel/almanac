@@ -6,7 +6,7 @@ import { IconTile } from '@/components/common/IconTile'
 import { Sparkline } from '@/components/common/Sparkline'
 import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
-import { frequencyLabel } from '@/features/habits/lib/frequency'
+import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 
@@ -20,9 +20,10 @@ export function HabitCard({ habit }: HabitCardProps) {
   const toggle = useToggleHabit()
   const color = resolveHabitColor(habit.color)
   const Icon = resolveHabitIcon(habit.icon)
-  const subtitle = habit.description
-    ? `${habit.description} · ${frequencyLabel(habit)}`
-    : frequencyLabel(habit)
+  const timeLabel = timeOfDayLabel(habit.time_of_day)
+  const subtitle = [habit.description, frequencyLabel(habit), timeLabel]
+    .filter(Boolean)
+    .join(' · ')
 
   const handleToggle = () => {
     toggle.mutate(
