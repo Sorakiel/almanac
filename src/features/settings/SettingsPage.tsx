@@ -1,6 +1,15 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Bell, ChevronRight, Clock, Coffee, Download, Moon, type LucideIcon } from 'lucide-react'
+import {
+  Bell,
+  ChevronRight,
+  Clock,
+  Coffee,
+  Download,
+  Moon,
+  ShieldCheck,
+  type LucideIcon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Segmented } from '@/components/ui/segmented'
 import { Avatar } from '@/components/common/Avatar'
@@ -13,6 +22,7 @@ import { useProfile } from '@/features/settings/hooks/useProfile'
 import { browserTimezone } from '@/lib/date'
 
 function SettingsPage() {
+  const navigate = useNavigate()
   const { user, status } = useSession()
   const { theme, setTheme } = useTheme()
   const { logOut } = useAuthActions()
@@ -64,6 +74,13 @@ function SettingsPage() {
         <Row icon={Bell} label="Notifications" value="Off" onClick={soon} />
         <Row icon={Download} label="Export data" onClick={soon} />
       </section>
+
+      {profile?.role === 'admin' ? (
+        <section className="flex flex-col gap-1">
+          <SectionLabel className="mb-2">ADMIN</SectionLabel>
+          <Row icon={ShieldCheck} label="Admin console" onClick={() => navigate('/admin')} />
+        </section>
+      ) : null}
 
       <Button variant="surface" className="w-full text-accent" onClick={handleSignOut} disabled={logOut.isPending}>
         Sign out
