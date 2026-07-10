@@ -5,29 +5,28 @@ interface ProgressBlocksProps {
   value: number
   /** Total units. */
   total: number
-  /** Number of rendered blocks (defaults to `total`, capped for wide targets). */
+  /** Number of rendered glyph blocks. */
   blocks?: number
   className?: string
   'aria-label'?: string
 }
 
-const MAX_BLOCKS = 12
+const DEFAULT_BLOCKS = 10
 
 /**
- * Signature block progress bar (▓▓▓▓░░░░). Renders filled/empty segments as a
- * meter for screen readers.
+ * Signature block progress bar, rendered as literal mono glyphs (▓▓▓▓░░░░)
+ * exactly like the spec board. Exposed as a meter for screen readers.
  */
 export function ProgressBlocks({
   value,
   total,
-  blocks,
+  blocks = DEFAULT_BLOCKS,
   className,
   'aria-label': ariaLabel,
 }: ProgressBlocksProps) {
   const safeTotal = Math.max(total, 1)
-  const count = Math.min(blocks ?? safeTotal, MAX_BLOCKS)
   const ratio = Math.min(Math.max(value / safeTotal, 0), 1)
-  const filled = Math.round(ratio * count)
+  const filled = Math.round(ratio * blocks)
 
   return (
     <div
@@ -36,18 +35,14 @@ export function ProgressBlocks({
       aria-valuemax={total}
       aria-valuenow={value}
       aria-label={ariaLabel ?? `${value} of ${total} complete`}
-      className={cn('flex gap-1', className)}
+      className={cn('font-mono text-[13px] leading-none tracking-[0.04em]', className)}
     >
-      {Array.from({ length: count }).map((_, i) => (
-        <span
-          key={i}
-          aria-hidden="true"
-          className={cn(
-            'h-2 flex-1 rounded-sm transition-colors',
-            i < filled ? 'bg-accent' : 'bg-border/40',
-          )}
-        />
-      ))}
+      <span aria-hidden="true" className="text-accent">
+        {'▓'.repeat(filled)}
+      </span>
+      <span aria-hidden="true" className="text-muted-strong/60">
+        {'░'.repeat(blocks - filled)}
+      </span>
     </div>
   )
 }

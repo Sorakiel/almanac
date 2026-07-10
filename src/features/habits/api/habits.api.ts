@@ -72,6 +72,19 @@ export async function updateHabit(id: string, patch: Partial<HabitInsert>): Prom
   return data
 }
 
+/** Persist a new display order after drag-and-drop. */
+export async function updateHabitOrder(
+  ordered: { id: string; sort_order: number }[],
+): Promise<void> {
+  const results = await Promise.all(
+    ordered.map(({ id, sort_order }) =>
+      supabase.from('habits').update({ sort_order }).eq('id', id),
+    ),
+  )
+  const failed = results.find((r) => r.error)
+  if (failed?.error) throw failed.error
+}
+
 /** Soft-delete a habit by archiving it. */
 export async function archiveHabit(id: string): Promise<void> {
   const { error } = await supabase

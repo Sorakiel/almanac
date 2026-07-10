@@ -1,8 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
-import { archiveHabit, createHabit, updateHabit } from '@/features/habits/api/habits.api'
+import {
+  archiveHabit,
+  createHabit,
+  updateHabit,
+  updateHabitOrder,
+} from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
-import type { HabitInsert } from '@/features/habits/types'
+import type { Habit, HabitInsert } from '@/features/habits/types'
 
 export interface HabitFormInput {
   name: string
@@ -38,5 +43,27 @@ export function useHabitMutations() {
     onSuccess: invalidate,
   })
 
-  return { create, update, archive }
+  // Optimistic: the list snaps to the new order instantly, rolls back on error.
+  const reorder = useMutation({
+    mutationFn: (ordered: { id: string; sort_order: number }[]) => updateHabitOrder(ordered),
+    onMutate: async (ordered) => {
+      const key = habitKeys.all(userId)
+      await queryClient.cancelQueries({ queryKey: key })
+      const previous = queryClient.getQueryData<Habit[]>(key)
+      if (previous) {
+        const position = new Map(ordered.map((o) => [o.id, o.sort_order]))
+        const next = previous
+          .map((h) => (position.has(h.id) ? { ...h, sort_order: position.get(h.id)! } : h))
+          .sort((a, b) => a.sort_order - b.sort_order)
+        queryClient.setQueryData<Habit[]>(key, next)
+      }
+      return { previous }
+    },
+    onError: (_error, _vars, context) => {
+      if (context?.previous) queryClient.setQueryData(habitKeys.all(userId), context.previous)
+    },
+    onSettled: invalidate,
+  })
+
+  return { create, update, archive, reorder }
 }

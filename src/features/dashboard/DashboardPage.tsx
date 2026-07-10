@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { FocusBlock } from '@/features/dashboard/components/FocusBlock'
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
-import { HabitRow } from '@/features/habits/components/HabitRow'
+import { SortableHabitList } from '@/features/habits/components/SortableHabitList'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
@@ -86,13 +86,7 @@ function DashboardPage() {
                 }
               />
             ) : (
-              <ul className="divide-y divide-border/10">
-                {habits.map((habit) => (
-                  <li key={habit.id}>
-                    <HabitRow habit={habit} />
-                  </li>
-                ))}
-              </ul>
+              <SortableHabitList habits={habits} />
             )}
           </section>
         </>

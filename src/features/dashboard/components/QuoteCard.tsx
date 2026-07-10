@@ -15,11 +15,16 @@ export function QuoteCard() {
   const [, month, day] = dateKey.split('-')
 
   return (
-    <Card className="flex flex-col gap-3 p-4">
-      <blockquote className="text-[15px] italic leading-relaxed">“{quote.text}”</blockquote>
-      <p className="label-mono text-muted-strong">
-        — {quote.author ?? 'Unknown'} · {month}.{day}
-      </p>
+    <Card className="flex gap-3 p-4">
+      <span aria-hidden="true" className="text-sm leading-relaxed text-accent">
+        ◇
+      </span>
+      <div className="flex flex-col gap-2">
+        <blockquote className="text-[15px] italic leading-relaxed">“{quote.text}”</blockquote>
+        <p className="label-mono text-muted-strong">
+          — {quote.author ?? 'Unknown'} · {month}.{day}
+        </p>
+      </div>
     </Card>
   )
 }
