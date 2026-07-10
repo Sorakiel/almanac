@@ -272,7 +272,7 @@ export function HabitFormSheet() {
                     option.value === 'custom' ? selectCustom() : selectSimplePreset(option.value)
                   }
                   className={cn(
-                    'rounded-pill border px-4 py-2 text-sm font-medium transition-colors',
+                    'rounded-tile border px-4 py-2.5 text-sm font-medium transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
                     active
                       ? 'border-transparent bg-accent text-on-accent'
@@ -286,7 +286,7 @@ export function HabitFormSheet() {
           </div>
 
           {preset === 'custom' && (
-            <div className="mt-1 flex items-center gap-3 rounded-2xl border px-4 py-3">
+            <div className="mt-1 flex items-center gap-3 rounded-2xl border border-accent/25 bg-bg-deep px-4 py-3">
               {unit !== 'per_week' ? <span className="text-sm font-medium">Every</span> : null}
               <Stepper
                 value={values.target_count}
@@ -353,7 +353,7 @@ interface StepperProps {
 
 function Stepper({ value, onChange, min, max }: StepperProps) {
   return (
-    <div className="flex items-center gap-1 rounded-xl border bg-bg-deep px-1.5 py-1">
+    <div className="flex items-center gap-1 rounded-xl bg-surface px-1.5 py-1">
       <button
         type="button"
         aria-label="Decrease"

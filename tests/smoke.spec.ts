@@ -34,7 +34,6 @@ test('almanac phase-1 smoke', async ({ page }) => {
   await page.getByLabel('Name').fill('Read 20 pages')
   await page.getByRole('button', { name: /create habit/i }).click()
   await expect(page.getByRole('link', { name: 'Read 20 pages' })).toBeVisible()
-  await expect(page.getByText(/now · focus/i)).toBeVisible()
 
   // 5. Complete it → optimistic, and persists after reload. Wait for the
   // habit_logs write to settle before reloading, or the reload races it.

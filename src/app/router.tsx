@@ -6,6 +6,7 @@ import ResetPasswordPage from '@/features/auth/ResetPasswordPage'
 import DashboardPage from '@/features/dashboard/DashboardPage'
 import HabitsPage from '@/features/habits/HabitsPage'
 import HabitDetailPage from '@/features/habits/HabitDetailPage'
+import FlowPage from '@/features/flow/FlowPage'
 import ModulesPage from '@/features/modules/ModulesPage'
 import SettingsPage from '@/features/settings/SettingsPage'
 import WorkoutsPage from '@/features/workouts/WorkoutsPage'
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
           { path: '/', element: <DashboardPage /> },
           { path: '/habits', element: <HabitsPage /> },
           { path: '/habits/:id', element: <HabitDetailPage /> },
+          { path: '/flow', element: <FlowPage /> },
           { path: '/train', element: <WorkoutsPage /> },
           { path: '/more', element: <ModulesPage /> },
           { path: '/reflect', element: <ReflectPage /> },

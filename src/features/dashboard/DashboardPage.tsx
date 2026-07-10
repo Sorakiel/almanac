@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/common/Avatar'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
-import { FocusBlock } from '@/features/dashboard/components/FocusBlock'
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
 import { SortableHabitList } from '@/features/habits/components/SortableHabitList'
 import { useHabits } from '@/features/habits/hooks/useHabits'
@@ -62,13 +61,6 @@ function DashboardPage() {
       ) : (
         <>
           <QuoteCard />
-
-          {habits.length > 0 ? (
-            <div className="flex flex-col gap-3">
-              <SectionLabel>NOW · FOCUS</SectionLabel>
-              <FocusBlock habits={habits} />
-            </div>
-          ) : null}
 
           <section className="flex flex-col gap-2">
             <SectionLabel accessory={habits.length > 0 ? `${completed} / ${dueHabits.length} done` : undefined}>

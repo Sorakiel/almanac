@@ -10,6 +10,7 @@ import {
   Plus,
   Settings,
   Target,
+  Timer,
   type LucideIcon,
 } from 'lucide-react'
 import { IconTile } from '@/components/common/IconTile'
@@ -43,6 +44,7 @@ function ModulesPage() {
       to: '/habits',
     },
     { key: 'workouts', title: 'Workouts', sub: 'Train', icon: Dumbbell, tone: 'bg-teal/15 text-teal', to: '/train' },
+    { key: 'flow', title: 'Flow', sub: 'Deep work', icon: Timer, tone: 'bg-amber/15 text-amber', to: '/flow' },
     { key: 'reflect', title: 'Reflect', sub: 'Journal', icon: NotebookPen, tone: 'bg-accent/15 text-accent', to: '/reflect' },
     { key: 'settings', title: 'Settings', sub: 'Profile', icon: Settings, tone: 'bg-border/10 text-muted', to: '/settings' },
   ]

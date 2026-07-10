@@ -3,6 +3,7 @@ import { ListChecks, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { HabitCard } from '@/features/habits/components/HabitCard'
+import { TodayProgress } from '@/features/habits/components/TodayProgress'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useUiStore } from '@/stores/ui'
 import type { HabitFrequency } from '@/features/habits/types'
@@ -10,9 +11,11 @@ import type { HabitFrequency } from '@/features/habits/types'
 const FILTERS: { value: HabitFrequency | 'all'; label: string }[] = [
   { value: 'all', label: 'all' },
   { value: 'daily', label: 'daily' },
+  { value: 'weekdays', label: 'weekdays' },
   { value: 'weekly', label: 'weekly' },
   { value: 'x_per_week', label: 'n× / wk' },
   { value: 'every_n_days', label: 'every n days' },
+  { value: 'every_n_weeks', label: 'every n weeks' },
 ]
 
 function HabitsPage() {
@@ -73,6 +76,7 @@ function HabitsPage() {
         />
       ) : (
         <>
+          <TodayProgress habits={habits} />
           {visible.length === 0 ? (
             <EmptyState
               title={`Nothing matches "${filter.label}"`}
