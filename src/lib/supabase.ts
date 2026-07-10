@@ -11,6 +11,32 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
+const REMEMBER_FLAG = 'almanac.remember'
+
+/**
+ * "Remember me" support: supabase-js still owns the session — we only choose
+ * which bucket it persists to. Opting out routes tokens to sessionStorage, so
+ * the session ends when the browser closes. Set BEFORE signing in.
+ */
+export function setRememberMe(remember: boolean): void {
+  localStorage.setItem(REMEMBER_FLAG, remember ? '1' : '0')
+}
+
+const remembered = (): boolean => localStorage.getItem(REMEMBER_FLAG) !== '0'
+
+const authStorage = {
+  getItem: (key: string): string | null =>
+    sessionStorage.getItem(key) ?? localStorage.getItem(key),
+  setItem: (key: string, value: string): void => {
+    if (remembered()) localStorage.setItem(key, value)
+    else sessionStorage.setItem(key, value)
+  },
+  removeItem: (key: string): void => {
+    sessionStorage.removeItem(key)
+    localStorage.removeItem(key)
+  },
+}
+
 /**
  * Single browser Supabase client. The anon key is safe on the client because
  * Row-Level Security enforces per-user isolation at the database. supabase-js
@@ -21,5 +47,6 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    storage: authStorage,
   },
 })

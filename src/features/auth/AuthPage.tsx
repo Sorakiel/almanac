@@ -4,12 +4,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { z } from 'zod'
-import { Diamond } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Segmented } from '@/components/ui/segmented'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useSession } from '@/hooks/useSession'
+import { setRememberMe } from '@/lib/supabase'
 
 const schema = z.object({
   displayName: z.string().trim().min(1, 'Required').optional(),
@@ -22,19 +22,23 @@ type Mode = 'signin' | 'signup'
 
 function AuthPage() {
   const [mode, setMode] = useState<Mode>('signin')
+  const [forgot, setForgot] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [remember, setRemember] = useState(true)
   const { status } = useSession()
-  const { signIn, signUp } = useAuthActions()
+  const { signIn, signUp, resetRequest } = useAuthActions()
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
-  const pending = signIn.isPending || signUp.isPending
+  const pending = signIn.isPending || signUp.isPending || resetRequest.isPending
 
   const onSubmit = handleSubmit(async (values) => {
     try {
+      setRememberMe(remember)
       if (mode === 'signup') {
         await signUp.mutateAsync({
           email: values.email,
@@ -50,13 +54,31 @@ function AuthPage() {
     }
   })
 
+  const onForgot = async () => {
+    const email = getValues('email').trim()
+    if (!email || !z.string().email().safeParse(email).success) {
+      toast.error('Enter your email above first, then tap Forgot again.')
+      return
+    }
+    try {
+      await resetRequest.mutateAsync(email)
+      setForgot(true)
+      toast.success('Reset link sent — check your inbox.')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not send the reset link')
+    }
+  }
+
   if (status === 'authenticated') return <Navigate to="/" replace />
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 px-6 py-12">
       <div className="flex flex-col gap-4">
-        <span className="flex h-12 w-12 items-center justify-center rounded-tile bg-accent text-on-accent">
-          <Diamond className="h-6 w-6" aria-hidden="true" />
+        <span className="relative flex h-11 w-11 items-center justify-center rounded-[13px] bg-gradient-to-br from-accent to-accent-deep shadow-glow">
+          <span
+            aria-hidden="true"
+            className="h-3.5 w-3.5 rotate-45 border-[1.8px] border-bg"
+          />
         </span>
         <div>
           <h1 className="text-3xl">{mode === 'signin' ? 'Welcome back' : 'Get started'}</h1>
@@ -116,7 +138,29 @@ function AuthPage() {
           ) : null}
         </label>
 
-        <Button type="submit" size="lg" disabled={pending}>
+        <div className="flex items-center justify-between">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="h-4 w-4 rounded accent-accent"
+            />
+            Remember me
+          </label>
+          {mode === 'signin' ? (
+            <button
+              type="button"
+              onClick={onForgot}
+              disabled={resetRequest.isPending}
+              className="font-mono text-[11px] tracking-label text-accent hover:text-accent-deep"
+            >
+              {forgot ? 'Link sent ✓' : 'Forgot?'}
+            </button>
+          ) : null}
+        </div>
+
+        <Button type="submit" size="lg" disabled={pending} className="shadow-glow">
           {pending ? 'One moment…' : mode === 'signin' ? 'Sign in →' : 'Create account →'}
         </Button>
       </form>
@@ -128,10 +172,18 @@ function AuthPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <Button variant="surface" onClick={() => toast('Social sign-in is coming soon.')}>
-          Apple
+        <Button
+          variant="ghost"
+          className="border bg-transparent font-semibold"
+          onClick={() => toast('Social sign-in is coming soon.')}
+        >
+           Apple
         </Button>
-        <Button variant="surface" onClick={() => toast('Social sign-in is coming soon.')}>
+        <Button
+          variant="ghost"
+          className="border bg-transparent font-semibold"
+          onClick={() => toast('Social sign-in is coming soon.')}
+        >
           G · Google
         </Button>
       </div>

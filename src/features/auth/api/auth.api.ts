@@ -33,3 +33,17 @@ export async function signOut(): Promise<void> {
   const { error } = await supabase.auth.signOut()
   if (error) throw error
 }
+
+/** Email a password-reset link that lands on /auth/reset. */
+export async function requestPasswordReset(email: string): Promise<void> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/auth/reset`,
+  })
+  if (error) throw error
+}
+
+/** Set a new password for the recovery session created by the reset link. */
+export async function updatePassword(password: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) throw error
+}

@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AppLayout } from '@/app/AppLayout'
 import { ProtectedRoute } from '@/app/ProtectedRoute'
 import AuthPage from '@/features/auth/AuthPage'
+import ResetPasswordPage from '@/features/auth/ResetPasswordPage'
 import DashboardPage from '@/features/dashboard/DashboardPage'
 import HabitsPage from '@/features/habits/HabitsPage'
 import HabitDetailPage from '@/features/habits/HabitDetailPage'
@@ -12,6 +13,7 @@ import ReflectPage from '@/features/reflect/ReflectPage'
 
 export const router = createBrowserRouter([
   { path: '/auth', element: <AuthPage /> },
+  { path: '/auth/reset', element: <ResetPasswordPage /> },
   {
     element: <ProtectedRoute />,
     children: [
