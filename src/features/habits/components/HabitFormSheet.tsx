@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -26,7 +26,7 @@ const schema = z.object({
   description: z.string().trim().max(160).optional(),
   icon: z.enum(HABIT_ICON_OPTIONS as [HabitIcon, ...HabitIcon[]]),
   color: z.enum(HABIT_COLOR_OPTIONS as [HabitColor, ...HabitColor[]]),
-  frequency: z.enum(['daily', 'weekly', 'x_per_week']),
+  frequency: z.enum(['daily', 'weekly', 'x_per_week', 'every_n_days']),
   target_count: z.number().int().min(1).max(50),
 })
 
@@ -58,8 +58,19 @@ export function HabitFormSheet() {
   const values = useWatch({ control }) as FormValues
   const pending = create.isPending || update.isPending
 
+  // Reset exactly once per open (or when the edited habit's data first
+  // arrives). `editing` gets a fresh identity every render — depending on it
+  // directly makes this effect re-fire on ANY re-render and wipe in-progress
+  // input (the "clicking Weekly does nothing" bug).
+  const lastResetKey = useRef<string | null>(null)
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      lastResetKey.current = null
+      return
+    }
+    const key = editing ? editing.id : 'new'
+    if (lastResetKey.current === key) return
+    lastResetKey.current = key
     reset(
       editing
         ? {
@@ -81,7 +92,9 @@ export function HabitFormSheet() {
       icon: v.icon,
       color: v.color,
       frequency: v.frequency,
-      target_count: v.frequency === 'x_per_week' ? v.target_count : 1,
+      // target_count doubles as the interval N for every_n_days habits.
+      target_count:
+        v.frequency === 'x_per_week' || v.frequency === 'every_n_days' ? v.target_count : 1,
     }
     try {
       if (editing) {
@@ -173,11 +186,19 @@ export function HabitFormSheet() {
           <Segmented
             aria-label="Frequency"
             value={values.frequency}
-            onChange={(f) => setValue('frequency', f)}
+            onChange={(f) => {
+              setValue('frequency', f)
+              // The shared target slot means different things per mode — reset
+              // to a sensible floor when switching so values don't leak across.
+              if (f === 'every_n_days') setValue('target_count', Math.max(values.target_count, 2))
+              else if (f === 'x_per_week') setValue('target_count', Math.max(values.target_count, 1))
+              else setValue('target_count', 1)
+            }}
             options={[
               { value: 'daily', label: 'Daily' },
               { value: 'weekly', label: 'Weekly' },
               { value: 'x_per_week', label: 'N× / wk' },
+              { value: 'every_n_days', label: 'N days' },
             ]}
           />
         </div>
@@ -191,6 +212,21 @@ export function HabitFormSheet() {
               min={1}
               max={50}
             />
+          </div>
+        )}
+
+        {values.frequency === 'every_n_days' && (
+          <div className="flex items-center justify-between rounded-2xl border px-4 py-2">
+            <span className="text-sm font-medium">Every</span>
+            <div className="flex items-center gap-3">
+              <Stepper
+                value={values.target_count}
+                onChange={(n) => setValue('target_count', n)}
+                min={2}
+                max={30}
+              />
+              <span className="label-mono normal-case tracking-normal">days</span>
+            </div>
           </div>
         )}
 

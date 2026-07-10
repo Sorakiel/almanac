@@ -24,8 +24,11 @@ export function useHabitMutations() {
   const { user } = useSession()
   const userId = user?.id ?? ''
 
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: habitKeys.all(userId) })
+  const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: habitKeys.all(userId) })
+    // The detail page reads ['habit', id] — keep it in sync with edits.
+    void queryClient.invalidateQueries({ queryKey: ['habit'] })
+  }
 
   const create = useMutation({
     mutationFn: (input: HabitFormInput) => createHabit({ ...input, user_id: userId }),
