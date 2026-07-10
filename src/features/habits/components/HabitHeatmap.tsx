@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 
 interface HabitHeatmapProps {
@@ -5,32 +6,49 @@ interface HabitHeatmapProps {
   days: { date: string; done: boolean }[]
 }
 
-/** GitHub-style contribution grid: one column per week, one cell per day. */
+/**
+ * GitHub-style contribution grid: one column per week, one cell per day.
+ * The full year is wider than a phone screen, so the grid scrolls
+ * horizontally and starts pinned to the newest week — recent activity must
+ * never be clipped out of view.
+ */
 export function HabitHeatmap({ days }: HabitHeatmapProps) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+
   const weeks: { date: string; done: boolean }[][] = []
   for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7))
 
+  useLayoutEffect(() => {
+    const el = scrollRef.current
+    if (el) el.scrollLeft = el.scrollWidth
+  }, [days.length])
+
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex gap-[3px] overflow-hidden">
-        {weeks.map((week, wi) => (
-          <div key={wi} className="flex flex-col gap-[3px]">
-            {week.map((day) => (
-              <span
-                key={day.date}
-                title={day.date}
-                className={cn('h-[9px] w-[9px] rounded-[2px]', day.done ? 'bg-accent' : 'bg-border/10')}
-              />
-            ))}
-          </div>
-        ))}
+    <div className="flex flex-col gap-3 rounded-2xl border bg-surface p-4">
+      <div ref={scrollRef} className="overflow-x-auto pb-1">
+        <div className="flex w-max gap-[2px]">
+          {weeks.map((week, wi) => (
+            <div key={wi} className="flex flex-col gap-[2px]">
+              {week.map((day) => (
+                <span
+                  key={day.date}
+                  title={day.date}
+                  className={cn(
+                    'h-[7px] w-[7px] rounded-[2px]',
+                    day.done ? 'bg-accent' : 'bg-foreground/10',
+                  )}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
       <div className="flex items-center gap-1.5">
         <span className="label-mono normal-case tracking-normal">less</span>
-        <span className="h-[9px] w-[9px] rounded-[2px] bg-border/10" />
-        <span className="h-[9px] w-[9px] rounded-[2px] bg-accent/40" />
-        <span className="h-[9px] w-[9px] rounded-[2px] bg-accent/70" />
-        <span className="h-[9px] w-[9px] rounded-[2px] bg-accent" />
+        <span className="h-[7px] w-[7px] rounded-[2px] bg-foreground/10" />
+        <span className="h-[7px] w-[7px] rounded-[2px] bg-accent/35" />
+        <span className="h-[7px] w-[7px] rounded-[2px] bg-accent/65" />
+        <span className="h-[7px] w-[7px] rounded-[2px] bg-accent" />
         <span className="label-mono normal-case tracking-normal">more</span>
       </div>
     </div>
