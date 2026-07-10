@@ -13,12 +13,13 @@ test('almanac phase-1 smoke', async ({ page }) => {
   // 1. App loads and routes anonymous users to auth.
   await page.goto('/')
   await expect(page).toHaveURL(/\/auth$/)
+  await expect(page.getByLabel(/remember me/i)).toBeVisible()
 
   // 2. Sign up a fresh test user. Note: Supabase's email validator rejects
   // throwaway domains like example.com, and this flow assumes email
   // confirmation is DISABLED so the sign-up issues a session immediately.
   const email = `almanac.smoke.${Date.now()}@gmail.com`
-  await page.getByRole('button', { name: /create one/i }).click()
+  await page.getByRole('tab', { name: /create account/i }).click()
   await page.getByLabel('Name').fill('Smoke Tester')
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password').fill('password123')
@@ -26,27 +27,31 @@ test('almanac phase-1 smoke', async ({ page }) => {
 
   // 3. Dashboard renders after auth.
   await expect(page).toHaveURL(/\/$/, { timeout: 15_000 })
-  await expect(page.getByText(/today's habits/i)).toBeVisible()
+  await expect(page.getByText(/today · habits/i)).toBeVisible()
 
-  // 4. Create a habit → it appears.
+  // 4. Create a habit → it appears (with the focus block once habits exist).
   await page.getByRole('button', { name: /add habit/i }).first().click()
   await page.getByLabel('Name').fill('Read 20 pages')
   await page.getByRole('button', { name: /create habit/i }).click()
-  const habit = page.getByText('Read 20 pages')
-  await expect(habit).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Read 20 pages' })).toBeVisible()
+  await expect(page.getByText(/now · focus/i)).toBeVisible()
 
-  // 5. Complete it → optimistic, and persists after reload.
+  // 5. Complete it → optimistic, and persists after reload. Wait for the
+  // habit_logs write to settle before reloading, or the reload races it.
+  const logWrite = page.waitForResponse(
+    (r) => r.url().includes('habit_logs') && r.request().method() === 'POST',
+  )
   await page.getByRole('button', { name: /^complete read 20 pages$/i }).click()
   const completeToggle = page.getByRole('button', { name: /mark read 20 pages incomplete/i })
   await expect(completeToggle).toBeVisible()
+  await logWrite
   await page.reload()
   await expect(page.getByRole('button', { name: /mark read 20 pages incomplete/i })).toBeVisible()
 
-  // 6. Toggle theme dark ↔ coffee.
-  const html = page.locator('html')
-  const before = await html.getAttribute('data-theme')
-  await page.getByRole('button', { name: /toggle theme/i }).click()
-  await expect(html).not.toHaveAttribute('data-theme', before ?? 'dark')
+  // 6. Toggle theme dark ↔ coffee (Settings → Appearance).
+  await page.goto('/settings')
+  await page.getByRole('tab', { name: /coffee/i }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'coffee')
 
   // 7. Sign out returns to auth.
   await page.getByRole('button', { name: /sign out/i }).click()
