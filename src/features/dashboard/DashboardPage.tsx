@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/common/Avatar'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
+import { NowBlock } from '@/features/dashboard/components/NowBlock'
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
 import { SortableHabitList } from '@/features/habits/components/SortableHabitList'
 import { useHabits } from '@/features/habits/hooks/useHabits'
@@ -61,6 +62,8 @@ function DashboardPage() {
       ) : (
         <>
           <QuoteCard />
+
+          <NowBlock habits={habits} />
 
           <section className="flex flex-col gap-2">
             <SectionLabel accessory={habits.length > 0 ? `${completed} / ${dueHabits.length} done` : undefined}>

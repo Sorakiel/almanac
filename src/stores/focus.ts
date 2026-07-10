@@ -8,7 +8,9 @@ interface FocusState {
   durationMin: number | null
   /** What the session is about — free label, defaults to "Focus session". */
   label: string | null
-  start: (durationMin: number, label?: string) => void
+  /** The habit this session targets, if any — lets "Complete" mark it done. */
+  habitId: string | null
+  start: (durationMin: number, label?: string, habitId?: string | null) => void
   stop: () => void
 }
 
@@ -22,9 +24,15 @@ export const useFocusStore = create<FocusState>()(
       endsAt: null,
       durationMin: null,
       label: null,
-      start: (durationMin, label) =>
-        set({ endsAt: Date.now() + durationMin * 60_000, durationMin, label: label ?? null }),
-      stop: () => set({ endsAt: null, durationMin: null, label: null }),
+      habitId: null,
+      start: (durationMin, label, habitId) =>
+        set({
+          endsAt: Date.now() + durationMin * 60_000,
+          durationMin,
+          label: label ?? null,
+          habitId: habitId ?? null,
+        }),
+      stop: () => set({ endsAt: null, durationMin: null, label: null, habitId: null }),
     }),
     { name: 'almanac.focus' },
   ),

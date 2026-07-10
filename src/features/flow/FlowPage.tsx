@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Check, Timer } from 'lucide-react'
+import { Check, Timer, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Segmented } from '@/components/ui/segmented'
@@ -8,7 +9,11 @@ import { IconTile } from '@/components/common/IconTile'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { useHabits } from '@/features/habits/hooks/useHabits'
+import { setHabitCount } from '@/features/habits/api/habits.api'
+import { dailyTarget } from '@/features/habits/lib/frequency'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
+import { useSession } from '@/hooks/useSession'
+import { useToday } from '@/hooks/useToday'
 import { useFocusStore } from '@/stores/focus'
 import { cn } from '@/lib/utils'
 
@@ -22,7 +27,10 @@ type Mode = 'habit' | 'custom'
  */
 function FlowPage() {
   const { habits } = useHabits()
-  const { endsAt, durationMin, label, start, stop } = useFocusStore()
+  const { user } = useSession()
+  const { dateKey } = useToday()
+  const queryClient = useQueryClient()
+  const { endsAt, durationMin, label, habitId, start, stop } = useFocusStore()
   const [mode, setMode] = useState<Mode>('habit')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [customLabel, setCustomLabel] = useState('')
@@ -33,6 +41,29 @@ function FlowPage() {
   const dueHabits = habits.filter((h) => h.dueToday && !h.isComplete)
   const selectedHabit = habits.find((h) => h.id === selectedId) ?? null
   const targetLabel = mode === 'habit' ? (selectedHabit?.name ?? null) : customLabel.trim() || null
+
+  // Mark the session's habit done (if any), then end. "End" just stops.
+  const completeSession = async () => {
+    const habit = habitId ? habits.find((h) => h.id === habitId) : null
+    if (habit && user) {
+      try {
+        await setHabitCount({
+          userId: user.id,
+          habitId: habit.id,
+          date: dateKey,
+          count: dailyTarget(habit),
+        })
+        void queryClient.invalidateQueries({ queryKey: ['habitHistory', habit.id] })
+        void queryClient.invalidateQueries({ queryKey: ['habits'] })
+        void queryClient.invalidateQueries({ queryKey: ['habitLogs'] })
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Could not complete habit')
+        return
+      }
+    }
+    stop()
+    toast.success('Nice — flow complete.')
+  }
 
   // 1 Hz tick while a session runs; also catches sessions that expired offline.
   useEffect(() => {
@@ -80,12 +111,18 @@ function FlowPage() {
               />
               <span className="ml-auto font-mono text-sm tabular-nums text-accent">{pct}%</span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <span className="label-mono">◷ {minLeft} min left</span>
-              <Button size="sm" onClick={stop}>
-                <Check className="h-4 w-4" />
-                Done
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="surface" onClick={stop}>
+                  <X className="h-4 w-4" />
+                  End
+                </Button>
+                <Button size="sm" onClick={completeSession}>
+                  <Check className="h-4 w-4" />
+                  {habitId ? 'Complete' : 'Done'}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -182,7 +219,10 @@ function FlowPage() {
         size="lg"
         className={cn('w-full', targetLabel && 'shadow-glow')}
         disabled={!targetLabel}
-        onClick={() => targetLabel && start(duration, targetLabel)}
+        onClick={() =>
+          targetLabel &&
+          start(duration, targetLabel, mode === 'habit' ? (selectedHabit?.id ?? null) : null)
+        }
       >
         <Timer className="h-4 w-4" />
         Start flow
