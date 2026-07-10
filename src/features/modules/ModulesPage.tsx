@@ -16,44 +16,46 @@ import {
 import { IconTile } from '@/components/common/IconTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { Tag } from '@/components/common/Tag'
+import { Switch } from '@/components/ui/switch'
 import { SuggestModuleSheet } from '@/features/modules/components/SuggestModuleSheet'
 import { useHabits } from '@/features/habits/hooks/useHabits'
-import { cn } from '@/lib/utils'
+import { useModulesStore, type ModuleKey } from '@/stores/modules'
 
-interface ModuleDef {
-  key: string
+interface ToggleModule {
+  key: ModuleKey
   title: string
   sub: string
   icon: LucideIcon
   tone: string
-  to?: string
+  to: string
+}
+
+interface SoonModule {
+  key: string
+  title: string
+  icon: LucideIcon
+  tone: string
 }
 
 function ModulesPage() {
   const navigate = useNavigate()
   const { habits } = useHabits()
+  const enabled = useModulesStore((s) => s.enabled)
+  const toggle = useModulesStore((s) => s.toggle)
   const [suggestOpen, setSuggestOpen] = useState(false)
 
-  const active: ModuleDef[] = [
-    {
-      key: 'habits',
-      title: 'Habits',
-      sub: `${habits.length} active`,
-      icon: ListChecks,
-      tone: 'bg-accent/15 text-accent',
-      to: '/habits',
-    },
-    { key: 'workouts', title: 'Workouts', sub: 'Train', icon: Dumbbell, tone: 'bg-teal/15 text-teal', to: '/train' },
+  const modules: ToggleModule[] = [
+    { key: 'habits', title: 'Habits', sub: `${habits.length} active`, icon: ListChecks, tone: 'bg-accent/15 text-accent', to: '/habits' },
     { key: 'flow', title: 'Flow', sub: 'Deep work', icon: Timer, tone: 'bg-amber/15 text-amber', to: '/flow' },
+    { key: 'workouts', title: 'Workouts', sub: 'Train', icon: Dumbbell, tone: 'bg-teal/15 text-teal', to: '/train' },
     { key: 'reflect', title: 'Reflect', sub: 'Journal', icon: NotebookPen, tone: 'bg-accent/15 text-accent', to: '/reflect' },
-    { key: 'settings', title: 'Settings', sub: 'Profile', icon: Settings, tone: 'bg-border/10 text-muted', to: '/settings' },
   ]
 
-  const soon: ModuleDef[] = [
-    { key: 'finances', title: 'Finances', sub: 'Soon', icon: CircleDollarSign, tone: 'bg-border/10 text-muted' },
-    { key: 'reading', title: 'Reading', sub: 'Soon', icon: BookOpen, tone: 'bg-border/10 text-muted' },
-    { key: 'goals', title: 'Goals', sub: 'Soon', icon: Target, tone: 'bg-border/10 text-muted' },
-    { key: 'sleep', title: 'Sleep', sub: 'Soon', icon: Moon, tone: 'bg-border/10 text-muted' },
+  const soon: SoonModule[] = [
+    { key: 'finances', title: 'Finances', icon: CircleDollarSign, tone: 'bg-border/10 text-muted' },
+    { key: 'reading', title: 'Reading', icon: BookOpen, tone: 'bg-border/10 text-muted' },
+    { key: 'goals', title: 'Goals', icon: Target, tone: 'bg-border/10 text-muted' },
+    { key: 'sleep', title: 'Sleep', icon: Moon, tone: 'bg-border/10 text-muted' },
   ]
 
   return (
@@ -64,22 +66,42 @@ function ModulesPage() {
       </header>
 
       <section className="flex flex-col gap-3">
-        <SectionLabel>ACTIVE</SectionLabel>
-        <div className="grid grid-cols-2 gap-3">
-          {active.map((m) => (
-            <button
-              key={m.key}
-              type="button"
-              onClick={() => m.to && navigate(m.to)}
-              className="flex flex-col gap-3 rounded-card border bg-surface p-4 text-left transition-colors hover:border-accent/40"
-            >
-              <IconTile icon={m.icon} tone={m.tone} />
-              <div>
-                <p className="font-semibold">{m.title}</p>
-                <p className="text-sm text-muted">{m.sub}</p>
-              </div>
-            </button>
+        <SectionLabel accessory="tap to open">ACTIVE</SectionLabel>
+        <p className="label-mono normal-case tracking-normal text-muted">
+          Toggle a module to show it in the bottom bar.
+        </p>
+        <div className="flex flex-col gap-2">
+          {modules.map((m) => (
+            <div key={m.key} className="flex items-center gap-3 rounded-card border bg-surface p-3">
+              <button
+                type="button"
+                onClick={() => navigate(m.to)}
+                className="flex flex-1 items-center gap-3 rounded-tile text-left"
+              >
+                <IconTile icon={m.icon} tone={m.tone} size="sm" />
+                <div>
+                  <p className="font-semibold">{m.title}</p>
+                  <p className="text-sm text-muted">{m.sub}</p>
+                </div>
+              </button>
+              <Switch
+                checked={enabled[m.key]}
+                onCheckedChange={() => toggle(m.key)}
+                aria-label={`Show ${m.title} in navigation`}
+              />
+            </div>
           ))}
+          <button
+            type="button"
+            onClick={() => navigate('/settings')}
+            className="flex items-center gap-3 rounded-card border bg-surface p-3 text-left transition-colors hover:border-accent/40"
+          >
+            <IconTile icon={Settings} tone="bg-border/10 text-muted" size="sm" />
+            <div>
+              <p className="font-semibold">Settings</p>
+              <p className="text-sm text-muted">Profile &amp; appearance</p>
+            </div>
+          </button>
         </div>
       </section>
 
@@ -87,10 +109,7 @@ function ModulesPage() {
         <SectionLabel>COMING SOON</SectionLabel>
         <div className="grid grid-cols-2 gap-3">
           {soon.map((m) => (
-            <div
-              key={m.key}
-              className={cn('flex items-center gap-3 rounded-card border bg-surface/50 p-4')}
-            >
+            <div key={m.key} className="flex items-center gap-3 rounded-card border bg-surface/50 p-4">
               <IconTile icon={m.icon} tone={m.tone} size="sm" />
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium text-muted">{m.title}</p>

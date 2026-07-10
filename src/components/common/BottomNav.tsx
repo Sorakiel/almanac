@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
+import { MAX_NAV_MODULES, NAV_MODULES, useModulesStore } from '@/stores/modules'
 import { useUiStore } from '@/stores/ui'
 import { cn } from '@/lib/utils'
 
@@ -10,14 +11,8 @@ interface NavItem {
   end?: boolean
 }
 
-const ITEMS: NavItem[] = [
-  { to: '/', label: 'Today', glyph: '◆', end: true },
-  { to: '/habits', label: 'Habits', glyph: '▤' },
-]
-const ITEMS_RIGHT: NavItem[] = [
-  { to: '/train', label: 'Train', glyph: '◇' },
-  { to: '/more', label: 'More', glyph: '⊞' },
-]
+const TODAY: NavItem = { to: '/', label: 'Today', glyph: '◆', end: true }
+const MORE: NavItem = { to: '/more', label: 'More', glyph: '⊞' }
 
 function NavButton({ item }: { item: NavItem }) {
   return (
@@ -39,10 +34,18 @@ function NavButton({ item }: { item: NavItem }) {
   )
 }
 
-/** Glassmorphism bottom nav (spec board): 24px radius bar, glyph tabs, raised square +. */
+/** Glassmorphism bottom nav (spec board): Today + enabled modules + More. */
 export function BottomNav() {
   const navigate = useNavigate()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
+  const enabled = useModulesStore((s) => s.enabled)
+
+  // Today and More always anchor the nav; enabled modules fill the middle.
+  const modules = NAV_MODULES.filter((m) => enabled[m.key]).slice(0, MAX_NAV_MODULES)
+  const items: NavItem[] = [TODAY, ...modules, MORE]
+  const mid = Math.ceil(items.length / 2)
+  const left = items.slice(0, mid)
+  const right = items.slice(mid)
 
   const handleAdd = () => {
     navigate('/habits')
@@ -56,7 +59,7 @@ export function BottomNav() {
     >
       <div className="flex h-[60px] w-full max-w-md items-center rounded-[24px] border bg-surface/75 px-3 shadow-soft backdrop-blur-nav">
         <div className="flex flex-1 justify-around">
-          {ITEMS.map((item) => (
+          {left.map((item) => (
             <NavButton key={item.to} item={item} />
           ))}
         </div>
@@ -71,7 +74,7 @@ export function BottomNav() {
         </button>
 
         <div className="flex flex-1 justify-around">
-          {ITEMS_RIGHT.map((item) => (
+          {right.map((item) => (
             <NavButton key={item.to} item={item} />
           ))}
         </div>
