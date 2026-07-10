@@ -258,7 +258,7 @@ export function HabitFormSheet() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3 rounded-2xl bg-surface p-4">
           <span className="label-mono">Repeats</span>
           <div className="flex flex-wrap gap-2" role="group" aria-label="Repeats">
             {PRESETS.map((option) => {
@@ -304,16 +304,16 @@ export function HabitFormSheet() {
               </div>
             </div>
           )}
-        </div>
 
-        <div className="flex items-center justify-between border-t border-border/60 pt-4">
-          <span className="label-mono normal-case">time of day</span>
-          <Dropdown
-            ariaLabel="Time of day"
-            value={values.time_of_day}
-            onChange={(next) => setValue('time_of_day', next)}
-            options={TIME_OPTIONS}
-          />
+          <div className="flex items-center justify-between border-t border-border/60 pt-4">
+            <span className="label-mono normal-case">time of day</span>
+            <Dropdown
+              ariaLabel="Time of day"
+              value={values.time_of_day}
+              onChange={(next) => setValue('time_of_day', next)}
+              options={TIME_OPTIONS}
+            />
+          </div>
         </div>
 
         <Button type="submit" size="lg" disabled={pending} className="mt-1">

@@ -25,7 +25,7 @@ export function HabitHeatmap({ days }: HabitHeatmapProps) {
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border bg-surface p-4">
-      <div ref={scrollRef} className="overflow-x-auto pb-1">
+      <div ref={scrollRef} className="no-scrollbar overflow-x-auto pb-1">
         <div className="flex w-max gap-[2px]">
           {weeks.map((week, wi) => (
             <div key={wi} className="flex flex-col gap-[2px]">

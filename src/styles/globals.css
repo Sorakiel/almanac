@@ -37,4 +37,14 @@
   .label-mono {
     @apply font-mono text-xs uppercase tracking-label text-muted;
   }
+
+  /* Scrollable but chromeless — the heatmap still pans, minus the scrollbar. */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
