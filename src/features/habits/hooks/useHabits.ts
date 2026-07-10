@@ -4,9 +4,12 @@ import { useToday } from '@/hooks/useToday'
 import { lastNDateKeys } from '@/lib/date'
 import { fetchHabits, fetchLogsSince } from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
+import { dailyTarget, dueInDays } from '@/features/habits/lib/frequency'
 import type { Habit, HabitLog, HabitWithTodayLog } from '@/features/habits/types'
 
 const WINDOW_DAYS = 7
+/** Fetch window: long enough to resolve due-ness for every-N-days habits (N ≤ 30). */
+const FETCH_DAYS = 31
 
 function join(habits: Habit[], logs: HabitLog[], windowKeys: string[]): HabitWithTodayLog[] {
   // Index counts by habit + date for O(1) lookup.
@@ -15,20 +18,33 @@ function join(habits: Habit[], logs: HabitLog[], windowKeys: string[]): HabitWit
   const todayKey = windowKeys[windowKeys.length - 1]
 
   return habits.map((habit) => {
-    const series: number[] = windowKeys.map((key) => {
-      const count = counts.get(`${habit.id}:${key}`) ?? 0
-      return count >= habit.target_count ? 1 : 0
-    })
+    const target = dailyTarget(habit)
+    const doneOn = (key: string): boolean => (counts.get(`${habit.id}:${key}`) ?? 0) >= target
+
+    const series: number[] = windowKeys.slice(-WINDOW_DAYS).map((key) => (doneOn(key) ? 1 : 0))
     const todayCount = counts.get(`${habit.id}:${todayKey}`) ?? 0
     const completedRecent = series.reduce((a, b) => a + b, 0)
+
+    // Whole days since the most recent completion (0 = today), for interval due-ness.
+    let daysSinceLastDone: number | null = null
+    for (let i = windowKeys.length - 1; i >= 0; i--) {
+      if (doneOn(windowKeys[i]!)) {
+        daysSinceLastDone = windowKeys.length - 1 - i
+        break
+      }
+    }
+    const dueIn = dueInDays(habit, daysSinceLastDone)
+
     return {
       ...habit,
       todayCount,
-      isComplete: todayCount >= habit.target_count,
+      isComplete: todayCount >= target,
       series,
       completedRecent,
       windowDays: WINDOW_DAYS,
       rate: completedRecent / WINDOW_DAYS,
+      dueInDays: dueIn,
+      dueToday: dueIn === 0,
     }
   })
 }
@@ -46,7 +62,7 @@ export function useHabits(): UseHabitsResult {
   const { dateKey } = useToday()
   const userId = user?.id ?? ''
   const enabled = Boolean(userId)
-  const windowKeys = lastNDateKeys(dateKey, WINDOW_DAYS)
+  const windowKeys = lastNDateKeys(dateKey, FETCH_DAYS)
 
   const habitsQuery = useQuery({
     queryKey: habitKeys.all(userId),

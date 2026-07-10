@@ -17,4 +17,8 @@ export interface HabitWithTodayLog extends Habit {
   windowDays: number
   /** Completion rate over the window, 0–1. */
   rate: number
+  /** Days until next due (every_n_days only; 0 for everything else). */
+  dueInDays: number
+  /** False only for an every_n_days habit still inside its rest interval. */
+  dueToday: boolean
 }

@@ -12,6 +12,7 @@ const FILTERS: { value: HabitFrequency | 'all'; label: string }[] = [
   { value: 'daily', label: 'daily' },
   { value: 'weekly', label: 'weekly' },
   { value: 'x_per_week', label: 'n× / wk' },
+  { value: 'every_n_days', label: 'every n days' },
 ]
 
 function HabitsPage() {

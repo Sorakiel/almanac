@@ -37,7 +37,11 @@ export function HabitRow({ habit }: HabitRowProps) {
       >
         {habit.name}
       </Link>
-      <Tag>{frequencyLabel(habit)}</Tag>
+      {!habit.isComplete && !habit.dueToday ? (
+        <Tag tone="muted">in {habit.dueInDays}d</Tag>
+      ) : (
+        <Tag>{frequencyLabel(habit)}</Tag>
+      )}
     </div>
   )
 }

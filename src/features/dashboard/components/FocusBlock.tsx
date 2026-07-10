@@ -24,8 +24,10 @@ export function FocusBlock({ habits }: FocusBlockProps) {
   const [now, setNow] = useState(() => Date.now())
 
   const running = endsAt !== null && durationMin !== null
-  const completed = habits.filter((h) => h.isComplete).length
-  const nextHabit = habits.find((h) => !h.isComplete)
+  // Resting interval habits don't count against today.
+  const dueHabits = habits.filter((h) => h.dueToday || h.isComplete)
+  const completed = dueHabits.filter((h) => h.isComplete).length
+  const nextHabit = dueHabits.find((h) => !h.isComplete)
 
   // 1 Hz tick while a session runs; also catches sessions that expired offline.
   useEffect(() => {
@@ -53,7 +55,7 @@ export function FocusBlock({ habits }: FocusBlockProps) {
       />
       <div className="relative">
         <p className="label-mono text-accent">
-          {running ? 'FOCUS · IN SESSION' : `FOCUS · ${completed} OF ${habits.length} DONE`}
+          {running ? 'FOCUS · IN SESSION' : `FOCUS · ${completed} OF ${dueHabits.length} DONE`}
         </p>
         <p className="mt-2 text-xl font-semibold tracking-title">
           {running ? (label ?? 'Focus session') : (nextHabit?.name ?? 'All done today 🎉')}

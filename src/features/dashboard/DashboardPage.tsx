@@ -26,7 +26,8 @@ function DashboardPage() {
 
   const name = (user?.user_metadata.display_name as string | undefined) ?? 'there'
   const firstName = name.split(' ')[0]
-  const completed = habits.filter((h) => h.isComplete).length
+  const dueHabits = habits.filter((h) => h.dueToday || h.isComplete)
+  const completed = dueHabits.filter((h) => h.isComplete).length
   const dateLabel = longDate.replace(/,/, ' ·').toUpperCase()
 
   return (
@@ -70,7 +71,7 @@ function DashboardPage() {
           ) : null}
 
           <section className="flex flex-col gap-2">
-            <SectionLabel accessory={habits.length > 0 ? `${completed} / ${habits.length} done` : undefined}>
+            <SectionLabel accessory={habits.length > 0 ? `${completed} / ${dueHabits.length} done` : undefined}>
               TODAY · HABITS
             </SectionLabel>
 

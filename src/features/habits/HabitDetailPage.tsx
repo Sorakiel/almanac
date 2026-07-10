@@ -14,7 +14,7 @@ import { useHabitDetail } from '@/features/habits/hooks/useHabitDetail'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
 import { setHabitCount } from '@/features/habits/api/habits.api'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
-import { frequencyLabel } from '@/features/habits/lib/frequency'
+import { dailyTarget, frequencyLabel } from '@/features/habits/lib/frequency'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
@@ -47,7 +47,7 @@ function HabitDetailPage() {
         userId: user?.id ?? '',
         habitId: id,
         date: dateKey,
-        count: done ? (habit?.target_count ?? 1) : 0,
+        count: done && habit ? dailyTarget(habit) : 0,
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['habitHistory', id] })

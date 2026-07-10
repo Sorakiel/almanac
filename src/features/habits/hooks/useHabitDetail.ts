@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useToday } from '@/hooks/useToday'
 import { lastNDateKeys } from '@/lib/date'
 import { fetchHabitById, fetchHabitHistory } from '@/features/habits/api/habits.api'
+import { dailyTarget } from '@/features/habits/lib/frequency'
 import type { Habit } from '@/features/habits/types'
 
 const HEATMAP_DAYS = 371 // 53 weeks
@@ -15,9 +16,8 @@ export interface HabitDetailStats {
   todayDone: boolean
 }
 
-function computeStats(completed: Set<string>, windowKeys: string[]): HabitDetailStats {
-  const heatmap = windowKeys.map((date) => ({ date, done: completed.has(date) }))
-
+/** Day-based stats: a streak is consecutive completed days. */
+function computeDailyStats(completed: Set<string>, windowKeys: string[]) {
   let best = 0
   let run = 0
   for (const key of windowKeys) {
@@ -32,12 +32,56 @@ function computeStats(completed: Set<string>, windowKeys: string[]): HabitDetail
     else break
   }
 
-  // Rate over the last 30 days.
   const last30 = windowKeys.slice(-30)
   const done30 = last30.filter((k) => completed.has(k)).length
   const ratePct = Math.round((done30 / last30.length) * 100)
 
-  return { streak, best, ratePct, heatmap, todayDone: completed.has(windowKeys.at(-1)!) }
+  return { streak, best, ratePct }
+}
+
+/**
+ * Interval stats for every-N-days habits: a streak is consecutive completions
+ * no more than N days apart, and it survives until a due day is missed.
+ */
+function computeIntervalStats(completed: Set<string>, windowKeys: string[], n: number) {
+  const doneIdx = windowKeys.reduce<number[]>((acc, key, i) => {
+    if (completed.has(key)) acc.push(i)
+    return acc
+  }, [])
+
+  const runFrom = (pos: number): number => {
+    let run = 1
+    for (let j = pos; j > 0; j--) {
+      if (doneIdx[j]! - doneIdx[j - 1]! <= n) run++
+      else break
+    }
+    return run
+  }
+
+  let best = 0
+  for (let i = 0; i < doneIdx.length; i++) best = Math.max(best, runFrom(i))
+
+  let streak = 0
+  const today = windowKeys.length - 1
+  const last = doneIdx.at(-1)
+  if (last !== undefined && today - last <= n) streak = runFrom(doneIdx.length - 1)
+
+  const last30 = windowKeys.slice(-30)
+  const done30 = last30.filter((k) => completed.has(k)).length
+  const expected = Math.max(Math.floor(30 / n), 1)
+  const ratePct = Math.min(Math.round((done30 / expected) * 100), 100)
+
+  return { streak, best, ratePct }
+}
+
+function computeStats(habit: Habit, completed: Set<string>, windowKeys: string[]): HabitDetailStats {
+  const heatmap = windowKeys.map((date) => ({ date, done: completed.has(date) }))
+  const core =
+    habit.frequency === 'every_n_days'
+      ? computeIntervalStats(completed, windowKeys, habit.target_count)
+      : computeDailyStats(completed, windowKeys)
+
+  return { ...core, heatmap, todayDone: completed.has(windowKeys.at(-1)!) }
 }
 
 interface UseHabitDetailResult {
@@ -64,10 +108,11 @@ export function useHabitDetail(habitId: string): UseHabitDetailResult {
   const habit = habitQuery.data
   let stats: HabitDetailStats | undefined
   if (habit && historyQuery.data) {
+    const target = dailyTarget(habit)
     const completed = new Set(
-      historyQuery.data.filter((l) => l.count >= habit.target_count).map((l) => l.date),
+      historyQuery.data.filter((l) => l.count >= target).map((l) => l.date),
     )
-    stats = computeStats(completed, windowKeys)
+    stats = computeStats(habit, completed, windowKeys)
   }
 
   return {

@@ -344,7 +344,7 @@ export type Database = {
     }
     Enums: {
       feedback_status: "open" | "planned" | "done" | "closed"
-      habit_frequency: "daily" | "weekly" | "x_per_week"
+      habit_frequency: "daily" | "weekly" | "x_per_week" | "every_n_days"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -474,7 +474,7 @@ export const Constants = {
   public: {
     Enums: {
       feedback_status: ["open", "planned", "done", "closed"],
-      habit_frequency: ["daily", "weekly", "x_per_week"],
+      habit_frequency: ["daily", "weekly", "x_per_week", "every_n_days"],
       user_role: ["user", "admin"],
     },
   },
