@@ -1,20 +1,24 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, Loader2, Pencil } from 'lucide-react'
+import { ArrowLeft, Check, Loader2, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { IconTile } from '@/components/common/IconTile'
 import { StatTile } from '@/components/common/StatTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { EmptyState } from '@/components/common/EmptyState'
+import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { HabitHeatmap } from '@/features/habits/components/HabitHeatmap'
 import { useHabitDetail } from '@/features/habits/hooks/useHabitDetail'
+import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
 import { setHabitCount } from '@/features/habits/api/habits.api'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { frequencyLabel } from '@/features/habits/lib/frequency'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
+import { cn } from '@/lib/utils'
 
 function HabitDetailPage() {
   const { id = '' } = useParams()
@@ -24,6 +28,18 @@ function HabitDetailPage() {
   const { dateKey } = useToday()
   const openEditHabit = useUiStore((s) => s.openEditHabit)
   const { habit, stats, isLoading, isError } = useHabitDetail(id)
+  const { archive } = useHabitMutations()
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const handleDelete = async () => {
+    try {
+      await archive.mutateAsync(id)
+      toast.success('Habit deleted')
+      navigate('/habits')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not delete habit')
+    }
+  }
 
   const markDone = useMutation({
     mutationFn: (done: boolean) =>
@@ -90,6 +106,14 @@ function HabitDetailPage() {
         >
           <Pencil className="h-4 w-4" aria-hidden="true" />
         </button>
+        <button
+          type="button"
+          onClick={() => setConfirmDelete(true)}
+          aria-label="Delete habit"
+          className="rounded-full p-2 text-muted hover:bg-surface hover:text-accent"
+        >
+          <Trash2 className="h-4 w-4" aria-hidden="true" />
+        </button>
       </header>
 
       <div className="grid grid-cols-3 gap-3">
@@ -115,13 +139,23 @@ function HabitDetailPage() {
       <Button
         size="lg"
         variant={stats.todayDone ? 'surface' : 'primary'}
-        className="mt-2 w-full"
+        className={cn('mt-2 w-full', !stats.todayDone && 'shadow-glow')}
         disabled={markDone.isPending}
         onClick={() => markDone.mutate(!stats.todayDone)}
       >
         <Check className="h-4 w-4" />
         {stats.todayDone ? 'Completed today' : 'Mark done for today'}
       </Button>
+
+      <ConfirmSheet
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title="Delete this habit?"
+        description={`"${habit.name}" and its streak will disappear from your lists. Its history is kept.`}
+        confirmLabel="Delete habit"
+        pending={archive.isPending}
+        onConfirm={handleDelete}
+      />
     </div>
   )
 }
