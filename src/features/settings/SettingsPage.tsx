@@ -9,12 +9,14 @@ import { Tag } from '@/components/common/Tag'
 import { useSession } from '@/hooks/useSession'
 import { useTheme } from '@/hooks/useTheme'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
+import { useProfile } from '@/features/settings/hooks/useProfile'
 import { browserTimezone } from '@/lib/date'
 
 function SettingsPage() {
   const { user, status } = useSession()
   const { theme, setTheme } = useTheme()
   const { logOut } = useAuthActions()
+  const { profile } = useProfile()
 
   if (status === 'anonymous') return <Navigate to="/auth" replace />
 
@@ -38,7 +40,7 @@ function SettingsPage() {
           <h1 className="truncate text-xl">{name}</h1>
           <p className="truncate text-sm text-muted">{email}</p>
           <Tag tone="accent" className="mt-1.5">
-            Member
+            ◇ {profile?.role === 'admin' ? 'Admin' : 'Member'}
           </Tag>
         </div>
       </header>
