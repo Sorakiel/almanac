@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   BookOpen,
@@ -11,10 +12,10 @@ import {
   Target,
   type LucideIcon,
 } from 'lucide-react'
-import { toast } from 'sonner'
 import { IconTile } from '@/components/common/IconTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { Tag } from '@/components/common/Tag'
+import { SuggestModuleSheet } from '@/features/modules/components/SuggestModuleSheet'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { cn } from '@/lib/utils'
 
@@ -30,6 +31,7 @@ interface ModuleDef {
 function ModulesPage() {
   const navigate = useNavigate()
   const { habits } = useHabits()
+  const [suggestOpen, setSuggestOpen] = useState(false)
 
   const active: ModuleDef[] = [
     {
@@ -99,12 +101,14 @@ function ModulesPage() {
 
       <button
         type="button"
-        onClick={() => toast('Thanks — noted! Almanac grows with you.')}
+        onClick={() => setSuggestOpen(true)}
         className="flex items-center gap-3 rounded-card border border-dashed px-4 py-4 text-left text-sm text-muted hover:text-foreground"
       >
         <Plus className="h-4 w-4 text-accent" aria-hidden="true" />
         Suggest a module — Almanac grows with you.
       </button>
+
+      <SuggestModuleSheet open={suggestOpen} onOpenChange={setSuggestOpen} />
     </div>
   )
 }
