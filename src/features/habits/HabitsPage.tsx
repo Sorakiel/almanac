@@ -2,9 +2,13 @@ import { useState } from 'react'
 import { ListChecks, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
+import { Rail } from '@/components/common/desktop/rail'
 import { HabitCard } from '@/features/habits/components/HabitCard'
 import { TodayProgress } from '@/features/habits/components/TodayProgress'
+import { HabitsWorkspace } from '@/features/habits/components/desktop/HabitsWorkspace'
+import { HabitsRail } from '@/features/habits/components/desktop/HabitsRail'
 import { useHabits } from '@/features/habits/hooks/useHabits'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useUiStore } from '@/stores/ui'
 import type { HabitFrequency } from '@/features/habits/types'
 
@@ -22,10 +26,31 @@ function HabitsPage() {
   const { habits, isLoading, isError, refetch } = useHabits()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
   const [filterIndex, setFilterIndex] = useState(0)
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   const filter = FILTERS[filterIndex]!
   const visible =
     filter.value === 'all' ? habits : habits.filter((h) => h.frequency === filter.value)
+
+  if (isDesktop) {
+    return (
+      <>
+        <HabitsWorkspace
+          habits={habits}
+          isLoading={isLoading}
+          isError={isError}
+          refetch={refetch}
+          filters={FILTERS}
+          filterIndex={filterIndex}
+          onFilter={setFilterIndex}
+          onNew={openNewHabit}
+        />
+        <Rail>
+          <HabitsRail habits={habits} />
+        </Rail>
+      </>
+    )
+  }
 
   return (
     <section className="flex flex-col gap-4">

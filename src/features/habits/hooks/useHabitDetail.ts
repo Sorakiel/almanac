@@ -12,6 +12,8 @@ export interface HabitDetailStats {
   streak: number
   best: number
   ratePct: number
+  /** Total completed days over the heatmap window. */
+  total: number
   /** One entry per day over the heatmap window, oldest→newest. */
   heatmap: { date: string; done: boolean }[]
   todayDone: boolean
@@ -93,7 +95,7 @@ function computeStats(habit: Habit, completed: Set<string>, windowKeys: string[]
     core = computeDailyStats(completed, windowKeys)
   }
 
-  return { ...core, heatmap, todayDone: completed.has(windowKeys.at(-1)!) }
+  return { ...core, total: completed.size, heatmap, todayDone: completed.has(windowKeys.at(-1)!) }
 }
 
 interface UseHabitDetailResult {

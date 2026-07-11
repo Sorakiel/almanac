@@ -4,10 +4,14 @@ import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/common/Avatar'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
+import { Rail } from '@/components/common/desktop/rail'
 import { NowBlock } from '@/features/dashboard/components/NowBlock'
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
+import { DashboardWorkspace } from '@/features/dashboard/components/desktop/DashboardWorkspace'
+import { DashboardRail } from '@/features/dashboard/components/desktop/DashboardRail'
 import { SortableHabitList } from '@/features/habits/components/SortableHabitList'
 import { useHabits } from '@/features/habits/hooks/useHabits'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
@@ -23,12 +27,51 @@ function DashboardPage() {
   const { longDate } = useToday()
   const { habits, isLoading, isError, refetch } = useHabits()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   const name = (user?.user_metadata.display_name as string | undefined) ?? 'there'
-  const firstName = name.split(' ')[0]
+  const firstName = name.split(' ')[0] ?? 'there'
   const dueHabits = habits.filter((h) => h.dueToday || h.isComplete)
   const completed = dueHabits.filter((h) => h.isComplete).length
   const dateLabel = longDate.replace(/,/, ' ·').toUpperCase()
+
+  if (isError) {
+    return (
+      <EmptyState
+        title="Couldn't load your day"
+        description="Something went wrong reaching the server."
+        action={
+          <Button size="sm" variant="surface" onClick={refetch}>
+            Try again
+          </Button>
+        }
+      />
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-16" role="status" aria-live="polite">
+        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
+        <span className="sr-only">Loading…</span>
+      </div>
+    )
+  }
+
+  if (isDesktop) {
+    return (
+      <>
+        <DashboardWorkspace
+          habits={habits}
+          greeting={greeting(new Date().getHours())}
+          firstName={firstName}
+        />
+        <Rail>
+          <DashboardRail habits={habits} />
+        </Rail>
+      </>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-5 pt-1">
@@ -44,49 +87,30 @@ function DashboardPage() {
         </Link>
       </header>
 
-      {isError ? (
-        <EmptyState
-          title="Couldn't load your day"
-          description="Something went wrong reaching the server."
-          action={
-            <Button size="sm" variant="surface" onClick={refetch}>
-              Try again
-            </Button>
-          }
-        />
-      ) : isLoading ? (
-        <div className="flex justify-center py-16" role="status" aria-live="polite">
-          <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-          <span className="sr-only">Loading…</span>
-        </div>
-      ) : (
-        <>
-          <QuoteCard />
+      <QuoteCard />
 
-          <NowBlock habits={habits} />
+      <NowBlock habits={habits} />
 
-          <section className="flex flex-col gap-2">
-            <SectionLabel accessory={habits.length > 0 ? `${completed} / ${dueHabits.length} done` : undefined}>
-              TODAY · HABITS
-            </SectionLabel>
+      <section className="flex flex-col gap-2">
+        <SectionLabel accessory={habits.length > 0 ? `${completed} / ${dueHabits.length} done` : undefined}>
+          TODAY · HABITS
+        </SectionLabel>
 
-            {habits.length === 0 ? (
-              <EmptyState
-                title="Start your first habit"
-                description="One small daily action, tracked."
-                action={
-                  <Button size="sm" onClick={openNewHabit}>
-                    <Plus className="h-4 w-4" />
-                    Add habit
-                  </Button>
-                }
-              />
-            ) : (
-              <SortableHabitList habits={habits} />
-            )}
-          </section>
-        </>
-      )}
+        {habits.length === 0 ? (
+          <EmptyState
+            title="Start your first habit"
+            description="One small daily action, tracked."
+            action={
+              <Button size="sm" onClick={openNewHabit}>
+                <Plus className="h-4 w-4" />
+                Add habit
+              </Button>
+            }
+          />
+        ) : (
+          <SortableHabitList habits={habits} />
+        )}
+      </section>
     </div>
   )
 }

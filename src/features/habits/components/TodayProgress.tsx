@@ -27,10 +27,12 @@ export function TodayProgress({ habits }: TodayProgressProps) {
         <ProgressBlocks
           value={done}
           total={total}
-          blocks={22}
+          blocks={20}
+          size="lg"
+          animated
           aria-label={`${done} of ${total} habits done today`}
         />
-        <span className="ml-auto font-mono text-sm tabular-nums text-accent">{pct}%</span>
+        <span className="ml-auto font-mono text-lg font-semibold tabular-nums text-accent">{pct}%</span>
       </div>
     </div>
   )

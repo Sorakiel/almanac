@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Segmented } from '@/components/ui/segmented'
+import { AuthBrandPanel } from '@/features/auth/components/AuthBrandPanel'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useSession } from '@/hooks/useSession'
 import { setRememberMe } from '@/lib/supabase'
@@ -72,122 +73,135 @@ function AuthPage() {
   if (status === 'authenticated') return <Navigate to="/" replace />
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 px-6 py-12">
-      <div className="flex flex-col gap-4">
-        <span className="relative flex h-11 w-11 items-center justify-center rounded-[13px] bg-gradient-to-br from-accent to-accent-deep shadow-glow">
-          <span
-            aria-hidden="true"
-            className="h-3.5 w-3.5 rotate-45 border-[1.8px] border-bg"
-          />
-        </span>
-        <div>
-          <h1 className="text-3xl">{mode === 'signin' ? 'Welcome back' : 'Get started'}</h1>
-          <p className="mt-1 text-sm text-muted">
-            {mode === 'signin' ? 'Pick up where you left off.' : 'Build your command center.'}
-          </p>
-        </div>
-      </div>
-
-      <Segmented
-        aria-label="Authentication mode"
-        value={mode}
-        onChange={setMode}
-        options={[
-          { value: 'signin', label: 'Sign in' },
-          { value: 'signup', label: 'Create account' },
-        ]}
-      />
-
-      <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
-        {mode === 'signup' && (
-          <label className="flex flex-col gap-1.5">
-            <span className="label-mono">Name</span>
-            <Input placeholder="Ada Lovelace" autoComplete="name" {...register('displayName')} />
-            {errors.displayName ? (
-              <span className="text-xs text-accent">{errors.displayName.message}</span>
-            ) : null}
-          </label>
-        )}
-
-        <label className="flex flex-col gap-1.5">
-          <span className="label-mono">Email</span>
-          <Input type="email" placeholder="you@almanac.app" autoComplete="email" {...register('email')} />
-          {errors.email ? <span className="text-xs text-accent">{errors.email.message}</span> : null}
-        </label>
-
-        <label className="flex flex-col gap-1.5">
-          <span className="label-mono">Password</span>
-          <div className="relative">
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
-              autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-              className="pr-14"
-              {...register('password')}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute inset-y-0 right-3 my-auto h-fit font-mono text-[10px] uppercase tracking-label text-muted hover:text-foreground"
-            >
-              {showPassword ? 'hide' : 'show'}
-            </button>
+    <div className="flex min-h-dvh">
+      <AuthBrandPanel />
+      <main className="flex flex-1 items-center justify-center px-6 py-12">
+        <div className="flex w-full max-w-sm flex-col gap-6 lg:max-w-[400px]">
+          <div className="flex flex-col gap-4">
+            <span className="relative flex h-11 w-11 items-center justify-center rounded-[13px] bg-gradient-to-br from-accent to-accent-deep shadow-glow lg:hidden">
+              <span aria-hidden="true" className="h-3.5 w-3.5 rotate-45 border-[1.8px] border-bg" />
+            </span>
+            <div>
+              <h1 className="text-3xl">{mode === 'signin' ? 'Welcome back' : 'Get started'}</h1>
+              <p className="mt-1 text-sm text-muted">
+                {mode === 'signin' ? 'Pick up where you left off.' : 'Build your command center.'}
+              </p>
+            </div>
           </div>
-          {errors.password ? (
-            <span className="text-xs text-accent">{errors.password.message}</span>
-          ) : null}
-        </label>
 
-        <div className="flex items-center justify-between">
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-              className="h-4 w-4 rounded accent-accent"
-            />
-            Remember me
-          </label>
-          {mode === 'signin' ? (
-            <button
-              type="button"
-              onClick={onForgot}
-              disabled={resetRequest.isPending}
-              className="font-mono text-[11px] tracking-label text-accent hover:text-accent-deep"
+          <Segmented
+            aria-label="Authentication mode"
+            value={mode}
+            onChange={setMode}
+            options={[
+              { value: 'signin', label: 'Sign in' },
+              { value: 'signup', label: 'Create account' },
+            ]}
+          />
+
+          <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+            {mode === 'signup' && (
+              <label className="flex flex-col gap-1.5">
+                <span className="label-mono">Name</span>
+                <Input
+                  placeholder="Ada Lovelace"
+                  autoComplete="name"
+                  {...register('displayName')}
+                />
+                {errors.displayName ? (
+                  <span className="text-xs text-accent">{errors.displayName.message}</span>
+                ) : null}
+              </label>
+            )}
+
+            <label className="flex flex-col gap-1.5">
+              <span className="label-mono">Email</span>
+              <Input
+                type="email"
+                placeholder="you@almanac.app"
+                autoComplete="email"
+                {...register('email')}
+              />
+              {errors.email ? (
+                <span className="text-xs text-accent">{errors.email.message}</span>
+              ) : null}
+            </label>
+
+            <label className="flex flex-col gap-1.5">
+              <span className="label-mono">Password</span>
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                  className="pr-14"
+                  {...register('password')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute inset-y-0 right-3 my-auto h-fit font-mono text-[10px] uppercase tracking-label text-muted hover:text-foreground"
+                >
+                  {showPassword ? 'hide' : 'show'}
+                </button>
+              </div>
+              {errors.password ? (
+                <span className="text-xs text-accent">{errors.password.message}</span>
+              ) : null}
+            </label>
+
+            <div className="flex items-center justify-between">
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="h-4 w-4 rounded accent-accent"
+                />
+                Remember me
+              </label>
+              {mode === 'signin' ? (
+                <button
+                  type="button"
+                  onClick={onForgot}
+                  disabled={resetRequest.isPending}
+                  className="font-mono text-[11px] tracking-label text-accent hover:text-accent-deep"
+                >
+                  {forgot ? 'Link sent ✓' : 'Forgot?'}
+                </button>
+              ) : null}
+            </div>
+
+            <Button type="submit" size="lg" disabled={pending} className="shadow-glow">
+              {pending ? 'One moment…' : mode === 'signin' ? 'Sign in →' : 'Create account →'}
+            </Button>
+          </form>
+
+          <div className="flex items-center gap-3">
+            <span className="h-px flex-1 bg-border" />
+            <span className="label-mono">or</span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              variant="ghost"
+              className="border bg-transparent font-semibold"
+              onClick={() => toast('Social sign-in is coming soon.')}
             >
-              {forgot ? 'Link sent ✓' : 'Forgot?'}
-            </button>
-          ) : null}
+              Apple
+            </Button>
+            <Button
+              variant="ghost"
+              className="border bg-transparent font-semibold"
+              onClick={() => toast('Social sign-in is coming soon.')}
+            >
+              G · Google
+            </Button>
+          </div>
         </div>
-
-        <Button type="submit" size="lg" disabled={pending} className="shadow-glow">
-          {pending ? 'One moment…' : mode === 'signin' ? 'Sign in →' : 'Create account →'}
-        </Button>
-      </form>
-
-      <div className="flex items-center gap-3">
-        <span className="h-px flex-1 bg-border" />
-        <span className="label-mono">or</span>
-        <span className="h-px flex-1 bg-border" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <Button
-          variant="ghost"
-          className="border bg-transparent font-semibold"
-          onClick={() => toast('Social sign-in is coming soon.')}
-        >
-           Apple
-        </Button>
-        <Button
-          variant="ghost"
-          className="border bg-transparent font-semibold"
-          onClick={() => toast('Social sign-in is coming soon.')}
-        >
-          G · Google
-        </Button>
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }
 

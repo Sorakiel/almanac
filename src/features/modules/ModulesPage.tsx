@@ -59,10 +59,10 @@ function ModulesPage() {
   ]
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 lg:max-w-[760px]">
       <header>
         <p className="label-mono">// your command center</p>
-        <h1 className="mt-1 text-2xl">Modules</h1>
+        <h1 className="mt-1 text-2xl lg:mt-1.5 lg:text-[32px] lg:tracking-title">Modules</h1>
       </header>
 
       <section className="flex flex-col gap-3">

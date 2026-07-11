@@ -86,7 +86,7 @@ function FlowPage() {
     const pct = durationMin ? Math.round((elapsedMin / durationMin) * 100) : 0
 
     return (
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5 lg:mx-auto lg:max-w-xl">
         <header>
           <p className="label-mono text-accent">// in session</p>
           <h1 className="mt-1 text-2xl">Flow</h1>
@@ -131,7 +131,7 @@ function FlowPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 lg:mx-auto lg:max-w-xl">
       <header>
         <p className="label-mono">// deep work, one block at a time</p>
         <h1 className="mt-1 text-2xl">Flow</h1>

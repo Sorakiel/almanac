@@ -10,12 +10,16 @@ import { StatTile } from '@/components/common/StatTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
+import { Rail } from '@/components/common/desktop/rail'
 import { HabitHeatmap } from '@/features/habits/components/HabitHeatmap'
+import { HabitDetailWorkspace } from '@/features/habits/components/desktop/HabitDetailWorkspace'
+import { HabitDetailRail } from '@/features/habits/components/desktop/HabitDetailRail'
 import { useHabitDetail } from '@/features/habits/hooks/useHabitDetail'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
 import { setHabitCount } from '@/features/habits/api/habits.api'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { dailyTarget, frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
@@ -32,6 +36,7 @@ function HabitDetailPage() {
   const { archive } = useHabitMutations()
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   const handleDelete = async () => {
     try {
@@ -85,6 +90,69 @@ function HabitDetailPage() {
   const Icon = resolveHabitIcon(habit.icon)
   const timeLabel = timeOfDayLabel(habit.time_of_day)
   const subtitle = [frequencyLabel(habit), timeLabel].filter(Boolean).join(' · ')
+
+  const overlays = (
+    <>
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen} title={habit.name}>
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setMenuOpen(false)
+              openEditHabit(habit.id)
+            }}
+            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium hover:bg-surface"
+          >
+            <Pencil className="h-4 w-4 text-muted" aria-hidden="true" />
+            Edit habit
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMenuOpen(false)
+              setConfirmDelete(true)
+            }}
+            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-accent hover:bg-surface"
+          >
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+            Delete habit
+          </button>
+        </div>
+      </Sheet>
+
+      <ConfirmSheet
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title="Delete this habit?"
+        description={`"${habit.name}" and its streak will disappear from your lists. Its history is kept.`}
+        confirmLabel="Delete habit"
+        pending={archive.isPending}
+        onConfirm={handleDelete}
+      />
+    </>
+  )
+
+  if (isDesktop) {
+    return (
+      <>
+        <HabitDetailWorkspace
+          habit={habit}
+          stats={stats}
+          onEdit={() => openEditHabit(habit.id)}
+          onMenu={() => setMenuOpen(true)}
+        />
+        <Rail>
+          <HabitDetailRail
+            habit={habit}
+            stats={stats}
+            onMarkDone={(done) => markDone.mutate(done)}
+            markPending={markDone.isPending}
+          />
+        </Rail>
+        {overlays}
+      </>
+    )
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-5">
@@ -143,42 +211,7 @@ function HabitDetailPage() {
         {stats.todayDone ? 'Completed today' : 'Mark done for today'}
       </Button>
 
-      <Sheet open={menuOpen} onOpenChange={setMenuOpen} title={habit.name}>
-        <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setMenuOpen(false)
-              openEditHabit(habit.id)
-            }}
-            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium hover:bg-surface"
-          >
-            <Pencil className="h-4 w-4 text-muted" aria-hidden="true" />
-            Edit habit
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMenuOpen(false)
-              setConfirmDelete(true)
-            }}
-            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-accent hover:bg-surface"
-          >
-            <Trash2 className="h-4 w-4" aria-hidden="true" />
-            Delete habit
-          </button>
-        </div>
-      </Sheet>
-
-      <ConfirmSheet
-        open={confirmDelete}
-        onOpenChange={setConfirmDelete}
-        title="Delete this habit?"
-        description={`"${habit.name}" and its streak will disappear from your lists. Its history is kept.`}
-        confirmLabel="Delete habit"
-        pending={archive.isPending}
-        onConfirm={handleDelete}
-      />
+      {overlays}
     </div>
   )
 }

@@ -18,6 +18,8 @@ export default {
         bg: withOpacity('--color-bg'),
         'bg-deep': withOpacity('--color-bg-deep'),
         surface: withOpacity('--color-surface'),
+        chrome: withOpacity('--color-chrome'),
+        panel: withOpacity('--color-panel'),
         foreground: withOpacity('--color-foreground'),
         muted: withOpacity('--color-muted'),
         'muted-strong': withOpacity('--color-muted-strong'),

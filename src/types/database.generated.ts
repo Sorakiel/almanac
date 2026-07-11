@@ -344,6 +344,14 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: never; Returns: boolean }
+      landing_stats: {
+        Args: never
+        Returns: {
+          members: number
+          longest_streak: number
+          avg_completion: number
+        }[]
+      }
     }
     Enums: {
       feedback_status: "open" | "planned" | "done" | "closed"

@@ -7,6 +7,7 @@ import DashboardPage from '@/features/dashboard/DashboardPage'
 import HabitsPage from '@/features/habits/HabitsPage'
 import HabitDetailPage from '@/features/habits/HabitDetailPage'
 import FlowPage from '@/features/flow/FlowPage'
+import InsightsPage from '@/features/insights/InsightsPage'
 import AdminPage from '@/features/admin/AdminPage'
 import ModulesPage from '@/features/modules/ModulesPage'
 import SettingsPage from '@/features/settings/SettingsPage'
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
           { path: '/habits/:id', element: <HabitDetailPage /> },
           { path: '/flow', element: <FlowPage /> },
           { path: '/train', element: <WorkoutsPage /> },
+          { path: '/insights', element: <InsightsPage /> },
           { path: '/more', element: <ModulesPage /> },
           { path: '/admin', element: <AdminPage /> },
           { path: '/reflect', element: <ReflectPage /> },

@@ -27,7 +27,7 @@ function AdminPage() {
   if (profile?.role !== 'admin') return <Navigate to="/" replace />
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 lg:max-w-[760px]">
       <header className="flex items-center gap-3">
         <button
           type="button"

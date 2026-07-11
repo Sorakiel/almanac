@@ -22,6 +22,12 @@
   --color-teal: 42 157 143; /* #2A9D8F */
   --color-amber: 199 154 58; /* #C79A3A */
 
+  /* Desktop shell surfaces (spec board "Almanac — Desktop"). Chrome is the
+     nav rail / top bar / context rail; panel is a workspace card sitting on
+     the main canvas. Deeper than surface on dark, lighter on coffee. */
+  --color-chrome: 21 21 23; /* #151517 */
+  --color-panel: 36 36 39; /* #242427 */
+
   --border-opacity: 0.08;
   color-scheme: dark;
 }
@@ -39,6 +45,11 @@
   --color-border: 42 32 24; /* espresso hairline on light */
   --color-teal: 42 157 143;
   --color-amber: 199 154 58;
+
+  /* Coffee shell surfaces: chrome is a touch deeper than the canvas, panel is
+     the warm card that sits on the #F4ECDD workspace. */
+  --color-chrome: 239 230 212; /* #EFE6D4 */
+  --color-panel: 236 227 210; /* #ECE3D2 */
 
   --border-opacity: 0.12;
   color-scheme: light;
