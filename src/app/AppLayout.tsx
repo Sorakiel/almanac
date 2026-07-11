@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { BottomNav } from '@/components/common/BottomNav'
 import { Sidebar } from '@/components/common/desktop/Sidebar'
 import { TopBar } from '@/components/common/desktop/TopBar'
 import { RailActive } from '@/components/common/desktop/RailActive'
 import { RailTargetProvider } from '@/components/common/desktop/rail'
 import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
+import { useOnboardingStore } from '@/stores/onboarding'
 import { cn } from '@/lib/utils'
 
 /**
@@ -19,6 +20,10 @@ import { cn } from '@/lib/utils'
 export function AppLayout() {
   const { pathname } = useLocation()
   const [railEl, setRailEl] = useState<HTMLDivElement | null>(null)
+  const onboarded = useOnboardingStore((s) => s.dismissed)
+
+  // First run: send new users to the welcome splash before the app shell.
+  if (!onboarded) return <Navigate to="/welcome" replace />
 
   // Habit detail is a focused mobile sub-page: no bottom nav, CTA pins bottom.
   // On desktop the persistent nav rail always stays.

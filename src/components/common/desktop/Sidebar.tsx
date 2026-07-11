@@ -78,8 +78,8 @@ export function Sidebar() {
   const name = (user?.user_metadata.display_name as string | undefined) ?? 'You'
   const roleLabel = profile?.role === 'admin' ? 'Admin' : 'Member'
 
-  // Today always leads; the toggleable modules follow (mirroring the bottom
-  // nav so the "More" switches add/remove them here); Insights closes the set.
+  // Today always leads; the enabled modules follow (mirroring the bottom nav,
+  // so the "More" switches add/remove them here).
   const primary: NavEntry[] = [
     { to: '/', label: 'Today', glyph: '◆', end: true, count: dueCount },
     ...NAV_MODULES.filter((m) => enabled[m.key]).map((m) => ({
@@ -88,7 +88,6 @@ export function Sidebar() {
       glyph: m.glyph,
       count: m.key === 'habits' ? habits.length : undefined,
     })),
-    { to: '/insights', label: 'Insights', glyph: '▧' },
   ]
 
   return (

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
+  BarChart3,
   BookOpen,
   CircleDollarSign,
   Dumbbell,
@@ -8,7 +9,6 @@ import {
   Moon,
   NotebookPen,
   Plus,
-  Settings,
   Target,
   Timer,
   type LucideIcon,
@@ -22,22 +22,59 @@ import { ModulesRail } from '@/features/modules/components/ModulesRail'
 import { SuggestModuleSheet } from '@/features/modules/components/SuggestModuleSheet'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useModulesStore, type ModuleKey } from '@/stores/modules'
+import { cn } from '@/lib/utils'
 
-interface ToggleModule {
+interface ModuleMeta {
   key: ModuleKey
   title: string
-  sub: string
   icon: LucideIcon
   tone: string
   to: string
 }
 
 interface SoonModule {
-  key: string
   title: string
   icon: LucideIcon
-  tone: string
 }
+
+const MODULES: ModuleMeta[] = [
+  {
+    key: 'habits',
+    title: 'Habits',
+    icon: ListChecks,
+    tone: 'bg-accent/15 text-accent',
+    to: '/habits',
+  },
+  {
+    key: 'workouts',
+    title: 'Workouts',
+    icon: Dumbbell,
+    tone: 'bg-teal/15 text-teal',
+    to: '/train',
+  },
+  {
+    key: 'insights',
+    title: 'Insights',
+    icon: BarChart3,
+    tone: 'bg-amber/15 text-amber',
+    to: '/insights',
+  },
+  { key: 'flow', title: 'Flow', icon: Timer, tone: 'bg-accent/15 text-accent', to: '/flow' },
+  {
+    key: 'reflect',
+    title: 'Reflect',
+    icon: NotebookPen,
+    tone: 'bg-teal/15 text-teal',
+    to: '/reflect',
+  },
+]
+
+const SOON: SoonModule[] = [
+  { title: 'Finances', icon: CircleDollarSign },
+  { title: 'Reading', icon: BookOpen },
+  { title: 'Goals', icon: Target },
+  { title: 'Sleep', icon: Moon },
+]
 
 function ModulesPage() {
   const navigate = useNavigate()
@@ -46,47 +83,13 @@ function ModulesPage() {
   const toggle = useModulesStore((s) => s.toggle)
   const [suggestOpen, setSuggestOpen] = useState(false)
 
-  const modules: ToggleModule[] = [
-    {
-      key: 'habits',
-      title: 'Habits',
-      sub: `${habits.length} active`,
-      icon: ListChecks,
-      tone: 'bg-accent/15 text-accent',
-      to: '/habits',
-    },
-    {
-      key: 'flow',
-      title: 'Flow',
-      sub: 'Deep work',
-      icon: Timer,
-      tone: 'bg-amber/15 text-amber',
-      to: '/flow',
-    },
-    {
-      key: 'workouts',
-      title: 'Workouts',
-      sub: 'Train',
-      icon: Dumbbell,
-      tone: 'bg-teal/15 text-teal',
-      to: '/train',
-    },
-    {
-      key: 'reflect',
-      title: 'Reflect',
-      sub: 'Journal',
-      icon: NotebookPen,
-      tone: 'bg-accent/15 text-accent',
-      to: '/reflect',
-    },
-  ]
-
-  const soon: SoonModule[] = [
-    { key: 'finances', title: 'Finances', icon: CircleDollarSign, tone: 'bg-border/10 text-muted' },
-    { key: 'reading', title: 'Reading', icon: BookOpen, tone: 'bg-border/10 text-muted' },
-    { key: 'goals', title: 'Goals', icon: Target, tone: 'bg-border/10 text-muted' },
-    { key: 'sleep', title: 'Sleep', icon: Moon, tone: 'bg-border/10 text-muted' },
-  ]
+  const stats: Record<ModuleKey, string> = {
+    habits: `${habits.length} active`,
+    workouts: 'Train',
+    insights: 'Progress',
+    flow: 'Deep work',
+    reflect: 'Journal',
+  }
 
   return (
     <>
@@ -97,61 +100,53 @@ function ModulesPage() {
         </header>
 
         <section className="flex flex-col gap-3">
-          <SectionLabel accessory="tap to open">ACTIVE</SectionLabel>
-          <p className="label-mono normal-case tracking-normal text-muted">
-            Toggle a module to show it in the bottom bar.
-          </p>
-          <div className="flex flex-col gap-2">
-            {modules.map((m) => (
-              <div
-                key={m.key}
-                className="flex items-center gap-3 rounded-card border bg-surface p-3"
-              >
-                <button
-                  type="button"
-                  onClick={() => navigate(m.to)}
-                  className="flex flex-1 items-center gap-3 rounded-tile text-left"
+          <SectionLabel accessory="switch = show in nav">ACTIVE</SectionLabel>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+            {MODULES.map((m) => {
+              const on = enabled[m.key]
+              return (
+                <div
+                  key={m.key}
+                  className={cn(
+                    'flex flex-col rounded-[20px] border p-4 transition-colors',
+                    on
+                      ? 'border-accent/25 bg-gradient-to-br from-accent/[0.07] to-transparent'
+                      : 'bg-surface',
+                  )}
                 >
-                  <IconTile icon={m.icon} tone={m.tone} size="sm" />
-                  <div>
-                    <p className="font-semibold">{m.title}</p>
-                    <p className="text-sm text-muted">{m.sub}</p>
+                  <div className="flex items-start justify-between">
+                    <IconTile icon={m.icon} tone={m.tone} size="sm" />
+                    <Switch
+                      checked={on}
+                      onCheckedChange={() => toggle(m.key)}
+                      aria-label={`Show ${m.title} in navigation`}
+                    />
                   </div>
-                </button>
-                <Switch
-                  checked={enabled[m.key]}
-                  onCheckedChange={() => toggle(m.key)}
-                  aria-label={`Show ${m.title} in navigation`}
-                />
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => navigate('/settings')}
-              className="flex items-center gap-3 rounded-card border bg-surface p-3 text-left transition-colors hover:border-accent/40"
-            >
-              <IconTile icon={Settings} tone="bg-border/10 text-muted" size="sm" />
-              <div>
-                <p className="font-semibold">Settings</p>
-                <p className="text-sm text-muted">Profile &amp; appearance</p>
-              </div>
-            </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate(m.to)}
+                    className="mt-3 block w-full rounded text-left"
+                  >
+                    <p className="font-semibold">{m.title}</p>
+                    <p className="mt-0.5 font-mono text-[10px] text-muted-strong">{stats[m.key]}</p>
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </section>
 
         <section className="flex flex-col gap-3">
           <SectionLabel>COMING SOON</SectionLabel>
-          <div className="grid grid-cols-2 gap-3">
-            {soon.map((m) => (
+          <div className="grid grid-cols-3 gap-3">
+            {SOON.map((m) => (
               <div
-                key={m.key}
-                className="flex items-center gap-3 rounded-card border bg-surface/50 p-4"
+                key={m.title}
+                className="flex flex-col items-center gap-2 rounded-[18px] border border-dashed px-3 py-4 text-center opacity-80"
               >
-                <IconTile icon={m.icon} tone={m.tone} size="sm" />
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium text-muted">{m.title}</p>
-                  <Tag tone="muted">Soon</Tag>
-                </div>
+                <IconTile icon={m.icon} tone="bg-border/10 text-muted" size="sm" />
+                <p className="text-[13px] font-medium text-muted">{m.title}</p>
+                <Tag tone="muted">Soon</Tag>
               </div>
             ))}
           </div>
@@ -160,7 +155,7 @@ function ModulesPage() {
         <button
           type="button"
           onClick={() => setSuggestOpen(true)}
-          className="flex items-center gap-3 rounded-card border border-dashed px-4 py-4 text-left text-sm text-muted hover:text-foreground"
+          className="flex items-center gap-3 rounded-card border border-accent/25 bg-gradient-to-br from-accent/[0.06] to-transparent px-4 py-4 text-left text-sm text-muted transition-colors hover:text-foreground"
         >
           <Plus className="h-4 w-4 text-accent" aria-hidden="true" />
           Suggest a module — Almanac grows with you.

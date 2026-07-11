@@ -3,6 +3,7 @@ import { AppLayout } from '@/app/AppLayout'
 import { ProtectedRoute } from '@/app/ProtectedRoute'
 import AuthPage from '@/features/auth/AuthPage'
 import ResetPasswordPage from '@/features/auth/ResetPasswordPage'
+import OnboardingPage from '@/features/onboarding/OnboardingPage'
 import DashboardPage from '@/features/dashboard/DashboardPage'
 import HabitsPage from '@/features/habits/HabitsPage'
 import HabitDetailPage from '@/features/habits/HabitDetailPage'
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
+      { path: '/welcome', element: <OnboardingPage /> },
       {
         element: <AppLayout />,
         children: [
