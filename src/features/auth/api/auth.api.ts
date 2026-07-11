@@ -30,7 +30,11 @@ export async function signUpWithPassword({
 }
 
 export async function signOut(): Promise<void> {
-  const { error } = await supabase.auth.signOut()
+  // Local scope: drop the stored session without a server round-trip. A global
+  // sign-out tries to revoke the token server-side, which hangs or 400s when
+  // the refresh token is already expired/invalid — the "logout takes forever
+  // and errors" case. Locally clearing the session always works and is instant.
+  const { error } = await supabase.auth.signOut({ scope: 'local' })
   if (error) throw error
 }
 

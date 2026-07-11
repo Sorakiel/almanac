@@ -58,7 +58,7 @@ export function ProgressBlocks({
       aria-valuemax={total}
       aria-valuenow={value}
       aria-label={ariaLabel ?? `${value} of ${total} complete`}
-      className={cn('relative inline-block leading-none', className)}
+      className={cn('relative inline-block max-w-full overflow-hidden leading-none', className)}
     >
       <span
         aria-hidden="true"

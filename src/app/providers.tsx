@@ -17,11 +17,27 @@ export function Providers({ children }: ProvidersProps) {
   // Bootstrap the current session, then keep the store in sync. This is an auth
   // listener (not data fetching), so useEffect is the right tool here.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => setSession(session))
-    return () => subscription.unsubscribe()
+
+    // Resolve the initial session. If it rejects (e.g. an invalid/expired
+    // refresh token 400s, or the network is unreachable), fall back to
+    // anonymous so the app shows the auth screen instead of spinning forever.
+    supabase.auth
+      .getSession()
+      .then(({ data }) => setSession(data.session))
+      .catch(() => setSession(null))
+
+    // Safety net: never stay on the loading spinner indefinitely.
+    const timeout = setTimeout(() => {
+      if (useSessionStore.getState().status === 'loading') setSession(null)
+    }, 8000)
+
+    return () => {
+      clearTimeout(timeout)
+      subscription.unsubscribe()
+    }
   }, [setSession])
 
   return (

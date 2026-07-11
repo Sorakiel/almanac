@@ -15,6 +15,8 @@ import { Segmented } from '@/components/ui/segmented'
 import { Avatar } from '@/components/common/Avatar'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { Tag } from '@/components/common/Tag'
+import { Rail } from '@/components/common/desktop/rail'
+import { SettingsRail } from '@/features/settings/components/SettingsRail'
 import { useSession } from '@/hooks/useSession'
 import { useTheme } from '@/hooks/useTheme'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
@@ -43,51 +45,61 @@ function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 lg:max-w-[760px]">
-      <header className="flex items-center gap-4">
-        <Avatar name={name} size="lg" />
-        <div className="min-w-0">
-          <h1 className="truncate text-xl">{name}</h1>
-          <p className="truncate text-sm text-muted">{email}</p>
-          <Tag tone="accent" className="mt-1.5">
-            ◇ {profile?.role === 'admin' ? 'Admin' : 'Member'}
-          </Tag>
-        </div>
-      </header>
+    <>
+      <div className="flex flex-col gap-6 lg:max-w-[760px]">
+        <header className="flex items-center gap-4">
+          <Avatar name={name} size="lg" />
+          <div className="min-w-0">
+            <h1 className="truncate text-xl">{name}</h1>
+            <p className="truncate text-sm text-muted">{email}</p>
+            <Tag tone="accent" className="mt-1.5">
+              ◇ {profile?.role === 'admin' ? 'Admin' : 'Member'}
+            </Tag>
+          </div>
+        </header>
 
-      <section className="flex flex-col gap-3">
-        <SectionLabel>APPEARANCE</SectionLabel>
-        <Segmented
-          aria-label="Theme"
-          value={theme}
-          onChange={setTheme}
-          options={[
-            { value: 'dark', label: 'Dark', icon: Moon },
-            { value: 'coffee', label: 'Coffee', icon: Coffee },
-          ]}
-        />
-      </section>
-
-      <section className="flex flex-col gap-1">
-        <SectionLabel className="mb-2">ACCOUNT</SectionLabel>
-        <Row icon={Clock} label="Timezone" value={browserTimezone()} onClick={soon} />
-        <Row icon={Bell} label="Notifications" value="Off" onClick={soon} />
-        <Row icon={Download} label="Export data" onClick={soon} />
-      </section>
-
-      {profile?.role === 'admin' ? (
-        <section className="flex flex-col gap-1">
-          <SectionLabel className="mb-2">ADMIN</SectionLabel>
-          <Row icon={ShieldCheck} label="Admin console" onClick={() => navigate('/admin')} />
+        <section className="flex flex-col gap-3">
+          <SectionLabel>APPEARANCE</SectionLabel>
+          <Segmented
+            aria-label="Theme"
+            value={theme}
+            onChange={setTheme}
+            options={[
+              { value: 'dark', label: 'Dark', icon: Moon },
+              { value: 'coffee', label: 'Coffee', icon: Coffee },
+            ]}
+          />
         </section>
-      ) : null}
 
-      <Button variant="surface" className="w-full text-accent" onClick={handleSignOut} disabled={logOut.isPending}>
-        Sign out
-      </Button>
+        <section className="flex flex-col gap-1">
+          <SectionLabel className="mb-2">ACCOUNT</SectionLabel>
+          <Row icon={Clock} label="Timezone" value={browserTimezone()} onClick={soon} />
+          <Row icon={Bell} label="Notifications" value="Off" onClick={soon} />
+          <Row icon={Download} label="Export data" onClick={soon} />
+        </section>
 
-      <p className="text-center label-mono">ALMANAC v0.1 · ◇</p>
-    </div>
+        {profile?.role === 'admin' ? (
+          <section className="flex flex-col gap-1">
+            <SectionLabel className="mb-2">ADMIN</SectionLabel>
+            <Row icon={ShieldCheck} label="Admin console" onClick={() => navigate('/admin')} />
+          </section>
+        ) : null}
+
+        <Button
+          variant="surface"
+          className="w-full text-accent"
+          onClick={handleSignOut}
+          disabled={logOut.isPending}
+        >
+          Sign out
+        </Button>
+
+        <p className="label-mono text-center">ALMANAC v0.1 · ◇</p>
+      </div>
+      <Rail>
+        <SettingsRail />
+      </Rail>
+    </>
   )
 }
 
