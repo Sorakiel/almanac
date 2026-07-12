@@ -1,6 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+interface FocusTarget {
+  habitId?: string | null
+  workoutId?: string | null
+}
+
 interface FocusState {
   /** Epoch ms when the running session ends; null when idle. */
   endsAt: number | null
@@ -10,7 +15,9 @@ interface FocusState {
   label: string | null
   /** The habit this session targets, if any — lets "Complete" mark it done. */
   habitId: string | null
-  start: (durationMin: number, label?: string, habitId?: string | null) => void
+  /** The workout this session runs, if any — shows the session runner. */
+  workoutId: string | null
+  start: (durationMin: number, label?: string, target?: FocusTarget) => void
   stop: () => void
 }
 
@@ -25,14 +32,17 @@ export const useFocusStore = create<FocusState>()(
       durationMin: null,
       label: null,
       habitId: null,
-      start: (durationMin, label, habitId) =>
+      workoutId: null,
+      start: (durationMin, label, target) =>
         set({
           endsAt: Date.now() + durationMin * 60_000,
           durationMin,
           label: label ?? null,
-          habitId: habitId ?? null,
+          habitId: target?.habitId ?? null,
+          workoutId: target?.workoutId ?? null,
         }),
-      stop: () => set({ endsAt: null, durationMin: null, label: null, habitId: null }),
+      stop: () =>
+        set({ endsAt: null, durationMin: null, label: null, habitId: null, workoutId: null }),
     }),
     { name: 'almanac.focus' },
   ),

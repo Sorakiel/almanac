@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { updateWorkout } from '@/features/workouts/api/workouts.api'
@@ -9,7 +10,7 @@ import {
   removeWorkoutExercise,
   updateSet,
 } from '@/features/workouts/api/session.api'
-import type { SessionExercise, SetLog } from '@/features/workouts/types'
+import type { SessionExercise, SetLog, Workout } from '@/features/workouts/types'
 
 interface AddExerciseArgs {
   exerciseId: string
@@ -19,11 +20,18 @@ interface AddExerciseArgs {
   targetWeight: number | null
 }
 
+/** Every logged set is done and there's at least one — the session is finished. */
+function allSetsDone(exercises: SessionExercise[]): boolean {
+  const sets = exercises.flatMap((e) => e.sets)
+  return sets.length > 0 && sets.every((s) => s.done)
+}
+
 /** Mutations for a workout's session — exercises, sets, and completion. */
 export function useSessionMutations(workoutId: string) {
   const queryClient = useQueryClient()
   const { user } = useSession()
   const userId = user?.id ?? ''
+  const [celebrate, setCelebrate] = useState(false)
 
   const sessionKey = ['workoutSession', workoutId]
   const invalidateSession = () => void queryClient.invalidateQueries({ queryKey: sessionKey })
@@ -39,6 +47,15 @@ export function useSessionMutations(workoutId: string) {
     queryClient.setQueryData(sessionKey, next)
     return prev
   }
+
+  const setCompleted = useMutation({
+    mutationFn: (done: boolean) =>
+      updateWorkout(workoutId, { completed_at: done ? new Date().toISOString() : null }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['workout', workoutId] })
+      void queryClient.invalidateQueries({ queryKey: ['workouts', userId] })
+    },
+  })
 
   const createLibraryExercise = useMutation({
     mutationFn: ({ name, muscleGroup }: { name: string; muscleGroup: string | null }) =>
@@ -79,6 +96,15 @@ export function useSessionMutations(workoutId: string) {
     onMutate: async ({ id, patch }) => {
       await queryClient.cancelQueries({ queryKey: sessionKey })
       const previous = patchSet(id, patch)
+      // Ticking the last remaining set auto-completes the workout + celebrates.
+      if (patch.done === true) {
+        const session = queryClient.getQueryData<SessionExercise[]>(sessionKey)
+        const workout = queryClient.getQueryData<Workout>(['workout', workoutId])
+        if (session && allSetsDone(session) && workout && !workout.completed_at) {
+          setCompleted.mutate(true)
+          setCelebrate(true)
+        }
+      }
       return { previous }
     },
     onError: (_e, _v, ctx) => {
@@ -92,15 +118,6 @@ export function useSessionMutations(workoutId: string) {
     onSuccess: invalidateSession,
   })
 
-  const setCompleted = useMutation({
-    mutationFn: (done: boolean) =>
-      updateWorkout(workoutId, { completed_at: done ? new Date().toISOString() : null }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['workout', workoutId] })
-      void queryClient.invalidateQueries({ queryKey: ['workouts', userId] })
-    },
-  })
-
   return {
     createLibraryExercise,
     addExercise,
@@ -109,5 +126,8 @@ export function useSessionMutations(workoutId: string) {
     editSet,
     deleteSet,
     setCompleted,
+    /** True right after the final set is ticked — drives the congrats modal. */
+    celebrate,
+    dismissCelebrate: () => setCelebrate(false),
   }
 }

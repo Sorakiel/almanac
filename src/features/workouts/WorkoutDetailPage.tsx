@@ -7,6 +7,7 @@ import { IconTile } from '@/components/common/IconTile'
 import { Tag } from '@/components/common/Tag'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { EmptyState } from '@/components/common/EmptyState'
+import { CelebrationModal } from '@/components/common/CelebrationModal'
 import { Rail } from '@/components/common/desktop/rail'
 import { ExerciseBlock } from '@/features/workouts/components/ExerciseBlock'
 import { AddExerciseSheet } from '@/features/workouts/components/AddExerciseSheet'
@@ -150,6 +151,13 @@ function WorkoutDetailPage() {
           mutations={mutations}
         />
       ) : null}
+
+      <CelebrationModal
+        open={mutations.celebrate}
+        onOpenChange={(o) => !o && mutations.dismissCelebrate()}
+        title="Workout complete!"
+        message={`Every set of ${workout.name} is done. Strong session — well earned.`}
+      />
     </>
   )
 }

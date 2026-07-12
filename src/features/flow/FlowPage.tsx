@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Check, Timer, X } from 'lucide-react'
+import { Check, Dumbbell, Timer, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Segmented } from '@/components/ui/segmented'
@@ -12,13 +12,15 @@ import { useHabits } from '@/features/habits/hooks/useHabits'
 import { setHabitCount } from '@/features/habits/api/habits.api'
 import { dailyTarget } from '@/features/habits/lib/frequency'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
+import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
+import { FlowWorkoutRunner } from '@/features/flow/components/FlowWorkoutRunner'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useFocusStore } from '@/stores/focus'
 import { cn } from '@/lib/utils'
 
 const DURATIONS_MIN = [15, 25, 45]
-type Mode = 'habit' | 'custom'
+type Mode = 'habit' | 'workout' | 'custom'
 
 /**
  * Flow — a standalone deep-work module. Pick a habit to focus on or describe a
@@ -27,20 +29,29 @@ type Mode = 'habit' | 'custom'
  */
 function FlowPage() {
   const { habits } = useHabits()
+  const { workouts } = useWorkouts()
   const { user } = useSession()
   const { dateKey } = useToday()
   const queryClient = useQueryClient()
-  const { endsAt, durationMin, label, habitId, start, stop } = useFocusStore()
+  const { endsAt, durationMin, label, habitId, workoutId, start, stop } = useFocusStore()
   const [mode, setMode] = useState<Mode>('habit')
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null)
   const [customLabel, setCustomLabel] = useState('')
   const [duration, setDuration] = useState(25)
   const [now, setNow] = useState(() => Date.now())
 
   const running = endsAt !== null && durationMin !== null
   const dueHabits = habits.filter((h) => h.dueToday && !h.isComplete)
+  const openWorkouts = workouts.filter((w) => w.status !== 'completed')
   const selectedHabit = habits.find((h) => h.id === selectedId) ?? null
-  const targetLabel = mode === 'habit' ? (selectedHabit?.name ?? null) : customLabel.trim() || null
+  const selectedWorkout = workouts.find((w) => w.id === selectedWorkoutId) ?? null
+  const targetLabel =
+    mode === 'habit'
+      ? (selectedHabit?.name ?? null)
+      : mode === 'workout'
+        ? (selectedWorkout?.name ?? null)
+        : customLabel.trim() || null
 
   // Mark the session's habit done (if any), then end. "End" just stops.
   const completeSession = async () => {
@@ -100,7 +111,9 @@ function FlowPage() {
           <div className="relative flex flex-col gap-5">
             <div>
               <p className="label-mono text-accent">FOCUSING ON</p>
-              <p className="mt-2 text-xl font-semibold tracking-title">{label ?? 'Focus session'}</p>
+              <p className="mt-2 text-xl font-semibold tracking-title">
+                {label ?? 'Focus session'}
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <ProgressBlocks
@@ -118,14 +131,18 @@ function FlowPage() {
                   <X className="h-4 w-4" />
                   End
                 </Button>
-                <Button size="sm" onClick={completeSession}>
-                  <Check className="h-4 w-4" />
-                  {habitId ? 'Complete' : 'Done'}
-                </Button>
+                {workoutId ? null : (
+                  <Button size="sm" onClick={completeSession}>
+                    <Check className="h-4 w-4" />
+                    {habitId ? 'Complete' : 'Done'}
+                  </Button>
+                )}
               </div>
             </div>
           </div>
         </div>
+
+        {workoutId ? <FlowWorkoutRunner workoutId={workoutId} onFinish={stop} /> : null}
       </div>
     )
   }
@@ -142,12 +159,44 @@ function FlowPage() {
         value={mode}
         onChange={setMode}
         options={[
-          { value: 'habit', label: 'Pick a habit' },
+          { value: 'habit', label: 'Habit' },
+          { value: 'workout', label: 'Workout' },
           { value: 'custom', label: 'Describe' },
         ]}
       />
 
-      {mode === 'habit' ? (
+      {mode === 'workout' ? (
+        <div className="flex flex-col gap-3">
+          <SectionLabel>PICK A WORKOUT</SectionLabel>
+          {openWorkouts.length === 0 ? (
+            <p className="rounded-card border border-dashed p-4 text-sm text-muted">
+              No open workouts — create one under Train first.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {openWorkouts.map((workout) => {
+                const active = selectedWorkoutId === workout.id
+                return (
+                  <li key={workout.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedWorkoutId(workout.id)}
+                      aria-pressed={active}
+                      className={cn(
+                        'flex w-full items-center gap-3 rounded-card border p-3 text-left transition-colors',
+                        active ? 'border-accent bg-accent/10' : 'hover:border-accent/40',
+                      )}
+                    >
+                      <IconTile icon={Dumbbell} tone="bg-teal/15 text-teal" size="sm" />
+                      <span className="font-medium">{workout.name}</span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+      ) : mode === 'habit' ? (
         <div className="flex flex-col gap-3">
           <SectionLabel>DUE TODAY</SectionLabel>
           {dueHabits.length === 0 ? (
@@ -221,7 +270,10 @@ function FlowPage() {
         disabled={!targetLabel}
         onClick={() =>
           targetLabel &&
-          start(duration, targetLabel, mode === 'habit' ? (selectedHabit?.id ?? null) : null)
+          start(duration, targetLabel, {
+            habitId: mode === 'habit' ? (selectedHabit?.id ?? null) : null,
+            workoutId: mode === 'workout' ? (selectedWorkout?.id ?? null) : null,
+          })
         }
       >
         <Timer className="h-4 w-4" />
