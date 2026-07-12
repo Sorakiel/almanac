@@ -32,6 +32,24 @@ export function browserTimezone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
 }
 
+/** All IANA timezone names the runtime knows, with a small guaranteed fallback. */
+export function listTimezones(): string[] {
+  const supported = (Intl as { supportedValuesOf?: (key: string) => string[] }).supportedValuesOf
+  if (supported) return supported('timeZone')
+  return ['UTC', 'Europe/London', 'Europe/Moscow', 'America/New_York', 'America/Los_Angeles', 'Asia/Tokyo']
+}
+
+/** Current UTC offset for a timezone as a short label, e.g. "UTC+03:00". */
+export function timezoneOffsetLabel(timezone: string, instant: Date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    timeZoneName: 'longOffset',
+  }).formatToParts(instant)
+  const name = parts.find((p) => p.type === 'timeZoneName')?.value ?? 'UTC'
+  // longOffset yields "GMT+03:00" (or "GMT"); normalise to a UTC label.
+  return name.replace('GMT', 'UTC').replace(/^UTC$/, 'UTC+00:00')
+}
+
 /** Human-friendly long date, e.g. "Monday, 8 July". */
 export function formatLongDate(timezone: string, instant: Date = new Date()): string {
   return new Intl.DateTimeFormat('en-GB', {

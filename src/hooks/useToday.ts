@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { browserTimezone, formatLongDate, localDateKey } from '@/lib/date'
+import { useProfile } from '@/features/settings/hooks/useProfile'
 
 interface Today {
   /** IANA timezone used to derive the local day. */
@@ -11,16 +12,20 @@ interface Today {
 }
 
 /**
- * The user's "today". Uses the browser timezone in Phase 1; swap to
- * profiles.timezone once the settings module lands (CLAUDE.md §5).
+ * The user's "today". Derives from the saved `profiles.timezone` when it's
+ * loaded, falling back to the detected device zone — getting this wrong shifts
+ * the streak boundary, so the explicit saved zone always wins.
  */
 export function useToday(): Today {
-  return useMemo(() => {
-    const timezone = browserTimezone()
-    return {
+  const { profile } = useProfile()
+  const timezone = profile?.timezone ?? browserTimezone()
+
+  return useMemo(
+    () => ({
       timezone,
       dateKey: localDateKey(timezone),
       longDate: formatLongDate(timezone),
-    }
-  }, [])
+    }),
+    [timezone],
+  )
 }

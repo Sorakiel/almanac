@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
@@ -18,6 +19,7 @@ import { SectionLabel } from '@/components/common/SectionLabel'
 import { Tag } from '@/components/common/Tag'
 import { Rail } from '@/components/common/desktop/rail'
 import { SettingsRail } from '@/features/settings/components/SettingsRail'
+import { TimezoneSheet } from '@/features/settings/components/TimezoneSheet'
 import { useSession } from '@/hooks/useSession'
 import { useTheme } from '@/hooks/useTheme'
 import { useToday } from '@/hooks/useToday'
@@ -32,6 +34,7 @@ function SettingsPage() {
   const { logOut } = useAuthActions()
   const { profile } = useProfile()
   const { dateKey } = useToday()
+  const [timezoneOpen, setTimezoneOpen] = useState(false)
 
   if (status === 'anonymous') return <Navigate to="/auth" replace />
 
@@ -83,7 +86,12 @@ function SettingsPage() {
         <section className="flex flex-col gap-2">
           <SectionLabel>ACCOUNT</SectionLabel>
           <div className="flex flex-col">
-            <Row icon={Clock} label="Timezone" value={browserTimezone()} onClick={soon} />
+            <Row
+              icon={Clock}
+              label="Timezone"
+              value={(profile?.timezone ?? browserTimezone()).replace(/_/g, ' ')}
+              onClick={() => setTimezoneOpen(true)}
+            />
             <Row icon={Bell} label="Notifications" value="Off" onClick={soon} />
             <Row icon={AlarmClock} label="Daily reminder" value="08:00" onClick={soon} />
             <Row icon={Download} label="Export data" onClick={soon} />
@@ -111,6 +119,13 @@ function SettingsPage() {
       <Rail>
         <SettingsRail />
       </Rail>
+      {timezoneOpen ? (
+        <TimezoneSheet
+          open
+          onOpenChange={setTimezoneOpen}
+          current={profile?.timezone ?? browserTimezone()}
+        />
+      ) : null}
     </>
   )
 }
