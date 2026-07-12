@@ -71,11 +71,7 @@ function longestStreak(days: Set<string>, keys: string[]): number {
  * date math is done against `windowKeys` (oldest→newest local date keys).
  * A day counts as "done" for a habit when it has a log with count ≥ 1.
  */
-export function computeInsights(
-  habits: Habit[],
-  logs: HabitLog[],
-  windowKeys: string[],
-): Insights {
+export function computeInsights(habits: Habit[], logs: HabitLog[], windowKeys: string[]): Insights {
   // habit_id → set of date keys the habit was done on.
   const done = new Map<string, Set<string>>()
   for (const log of logs) {
@@ -93,9 +89,7 @@ export function computeInsights(
 
   const completionRate = rateOver(habits, done, current)
   const completionDelta =
-    previous.length > 0
-      ? Math.round((completionRate - rateOver(habits, done, previous)) * 100)
-      : 0
+    previous.length > 0 ? Math.round((completionRate - rateOver(habits, done, previous)) * 100) : 0
 
   const totalDone = current.reduce((sum, key) => {
     for (const days of done.values()) if (days.has(key)) sum += 1
@@ -143,11 +137,11 @@ export function computeInsights(
   const rated = weekdayRates.filter((d): d is { wd: number; rate: number } => d.rate !== null)
   const bestWeekday =
     rated.length > 0
-      ? WEEKDAY_NAMES[rated.reduce((a, b) => (b.rate > a.rate ? b : a)).wd] ?? null
+      ? (WEEKDAY_NAMES[rated.reduce((a, b) => (b.rate > a.rate ? b : a)).wd] ?? null)
       : null
   const worstWeekday =
     rated.length > 1
-      ? WEEKDAY_NAMES[rated.reduce((a, b) => (b.rate < a.rate ? b : a)).wd] ?? null
+      ? (WEEKDAY_NAMES[rated.reduce((a, b) => (b.rate < a.rate ? b : a)).wd] ?? null)
       : null
 
   return {

@@ -1,13 +1,15 @@
 import { CompletionTrend } from '@/features/insights/components/CompletionTrend'
 import { InsightStat } from '@/features/insights/components/InsightStat'
-import type { Insights } from '@/features/insights/types'
+import { WorkoutInsightsSection } from '@/features/insights/components/WorkoutInsightsSection'
+import type { Insights, WorkoutInsights } from '@/features/insights/types'
 
 interface InsightsWorkspaceProps {
   insights: Insights
+  workoutInsights: WorkoutInsights | null
 }
 
-/** Desktop "Insights" workspace — KPI tiles + completion trend, centre column. */
-export function InsightsWorkspace({ insights }: InsightsWorkspaceProps) {
+/** Desktop "Insights" workspace — habit KPIs + trend, then training stats. */
+export function InsightsWorkspace({ insights, workoutInsights }: InsightsWorkspaceProps) {
   const completionPct = Math.round(insights.completionRate * 100)
 
   return (
@@ -25,21 +27,31 @@ export function InsightsWorkspace({ insights }: InsightsWorkspaceProps) {
         </div>
       </header>
 
-      <section className="mt-7 flex gap-3.5">
-        <InsightStat
-          label="completion"
-          value={String(completionPct)}
-          unit="%"
-          delta={insights.completionDelta}
-          deltaSuffix="% vs prev"
-        />
-        <InsightStat label="best streak" value={`${insights.bestStreak}d`} accent />
-        <InsightStat label="active" value={String(insights.activeHabits)} />
-        <InsightStat label="done · 30d" value={String(insights.totalDone)} />
-      </section>
+      {insights.hasData ? (
+        <>
+          <section className="mt-7 flex gap-3.5">
+            <InsightStat
+              label="completion"
+              value={String(completionPct)}
+              unit="%"
+              delta={insights.completionDelta}
+              deltaSuffix="% vs prev"
+            />
+            <InsightStat label="best streak" value={`${insights.bestStreak}d`} accent />
+            <InsightStat label="active" value={String(insights.activeHabits)} />
+            <InsightStat label="done · 30d" value={String(insights.totalDone)} />
+          </section>
 
-      <p className="label-mono mt-8 mb-3">// completion over time</p>
-      <CompletionTrend weekly={insights.weekly} />
+          <p className="label-mono mb-3 mt-8">// completion over time</p>
+          <CompletionTrend weekly={insights.weekly} />
+        </>
+      ) : null}
+
+      {workoutInsights?.hasData ? (
+        <div className="mt-9">
+          <WorkoutInsightsSection data={workoutInsights} />
+        </div>
+      ) : null}
     </div>
   )
 }

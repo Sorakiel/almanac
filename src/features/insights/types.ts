@@ -34,3 +34,31 @@ export interface Insights {
   /** False when there's nothing to show yet (no habits or no logs). */
   hasData: boolean
 }
+
+/** How often an exercise appears across sessions. */
+export interface ExerciseFrequency {
+  name: string
+  sessions: number
+}
+
+/** A personal record — the heaviest logged set for an exercise. */
+export interface ExercisePR {
+  name: string
+  weight: number
+  reps: number
+}
+
+/** Training stats derived from workouts + their logged sets. */
+export interface WorkoutInsights {
+  totalSessions: number
+  completedSessions: number
+  /** Sessions completed in the last 30 days (by workout date). */
+  completed30d: number
+  /** Volume (reps × weight over done sets) in the last 30 days. */
+  volume30d: number
+  /** Most frequent exercises, most-used first. */
+  topExercises: ExerciseFrequency[]
+  /** Heaviest set per exercise, strongest first. */
+  prs: ExercisePR[]
+  hasData: boolean
+}

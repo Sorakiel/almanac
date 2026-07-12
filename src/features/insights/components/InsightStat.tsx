@@ -29,7 +29,7 @@ export function InsightStat({
       <p className="font-mono text-[9.5px] uppercase tracking-label text-muted-strong">{label}</p>
       <p
         className={cn(
-          'mt-1 text-[28px] font-semibold tracking-title tabular-nums',
+          'mt-1 text-[28px] font-semibold tabular-nums tracking-title',
           accent && 'text-accent',
         )}
       >
