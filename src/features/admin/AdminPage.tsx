@@ -10,6 +10,7 @@ import { AdminWorkspace } from '@/features/admin/components/desktop/AdminWorkspa
 import { useAdminData } from '@/features/admin/hooks/useAdminData'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 
 function Spinner({ label }: { label: string }) {
@@ -35,8 +36,11 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 /** Admin-only console. Gated by profile role; non-admins are bounced home. */
 function AdminPage() {
   const navigate = useNavigate()
+  const { user } = useSession()
   const { profile, isLoading: profileLoading } = useProfile()
-  const isAdmin = profile?.role === 'admin'
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'owner'
+  const isOwner = profile?.role === 'owner'
+  const currentUserId = user?.id ?? ''
   const { data, isLoading, isError, refetch } = useAdminData(isAdmin)
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const { dateKey } = useToday()
@@ -63,7 +67,12 @@ function AdminPage() {
   if (isDesktop) {
     return (
       <>
-        <AdminWorkspace data={data} todayKey={dateKey} />
+        <AdminWorkspace
+          data={data}
+          todayKey={dateKey}
+          isOwner={isOwner}
+          currentUserId={currentUserId}
+        />
         <Rail>
           <AdminRail data={data} />
         </Rail>
@@ -103,7 +112,12 @@ function AdminPage() {
 
       <div>
         <p className="label-mono mb-3">// recent signups</p>
-        <MembersTable members={data.members} todayKey={dateKey} />
+        <MembersTable
+          members={data.members}
+          todayKey={dateKey}
+          isOwner={isOwner}
+          currentUserId={currentUserId}
+        />
       </div>
     </section>
   )

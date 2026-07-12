@@ -80,7 +80,8 @@ export function Sidebar() {
 
   const dueCount = habits.filter((h) => (h.dueToday || h.isComplete) && !h.isComplete).length
   const name = (user?.user_metadata.display_name as string | undefined) ?? 'You'
-  const roleLabel = profile?.role === 'admin' ? 'Admin' : 'Member'
+  const roleLabel =
+    profile?.role === 'owner' ? 'Owner' : profile?.role === 'admin' ? 'Admin' : 'Member'
 
   // Today always leads; the enabled modules follow (mirroring the bottom nav,
   // so the "More" switches add/remove them here).

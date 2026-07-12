@@ -1,5 +1,9 @@
 import { supabase } from '@/lib/supabase'
-import type { Feedback, Profile } from '@/features/admin/types'
+import type { Feedback, Profile, UserRole } from '@/features/admin/types'
+import type { Database } from '@/types/database.generated'
+
+type HabitRow = Database['public']['Tables']['habits']['Row']
+type HabitLogLite = { habit_id: string; date: string; count: number }
 
 /**
  * Admin reads go straight through PostgREST — the RLS policies already grant
@@ -41,6 +45,63 @@ export async function fetchAllFeedback(): Promise<Feedback[]> {
     .select('*')
     .order('created_at', { ascending: false })
     .limit(50)
+  if (error) throw error
+  return data
+}
+
+// --- User management (owner: roles; admin/owner: delete) ------------------
+
+/** Appoint or demote an admin. Guarded server-side to the owner (RPC 0007). */
+export async function setUserRole(target: string, role: UserRole): Promise<void> {
+  const { error } = await supabase.rpc('set_user_role', { target, new_role: role })
+  if (error) throw error
+}
+
+/** Permanently delete a user and all their data. Guarded server-side (RPC 0007). */
+export async function deleteUser(target: string): Promise<void> {
+  const { error } = await supabase.rpc('admin_delete_user', { target })
+  if (error) throw error
+}
+
+// --- Single-user detail (admin/owner cross-user SELECT via is_admin RLS) ---
+
+/** One user's profile row. */
+export async function fetchUserProfile(userId: string): Promise<Profile> {
+  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
+  if (error) throw error
+  return data
+}
+
+/** A user's active (non-archived) habits, in sort order. */
+export async function fetchUserHabits(userId: string): Promise<HabitRow[]> {
+  const { data, error } = await supabase
+    .from('habits')
+    .select('*')
+    .eq('user_id', userId)
+    .is('archived_at', null)
+    .order('sort_order', { ascending: true })
+  if (error) throw error
+  return data
+}
+
+/** A user's habit logs on/after a date key (for recent-completion stats). */
+export async function fetchUserLogsSince(userId: string, sinceKey: string): Promise<HabitLogLite[]> {
+  const { data, error } = await supabase
+    .from('habit_logs')
+    .select('habit_id, date, count')
+    .eq('user_id', userId)
+    .gte('date', sinceKey)
+  if (error) throw error
+  return data
+}
+
+/** A user's feedback, newest first. */
+export async function fetchUserFeedback(userId: string): Promise<Feedback[]> {
+  const { data, error } = await supabase
+    .from('feedback')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
   if (error) throw error
   return data
 }

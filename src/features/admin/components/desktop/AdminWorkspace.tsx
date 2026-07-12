@@ -5,6 +5,8 @@ import type { AdminData } from '@/features/admin/types'
 interface AdminWorkspaceProps {
   data: AdminData
   todayKey: string
+  isOwner: boolean
+  currentUserId: string
 }
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
@@ -21,7 +23,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 }
 
 /** Desktop admin "Overview" — KPIs, signups chart, recent-members table. */
-export function AdminWorkspace({ data, todayKey }: AdminWorkspaceProps) {
+export function AdminWorkspace({ data, todayKey, isOwner, currentUserId }: AdminWorkspaceProps) {
   const { overview } = data
 
   return (
@@ -48,7 +50,12 @@ export function AdminWorkspace({ data, todayKey }: AdminWorkspaceProps) {
       <SignupsChart weeks={data.signups} />
 
       <p className="label-mono mt-8 mb-3">// recent signups</p>
-      <MembersTable members={data.members} todayKey={todayKey} />
+      <MembersTable
+        members={data.members}
+        todayKey={todayKey}
+        isOwner={isOwner}
+        currentUserId={currentUserId}
+      />
     </div>
   )
 }

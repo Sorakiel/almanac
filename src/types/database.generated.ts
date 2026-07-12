@@ -344,6 +344,12 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: never; Returns: boolean }
+      is_owner: { Args: never; Returns: boolean }
+      admin_delete_user: { Args: { target: string }; Returns: undefined }
+      set_user_role: {
+        Args: { target: string; new_role: Database["public"]["Enums"]["user_role"] }
+        Returns: undefined
+      }
       landing_stats: {
         Args: never
         Returns: {
@@ -363,7 +369,7 @@ export type Database = {
         | "weekdays"
         | "every_n_weeks"
       habit_time_of_day: "anytime" | "morning" | "afternoon" | "evening"
-      user_role: "user" | "admin"
+      user_role: "user" | "admin" | "owner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -501,7 +507,7 @@ export const Constants = {
         "every_n_weeks",
       ],
       habit_time_of_day: ["anytime", "morning", "afternoon", "evening"],
-      user_role: ["user", "admin"],
+      user_role: ["user", "admin", "owner"],
     },
   },
 } as const

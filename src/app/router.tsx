@@ -10,6 +10,7 @@ import HabitDetailPage from '@/features/habits/HabitDetailPage'
 import FlowPage from '@/features/flow/FlowPage'
 import InsightsPage from '@/features/insights/InsightsPage'
 import AdminPage from '@/features/admin/AdminPage'
+import AdminUserPage from '@/features/admin/AdminUserPage'
 import ModulesPage from '@/features/modules/ModulesPage'
 import SettingsPage from '@/features/settings/SettingsPage'
 import WorkoutsPage from '@/features/workouts/WorkoutsPage'
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
           { path: '/insights', element: <InsightsPage /> },
           { path: '/more', element: <ModulesPage /> },
           { path: '/admin', element: <AdminPage /> },
+          { path: '/admin/user/:id', element: <AdminUserPage /> },
           { path: '/reflect', element: <ReflectPage /> },
           { path: '/settings', element: <SettingsPage /> },
         ],

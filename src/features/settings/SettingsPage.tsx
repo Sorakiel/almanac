@@ -65,7 +65,7 @@ function SettingsPage() {
             <h1 className="truncate text-xl">{name}</h1>
             <p className="truncate text-sm text-muted">{email}</p>
             <Tag tone="accent" className="mt-1.5">
-              ◇ {profile?.role === 'admin' ? 'admin' : 'member'} · {joinedDays}-day
+              ◇ {profile?.role && profile.role !== 'user' ? profile.role : 'member'} · {joinedDays}-day
             </Tag>
           </div>
         </header>
@@ -98,7 +98,7 @@ function SettingsPage() {
           </div>
         </section>
 
-        {profile?.role === 'admin' ? (
+        {profile?.role === 'admin' || profile?.role === 'owner' ? (
           <section className="flex flex-col gap-1">
             <SectionLabel className="mb-2">ADMIN</SectionLabel>
             <Row icon={ShieldCheck} label="Admin console" onClick={() => navigate('/admin')} />

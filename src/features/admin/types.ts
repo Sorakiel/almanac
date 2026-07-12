@@ -3,6 +3,7 @@ import type { Database } from '@/types/database.generated'
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Feedback = Database['public']['Tables']['feedback']['Row']
 export type FeedbackStatus = Database['public']['Enums']['feedback_status']
+export type UserRole = Database['public']['Enums']['user_role']
 
 /** Workspace-wide KPIs shown across the top of the admin console. */
 export interface AdminOverview {
@@ -26,8 +27,36 @@ export interface SignupWeek {
 export interface MemberRow {
   id: string
   name: string
-  role: string
+  role: UserRole
   joinedAt: string
+}
+
+/** One habit in a user's detail view (admin/owner cross-user read). */
+export interface UserHabitRow {
+  id: string
+  name: string
+  frequencyLabel: string
+  /** Completed calendar days over the last 30 days. */
+  doneLast30: number
+}
+
+/** A user's detail read-out for the admin console. */
+export interface AdminUserDetail {
+  id: string
+  name: string
+  role: UserRole
+  joinedAt: string
+  timezone: string | null
+  stats: {
+    habits: number
+    logs: number
+    /** Completion over the last 30 days across daily-ish habits, 0–100. */
+    completionPct: number
+    /** Distinct days with at least one completed log in the last 30. */
+    activeDays30: number
+  }
+  habits: UserHabitRow[]
+  feedback: FeedbackRow[]
 }
 
 /** A feedback item joined with its author's display name. */
