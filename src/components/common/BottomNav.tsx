@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
+import { Home, LayoutGrid, type LucideIcon } from 'lucide-react'
 import { MAX_NAV_MODULES, NAV_MODULES, useModulesStore } from '@/stores/modules'
 import { useUiStore } from '@/stores/ui'
 import { cn } from '@/lib/utils'
@@ -6,15 +7,16 @@ import { cn } from '@/lib/utils'
 interface NavItem {
   to: string
   label: string
-  /** Spec-board glyph — the nav deliberately uses type, not icon fonts. */
-  glyph: string
+  /** Lucide icon — matches the modules hub so the nav and "More" stay in sync. */
+  icon: LucideIcon
   end?: boolean
 }
 
-const TODAY: NavItem = { to: '/', label: 'Today', glyph: '◆', end: true }
-const MORE: NavItem = { to: '/more', label: 'More', glyph: '⊞' }
+const TODAY: NavItem = { to: '/', label: 'Today', icon: Home, end: true }
+const MORE: NavItem = { to: '/more', label: 'More', icon: LayoutGrid }
 
 function NavButton({ item }: { item: NavItem }) {
+  const Icon = item.icon
   return (
     <NavLink
       to={item.to}
@@ -26,9 +28,7 @@ function NavButton({ item }: { item: NavItem }) {
         )
       }
     >
-      <span aria-hidden="true" className="text-[15px] leading-none">
-        {item.glyph}
-      </span>
+      <Icon aria-hidden="true" className="h-[18px] w-[18px]" strokeWidth={1.75} />
       <span className="font-mono text-[8px] uppercase tracking-label">{item.label}</span>
     </NavLink>
   )

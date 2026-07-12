@@ -1,4 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
+import { Home, type LucideIcon } from 'lucide-react'
 import { Avatar } from '@/components/common/Avatar'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useProfile } from '@/features/settings/hooks/useProfile'
@@ -9,8 +10,8 @@ import { cn } from '@/lib/utils'
 interface NavEntry {
   to: string
   label: string
-  /** Spec-board glyph — the nav uses type, not icon fonts. */
-  glyph: string
+  /** Lucide icon — shared with the modules hub so nav and "More" stay in sync. */
+  icon: LucideIcon
   end?: boolean
   /** Optional live count badge (resolved by the sidebar). */
   count?: number
@@ -32,6 +33,7 @@ function BrandMark({ className }: { className?: string }) {
 }
 
 function NavRow({ entry }: { entry: NavEntry }) {
+  const Icon = entry.icon
   return (
     <NavLink
       to={entry.to}
@@ -47,9 +49,11 @@ function NavRow({ entry }: { entry: NavEntry }) {
     >
       {({ isActive }) => (
         <>
-          <span aria-hidden="true" className={cn('text-sm', !isActive && 'text-muted-strong')}>
-            {entry.glyph}
-          </span>
+          <Icon
+            aria-hidden="true"
+            className={cn('h-[18px] w-[18px]', !isActive && 'text-muted-strong')}
+            strokeWidth={1.75}
+          />
           <span className="flex-1">{entry.label}</span>
           {entry.count !== undefined && entry.count > 0 ? (
             <span
@@ -81,11 +85,11 @@ export function Sidebar() {
   // Today always leads; the enabled modules follow (mirroring the bottom nav,
   // so the "More" switches add/remove them here).
   const primary: NavEntry[] = [
-    { to: '/', label: 'Today', glyph: '◆', end: true, count: dueCount },
+    { to: '/', label: 'Today', icon: Home, end: true, count: dueCount },
     ...NAV_MODULES.filter((m) => enabled[m.key]).map((m) => ({
       to: m.to,
       label: m.label,
-      glyph: m.glyph,
+      icon: m.icon,
       count: m.key === 'habits' ? habits.length : undefined,
     })),
   ]

@@ -1,18 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  BarChart3,
-  BookOpen,
-  CircleDollarSign,
-  Dumbbell,
-  ListChecks,
-  Moon,
-  NotebookPen,
-  Plus,
-  Target,
-  Timer,
-  type LucideIcon,
-} from 'lucide-react'
+import { BookOpen, CircleDollarSign, Moon, Plus, Target, type LucideIcon } from 'lucide-react'
 import { IconTile } from '@/components/common/IconTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { Tag } from '@/components/common/Tag'
@@ -21,53 +9,22 @@ import { Rail } from '@/components/common/desktop/rail'
 import { ModulesRail } from '@/features/modules/components/ModulesRail'
 import { SuggestModuleSheet } from '@/features/modules/components/SuggestModuleSheet'
 import { useHabits } from '@/features/habits/hooks/useHabits'
-import { useModulesStore, type ModuleKey } from '@/stores/modules'
+import { NAV_MODULES, useModulesStore, type ModuleKey } from '@/stores/modules'
 import { cn } from '@/lib/utils'
-
-interface ModuleMeta {
-  key: ModuleKey
-  title: string
-  icon: LucideIcon
-  tone: string
-  to: string
-}
 
 interface SoonModule {
   title: string
   icon: LucideIcon
 }
 
-const MODULES: ModuleMeta[] = [
-  {
-    key: 'habits',
-    title: 'Habits',
-    icon: ListChecks,
-    tone: 'bg-accent/15 text-accent',
-    to: '/habits',
-  },
-  {
-    key: 'workouts',
-    title: 'Workouts',
-    icon: Dumbbell,
-    tone: 'bg-teal/15 text-teal',
-    to: '/train',
-  },
-  {
-    key: 'insights',
-    title: 'Insights',
-    icon: BarChart3,
-    tone: 'bg-amber/15 text-amber',
-    to: '/insights',
-  },
-  { key: 'flow', title: 'Flow', icon: Timer, tone: 'bg-accent/15 text-accent', to: '/flow' },
-  {
-    key: 'reflect',
-    title: 'Reflect',
-    icon: NotebookPen,
-    tone: 'bg-teal/15 text-teal',
-    to: '/reflect',
-  },
-]
+/** Per-module icon tint, keyed to the shared NAV_MODULES list. */
+const MODULE_TONE: Record<ModuleKey, string> = {
+  habits: 'bg-accent/15 text-accent',
+  workouts: 'bg-teal/15 text-teal',
+  insights: 'bg-amber/15 text-amber',
+  flow: 'bg-accent/15 text-accent',
+  reflect: 'bg-teal/15 text-teal',
+}
 
 const SOON: SoonModule[] = [
   { title: 'Finances', icon: CircleDollarSign },
@@ -102,7 +59,7 @@ function ModulesPage() {
         <section className="flex flex-col gap-3">
           <SectionLabel accessory="switch = show in nav">ACTIVE</SectionLabel>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-            {MODULES.map((m) => {
+            {NAV_MODULES.map((m) => {
               const on = enabled[m.key]
               return (
                 <div
@@ -115,11 +72,11 @@ function ModulesPage() {
                   )}
                 >
                   <div className="flex items-start justify-between">
-                    <IconTile icon={m.icon} tone={m.tone} size="sm" />
+                    <IconTile icon={m.icon} tone={MODULE_TONE[m.key]} size="sm" />
                     <Switch
                       checked={on}
                       onCheckedChange={() => toggle(m.key)}
-                      aria-label={`Show ${m.title} in navigation`}
+                      aria-label={`Show ${m.label} in navigation`}
                     />
                   </div>
                   <button
@@ -127,7 +84,7 @@ function ModulesPage() {
                     onClick={() => navigate(m.to)}
                     className="mt-3 block w-full rounded text-left"
                   >
-                    <p className="font-semibold">{m.title}</p>
+                    <p className="font-semibold">{m.label}</p>
                     <p className="mt-0.5 font-mono text-[10px] text-muted-strong">{stats[m.key]}</p>
                   </button>
                 </div>
