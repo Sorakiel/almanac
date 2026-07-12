@@ -7,6 +7,7 @@ import { SectionLabel } from '@/components/common/SectionLabel'
 import { Rail } from '@/components/common/desktop/rail'
 import { NowBlock } from '@/features/dashboard/components/NowBlock'
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
+import { TodaysWorkoutsBlock } from '@/features/dashboard/components/TodaysWorkoutsBlock'
 import { DashboardWorkspace } from '@/features/dashboard/components/desktop/DashboardWorkspace'
 import { DashboardRail } from '@/features/dashboard/components/desktop/DashboardRail'
 import { SortableHabitList } from '@/features/habits/components/SortableHabitList'
@@ -92,7 +93,9 @@ function DashboardPage() {
       <NowBlock habits={habits} />
 
       <section className="flex flex-col gap-2">
-        <SectionLabel accessory={habits.length > 0 ? `${completed} / ${dueHabits.length} done` : undefined}>
+        <SectionLabel
+          accessory={habits.length > 0 ? `${completed} / ${dueHabits.length} done` : undefined}
+        >
           TODAY · HABITS
         </SectionLabel>
 
@@ -111,6 +114,8 @@ function DashboardPage() {
           <SortableHabitList habits={habits} />
         )}
       </section>
+
+      <TodaysWorkoutsBlock />
     </div>
   )
 }

@@ -8,7 +8,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sheet } from '@/components/ui/sheet'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
+import {
+  RecurrencePicker,
+  type RecurrenceValue,
+} from '@/features/workouts/components/RecurrencePicker'
 import { useWorkoutMutations } from '@/features/workouts/hooks/useWorkoutMutations'
+import { useToday } from '@/hooks/useToday'
 import type { Workout } from '@/features/workouts/types'
 
 const schema = z.object({
@@ -27,7 +32,7 @@ interface WorkoutFormSheetProps {
   onDeleted?: () => void
 }
 
-/** Create or edit a workout — name + optional scheduled date. */
+/** Create or edit a workout — name, schedule, and optional date. */
 export function WorkoutFormSheet({
   open,
   onOpenChange,
@@ -35,7 +40,13 @@ export function WorkoutFormSheet({
   onDeleted,
 }: WorkoutFormSheetProps) {
   const { create, update, remove } = useWorkoutMutations()
+  const { dateKey } = useToday()
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [recur, setRecur] = useState<RecurrenceValue>({
+    recurrence: workout?.recurrence ?? 'none',
+    days: workout?.recurrence_days ?? [],
+    interval: workout?.recurrence_interval ?? null,
+  })
   const isEdit = Boolean(workout)
 
   const {
@@ -50,8 +61,35 @@ export function WorkoutFormSheet({
     },
   })
 
+  // The date field only applies to a one-off or the every-N-days anchor.
+  const showDate = recur.recurrence === 'none' || recur.recurrence === 'every_n_days'
+  const dateLabel = recur.recurrence === 'every_n_days' ? 'Start date' : 'Date (optional)'
+
   const onSubmit = handleSubmit(async (values) => {
-    const input = { name: values.name, scheduled_date: values.scheduled_date || null }
+    if (recur.recurrence === 'weekdays' && recur.days.length === 0) {
+      toast.error('Pick at least one weekday')
+      return
+    }
+    if (recur.recurrence === 'every_n_days' && (!recur.interval || recur.interval < 1)) {
+      toast.error('Set how many days between sessions')
+      return
+    }
+
+    const scheduled_date =
+      recur.recurrence === 'every_n_days'
+        ? values.scheduled_date || dateKey
+        : recur.recurrence === 'none'
+          ? values.scheduled_date || null
+          : null
+
+    const input = {
+      name: values.name,
+      scheduled_date,
+      recurrence: recur.recurrence,
+      recurrence_days: recur.recurrence === 'weekdays' ? recur.days : null,
+      recurrence_interval: recur.recurrence === 'every_n_days' ? recur.interval : null,
+    }
+
     try {
       if (workout) {
         await update.mutateAsync({ id: workout.id, input })
@@ -98,10 +136,17 @@ export function WorkoutFormSheet({
             ) : null}
           </label>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="label-mono">Scheduled date (optional)</span>
-            <Input type="date" {...register('scheduled_date')} />
-          </label>
+          <div className="flex flex-col gap-1.5">
+            <span className="label-mono">Repeat</span>
+            <RecurrencePicker value={recur} onChange={setRecur} />
+          </div>
+
+          {showDate ? (
+            <label className="flex flex-col gap-1.5">
+              <span className="label-mono">{dateLabel}</span>
+              <Input type="date" {...register('scheduled_date')} />
+            </label>
+          ) : null}
 
           <Button type="submit" size="lg" disabled={pending}>
             {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Add workout'}

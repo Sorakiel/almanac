@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { NowBlock } from '@/features/dashboard/components/NowBlock'
+import { TodaysWorkoutsBlock } from '@/features/dashboard/components/TodaysWorkoutsBlock'
 import { DesktopHabitTile } from '@/features/dashboard/components/desktop/DesktopHabitTile'
 import { useFocusStore } from '@/stores/focus'
 import { useToday } from '@/hooks/useToday'
@@ -15,11 +16,23 @@ interface DashboardWorkspaceProps {
   firstName: string
 }
 
-function StatTile({ label, value, unit, accent }: { label: string; value: string; unit?: string; accent?: boolean }) {
+function StatTile({
+  label,
+  value,
+  unit,
+  accent,
+}: {
+  label: string
+  value: string
+  unit?: string
+  accent?: boolean
+}) {
   return (
     <div className="flex-1 rounded-2xl border bg-panel px-5 py-[18px]">
       <p className="font-mono text-[9.5px] uppercase tracking-label text-muted-strong">{label}</p>
-      <p className={`mt-1 text-[30px] font-semibold tracking-title tabular-nums ${accent ? 'text-accent' : ''}`}>
+      <p
+        className={`mt-1 text-[30px] font-semibold tabular-nums tracking-title ${accent ? 'text-accent' : ''}`}
+      >
         {value}
         {unit ? <span className="text-base text-muted-strong">{unit}</span> : null}
       </p>
@@ -51,7 +64,8 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
             {greeting}, {firstName}
           </h1>
           <p className="mt-2 text-[15px] text-muted">
-            {datePart} · {completed} of {due.length} habits{focusRunning ? ' · 1 focus block running' : ''}
+            {datePart} · {completed} of {due.length} habits
+            {focusRunning ? ' · 1 focus block running' : ''}
           </p>
         </div>
         <div className="flex items-center gap-5">
@@ -109,6 +123,10 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
           </div>
         )}
       </section>
+
+      <div className="mt-8">
+        <TodaysWorkoutsBlock />
+      </div>
 
       <section className="mt-6 flex gap-3">
         <StatTile label="today" value={String(pct)} unit="%" />

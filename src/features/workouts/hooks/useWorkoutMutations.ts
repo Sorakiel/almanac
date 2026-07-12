@@ -1,11 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { createWorkout, deleteWorkout, updateWorkout } from '@/features/workouts/api/workouts.api'
-import type { Workout } from '@/features/workouts/types'
+import type { Workout, WorkoutRecurrence } from '@/features/workouts/types'
 
 export interface WorkoutFormInput {
   name: string
   scheduled_date: string | null
+  recurrence: WorkoutRecurrence
+  recurrence_days: number[] | null
+  recurrence_interval: number | null
 }
 
 /** Create / edit / complete / delete workouts, invalidating the list on settle. */

@@ -26,10 +26,19 @@ export async function createWorkout(input: WorkoutInsert): Promise<Workout> {
   return data
 }
 
-export async function updateWorkout(
-  id: string,
-  patch: Partial<Pick<Workout, 'name' | 'scheduled_date' | 'completed_at'>>,
-): Promise<Workout> {
+type WorkoutPatch = Partial<
+  Pick<
+    Workout,
+    | 'name'
+    | 'scheduled_date'
+    | 'completed_at'
+    | 'recurrence'
+    | 'recurrence_days'
+    | 'recurrence_interval'
+  >
+>
+
+export async function updateWorkout(id: string, patch: WorkoutPatch): Promise<Workout> {
   const { data, error } = await supabase
     .from('workouts')
     .update(patch)

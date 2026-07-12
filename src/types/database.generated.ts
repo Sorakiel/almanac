@@ -317,6 +317,9 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          recurrence: Database["public"]["Enums"]["workout_recurrence"]
+          recurrence_days: number[] | null
+          recurrence_interval: number | null
           scheduled_date: string | null
           user_id: string
         }
@@ -325,6 +328,9 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          recurrence?: Database["public"]["Enums"]["workout_recurrence"]
+          recurrence_days?: number[] | null
+          recurrence_interval?: number | null
           scheduled_date?: string | null
           user_id: string
         }
@@ -333,6 +339,9 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          recurrence?: Database["public"]["Enums"]["workout_recurrence"]
+          recurrence_days?: number[] | null
+          recurrence_interval?: number | null
           scheduled_date?: string | null
           user_id?: string
         }
@@ -370,6 +379,7 @@ export type Database = {
         | "every_n_weeks"
       habit_time_of_day: "anytime" | "morning" | "afternoon" | "evening"
       user_role: "user" | "admin" | "owner"
+      workout_recurrence: "none" | "daily" | "weekdays" | "every_n_days"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -508,6 +518,7 @@ export const Constants = {
       ],
       habit_time_of_day: ["anytime", "morning", "afternoon", "evening"],
       user_role: ["user", "admin", "owner"],
+      workout_recurrence: ["none", "daily", "weekdays", "every_n_days"],
     },
   },
 } as const

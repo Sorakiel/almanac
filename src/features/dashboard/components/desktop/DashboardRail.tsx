@@ -46,7 +46,9 @@ export function DashboardRail({ habits }: DashboardRailProps) {
       <QuoteCard />
 
       <div className="rounded-[18px] border bg-surface p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">this week</p>
+        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
+          this week
+        </p>
         <div className="mt-2 flex flex-col">
           <Row label="on track" value={`${weekRate}%`} accent />
           <Row label="today" value={`${todayPct}%`} />

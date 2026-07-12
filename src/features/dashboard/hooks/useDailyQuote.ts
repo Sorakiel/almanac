@@ -24,8 +24,7 @@ export function useDailyQuote(): UseDailyQuoteResult {
     staleTime: 1000 * 60 * 60,
   })
 
-  const quote =
-    data && data.length > 0 ? (data[dayOfYear(dateKey) % data.length] ?? null) : null
+  const quote = data && data.length > 0 ? (data[dayOfYear(dateKey) % data.length] ?? null) : null
 
   return { quote, isLoading }
 }

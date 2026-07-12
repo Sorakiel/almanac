@@ -16,6 +16,7 @@ import { WorkoutSessionRail } from '@/features/workouts/components/desktop/Worko
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
 import { useExerciseLibrary } from '@/features/workouts/hooks/useExerciseLibrary'
+import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import { cn } from '@/lib/utils'
 
 /** Friendly label for a `YYYY-MM-DD` date, UTC-safe. */
@@ -60,7 +61,9 @@ function WorkoutDetailPage() {
   }
 
   const done = Boolean(workout.completed_at)
-  const subtitle = workout.scheduled_date ? formatDate(workout.scheduled_date) : 'No date set'
+  const subtitle =
+    recurrenceLabel(workout) ??
+    (workout.scheduled_date ? formatDate(workout.scheduled_date) : 'No date set')
 
   const toggleComplete = () =>
     mutations.setCompleted.mutate(!done, {

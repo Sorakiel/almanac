@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card'
 import { IconTile } from '@/components/common/IconTile'
 import { Tag } from '@/components/common/Tag'
 import { useWorkoutMutations } from '@/features/workouts/hooks/useWorkoutMutations'
+import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import type { WorkoutStatus, WorkoutView } from '@/features/workouts/types'
 import { cn } from '@/lib/utils'
 
@@ -39,7 +40,9 @@ export function WorkoutCard({ workout }: WorkoutCardProps) {
   const navigate = useNavigate()
   const { toggleComplete } = useWorkoutMutations()
   const done = Boolean(workout.completed_at)
-  const subtitle = workout.scheduled_date ? formatDate(workout.scheduled_date) : 'No date set'
+  const subtitle =
+    recurrenceLabel(workout) ??
+    (workout.scheduled_date ? formatDate(workout.scheduled_date) : 'No date set')
 
   const handleToggle = () => {
     toggleComplete.mutate(

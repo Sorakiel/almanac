@@ -12,7 +12,11 @@ interface UseWorkoutsResult {
 }
 
 function toView(w: Workout): WorkoutView {
-  const status = w.completed_at ? 'completed' : w.scheduled_date ? 'scheduled' : 'unplanned'
+  const status = w.completed_at
+    ? 'completed'
+    : w.scheduled_date || w.recurrence !== 'none'
+      ? 'scheduled'
+      : 'unplanned'
   return { ...w, status }
 }
 

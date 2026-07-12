@@ -2,6 +2,7 @@ import type { Database } from '@/types/database.generated'
 
 export type Workout = Database['public']['Tables']['workouts']['Row']
 export type WorkoutInsert = Database['public']['Tables']['workouts']['Insert']
+export type WorkoutRecurrence = Database['public']['Enums']['workout_recurrence']
 export type Exercise = Database['public']['Tables']['exercises']['Row']
 export type WorkoutExercise = Database['public']['Tables']['workout_exercises']['Row']
 export type SetLog = Database['public']['Tables']['set_logs']['Row']

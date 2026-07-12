@@ -45,7 +45,7 @@ export function NowBlock({ habits }: NowBlockProps) {
       <div className="relative flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="label-mono text-accent">◷ flow · in session</span>
-          <span className="label-mono normal-case tracking-normal tabular-nums">
+          <span className="label-mono normal-case tabular-nums tracking-normal">
             {minLeft} min left
           </span>
         </div>
