@@ -1,9 +1,12 @@
-import { ShieldCheck } from 'lucide-react'
+import { Crown, ShieldCheck } from 'lucide-react'
 import { Tag } from '@/components/common/Tag'
+import { cn } from '@/lib/utils'
 import type { AdminData, FeedbackStatus } from '@/features/admin/types'
 
 interface AdminRailProps {
   data: AdminData
+  /** The viewer is the owner — unlocks role management, shown in the header. */
+  isOwner: boolean
 }
 
 const STATUS_TONE: Record<FeedbackStatus, 'accent' | 'teal' | 'amber' | 'muted'> = {
@@ -23,20 +26,26 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 /** Desktop Admin context rail: workspace counters, feedback, caution note. */
-export function AdminRail({ data }: AdminRailProps) {
+export function AdminRail({ data, isOwner }: AdminRailProps) {
   const { overview, feedback } = data
+  const Icon = isOwner ? Crown : ShieldCheck
   return (
     <div className="flex flex-col gap-3.5">
       <div className="flex items-center gap-3">
         <span
           aria-hidden="true"
-          className="flex h-[38px] w-[38px] items-center justify-center rounded-xl bg-accent/15 text-accent"
+          className={cn(
+            'flex h-[38px] w-[38px] items-center justify-center rounded-xl',
+            isOwner ? 'bg-teal/15 text-teal' : 'bg-accent/15 text-accent',
+          )}
         >
-          <ShieldCheck className="h-[18px] w-[18px]" />
+          <Icon className="h-[18px] w-[18px]" />
         </span>
         <div>
-          <p className="text-[15px] font-semibold">Admin</p>
-          <p className="font-mono text-[10px] text-muted-strong">workspace tools</p>
+          <p className="text-[15px] font-semibold">{isOwner ? 'Owner' : 'Admin'}</p>
+          <p className="font-mono text-[10px] text-muted-strong">
+            {isOwner ? 'full control' : 'workspace tools'}
+          </p>
         </div>
       </div>
 
@@ -73,10 +82,24 @@ export function AdminRail({ data }: AdminRailProps) {
         )}
       </div>
 
-      <div className="rounded-[16px] border border-accent/25 bg-gradient-to-br from-accent/10 to-transparent p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-accent">elevated access</p>
+      <div
+        className={cn(
+          'rounded-[16px] border bg-gradient-to-br to-transparent p-[18px]',
+          isOwner ? 'border-teal/25 from-teal/10' : 'border-accent/25 from-accent/10',
+        )}
+      >
+        <p
+          className={cn(
+            'font-mono text-[10px] uppercase tracking-label',
+            isOwner ? 'text-teal' : 'text-accent',
+          )}
+        >
+          {isOwner ? 'owner access' : 'elevated access'}
+        </p>
         <p className="mt-2 text-[13px] leading-relaxed text-muted">
-          Cross-user views bypass the usual isolation — read-only, but handle with care.
+          {isOwner
+            ? 'You can appoint or remove admins and delete accounts. These actions are permanent — handle with care.'
+            : 'Cross-user views bypass the usual isolation — read-only, but handle with care.'}
         </p>
       </div>
     </div>

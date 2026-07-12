@@ -74,7 +74,7 @@ function AdminPage() {
           currentUserId={currentUserId}
         />
         <Rail>
-          <AdminRail data={data} />
+          <AdminRail data={data} isOwner={isOwner} />
         </Rail>
       </>
     )
@@ -93,7 +93,7 @@ function AdminPage() {
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
         <div>
-          <p className="label-mono text-accent">// admin</p>
+          <p className="label-mono text-accent">// {isOwner ? 'owner' : 'admin'}</p>
           <h1 className="text-2xl">Overview</h1>
         </div>
       </header>

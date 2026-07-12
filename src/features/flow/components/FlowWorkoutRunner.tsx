@@ -63,7 +63,9 @@ export function FlowWorkoutRunner({ workoutId, onFinish }: FlowWorkoutRunnerProp
           .
         </div>
       ) : (
-        exercises.map((ex) => <ExerciseBlock key={ex.id} exercise={ex} mutations={mutations} />)
+        exercises.map((ex) => (
+          <ExerciseBlock key={ex.id} exercise={ex} mutations={mutations} variant="run" />
+        ))
       )}
 
       <Button
