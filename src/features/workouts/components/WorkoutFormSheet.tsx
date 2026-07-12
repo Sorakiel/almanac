@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Sheet } from '@/components/ui/sheet'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { useWorkoutMutations } from '@/features/workouts/hooks/useWorkoutMutations'
-import type { WorkoutView } from '@/features/workouts/types'
+import type { Workout } from '@/features/workouts/types'
 
 const schema = z.object({
   name: z.string().trim().min(1, 'Give the session a name').max(80),
@@ -22,11 +22,18 @@ interface WorkoutFormSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   /** When set, the sheet edits this workout (and can delete it). */
-  workout?: WorkoutView | null
+  workout?: Workout | null
+  /** Called after a successful delete (e.g. to navigate away from a detail page). */
+  onDeleted?: () => void
 }
 
 /** Create or edit a workout — name + optional scheduled date. */
-export function WorkoutFormSheet({ open, onOpenChange, workout }: WorkoutFormSheetProps) {
+export function WorkoutFormSheet({
+  open,
+  onOpenChange,
+  workout,
+  onDeleted,
+}: WorkoutFormSheetProps) {
   const { create, update, remove } = useWorkoutMutations()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const isEdit = Boolean(workout)
@@ -66,6 +73,7 @@ export function WorkoutFormSheet({ open, onOpenChange, workout }: WorkoutFormShe
       toast.success('Workout deleted')
       setConfirmDelete(false)
       onOpenChange(false)
+      onDeleted?.()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not delete the workout')
     }

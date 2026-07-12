@@ -11,32 +11,15 @@ import { WorkoutsRail } from '@/features/workouts/components/desktop/WorkoutsRai
 import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
 import { splitWorkouts } from '@/features/workouts/lib/summary'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import type { WorkoutView } from '@/features/workouts/types'
 
 function WorkoutsPage() {
   const { workouts, isLoading, isError, refetch } = useWorkouts()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [formOpen, setFormOpen] = useState(false)
-  const [editing, setEditing] = useState<WorkoutView | null>(null)
 
-  const openNew = () => {
-    setEditing(null)
-    setFormOpen(true)
-  }
-  const openEdit = (workout: WorkoutView) => {
-    setEditing(workout)
-    setFormOpen(true)
-  }
+  const openNew = () => setFormOpen(true)
 
-  // Remount the sheet per target so its form defaults always match.
-  const formSheet = formOpen ? (
-    <WorkoutFormSheet
-      key={editing?.id ?? 'new'}
-      open
-      onOpenChange={setFormOpen}
-      workout={editing}
-    />
-  ) : null
+  const formSheet = formOpen ? <WorkoutFormSheet open onOpenChange={setFormOpen} /> : null
 
   if (isDesktop) {
     return (
@@ -47,7 +30,6 @@ function WorkoutsPage() {
           isError={isError}
           refetch={refetch}
           onNew={openNew}
-          onEdit={openEdit}
         />
         <Rail>
           <WorkoutsRail workouts={workouts} />
@@ -102,7 +84,7 @@ function WorkoutsPage() {
             <div className="flex flex-col gap-3">
               <SectionLabel>TO DO</SectionLabel>
               {active.map((w) => (
-                <WorkoutCard key={w.id} workout={w} onEdit={openEdit} />
+                <WorkoutCard key={w.id} workout={w} />
               ))}
             </div>
           ) : null}
@@ -111,7 +93,7 @@ function WorkoutsPage() {
             <div className="flex flex-col gap-3">
               <SectionLabel>COMPLETED</SectionLabel>
               {completed.map((w) => (
-                <WorkoutCard key={w.id} workout={w} onEdit={openEdit} />
+                <WorkoutCard key={w.id} workout={w} />
               ))}
             </div>
           ) : null}

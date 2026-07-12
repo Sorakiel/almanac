@@ -14,6 +14,7 @@ import AdminUserPage from '@/features/admin/AdminUserPage'
 import ModulesPage from '@/features/modules/ModulesPage'
 import SettingsPage from '@/features/settings/SettingsPage'
 import WorkoutsPage from '@/features/workouts/WorkoutsPage'
+import WorkoutDetailPage from '@/features/workouts/WorkoutDetailPage'
 import ReflectPage from '@/features/reflect/ReflectPage'
 
 export const router = createBrowserRouter([
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
           { path: '/habits/:id', element: <HabitDetailPage /> },
           { path: '/flow', element: <FlowPage /> },
           { path: '/train', element: <WorkoutsPage /> },
+          { path: '/train/:id', element: <WorkoutDetailPage /> },
           { path: '/insights', element: <InsightsPage /> },
           { path: '/more', element: <ModulesPage /> },
           { path: '/admin', element: <AdminPage /> },

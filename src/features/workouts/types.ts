@@ -13,3 +13,16 @@ export type WorkoutStatus = 'completed' | 'scheduled' | 'unplanned'
 export interface WorkoutView extends Workout {
   status: WorkoutStatus
 }
+
+/** One exercise within a workout, joined with its name and logged sets. */
+export interface SessionExercise {
+  id: string
+  exerciseId: string
+  name: string
+  muscleGroup: string | null
+  targetSets: number | null
+  targetReps: number | null
+  targetWeight: number | null
+  sortOrder: number
+  sets: SetLog[]
+}

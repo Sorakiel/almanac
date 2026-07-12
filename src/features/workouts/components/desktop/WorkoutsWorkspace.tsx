@@ -12,7 +12,6 @@ interface WorkoutsWorkspaceProps {
   isError: boolean
   refetch: () => void
   onNew: () => void
-  onEdit: (workout: WorkoutView) => void
 }
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
@@ -35,7 +34,6 @@ export function WorkoutsWorkspace({
   isError,
   refetch,
   onNew,
-  onEdit,
 }: WorkoutsWorkspaceProps) {
   const { active, completed } = splitWorkouts(workouts)
   const stats = summarize(workouts)
@@ -98,7 +96,7 @@ export function WorkoutsWorkspace({
             <section className="mt-8 flex flex-col gap-3">
               <SectionLabel>TO DO</SectionLabel>
               {active.map((w) => (
-                <WorkoutCard key={w.id} workout={w} onEdit={onEdit} />
+                <WorkoutCard key={w.id} workout={w} />
               ))}
             </section>
           ) : null}
@@ -107,7 +105,7 @@ export function WorkoutsWorkspace({
             <section className="mt-8 flex flex-col gap-3">
               <SectionLabel>COMPLETED</SectionLabel>
               {completed.map((w) => (
-                <WorkoutCard key={w.id} workout={w} onEdit={onEdit} />
+                <WorkoutCard key={w.id} workout={w} />
               ))}
             </section>
           ) : null}

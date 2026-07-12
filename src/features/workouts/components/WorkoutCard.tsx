@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { Check, Dumbbell } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
@@ -9,7 +10,6 @@ import { cn } from '@/lib/utils'
 
 interface WorkoutCardProps {
   workout: WorkoutView
-  onEdit: (workout: WorkoutView) => void
 }
 
 const STATUS_TONE: Record<WorkoutStatus, 'teal' | 'accent' | 'muted'> = {
@@ -35,7 +35,8 @@ function formatDate(dateKey: string): string {
 }
 
 /** A workout row: complete toggle, identity (tap to edit), status badge. */
-export function WorkoutCard({ workout, onEdit }: WorkoutCardProps) {
+export function WorkoutCard({ workout }: WorkoutCardProps) {
+  const navigate = useNavigate()
   const { toggleComplete } = useWorkoutMutations()
   const done = Boolean(workout.completed_at)
   const subtitle = workout.scheduled_date ? formatDate(workout.scheduled_date) : 'No date set'
@@ -70,7 +71,11 @@ export function WorkoutCard({ workout, onEdit }: WorkoutCardProps) {
 
       <IconTile icon={Dumbbell} tone="bg-teal/15 text-teal" />
 
-      <button type="button" onClick={() => onEdit(workout)} className="min-w-0 flex-1 text-left">
+      <button
+        type="button"
+        onClick={() => navigate(`/train/${workout.id}`)}
+        className="min-w-0 flex-1 text-left"
+      >
         <p className={cn('truncate font-semibold', done && 'text-muted line-through')}>
           {workout.name}
         </p>

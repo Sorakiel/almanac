@@ -13,6 +13,13 @@ export async function fetchWorkouts(userId: string): Promise<Workout[]> {
   return data
 }
 
+/** A single workout by id (own-rows RLS applies). */
+export async function fetchWorkoutById(id: string): Promise<Workout> {
+  const { data, error } = await supabase.from('workouts').select('*').eq('id', id).single()
+  if (error) throw error
+  return data
+}
+
 export async function createWorkout(input: WorkoutInsert): Promise<Workout> {
   const { data, error } = await supabase.from('workouts').insert(input).select().single()
   if (error) throw error
