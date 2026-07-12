@@ -11,6 +11,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    // Respect a PORT from the environment so multiple dev servers can coexist.
+    port: process.env.PORT ? Number(process.env.PORT) : 5173,
   },
 })
