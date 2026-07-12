@@ -1,4 +1,4 @@
-import { MoreHorizontal, Pencil } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { IconTile } from '@/components/common/IconTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { HabitHeatmap } from '@/features/habits/components/HabitHeatmap'
@@ -11,7 +11,7 @@ interface HabitDetailWorkspaceProps {
   habit: Habit
   stats: HabitDetailStats
   onEdit: () => void
-  onMenu: () => void
+  onDelete: () => void
 }
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
@@ -26,7 +26,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 }
 
 /** Desktop habit-detail workspace: identity header, stat tiles, year heatmap. */
-export function HabitDetailWorkspace({ habit, stats, onEdit, onMenu }: HabitDetailWorkspaceProps) {
+export function HabitDetailWorkspace({ habit, stats, onEdit, onDelete }: HabitDetailWorkspaceProps) {
   const color = resolveHabitColor(habit.color)
   const Icon = resolveHabitIcon(habit.icon)
   const subtitle = [frequencyLabel(habit), habit.description, timeOfDayLabel(habit.time_of_day)]
@@ -34,7 +34,7 @@ export function HabitDetailWorkspace({ habit, stats, onEdit, onMenu }: HabitDeta
     .join(' · ')
 
   return (
-    <div className="mx-auto max-w-[900px]">
+    <div className="mx-auto w-full max-w-[900px]">
       <header className="flex items-center gap-4">
         <IconTile icon={Icon} tone={color.tile} size="lg" />
         <div className="min-w-0 flex-1">
@@ -53,11 +53,11 @@ export function HabitDetailWorkspace({ habit, stats, onEdit, onMenu }: HabitDeta
         </button>
         <button
           type="button"
-          onClick={onMenu}
-          aria-label="Habit options"
-          className="rounded-full p-2 text-muted-strong transition-colors hover:bg-surface hover:text-foreground"
+          onClick={onDelete}
+          aria-label="Delete habit"
+          className="rounded-[11px] border p-[11px] text-muted-strong transition-colors hover:border-accent/40 hover:text-accent"
         >
-          <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+          <Trash2 className="h-4 w-4" aria-hidden="true" />
         </button>
       </header>
 

@@ -139,7 +139,7 @@ function HabitDetailPage() {
           habit={habit}
           stats={stats}
           onEdit={() => openEditHabit(habit.id)}
-          onMenu={() => setMenuOpen(true)}
+          onDelete={() => setConfirmDelete(true)}
         />
         <Rail>
           <HabitDetailRail

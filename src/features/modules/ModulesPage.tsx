@@ -65,28 +65,34 @@ function ModulesPage() {
                 <div
                   key={m.key}
                   className={cn(
-                    'flex flex-col rounded-[20px] border p-4 transition-colors',
+                    'relative flex flex-col rounded-[20px] border p-4 transition-colors',
                     on
                       ? 'border-accent/25 bg-gradient-to-br from-accent/[0.07] to-transparent'
-                      : 'bg-surface',
+                      : 'bg-surface hover:border-accent/25',
                   )}
                 >
-                  <div className="flex items-start justify-between">
-                    <IconTile icon={m.icon} tone={MODULE_TONE[m.key]} size="sm" />
-                    <Switch
-                      checked={on}
-                      onCheckedChange={() => toggle(m.key)}
-                      aria-label={`Show ${m.label} in navigation`}
-                    />
-                  </div>
+                  {/* Stretched overlay: the whole card opens the module; the
+                      nav switch sits above it (z-10) with its own click. */}
                   <button
                     type="button"
                     onClick={() => navigate(m.to)}
-                    className="mt-3 block w-full rounded text-left"
-                  >
+                    aria-label={`Open ${m.label}`}
+                    className="absolute inset-0 z-0 rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+                  />
+                  <div className="flex items-start justify-between">
+                    <IconTile icon={m.icon} tone={MODULE_TONE[m.key]} size="sm" />
+                    <div className="relative z-10">
+                      <Switch
+                        checked={on}
+                        onCheckedChange={() => toggle(m.key)}
+                        aria-label={`Show ${m.label} in navigation`}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-3">
                     <p className="font-semibold">{m.label}</p>
                     <p className="mt-0.5 font-mono text-[10px] text-muted-strong">{stats[m.key]}</p>
-                  </button>
+                  </div>
                 </div>
               )
             })}

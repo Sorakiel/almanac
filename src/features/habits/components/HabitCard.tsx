@@ -36,18 +36,24 @@ export function HabitCard({ habit }: HabitCardProps) {
   }
 
   return (
-    <Card className="p-4">
+    <Card className="relative p-4 transition-colors hover:border-accent/30">
+      {/* Stretched overlay: the whole card opens the habit, while the toggle
+          below sits above it (z-10) and keeps its own click. */}
+      <button
+        type="button"
+        onClick={() => navigate(`/habits/${habit.id}`)}
+        aria-label={`Open ${habit.name}`}
+        className="absolute inset-0 z-0 rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+      />
       <div className="flex items-start gap-3">
         <IconTile icon={Icon} tone={color.tile} />
-        <button
-          type="button"
-          onClick={() => navigate(`/habits/${habit.id}`)}
-          className="min-w-0 flex-1 text-left"
-        >
+        <div className="min-w-0 flex-1">
           <p className="truncate font-semibold">{habit.name}</p>
           <p className="truncate text-sm text-muted">{subtitle}</p>
-        </button>
-        <CheckToggle habit={habit} onToggle={handleToggle} />
+        </div>
+        <div className="relative z-10">
+          <CheckToggle habit={habit} onToggle={handleToggle} />
+        </div>
       </div>
 
       <div className="mt-3 flex items-end justify-between gap-3">
