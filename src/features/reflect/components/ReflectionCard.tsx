@@ -12,9 +12,16 @@ interface ReflectionCardProps {
   quote: Quote | null
 }
 
-/** One past reflection: its day, body, and the quote it was written against. */
+const RATING_LABELS: { key: 'mood' | 'energy' | 'day_rating'; label: string }[] = [
+  { key: 'mood', label: 'Mood' },
+  { key: 'energy', label: 'Energy' },
+  { key: 'day_rating', label: 'Day' },
+]
+
+/** One past reflection: its ratings, body, and the quote it was written against. */
 export function ReflectionCard({ reflection, quote }: ReflectionCardProps) {
   const { remove } = useReflectionMutations()
+  const ratings = RATING_LABELS.filter((r) => reflection[r.key] !== null)
 
   const handleDelete = () => {
     remove.mutate(reflection.id, {
@@ -37,7 +44,19 @@ export function ReflectionCard({ reflection, quote }: ReflectionCardProps) {
           <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       </div>
-      <p className="whitespace-pre-wrap text-[14px] leading-relaxed">{reflection.body}</p>
+      {ratings.length > 0 ? (
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          {ratings.map((r) => (
+            <span key={r.key} className="font-mono text-[11px] text-muted-strong">
+              {r.label}{' '}
+              <span className="text-amber">{'★'.repeat(reflection[r.key] as number)}</span>
+            </span>
+          ))}
+        </div>
+      ) : null}
+      {reflection.body ? (
+        <p className="whitespace-pre-wrap text-[14px] leading-relaxed">{reflection.body}</p>
+      ) : null}
       {quote ? (
         <p className="label-mono text-muted-strong/80">◇ {quote.author ?? 'Unknown'}</p>
       ) : null}

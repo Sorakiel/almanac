@@ -52,6 +52,41 @@ export type Database = {
           },
         ]
       }
+      book_rating_events: {
+        Row: {
+          book_id: string
+          created_at: string
+          current_unit: number
+          id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          current_unit?: number
+          id?: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          current_unit?: number
+          id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_rating_events_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       books: {
         Row: {
           author: string | null
@@ -322,7 +357,10 @@ export type Database = {
           body: string
           created_at: string
           date: string
+          day_rating: number | null
+          energy: number | null
           id: string
+          mood: number | null
           quote_id: string | null
           user_id: string
         }
@@ -330,7 +368,10 @@ export type Database = {
           body: string
           created_at?: string
           date: string
+          day_rating?: number | null
+          energy?: number | null
           id?: string
+          mood?: number | null
           quote_id?: string | null
           user_id: string
         }
@@ -338,7 +379,10 @@ export type Database = {
           body?: string
           created_at?: string
           date?: string
+          day_rating?: number | null
+          energy?: number | null
           id?: string
+          mood?: number | null
           quote_id?: string | null
           user_id?: string
         }

@@ -19,10 +19,14 @@ export async function createReflection(input: ReflectionInsert): Promise<Reflect
   return data
 }
 
-export async function updateReflectionBody(id: string, body: string): Promise<Reflection> {
+export type ReflectionPatch = Partial<
+  Pick<Reflection, 'body' | 'mood' | 'energy' | 'day_rating'>
+>
+
+export async function updateReflection(id: string, patch: ReflectionPatch): Promise<Reflection> {
   const { data, error } = await supabase
     .from('reflections')
-    .update({ body })
+    .update(patch)
     .eq('id', id)
     .select()
     .single()

@@ -3,7 +3,7 @@ import { useSession } from '@/hooks/useSession'
 import {
   createReflection,
   deleteReflection,
-  updateReflectionBody,
+  updateReflection,
 } from '@/features/reflect/api/reflections.api'
 
 interface SaveInput {
@@ -12,6 +12,9 @@ interface SaveInput {
   date: string
   body: string
   quoteId: string | null
+  mood: number | null
+  energy: number | null
+  dayRating: number | null
 }
 
 /** Save (create or update today's) and delete reflections; invalidate on settle. */
@@ -23,10 +26,18 @@ export function useReflectionMutations() {
   const invalidate = () => void queryClient.invalidateQueries({ queryKey: key })
 
   const save = useMutation({
-    mutationFn: ({ id, date, body, quoteId }: SaveInput) =>
+    mutationFn: ({ id, date, body, quoteId, mood, energy, dayRating }: SaveInput) =>
       id
-        ? updateReflectionBody(id, body)
-        : createReflection({ user_id: userId, date, body, quote_id: quoteId }),
+        ? updateReflection(id, { body, mood, energy, day_rating: dayRating })
+        : createReflection({
+            user_id: userId,
+            date,
+            body,
+            quote_id: quoteId,
+            mood,
+            energy,
+            day_rating: dayRating,
+          }),
     onSuccess: invalidate,
   })
 

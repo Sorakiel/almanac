@@ -1,17 +1,18 @@
 import { toast } from 'sonner'
-import { Star } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Segmented } from '@/components/ui/segmented'
 import { SectionLabel } from '@/components/common/SectionLabel'
+import { StarRating } from '@/components/common/StarRating'
 import { useBookMutations } from '@/features/reading/hooks/useBookMutations'
+import { useRateBook } from '@/features/reading/hooks/useRateBook'
 import { type BookPatch } from '@/features/reading/api/books.api'
 import { useToday } from '@/hooks/useToday'
-import { cn } from '@/lib/utils'
 import type { Book, BookStatus } from '@/features/reading/types'
 
-/** Status (with auto start/finish dates), editable dates, and a finished rating. */
+/** Status (with auto start/finish dates), editable dates, and a live rating. */
 export function BookStatusControls({ book }: { book: Book }) {
   const { update } = useBookMutations()
+  const rate = useRateBook()
   const { dateKey } = useToday()
 
   const patch = (fields: BookPatch) =>
@@ -20,6 +21,15 @@ export function BookStatusControls({ book }: { book: Book }) {
       {
         onError: (error) =>
           toast.error(error instanceof Error ? error.message : 'Could not update the book'),
+      },
+    )
+
+  const onRate = (rating: number | null) =>
+    rate.mutate(
+      { book, rating },
+      {
+        onError: (error) =>
+          toast.error(error instanceof Error ? error.message : 'Could not save the rating'),
       },
     )
 
@@ -66,35 +76,10 @@ export function BookStatusControls({ book }: { book: Book }) {
         </label>
       </div>
 
-      {book.status === 'finished' ? (
-        <div className="flex items-center gap-2">
-          <span className="label-mono text-muted-strong">Rating</span>
-          <div className="flex items-center gap-1" role="radiogroup" aria-label="Book rating">
-            {[1, 2, 3, 4, 5].map((star) => {
-              const active = (book.rating ?? 0) >= star
-              return (
-                <button
-                  key={star}
-                  type="button"
-                  role="radio"
-                  aria-checked={active}
-                  aria-label={`${star} star${star > 1 ? 's' : ''}`}
-                  onClick={() => patch({ rating: book.rating === star ? null : star })}
-                  className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                >
-                  <Star
-                    className={cn(
-                      'h-5 w-5 transition-colors',
-                      active ? 'fill-amber text-amber' : 'text-muted-strong',
-                    )}
-                    aria-hidden="true"
-                  />
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      ) : null}
+      <div className="flex flex-col gap-1.5">
+        <span className="label-mono text-muted-strong">Your rating</span>
+        <StarRating value={book.rating} onChange={onRate} size="lg" aria-label="Book rating" />
+      </div>
     </section>
   )
 }
