@@ -4,8 +4,19 @@ Emails users a nudge when they still have daily habits left to complete, at the
 local hour they chose in **Settings → Daily reminder**.
 
 It runs with the service-role key (bypasses RLS) and sends mail through
-[Resend](https://resend.com). Everything below is **owner setup** — Claude can't
-do it because it needs your credentials.
+[Resend](https://resend.com).
+
+## Status: LIVE (deployed 2026-07-14)
+
+The function is deployed (verify_jwt on) and an hourly pg_cron job
+`almanac-daily-reminder` (`0 * * * *`) invokes it via pg_net with the anon JWT.
+Verified end-to-end: a manual call returned `200 {"sent":0}`. The three secrets
+(RESEND_API_KEY / REMINDER_FROM / APP_URL) are set. Reminders fire for any user
+who enables one in Settings. NOTE: with a Resend account that has no verified
+domain, delivery only reaches the Resend account owner's own address — friends'
+reminders need a verified domain.
+
+The steps below document how to re-create this setup from scratch.
 
 ## One-time setup
 
