@@ -15,18 +15,27 @@ export async function signInWithPassword({ email, password }: Credentials): Prom
   if (error) throw error
 }
 
-/** Create an account; display_name is stored in user metadata for the profile trigger. */
+/**
+ * Create an account; display_name is stored in user metadata for the profile
+ * trigger. Returns `needsConfirmation: true` when the project requires email
+ * confirmation — Supabase then returns a user but no session, so the caller
+ * should tell the user to check their inbox instead of routing them in.
+ */
 export async function signUpWithPassword({
   email,
   password,
   displayName,
-}: SignUpArgs): Promise<void> {
-  const { error } = await supabase.auth.signUp({
+}: SignUpArgs): Promise<{ needsConfirmation: boolean }> {
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { display_name: displayName } },
+    options: {
+      data: { display_name: displayName },
+      emailRedirectTo: `${window.location.origin}/`,
+    },
   })
   if (error) throw error
+  return { needsConfirmation: data.session === null }
 }
 
 /** Passwordless sign-in: email a one-tap magic link that lands on the app root. */

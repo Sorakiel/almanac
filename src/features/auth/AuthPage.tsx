@@ -57,12 +57,17 @@ function AuthPage() {
     try {
       setRememberMe(remember)
       if (mode === 'signup') {
-        await signUp.mutateAsync({
+        const { needsConfirmation } = await signUp.mutateAsync({
           email: values.email,
           password: values.password,
           displayName: values.displayName?.trim() || values.email.split('@')[0]!,
         })
-        toast.success('Account created — welcome to Almanac.')
+        if (needsConfirmation) {
+          toast.success('Almost there — check your email to confirm your account.')
+          setMode('signin')
+        } else {
+          toast.success('Account created — welcome to Almanac.')
+        }
       } else {
         await signIn.mutateAsync({ email: values.email, password: values.password })
       }
