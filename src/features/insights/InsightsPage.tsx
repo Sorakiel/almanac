@@ -1,4 +1,5 @@
-import { BarChart3, Loader2, RefreshCw } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { BarChart3, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Rail } from '@/components/common/desktop/rail'
@@ -11,8 +12,11 @@ import { InsightsRail } from '@/features/insights/components/desktop/InsightsRai
 import { useInsights } from '@/features/insights/hooks/useInsights'
 import { useWorkoutInsights } from '@/features/insights/hooks/useWorkoutInsights'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useUiStore } from '@/stores/ui'
 
 function InsightsPage() {
+  const navigate = useNavigate()
+  const openNewHabit = useUiStore((s) => s.openNewHabit)
   const { insights, isLoading, isError, refetch } = useInsights()
   const { data: workoutInsights, isLoading: woLoading } = useWorkoutInsights()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
@@ -45,11 +49,22 @@ function InsightsPage() {
   const workoutHasData = Boolean(workoutInsights?.hasData)
 
   if (!habitHasData && !workoutHasData) {
+    // New user, no data yet — point them at the first habit rather than a dead end.
+    const startHabit = () => {
+      navigate('/habits')
+      openNewHabit()
+    }
     return (
       <EmptyState
         icon={BarChart3}
         title="No insights yet"
-        description="Track habits or log a workout and your trends will show up here."
+        description="Add your first habit and start checking it off — your trends will build up here."
+        action={
+          <Button size="sm" onClick={startHabit}>
+            <Plus className="h-4 w-4" />
+            Add your first habit
+          </Button>
+        }
       />
     )
   }
