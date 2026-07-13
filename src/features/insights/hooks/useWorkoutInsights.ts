@@ -4,6 +4,7 @@ import { useToday } from '@/hooks/useToday'
 import { fetchWorkoutInsightsData } from '@/features/insights/api/workoutInsights.api'
 import { computeWorkoutInsights } from '@/features/insights/lib/computeWorkoutInsights'
 import type { WorkoutInsights } from '@/features/insights/types'
+import { useModulesStore } from '@/stores/modules'
 
 interface UseWorkoutInsightsResult {
   data: WorkoutInsights | null
@@ -15,11 +16,13 @@ export function useWorkoutInsights(): UseWorkoutInsightsResult {
   const { user } = useSession()
   const { dateKey } = useToday()
   const userId = user?.id ?? ''
+  // Training stats belong to the Workouts module — hide them when it's off.
+  const workoutsEnabled = useModulesStore((s) => s.enabled.workouts)
 
   const query = useQuery({
     queryKey: ['insights', 'workouts', userId, dateKey],
     queryFn: () => fetchWorkoutInsightsData(userId),
-    enabled: Boolean(userId),
+    enabled: Boolean(userId) && workoutsEnabled,
   })
 
   return {

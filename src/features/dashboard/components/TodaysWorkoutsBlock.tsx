@@ -8,6 +8,7 @@ import { Tag } from '@/components/common/Tag'
 import { useTodaysWorkouts, type DueWorkout } from '@/features/workouts/hooks/useTodaysWorkouts'
 import { useWorkoutMutations } from '@/features/workouts/hooks/useWorkoutMutations'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
+import { useModulesStore } from '@/stores/modules'
 import { cn } from '@/lib/utils'
 
 function Row({ item }: { item: DueWorkout }) {
@@ -55,8 +56,10 @@ function Row({ item }: { item: DueWorkout }) {
 
 /** Dashboard block: workouts scheduled for today. Hidden when nothing's due. */
 export function TodaysWorkoutsBlock() {
+  const workoutsEnabled = useModulesStore((s) => s.enabled.workouts)
   const { due } = useTodaysWorkouts()
-  if (due.length === 0) return null
+  // Don't leak training onto the dashboard when the module is switched off.
+  if (!workoutsEnabled || due.length === 0) return null
 
   const doneCount = due.filter((d) => d.doneToday).length
 
