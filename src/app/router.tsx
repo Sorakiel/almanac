@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components -- this is the route table,
+   not a fast-refreshed component module; the lazy() consts are route targets. */
 import { lazy, Suspense, type ReactElement } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AppLayout } from '@/app/AppLayout'
