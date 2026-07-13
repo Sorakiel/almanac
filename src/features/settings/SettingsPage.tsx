@@ -20,6 +20,8 @@ import { Tag } from '@/components/common/Tag'
 import { Rail } from '@/components/common/desktop/rail'
 import { SettingsRail } from '@/features/settings/components/SettingsRail'
 import { TimezoneSheet } from '@/features/settings/components/TimezoneSheet'
+import { ReminderSheet } from '@/features/settings/components/ReminderSheet'
+import { reminderTimeLabel } from '@/features/settings/lib/reminder'
 import { useSession } from '@/hooks/useSession'
 import { useTheme } from '@/hooks/useTheme'
 import { useToday } from '@/hooks/useToday'
@@ -35,6 +37,7 @@ function SettingsPage() {
   const { profile } = useProfile()
   const { dateKey } = useToday()
   const [timezoneOpen, setTimezoneOpen] = useState(false)
+  const [reminderOpen, setReminderOpen] = useState(false)
 
   if (status === 'anonymous') return <Navigate to="/auth" replace />
 
@@ -47,6 +50,8 @@ function SettingsPage() {
       )
     : 0
   const soon = () => toast('This setting is coming soon.')
+  const reminderEnabled = profile?.reminder_enabled ?? false
+  const reminderHour = profile?.reminder_hour ?? 8
 
   const handleSignOut = async () => {
     try {
@@ -92,8 +97,12 @@ function SettingsPage() {
               value={(profile?.timezone ?? browserTimezone()).replace(/_/g, ' ')}
               onClick={() => setTimezoneOpen(true)}
             />
-            <Row icon={Bell} label="Notifications" value="Off" onClick={soon} />
-            <Row icon={AlarmClock} label="Daily reminder" value="08:00" onClick={soon} />
+            <Row
+              icon={reminderEnabled ? AlarmClock : Bell}
+              label="Daily reminder"
+              value={reminderEnabled ? reminderTimeLabel(reminderHour) : 'Off'}
+              onClick={() => setReminderOpen(true)}
+            />
             <Row icon={Download} label="Export data" onClick={soon} />
           </div>
         </section>
@@ -124,6 +133,14 @@ function SettingsPage() {
           open
           onOpenChange={setTimezoneOpen}
           current={profile?.timezone ?? browserTimezone()}
+        />
+      ) : null}
+      {reminderOpen ? (
+        <ReminderSheet
+          open
+          onOpenChange={setReminderOpen}
+          enabled={reminderEnabled}
+          hour={reminderHour}
         />
       ) : null}
     </>

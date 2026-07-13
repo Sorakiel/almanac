@@ -6,7 +6,16 @@ import tseslint from 'typescript-eslint'
 import prettier from 'eslint-config-prettier'
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'src/types/database.generated.ts'] },
+  // supabase/functions run on Deno (remote imports, Deno global) — not part of
+  // the Vite/Node app, so the Node-oriented lint config doesn't apply.
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      'src/types/database.generated.ts',
+      'supabase/functions',
+    ],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

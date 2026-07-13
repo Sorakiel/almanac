@@ -272,6 +272,8 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          reminder_enabled: boolean
+          reminder_hour: number
           role: Database["public"]["Enums"]["user_role"]
           timezone: string
         }
@@ -280,6 +282,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          reminder_enabled?: boolean
+          reminder_hour?: number
           role?: Database["public"]["Enums"]["user_role"]
           timezone?: string
         }
@@ -288,6 +292,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          reminder_enabled?: boolean
+          reminder_hour?: number
           role?: Database["public"]["Enums"]["user_role"]
           timezone?: string
         }
