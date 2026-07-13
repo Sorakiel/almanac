@@ -26,7 +26,9 @@ export function useWorkoutInsights(): UseWorkoutInsightsResult {
   })
 
   return {
-    data: query.data ? computeWorkoutInsights(query.data, dateKey) : null,
+    // Gate on the flag too: a disabled query keeps its last cached data, which
+    // would otherwise keep the section visible after the module is switched off.
+    data: workoutsEnabled && query.data ? computeWorkoutInsights(query.data, dateKey) : null,
     isLoading: query.isLoading,
   }
 }

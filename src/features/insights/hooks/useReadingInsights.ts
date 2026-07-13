@@ -25,7 +25,9 @@ export function useReadingInsights(): UseReadingInsightsResult {
   })
 
   return {
-    data: query.data ? computeReadingInsights(query.data, dateKey) : null,
+    // Gate on the flag too: a disabled query keeps its last cached data, which
+    // would otherwise keep the section visible after the module is switched off.
+    data: readingEnabled && query.data ? computeReadingInsights(query.data, dateKey) : null,
     isLoading: query.isLoading,
   }
 }

@@ -19,6 +19,7 @@ import { FlowReadingRunner } from '@/features/flow/components/FlowReadingRunner'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useFocusStore } from '@/stores/focus'
+import { useModulesStore } from '@/stores/modules'
 import { cn } from '@/lib/utils'
 
 const DURATIONS_MIN = [15, 25, 45]
@@ -33,6 +34,8 @@ function FlowPage() {
   const { habits } = useHabits()
   const { workouts } = useWorkouts()
   const { books } = useBooks()
+  const workoutsEnabled = useModulesStore((s) => s.enabled.workouts)
+  const readingEnabled = useModulesStore((s) => s.enabled.reading)
   const { user } = useSession()
   const { dateKey } = useToday()
   const queryClient = useQueryClient()
@@ -44,6 +47,11 @@ function FlowPage() {
   const [customLabel, setCustomLabel] = useState('')
   const [duration, setDuration] = useState(25)
   const [now, setNow] = useState(() => Date.now())
+
+  // If the module behind the selected mode was just disabled, fall back to Habit.
+  if ((mode === 'workout' && !workoutsEnabled) || (mode === 'book' && !readingEnabled)) {
+    setMode('habit')
+  }
 
   const running = endsAt !== null && durationMin !== null
   const dueHabits = habits.filter((h) => h.dueToday && !h.isComplete)
@@ -170,10 +178,10 @@ function FlowPage() {
         value={mode}
         onChange={setMode}
         options={[
-          { value: 'habit', label: 'Habit' },
-          { value: 'workout', label: 'Workout' },
-          { value: 'book', label: 'Read' },
-          { value: 'custom', label: 'Describe' },
+          { value: 'habit' as const, label: 'Habit' },
+          ...(workoutsEnabled ? [{ value: 'workout' as const, label: 'Workout' }] : []),
+          ...(readingEnabled ? [{ value: 'book' as const, label: 'Read' }] : []),
+          { value: 'custom' as const, label: 'Describe' },
         ]}
       />
 
