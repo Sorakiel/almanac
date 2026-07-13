@@ -29,6 +29,24 @@ export async function signUpWithPassword({
   if (error) throw error
 }
 
+/** Redirect to Google's consent screen; the session lands back on the app root. */
+export async function signInWithGoogle(): Promise<void> {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: `${window.location.origin}/` },
+  })
+  if (error) throw error
+}
+
+/** Passwordless sign-in: email a one-tap magic link that lands on the app root. */
+export async function signInWithMagicLink(email: string): Promise<void> {
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: `${window.location.origin}/` },
+  })
+  if (error) throw error
+}
+
 export async function signOut(): Promise<void> {
   // Local scope: drop the stored session without a server round-trip. A global
   // sign-out tries to revoke the token server-side, which hangs or 400s when

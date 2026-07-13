@@ -27,7 +27,7 @@ function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(true)
   const { status } = useSession()
-  const { signIn, signUp, resetRequest } = useAuthActions()
+  const { signIn, signUp, google, magicLink, resetRequest } = useAuthActions()
   const {
     register,
     handleSubmit,
@@ -35,7 +35,32 @@ function AuthPage() {
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
-  const pending = signIn.isPending || signUp.isPending || resetRequest.isPending
+  const pending =
+    signIn.isPending || signUp.isPending || resetRequest.isPending || magicLink.isPending
+
+  const onGoogle = async () => {
+    try {
+      setRememberMe(remember)
+      await google.mutateAsync()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not reach Google sign-in')
+    }
+  }
+
+  const onMagicLink = async () => {
+    const email = getValues('email').trim()
+    if (!email || !z.string().email().safeParse(email).success) {
+      toast.error('Enter your email above first, then tap the magic link.')
+      return
+    }
+    try {
+      setRememberMe(remember)
+      await magicLink.mutateAsync(email)
+      toast.success('Magic link sent — check your inbox to sign in.')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not send the magic link')
+    }
+  }
 
   const onSubmit = handleSubmit(async (values) => {
     try {
@@ -183,20 +208,22 @@ function AuthPage() {
             <span className="h-px flex-1 bg-border" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-3">
             <Button
               variant="ghost"
-              className="border bg-transparent font-semibold"
-              onClick={() => toast('Social sign-in is coming soon.')}
+              className="w-full border bg-transparent font-semibold"
+              onClick={onGoogle}
+              disabled={google.isPending}
             >
-              Apple
+              {google.isPending ? 'Redirecting…' : 'G · Continue with Google'}
             </Button>
             <Button
               variant="ghost"
-              className="border bg-transparent font-semibold"
-              onClick={() => toast('Social sign-in is coming soon.')}
+              className="w-full border bg-transparent font-semibold"
+              onClick={onMagicLink}
+              disabled={magicLink.isPending}
             >
-              G · Google
+              {magicLink.isPending ? 'Sending…' : '✦ Email me a magic link'}
             </Button>
           </div>
         </div>

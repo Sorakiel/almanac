@@ -1,6 +1,8 @@
 import { useMutation } from '@tanstack/react-query'
 import {
   requestPasswordReset,
+  signInWithGoogle,
+  signInWithMagicLink,
   signInWithPassword,
   signOut,
   signUpWithPassword,
@@ -11,8 +13,10 @@ import {
 export function useAuthActions() {
   const signIn = useMutation({ mutationFn: signInWithPassword })
   const signUp = useMutation({ mutationFn: signUpWithPassword })
+  const google = useMutation({ mutationFn: signInWithGoogle })
+  const magicLink = useMutation({ mutationFn: signInWithMagicLink })
   const logOut = useMutation({ mutationFn: signOut })
   const resetRequest = useMutation({ mutationFn: requestPasswordReset })
   const setPassword = useMutation({ mutationFn: updatePassword })
-  return { signIn, signUp, logOut, resetRequest, setPassword }
+  return { signIn, signUp, google, magicLink, logOut, resetRequest, setPassword }
 }
