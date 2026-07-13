@@ -4,7 +4,7 @@ import { Avatar } from '@/components/common/Avatar'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSession } from '@/hooks/useSession'
-import { NAV_MODULES, useModulesStore } from '@/stores/modules'
+import { CORE_MODULES, OPTIONAL_MODULES, useModulesStore } from '@/stores/modules'
 import { cn } from '@/lib/utils'
 
 interface NavEntry {
@@ -83,17 +83,24 @@ export function Sidebar() {
   const roleLabel =
     profile?.role === 'owner' ? 'Owner' : profile?.role === 'admin' ? 'Admin' : 'Member'
 
-  // Today always leads; the enabled modules follow (mirroring the bottom nav,
-  // so the "More" switches add/remove them here).
+  // Fixed primary nav: Today + the core modules (Habits, Insights). Always
+  // present, never toggled — the three buttons the app always answers with.
   const primary: NavEntry[] = [
     { to: '/', label: 'Today', icon: Home, end: true, count: dueCount },
-    ...NAV_MODULES.filter((m) => enabled[m.key]).map((m) => ({
+    ...CORE_MODULES.map((m) => ({
       to: m.to,
       label: m.label,
       icon: m.icon,
       count: m.key === 'habits' ? habits.length : undefined,
     })),
   ]
+
+  // Optional modules the user has switched on in the hub live under "Modules".
+  const modules: NavEntry[] = OPTIONAL_MODULES.filter((m) => enabled[m.key]).map((m) => ({
+    to: m.to,
+    label: m.label,
+    icon: m.icon,
+  }))
 
   return (
     <aside className="flex w-[250px] flex-none flex-col border-r bg-chrome px-[18px] py-6">
@@ -111,6 +118,13 @@ export function Sidebar() {
       <p className="px-3.5 pb-2.5 pt-[22px] font-mono text-[9.5px] uppercase tracking-label text-muted-strong/80">
         modules
       </p>
+      {modules.length > 0 ? (
+        <nav aria-label="Modules" className="mb-1 flex flex-col gap-0.5">
+          {modules.map((entry) => (
+            <NavRow key={entry.to} entry={entry} />
+          ))}
+        </nav>
+      ) : null}
       <NavLink
         to="/more"
         className={({ isActive }) =>

@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Home, LayoutGrid, type LucideIcon } from 'lucide-react'
-import { MAX_NAV_MODULES, NAV_MODULES, useModulesStore } from '@/stores/modules'
+import { CORE_MODULES } from '@/stores/modules'
 import { useUiStore } from '@/stores/ui'
 import { cn } from '@/lib/utils'
 
@@ -34,18 +34,17 @@ function NavButton({ item }: { item: NavItem }) {
   )
 }
 
-/** Glassmorphism bottom nav (spec board): Today + enabled modules + More. */
+/** Glassmorphism bottom nav (spec board): Today + core modules + More. */
 export function BottomNav() {
   const navigate = useNavigate()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
-  const enabled = useModulesStore((s) => s.enabled)
 
-  // Today and More always anchor the nav; enabled modules fill the middle.
-  const modules = NAV_MODULES.filter((m) => enabled[m.key]).slice(0, MAX_NAV_MODULES)
-  const items: NavItem[] = [TODAY, ...modules, MORE]
-  const mid = Math.ceil(items.length / 2)
-  const left = items.slice(0, mid)
-  const right = items.slice(mid)
+  // A fixed, uncluttered mobile nav: Today, the core modules (Habits, Insights),
+  // then More. Optional modules stay one tap away inside the More hub — the small
+  // bottom bar never has to grow or reshuffle as the user toggles modules.
+  const core: NavItem[] = CORE_MODULES.map((m) => ({ to: m.to, label: m.label, icon: m.icon }))
+  const left: NavItem[] = [TODAY, ...core.slice(0, 1)]
+  const right: NavItem[] = [...core.slice(1), MORE]
 
   const handleAdd = () => {
     navigate('/habits')

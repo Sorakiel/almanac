@@ -57,7 +57,7 @@ function ModulesPage() {
         </header>
 
         <section className="flex flex-col gap-3">
-          <SectionLabel accessory="switch = show in nav">ACTIVE</SectionLabel>
+          <SectionLabel accessory="switch = show in nav">MODULES</SectionLabel>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
             {NAV_MODULES.map((m) => {
               const on = enabled[m.key]
@@ -82,11 +82,16 @@ function ModulesPage() {
                   <div className="flex items-start justify-between">
                     <IconTile icon={m.icon} tone={MODULE_TONE[m.key]} size="sm" />
                     <div className="relative z-10">
-                      <Switch
-                        checked={on}
-                        onCheckedChange={() => toggle(m.key)}
-                        aria-label={`Show ${m.label} in navigation`}
-                      />
+                      {m.core ? (
+                        // Core modules are permanent — locked on, no toggle.
+                        <Tag tone="muted">Pinned</Tag>
+                      ) : (
+                        <Switch
+                          checked={on}
+                          onCheckedChange={() => toggle(m.key)}
+                          aria-label={`Show ${m.label} in navigation`}
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="mt-3">
