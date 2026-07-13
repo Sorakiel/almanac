@@ -27,7 +27,7 @@ function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(true)
   const { status } = useSession()
-  const { signIn, signUp, google, magicLink, resetRequest } = useAuthActions()
+  const { signIn, signUp, magicLink, resetRequest } = useAuthActions()
   const {
     register,
     handleSubmit,
@@ -37,15 +37,6 @@ function AuthPage() {
 
   const pending =
     signIn.isPending || signUp.isPending || resetRequest.isPending || magicLink.isPending
-
-  const onGoogle = async () => {
-    try {
-      setRememberMe(remember)
-      await google.mutateAsync()
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not reach Google sign-in')
-    }
-  }
 
   const onMagicLink = async () => {
     const email = getValues('email').trim()
@@ -208,24 +199,14 @@ function AuthPage() {
             <span className="h-px flex-1 bg-border" />
           </div>
 
-          <div className="flex flex-col gap-3">
-            <Button
-              variant="ghost"
-              className="w-full border bg-transparent font-semibold"
-              onClick={onGoogle}
-              disabled={google.isPending}
-            >
-              {google.isPending ? 'Redirecting…' : 'G · Continue with Google'}
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full border bg-transparent font-semibold"
-              onClick={onMagicLink}
-              disabled={magicLink.isPending}
-            >
-              {magicLink.isPending ? 'Sending…' : '✦ Email me a magic link'}
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            className="w-full border bg-transparent font-semibold"
+            onClick={onMagicLink}
+            disabled={magicLink.isPending}
+          >
+            {magicLink.isPending ? 'Sending…' : '✦ Email me a magic link'}
+          </Button>
         </div>
       </main>
     </div>
