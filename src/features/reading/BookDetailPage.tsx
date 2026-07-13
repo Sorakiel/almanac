@@ -91,7 +91,7 @@ function BookDetailPage() {
         Read in Flow · {READING_SESSION_MIN} min
       </Button>
 
-      <ProgressUpdater book={book} />
+      <ProgressUpdater book={book} sessions={sessions} />
       <BookStatusControls book={book} />
       <NotesSection book={book} notes={notes} />
 

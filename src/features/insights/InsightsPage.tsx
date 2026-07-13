@@ -7,10 +7,12 @@ import { CompletionTrend } from '@/features/insights/components/CompletionTrend'
 import { HabitRateList } from '@/features/insights/components/HabitRateList'
 import { InsightStat } from '@/features/insights/components/InsightStat'
 import { WorkoutInsightsSection } from '@/features/insights/components/WorkoutInsightsSection'
+import { ReadingInsightsSection } from '@/features/insights/components/ReadingInsightsSection'
 import { InsightsWorkspace } from '@/features/insights/components/desktop/InsightsWorkspace'
 import { InsightsRail } from '@/features/insights/components/desktop/InsightsRail'
 import { useInsights } from '@/features/insights/hooks/useInsights'
 import { useWorkoutInsights } from '@/features/insights/hooks/useWorkoutInsights'
+import { useReadingInsights } from '@/features/insights/hooks/useReadingInsights'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useUiStore } from '@/stores/ui'
 
@@ -19,9 +21,10 @@ function InsightsPage() {
   const openNewHabit = useUiStore((s) => s.openNewHabit)
   const { insights, isLoading, isError, refetch } = useInsights()
   const { data: workoutInsights, isLoading: woLoading } = useWorkoutInsights()
+  const { data: readingInsights, isLoading: rdLoading } = useReadingInsights()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
 
-  if (isLoading || woLoading) {
+  if (isLoading || woLoading || rdLoading) {
     return (
       <div className="flex justify-center py-24" role="status" aria-live="polite">
         <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
@@ -47,8 +50,9 @@ function InsightsPage() {
 
   const habitHasData = insights.hasData
   const workoutHasData = Boolean(workoutInsights?.hasData)
+  const readingHasData = Boolean(readingInsights?.hasData)
 
-  if (!habitHasData && !workoutHasData) {
+  if (!habitHasData && !workoutHasData && !readingHasData) {
     // New user, no data yet — point them at the first habit rather than a dead end.
     const startHabit = () => {
       navigate('/habits')
@@ -72,7 +76,11 @@ function InsightsPage() {
   if (isDesktop) {
     return (
       <>
-        <InsightsWorkspace insights={insights} workoutInsights={workoutInsights} />
+        <InsightsWorkspace
+          insights={insights}
+          workoutInsights={workoutInsights}
+          readingInsights={readingInsights}
+        />
         <Rail>
           <InsightsRail insights={insights} />
         </Rail>
@@ -140,6 +148,8 @@ function InsightsPage() {
       ) : null}
 
       {workoutHasData && workoutInsights ? <WorkoutInsightsSection data={workoutInsights} /> : null}
+
+      {readingHasData && readingInsights ? <ReadingInsightsSection data={readingInsights} /> : null}
     </section>
   )
 }

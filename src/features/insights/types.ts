@@ -62,3 +62,29 @@ export interface WorkoutInsights {
   prs: ExercisePR[]
   hasData: boolean
 }
+
+/** A book the reader is partway through, for the "currently reading" list. */
+export interface ReadingProgressItem {
+  id: string
+  title: string
+  author: string | null
+  /** Completion 0–100, or null when the book's length is unknown. */
+  pct: number | null
+}
+
+/** Reading stats derived from books + logged reading sessions. */
+export interface ReadingInsights {
+  booksReading: number
+  booksFinished: number
+  /** Books finished in the current calendar year. */
+  finishedThisYear: number
+  /** Pages read (pages-mode books) in the last 30 days. */
+  pages30d: number
+  /** Minutes read in the last 30 days. */
+  minutes30d: number
+  /** Reading sessions logged in the last 30 days. */
+  sessions30d: number
+  /** In-progress books, most recently added first. */
+  currentlyReading: ReadingProgressItem[]
+  hasData: boolean
+}
