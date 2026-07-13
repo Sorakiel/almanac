@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Check, Dumbbell, Timer, X } from 'lucide-react'
+import { BookOpen, Check, Dumbbell, Timer, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Segmented } from '@/components/ui/segmented'
@@ -13,14 +13,16 @@ import { setHabitCount } from '@/features/habits/api/habits.api'
 import { dailyTarget } from '@/features/habits/lib/frequency'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
+import { useBooks } from '@/features/reading/hooks/useBooks'
 import { FlowWorkoutRunner } from '@/features/flow/components/FlowWorkoutRunner'
+import { FlowReadingRunner } from '@/features/flow/components/FlowReadingRunner'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useFocusStore } from '@/stores/focus'
 import { cn } from '@/lib/utils'
 
 const DURATIONS_MIN = [15, 25, 45]
-type Mode = 'habit' | 'workout' | 'custom'
+type Mode = 'habit' | 'workout' | 'book' | 'custom'
 
 /**
  * Flow — a standalone deep-work module. Pick a habit to focus on or describe a
@@ -30,13 +32,15 @@ type Mode = 'habit' | 'workout' | 'custom'
 function FlowPage() {
   const { habits } = useHabits()
   const { workouts } = useWorkouts()
+  const { books } = useBooks()
   const { user } = useSession()
   const { dateKey } = useToday()
   const queryClient = useQueryClient()
-  const { endsAt, durationMin, label, habitId, workoutId, start, stop } = useFocusStore()
+  const { endsAt, durationMin, label, habitId, workoutId, bookId, start, stop } = useFocusStore()
   const [mode, setMode] = useState<Mode>('habit')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null)
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null)
   const [customLabel, setCustomLabel] = useState('')
   const [duration, setDuration] = useState(25)
   const [now, setNow] = useState(() => Date.now())
@@ -44,14 +48,18 @@ function FlowPage() {
   const running = endsAt !== null && durationMin !== null
   const dueHabits = habits.filter((h) => h.dueToday && !h.isComplete)
   const openWorkouts = workouts.filter((w) => w.status !== 'completed')
+  const openBooks = books.filter((b) => b.status !== 'finished')
   const selectedHabit = habits.find((h) => h.id === selectedId) ?? null
   const selectedWorkout = workouts.find((w) => w.id === selectedWorkoutId) ?? null
+  const selectedBook = books.find((b) => b.id === selectedBookId) ?? null
   const targetLabel =
     mode === 'habit'
       ? (selectedHabit?.name ?? null)
       : mode === 'workout'
         ? (selectedWorkout?.name ?? null)
-        : customLabel.trim() || null
+        : mode === 'book'
+          ? (selectedBook?.title ?? null)
+          : customLabel.trim() || null
 
   // Mark the session's habit done (if any), then end. "End" just stops.
   const completeSession = async () => {
@@ -131,7 +139,7 @@ function FlowPage() {
                   <X className="h-4 w-4" />
                   End
                 </Button>
-                {workoutId ? null : (
+                {workoutId || bookId ? null : (
                   <Button size="sm" onClick={completeSession}>
                     <Check className="h-4 w-4" />
                     {habitId ? 'Complete' : 'Done'}
@@ -143,6 +151,9 @@ function FlowPage() {
         </div>
 
         {workoutId ? <FlowWorkoutRunner workoutId={workoutId} onFinish={stop} /> : null}
+        {bookId ? (
+          <FlowReadingRunner bookId={bookId} minutes={durationMin} onFinish={stop} />
+        ) : null}
       </div>
     )
   }
@@ -161,6 +172,7 @@ function FlowPage() {
         options={[
           { value: 'habit', label: 'Habit' },
           { value: 'workout', label: 'Workout' },
+          { value: 'book', label: 'Read' },
           { value: 'custom', label: 'Describe' },
         ]}
       />
@@ -229,6 +241,44 @@ function FlowPage() {
             </ul>
           )}
         </div>
+      ) : mode === 'book' ? (
+        <div className="flex flex-col gap-3">
+          <SectionLabel>PICK A BOOK</SectionLabel>
+          {openBooks.length === 0 ? (
+            <p className="rounded-card border border-dashed p-4 text-sm text-muted">
+              No books on the go — add one under Reading first.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {openBooks.map((book) => {
+                const active = selectedBookId === book.id
+                return (
+                  <li key={book.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBookId(book.id)}
+                      aria-pressed={active}
+                      className={cn(
+                        'flex w-full items-center gap-3 rounded-card border p-3 text-left transition-colors',
+                        active ? 'border-accent bg-accent/10' : 'hover:border-accent/40',
+                      )}
+                    >
+                      <IconTile icon={BookOpen} tone="bg-amber/15 text-amber" size="sm" />
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium">{book.title}</span>
+                        {book.author ? (
+                          <span className="block truncate text-[12px] text-muted">
+                            {book.author}
+                          </span>
+                        ) : null}
+                      </span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
       ) : (
         <label className="flex flex-col gap-1.5">
           <span className="label-mono">What are you focusing on?</span>
@@ -273,6 +323,7 @@ function FlowPage() {
           start(duration, targetLabel, {
             habitId: mode === 'habit' ? (selectedHabit?.id ?? null) : null,
             workoutId: mode === 'workout' ? (selectedWorkout?.id ?? null) : null,
+            bookId: mode === 'book' ? (selectedBook?.id ?? null) : null,
           })
         }
       >

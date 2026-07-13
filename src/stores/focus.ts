@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware'
 interface FocusTarget {
   habitId?: string | null
   workoutId?: string | null
+  bookId?: string | null
 }
 
 interface FocusState {
@@ -17,6 +18,8 @@ interface FocusState {
   habitId: string | null
   /** The workout this session runs, if any — shows the session runner. */
   workoutId: string | null
+  /** The book this session reads, if any — shows the reading runner. */
+  bookId: string | null
   start: (durationMin: number, label?: string, target?: FocusTarget) => void
   stop: () => void
 }
@@ -33,6 +36,7 @@ export const useFocusStore = create<FocusState>()(
       label: null,
       habitId: null,
       workoutId: null,
+      bookId: null,
       start: (durationMin, label, target) =>
         set({
           endsAt: Date.now() + durationMin * 60_000,
@@ -40,9 +44,17 @@ export const useFocusStore = create<FocusState>()(
           label: label ?? null,
           habitId: target?.habitId ?? null,
           workoutId: target?.workoutId ?? null,
+          bookId: target?.bookId ?? null,
         }),
       stop: () =>
-        set({ endsAt: null, durationMin: null, label: null, habitId: null, workoutId: null }),
+        set({
+          endsAt: null,
+          durationMin: null,
+          label: null,
+          habitId: null,
+          workoutId: null,
+          bookId: null,
+        }),
     }),
     { name: 'almanac.focus' },
   ),

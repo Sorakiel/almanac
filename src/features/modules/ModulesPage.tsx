@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, CircleDollarSign, Moon, Plus, Target, type LucideIcon } from 'lucide-react'
+import { CircleDollarSign, Moon, Plus, Target, type LucideIcon } from 'lucide-react'
 import { IconTile } from '@/components/common/IconTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { Tag } from '@/components/common/Tag'
@@ -24,11 +24,11 @@ const MODULE_TONE: Record<ModuleKey, string> = {
   insights: 'bg-amber/15 text-amber',
   flow: 'bg-accent/15 text-accent',
   reflect: 'bg-teal/15 text-teal',
+  reading: 'bg-amber/15 text-amber',
 }
 
 const SOON: SoonModule[] = [
   { title: 'Finances', icon: CircleDollarSign },
-  { title: 'Reading', icon: BookOpen },
   { title: 'Goals', icon: Target },
   { title: 'Sleep', icon: Moon },
 ]
@@ -46,6 +46,7 @@ function ModulesPage() {
     insights: 'Progress',
     flow: 'Deep work',
     reflect: 'Journal',
+    reading: 'Library',
   }
 
   return (

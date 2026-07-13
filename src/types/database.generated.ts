@@ -17,6 +17,124 @@ export type Database = {
   }
   public: {
     Tables: {
+      book_notes: {
+        Row: {
+          body: string
+          book_id: string
+          created_at: string
+          id: string
+          page: number | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          book_id: string
+          created_at?: string
+          id?: string
+          page?: number | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          book_id?: string
+          created_at?: string
+          id?: string
+          page?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_notes_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      books: {
+        Row: {
+          author: string | null
+          created_at: string
+          current_unit: number
+          finished_on: string | null
+          id: string
+          progress_mode: Database["public"]["Enums"]["book_progress_mode"]
+          rating: number | null
+          started_on: string | null
+          status: Database["public"]["Enums"]["book_status"]
+          title: string
+          total_units: number | null
+          user_id: string
+        }
+        Insert: {
+          author?: string | null
+          created_at?: string
+          current_unit?: number
+          finished_on?: string | null
+          id?: string
+          progress_mode?: Database["public"]["Enums"]["book_progress_mode"]
+          rating?: number | null
+          started_on?: string | null
+          status?: Database["public"]["Enums"]["book_status"]
+          title: string
+          total_units?: number | null
+          user_id: string
+        }
+        Update: {
+          author?: string | null
+          created_at?: string
+          current_unit?: number
+          finished_on?: string | null
+          id?: string
+          progress_mode?: Database["public"]["Enums"]["book_progress_mode"]
+          rating?: number | null
+          started_on?: string | null
+          status?: Database["public"]["Enums"]["book_status"]
+          title?: string
+          total_units?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reading_sessions: {
+        Row: {
+          book_id: string
+          created_at: string
+          date: string
+          id: string
+          minutes: number
+          units_read: number
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          date: string
+          id?: string
+          minutes?: number
+          units_read?: number
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          minutes?: number
+          units_read?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_sessions_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercises: {
         Row: {
           created_at: string
@@ -369,6 +487,8 @@ export type Database = {
       }
     }
     Enums: {
+      book_progress_mode: "pages" | "chapters"
+      book_status: "to_read" | "reading" | "finished"
       feedback_status: "open" | "planned" | "done" | "closed"
       habit_frequency:
         | "daily"
@@ -507,6 +627,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      book_progress_mode: ["pages", "chapters"],
+      book_status: ["to_read", "reading", "finished"],
       feedback_status: ["open", "planned", "done", "closed"],
       habit_frequency: [
         "daily",

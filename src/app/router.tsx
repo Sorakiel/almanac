@@ -24,6 +24,8 @@ const SettingsPage = lazy(() => import('@/features/settings/SettingsPage'))
 const WorkoutsPage = lazy(() => import('@/features/workouts/WorkoutsPage'))
 const WorkoutDetailPage = lazy(() => import('@/features/workouts/WorkoutDetailPage'))
 const ReflectPage = lazy(() => import('@/features/reflect/ReflectPage'))
+const BooksPage = lazy(() => import('@/features/reading/BooksPage'))
+const BookDetailPage = lazy(() => import('@/features/reading/BookDetailPage'))
 
 /** Wrap a lazy page element in a Suspense boundary with the shared fallback. */
 function suspend(element: ReactElement): ReactElement {
@@ -51,6 +53,8 @@ export const router = createBrowserRouter([
           { path: '/admin', element: suspend(<AdminPage />) },
           { path: '/admin/user/:id', element: suspend(<AdminUserPage />) },
           { path: '/reflect', element: suspend(<ReflectPage />) },
+          { path: '/reading', element: suspend(<BooksPage />) },
+          { path: '/reading/:id', element: suspend(<BookDetailPage />) },
           { path: '/settings', element: suspend(<SettingsPage />) },
         ],
       },
