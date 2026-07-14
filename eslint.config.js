@@ -15,6 +15,9 @@ export default tseslint.config(
       'src/types/database.generated.ts',
       'supabase/functions',
       'src-tauri',
+      // Generated native shells — not app source.
+      'android',
+      'ios',
     ],
   },
   {

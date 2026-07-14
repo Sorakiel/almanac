@@ -32,3 +32,17 @@ export async function applyRunInBackground(enabled: boolean): Promise<void> {
     console.debug('[desktop] autostart sync failed', err)
   }
 }
+
+/**
+ * Reflect the number of unfinished habits on the app icon (dock/taskbar badge).
+ * Zero clears it. No-op outside the native shell; unsupported platforms swallow.
+ */
+export async function setBadgeCount(count: number): Promise<void> {
+  if (!isTauri()) return
+  try {
+    const { invoke } = await import('@tauri-apps/api/core')
+    await invoke('set_badge', { count })
+  } catch (err) {
+    console.debug('[desktop] set_badge failed', err)
+  }
+}

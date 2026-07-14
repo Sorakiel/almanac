@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { browserTimezone, msUntilNextHour } from '@/lib/date'
+import { setBadgeCount } from '@/lib/desktop'
 import {
   clearScheduledReminders,
   isMobilePlatform,
@@ -47,6 +48,11 @@ export function useDailyReminder(): void {
   const habitsRef = useRef(habits)
   useEffect(() => {
     habitsRef.current = habits
+  }, [habits])
+
+  // Keep the app-icon badge in sync with unfinished habits (native shell only).
+  useEffect(() => {
+    void setBadgeCount(remainingCount(habits))
   }, [habits])
 
   // Native mobile schedule: survives the app being closed.

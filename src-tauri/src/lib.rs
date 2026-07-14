@@ -13,6 +13,17 @@ fn set_run_in_background(state: tauri::State<'_, RunInBackground>, enabled: bool
     state.0.store(enabled, Ordering::Relaxed);
 }
 
+/// Show the count of unfinished habits as a badge on the app icon (dock on
+/// macOS, taskbar on Linux/iOS). Zero clears it. Unsupported platforms no-op.
+#[tauri::command]
+fn set_badge(app: tauri::AppHandle, count: u32) {
+    use tauri::Manager;
+    if let Some(window) = app.get_webview_window("main") {
+        let value = if count == 0 { None } else { Some(i64::from(count)) };
+        let _ = window.set_badge_count(value);
+    }
+}
+
 #[cfg(desktop)]
 fn show_main_window(app: &tauri::AppHandle) {
     use tauri::Manager;
@@ -43,15 +54,18 @@ fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
             "quit" => app.exit(0),
             _ => {}
         })
-        .on_tray_icon_event(|tray, event| {
-            if let TrayIconEvent::Click {
+        .on_tray_icon_event(|tray, event| match event {
+            // Single left-click (release) or double-click reopens the window.
+            TrayIconEvent::Click {
                 button: MouseButton::Left,
                 button_state: MouseButtonState::Up,
                 ..
-            } = event
-            {
-                show_main_window(tray.app_handle());
             }
+            | TrayIconEvent::DoubleClick {
+                button: MouseButton::Left,
+                ..
+            } => show_main_window(tray.app_handle()),
+            _ => {}
         })
         .build(app)?;
 
@@ -65,7 +79,7 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_process::init())
         .manage(RunInBackground(Arc::new(AtomicBool::new(true))))
-        .invoke_handler(tauri::generate_handler![set_run_in_background]);
+        .invoke_handler(tauri::generate_handler![set_run_in_background, set_badge]);
 
     // Desktop-only: auto-update, launch-on-login, and close-to-tray. These crates
     // don't exist on mobile, so both the plugins and the window handler are gated.
