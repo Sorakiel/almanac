@@ -26,6 +26,7 @@ import { ReminderSheet } from '@/features/settings/components/ReminderSheet'
 import { BackgroundSheet } from '@/features/settings/components/BackgroundSheet'
 import { reminderTimeLabel } from '@/features/settings/lib/reminder'
 import { isDesktopApp } from '@/lib/desktop'
+import { APP_VERSION } from '@/lib/version'
 import { useDesktopStore } from '@/stores/desktop'
 import { useSession } from '@/hooks/useSession'
 import { useTheme } from '@/hooks/useTheme'
@@ -156,7 +157,7 @@ function SettingsPage() {
           Sign out
         </Button>
 
-        <p className="label-mono text-center">ALMANAC v0.1 · ◇</p>
+        <p className="label-mono text-center">ALMANAC v{APP_VERSION} · ◇</p>
       </div>
       <Rail>
         <SettingsRail />

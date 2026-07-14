@@ -2,6 +2,7 @@ import { format } from 'date-fns'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSession } from '@/hooks/useSession'
 import { browserTimezone } from '@/lib/date'
+import { APP_VERSION } from '@/lib/version'
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -31,7 +32,7 @@ export function SettingsRail() {
         </span>
         <div>
           <p className="text-[15px] font-semibold">The Almanac</p>
-          <p className="font-mono text-[10px] text-muted-strong">v0.1 · command center</p>
+          <p className="font-mono text-[10px] text-muted-strong">v{APP_VERSION} · command center</p>
         </div>
       </div>
 
