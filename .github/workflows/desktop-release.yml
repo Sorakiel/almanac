@@ -71,3 +71,39 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+  # Android OTA: publish the web bundle + manifest so installed APKs self-update
+  # over the air (src/lib/androidUpdater.ts reads android-latest.json). Runs
+  # after `build` so tauri-action has already created the release to upload into.
+  android-ota:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build web bundle
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Zip bundle + write manifest
+        run: |
+          (cd dist && zip -qr ../android-bundle.zip .)
+          VER="${GITHUB_REF_NAME#v}"
+          URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/android-bundle.zip"
+          printf '{"version":"%s","url":"%s"}\n' "$VER" "$URL" > android-latest.json
+          cat android-latest.json
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${GITHUB_REF_NAME}" android-bundle.zip android-latest.json --clobber

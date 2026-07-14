@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
+import { checkForAndroidUpdate } from '@/lib/androidUpdater'
 import { checkForDesktopUpdate } from '@/lib/desktopUpdater'
 import { applyRunInBackground } from '@/lib/desktop'
 import { queryClient } from '@/lib/queryClient'
@@ -17,9 +18,10 @@ export function Providers({ children }: ProvidersProps) {
   const setSession = useSessionStore((s) => s.setSession)
   const theme = useThemeStore((s) => s.theme)
 
-  // Desktop (Tauri) auto-update check on launch; no-op in the browser build.
+  // Native auto-update on launch; both are no-ops in the browser build.
   useEffect(() => {
     void checkForDesktopUpdate()
+    void checkForAndroidUpdate()
     // Push the saved "run in background" choice into the native shell (tray +
     // autostart) so it matches the toggle after a restart.
     void applyRunInBackground(useDesktopStore.getState().runInBackground)
