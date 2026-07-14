@@ -10,6 +10,7 @@ import {
   Download,
   Moon,
   ShieldCheck,
+  Trophy,
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -86,6 +87,17 @@ function SettingsPage() {
               { value: 'coffee', label: 'Coffee', icon: Coffee },
             ]}
           />
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <SectionLabel>YOU</SectionLabel>
+          <div className="flex flex-col">
+            <Row
+              icon={Trophy}
+              label="Achievements"
+              onClick={() => navigate('/achievements')}
+            />
+          </div>
         </section>
 
         <section className="flex flex-col gap-2">
