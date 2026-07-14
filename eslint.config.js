@@ -14,6 +14,7 @@ export default tseslint.config(
       'node_modules',
       'src/types/database.generated.ts',
       'supabase/functions',
+      'src-tauri',
     ],
   },
   {

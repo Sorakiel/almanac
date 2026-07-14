@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
+import { checkForDesktopUpdate } from '@/lib/desktopUpdater'
 import { queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
 import { useSessionStore } from '@/stores/session'
@@ -13,6 +14,11 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   const setSession = useSessionStore((s) => s.setSession)
   const theme = useThemeStore((s) => s.theme)
+
+  // Desktop (Tauri) auto-update check on launch; no-op in the browser build.
+  useEffect(() => {
+    void checkForDesktopUpdate()
+  }, [])
 
   // Bootstrap the current session, then keep the store in sync. This is an auth
   // listener (not data fetching), so useEffect is the right tool here.
