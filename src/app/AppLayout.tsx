@@ -6,6 +6,7 @@ import { TopBar } from '@/components/common/desktop/TopBar'
 import { RailActive } from '@/components/common/desktop/RailActive'
 import { RailTargetProvider } from '@/components/common/desktop/rail'
 import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
+import { useDailyReminder } from '@/hooks/useDailyReminder'
 import { useOnboardingStore } from '@/stores/onboarding'
 import { cn } from '@/lib/utils'
 
@@ -21,6 +22,9 @@ export function AppLayout() {
   const { pathname } = useLocation()
   const [railEl, setRailEl] = useState<HTMLDivElement | null>(null)
   const onboarded = useOnboardingStore((s) => s.dismissed)
+
+  // Drive the native/foreground daily habit reminder from the saved preference.
+  useDailyReminder()
 
   // First run: send new users to the welcome splash before the app shell.
   if (!onboarded) return <Navigate to="/welcome" replace />
@@ -45,13 +49,13 @@ export function AppLayout() {
             className={cn(
               'mx-auto w-full max-w-md flex-1 px-5 pt-6',
               hideNav ? 'flex flex-col pb-6' : 'pb-28',
-              'lg:mx-0 lg:max-w-none lg:overflow-y-auto lg:px-10 lg:py-8',
+              'app-scroll lg:mx-0 lg:max-w-none lg:overflow-y-auto lg:px-10 lg:py-8',
             )}
           >
             <Outlet />
           </main>
 
-          <aside className="hidden w-[340px] flex-none flex-col overflow-y-auto border-l bg-chrome px-6 py-6 lg:flex">
+          <aside className="app-scroll hidden w-[340px] flex-none flex-col overflow-y-auto border-l bg-chrome px-6 py-6 lg:flex">
             <RailActive />
             <div ref={setRailEl} className="flex flex-1 flex-col" />
           </aside>

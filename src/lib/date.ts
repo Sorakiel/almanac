@@ -50,6 +50,26 @@ export function timezoneOffsetLabel(timezone: string, instant: Date = new Date()
   return name.replace('GMT', 'UTC').replace(/^UTC$/, 'UTC+00:00')
 }
 
+/**
+ * Milliseconds from `instant` until the next time it is `hour`:00 in `timezone`.
+ * Uses wall-clock arithmetic (not date math) so it's DST- and midnight-safe: if
+ * the hour has already passed today, it rolls to tomorrow.
+ */
+export function msUntilNextHour(hour: number, timezone: string, instant: Date = new Date()): number {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: timezone,
+    hourCycle: 'h23',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(instant)
+  const at = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0)
+  const secondsNow = at('hour') * 3600 + at('minute') * 60 + at('second')
+  let delta = hour * 3600 - secondsNow
+  if (delta <= 0) delta += 86_400
+  return delta * 1000
+}
+
 /** Human-friendly long date, e.g. "Monday, 8 July". */
 export function formatLongDate(timezone: string, instant: Date = new Date()): string {
   return new Intl.DateTimeFormat('en-GB', {

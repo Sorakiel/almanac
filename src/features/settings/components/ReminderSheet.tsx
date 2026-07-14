@@ -5,6 +5,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { useUpdateProfile } from '@/features/settings/hooks/useUpdateProfile'
 import { reminderTimeLabel } from '@/features/settings/lib/reminder'
+import { clearScheduledReminders, requestNotifyPermission } from '@/lib/notify'
 
 interface ReminderSheetProps {
   open: boolean
@@ -17,9 +18,9 @@ interface ReminderSheetProps {
 const HOURS = Array.from({ length: 24 }, (_, h) => h)
 
 /**
- * Daily email-reminder settings. Almanac emails you around this LOCAL hour on
- * days you still have habits left to complete — the delivery runs server-side,
- * so it lands even when the app is closed.
+ * Daily reminder settings. Almanac sends a device notification around this LOCAL
+ * hour on days you still have habits left to complete. On mobile the OS delivers
+ * it even when the app is closed; on desktop it fires while the app is running.
  */
 export function ReminderSheet({ open, onOpenChange, enabled, hour }: ReminderSheetProps) {
   const { update, isPending } = useUpdateProfile()
@@ -30,6 +31,16 @@ export function ReminderSheet({ open, onOpenChange, enabled, hour }: ReminderShe
 
   const save = async () => {
     try {
+      // Enabling needs OS permission; if it's refused, save anyway and let the
+      // user grant it later from system settings rather than blocking the toggle.
+      if (on) {
+        const granted = await requestNotifyPermission()
+        if (!granted) {
+          toast.error('Allow notifications for Almanac in your system settings to get reminders.')
+        }
+      } else {
+        await clearScheduledReminders()
+      }
       await update({ reminder_enabled: on, reminder_hour: selectedHour })
       toast.success(on ? 'Daily reminder on' : 'Daily reminder off')
       onOpenChange(false)
@@ -43,15 +54,15 @@ export function ReminderSheet({ open, onOpenChange, enabled, hour }: ReminderShe
       open={open}
       onOpenChange={onOpenChange}
       title="Daily reminder"
-      description="Get a nudge by email on days you still have habits to finish."
+      description="Get a notification on days you still have habits to finish."
     >
       <div className="flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <div className="min-w-0">
-            <p className="text-sm font-medium">Email reminder</p>
-            <p className="text-xs text-muted">Sent to your account email.</p>
+            <p className="text-sm font-medium">Push notification</p>
+            <p className="text-xs text-muted">Sent to this device.</p>
           </div>
-          <Switch checked={on} onCheckedChange={setOn} aria-label="Enable daily email reminder" />
+          <Switch checked={on} onCheckedChange={setOn} aria-label="Enable daily reminder" />
         </div>
 
         <label className="flex flex-col gap-1.5">

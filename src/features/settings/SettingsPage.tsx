@@ -64,7 +64,7 @@ function SettingsPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-6 lg:max-w-[760px]">
+      <div className="flex flex-col gap-6 lg:mx-auto lg:max-w-[760px]">
         <header className="flex items-center gap-4">
           <Avatar name={name} size="lg" />
           <div className="min-w-0">
