@@ -8,6 +8,7 @@ import {
   Clock,
   Coffee,
   Download,
+  Laptop,
   Moon,
   ShieldCheck,
   Trophy,
@@ -22,7 +23,10 @@ import { Rail } from '@/components/common/desktop/rail'
 import { SettingsRail } from '@/features/settings/components/SettingsRail'
 import { TimezoneSheet } from '@/features/settings/components/TimezoneSheet'
 import { ReminderSheet } from '@/features/settings/components/ReminderSheet'
+import { BackgroundSheet } from '@/features/settings/components/BackgroundSheet'
 import { reminderTimeLabel } from '@/features/settings/lib/reminder'
+import { isDesktopApp } from '@/lib/desktop'
+import { useDesktopStore } from '@/stores/desktop'
 import { useSession } from '@/hooks/useSession'
 import { useTheme } from '@/hooks/useTheme'
 import { useToday } from '@/hooks/useToday'
@@ -39,6 +43,9 @@ function SettingsPage() {
   const { dateKey } = useToday()
   const [timezoneOpen, setTimezoneOpen] = useState(false)
   const [reminderOpen, setReminderOpen] = useState(false)
+  const [backgroundOpen, setBackgroundOpen] = useState(false)
+  const runInBackground = useDesktopStore((s) => s.runInBackground)
+  const showDesktop = isDesktopApp()
 
   if (status === 'anonymous') return <Navigate to="/auth" replace />
 
@@ -119,6 +126,20 @@ function SettingsPage() {
           </div>
         </section>
 
+        {showDesktop ? (
+          <section className="flex flex-col gap-2">
+            <SectionLabel>DESKTOP</SectionLabel>
+            <div className="flex flex-col">
+              <Row
+                icon={Laptop}
+                label="Run in background"
+                value={runInBackground ? 'On' : 'Off'}
+                onClick={() => setBackgroundOpen(true)}
+              />
+            </div>
+          </section>
+        ) : null}
+
         {profile?.role === 'admin' || profile?.role === 'owner' ? (
           <section className="flex flex-col gap-1">
             <SectionLabel className="mb-2">ADMIN</SectionLabel>
@@ -155,6 +176,7 @@ function SettingsPage() {
           hour={reminderHour}
         />
       ) : null}
+      {backgroundOpen ? <BackgroundSheet open onOpenChange={setBackgroundOpen} /> : null}
     </>
   )
 }

@@ -2,8 +2,10 @@ import { useEffect, type ReactNode } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { checkForDesktopUpdate } from '@/lib/desktopUpdater'
+import { applyRunInBackground } from '@/lib/desktop'
 import { queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
+import { useDesktopStore } from '@/stores/desktop'
 import { useSessionStore } from '@/stores/session'
 import { useThemeStore } from '@/stores/theme'
 
@@ -18,6 +20,9 @@ export function Providers({ children }: ProvidersProps) {
   // Desktop (Tauri) auto-update check on launch; no-op in the browser build.
   useEffect(() => {
     void checkForDesktopUpdate()
+    // Push the saved "run in background" choice into the native shell (tray +
+    // autostart) so it matches the toggle after a restart.
+    void applyRunInBackground(useDesktopStore.getState().runInBackground)
   }, [])
 
   // Bootstrap the current session, then keep the store in sync. This is an auth
