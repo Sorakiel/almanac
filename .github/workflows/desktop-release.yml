@@ -9,6 +9,12 @@ on:
     tags: ['v*']
   workflow_dispatch: # allow manual runs from the Actions tab
 
+# tauri-action creates a GitHub Release, which needs write access to repo
+# contents. The default GITHUB_TOKEN is read-only, hence the earlier
+# "Resource not accessible by integration" failure.
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
