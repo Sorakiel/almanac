@@ -19,6 +19,11 @@ export interface AchievementDef {
   tone: AchievementTone
   /** Unit noun for progress copy, e.g. "days", "books". */
   unit?: string
+  /**
+   * Owner-awarded badge: not derived from data, unlocked only by a grant. Manual
+   * defs use a single ★ tier and ignore `metric`.
+   */
+  manual?: boolean
   /** Current value of the tracked metric for a set of stats. */
   metric: (stats: AchievementStats) => number
   /** Ascending thresholds; a single tier makes a one-off badge. */

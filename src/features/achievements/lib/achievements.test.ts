@@ -67,9 +67,11 @@ const baseStats: AchievementStats = {
   betaUser: false,
 }
 
+const NONE = new Set<string>()
+
 describe('evaluate', () => {
   it('is locked below the first tier, with progress toward it', () => {
-    const out = evaluate(STREAK_DEF, { ...baseStats, bestStreak: 2 })
+    const out = evaluate(STREAK_DEF, { ...baseStats, bestStreak: 2 }, NONE)
     expect(out.unlocked).toBe(false)
     expect(out.tierIndex).toBe(-1)
     expect(out.nextGoal).toBe(3)
@@ -77,16 +79,31 @@ describe('evaluate', () => {
   })
 
   it('picks the highest unlocked tier and scales progress from its floor', () => {
-    const out = evaluate(STREAK_DEF, { ...baseStats, bestStreak: 10 })
+    const out = evaluate(STREAK_DEF, { ...baseStats, bestStreak: 10 }, NONE)
     expect(out.tierIndex).toBe(1) // 7 unlocked, 21 next
     expect(out.nextGoal).toBe(21)
     expect(out.progress).toBeCloseTo((10 - 7) / (21 - 7), 3)
   })
 
   it('maxes out at the top tier', () => {
-    const out = evaluate(STREAK_DEF, { ...baseStats, bestStreak: 40 })
+    const out = evaluate(STREAK_DEF, { ...baseStats, bestStreak: 40 }, NONE)
     expect(out.tierIndex).toBe(2)
     expect(out.nextGoal).toBeNull()
     expect(out.progress).toBe(1)
+  })
+
+  it('unlocks a manual badge only when granted', () => {
+    const manual: AchievementDef = {
+      id: 'founder',
+      title: 'Founder',
+      description: '',
+      icon: Flame,
+      tone: 'amber',
+      manual: true,
+      metric: () => 0,
+      tiers: [{ goal: 1, label: '★', title: 'Founder' }],
+    }
+    expect(evaluate(manual, baseStats, NONE).unlocked).toBe(false)
+    expect(evaluate(manual, baseStats, new Set(['founder'])).unlocked).toBe(true)
   })
 })

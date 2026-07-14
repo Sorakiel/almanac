@@ -3,6 +3,7 @@ import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { fetchAchievementData } from '@/features/achievements/api/achievements.api'
+import { fetchGrantedIds } from '@/features/achievements/api/grants.api'
 import { computeAchievementStats } from '@/features/achievements/lib/stats'
 import { evaluateAll } from '@/features/achievements/lib/evaluate'
 import type { EvaluatedAchievement } from '@/features/achievements/types'
@@ -30,16 +31,28 @@ export function useAchievements(): UseAchievementsResult {
     enabled: Boolean(userId),
   })
 
+  const grantsQuery = useQuery({
+    queryKey: ['achievementGrants', userId],
+    queryFn: () => fetchGrantedIds(userId),
+    enabled: Boolean(userId),
+  })
+
   const betaUser = (profile?.created_at ?? user?.created_at ?? '9999').slice(0, 10) < BETA_CUTOFF
 
   const achievements = query.data
-    ? evaluateAll(computeAchievementStats({ ...query.data, betaUser, todayKey: dateKey }))
+    ? evaluateAll(
+        computeAchievementStats({ ...query.data, betaUser, todayKey: dateKey }),
+        new Set(grantsQuery.data ?? []),
+      )
     : []
 
   return {
     achievements,
-    isLoading: query.isLoading,
+    isLoading: query.isLoading || grantsQuery.isLoading,
     isError: query.isError,
-    refetch: () => void query.refetch(),
+    refetch: () => {
+      void query.refetch()
+      void grantsQuery.refetch()
+    },
   }
 }

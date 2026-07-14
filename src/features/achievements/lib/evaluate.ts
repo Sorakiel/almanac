@@ -2,7 +2,25 @@ import { CATALOG } from '@/features/achievements/lib/catalog'
 import type { AchievementDef, AchievementStats, EvaluatedAchievement } from '@/features/achievements/types'
 
 /** Resolve one definition against the stats: current tier, next goal, progress. */
-export function evaluate(def: AchievementDef, stats: AchievementStats): EvaluatedAchievement {
+export function evaluate(
+  def: AchievementDef,
+  stats: AchievementStats,
+  grantedIds: Set<string>,
+): EvaluatedAchievement {
+  // Manual badges are unlocked only by an owner grant; they carry a single tier.
+  if (def.manual) {
+    const unlocked = grantedIds.has(def.id)
+    return {
+      def,
+      value: unlocked ? 1 : 0,
+      tierIndex: unlocked ? 0 : -1,
+      unlocked,
+      displayTitle: def.tiers[0]?.title ?? def.title,
+      nextGoal: null,
+      progress: unlocked ? 1 : 0,
+    }
+  }
+
   const value = def.metric(stats)
 
   let tierIndex = -1
@@ -33,8 +51,11 @@ export function evaluate(def: AchievementDef, stats: AchievementStats): Evaluate
 }
 
 /** Evaluate the whole catalog, unlocked (highest tier first) before locked. */
-export function evaluateAll(stats: AchievementStats): EvaluatedAchievement[] {
-  return CATALOG.map((def) => evaluate(def, stats)).sort((a, b) => {
+export function evaluateAll(
+  stats: AchievementStats,
+  grantedIds: Set<string> = new Set(),
+): EvaluatedAchievement[] {
+  return CATALOG.map((def) => evaluate(def, stats, grantedIds)).sort((a, b) => {
     if (a.unlocked !== b.unlocked) return a.unlocked ? -1 : 1
     return b.tierIndex - a.tierIndex
   })

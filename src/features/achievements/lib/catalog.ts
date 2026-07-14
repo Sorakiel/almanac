@@ -1,5 +1,23 @@
-import { BookOpen, Dumbbell, Flame, Link2, NotebookPen, Rocket, Sparkles } from 'lucide-react'
+import {
+  Award,
+  BookMarked,
+  BookOpen,
+  Bug,
+  Crown,
+  Dumbbell,
+  Flame,
+  Lightbulb,
+  Link2,
+  NotebookPen,
+  Rocket,
+  Sparkles,
+} from 'lucide-react'
 import type { AchievementDef } from '@/features/achievements/types'
+
+/** A single ★ tier — used by manual (owner-awarded) badges. */
+function manualTier(title: string): AchievementDef['tiers'] {
+  return [{ goal: 1, label: '★', title }]
+}
 
 /**
  * The achievement catalog. Every entry is derived purely from the user's data
@@ -93,6 +111,21 @@ export const CATALOG: AchievementDef[] = [
     ],
   },
   {
+    id: 'pages',
+    title: 'Page Turner',
+    description: 'Pages read across your books.',
+    icon: BookMarked,
+    tone: 'amber',
+    unit: 'pages',
+    metric: (s) => s.pagesRead,
+    tiers: [
+      { goal: 250, label: 'I', title: 'Skimmer' },
+      { goal: 1000, label: 'II', title: 'Reader' },
+      { goal: 3000, label: 'III', title: 'Devourer' },
+      { goal: 10000, label: 'IV', title: 'Ink-Blooded' },
+    ],
+  },
+  {
     id: 'beta',
     title: 'Beta User',
     description: 'Here before v1 — thank you for testing Almanac.',
@@ -101,4 +134,49 @@ export const CATALOG: AchievementDef[] = [
     metric: (s) => (s.betaUser ? 1 : 0),
     tiers: [{ goal: 1, label: '★', title: 'Beta User' }],
   },
+
+  // ── Owner-awarded (manual) ────────────────────────────────────────────────
+  {
+    id: 'founder',
+    title: 'Founder',
+    description: 'A founding member, here at the very beginning.',
+    icon: Crown,
+    tone: 'amber',
+    manual: true,
+    metric: () => 0,
+    tiers: manualTier('Founder'),
+  },
+  {
+    id: 'bug_hunter',
+    title: 'Bug Hunter',
+    description: 'Found and reported a real bug. The app thanks you.',
+    icon: Bug,
+    tone: 'teal',
+    manual: true,
+    metric: () => 0,
+    tiers: manualTier('Bug Hunter'),
+  },
+  {
+    id: 'muse',
+    title: 'Muse',
+    description: 'Suggested an idea that made it into Almanac.',
+    icon: Lightbulb,
+    tone: 'accent',
+    manual: true,
+    metric: () => 0,
+    tiers: manualTier('Muse'),
+  },
+  {
+    id: 'owners_honour',
+    title: "Owner's Honour",
+    description: 'Hand-picked by the owner for something special.',
+    icon: Award,
+    tone: 'amber',
+    manual: true,
+    metric: () => 0,
+    tiers: manualTier("Owner's Honour"),
+  },
 ]
+
+/** The owner-awardable subset, in catalog order. */
+export const MANUAL_ACHIEVEMENTS = CATALOG.filter((def) => def.manual)

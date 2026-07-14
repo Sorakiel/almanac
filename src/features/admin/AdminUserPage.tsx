@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { Rail } from '@/components/common/desktop/rail'
 import { AdminUserRail } from '@/features/admin/components/AdminUserRail'
+import { AwardAchievements } from '@/features/achievements/components/AwardAchievements'
 import { useAdminUser } from '@/features/admin/hooks/useAdminUser'
 import { useUserManagement } from '@/features/admin/hooks/useUserManagement'
 import { joinedLabel } from '@/features/admin/lib/format'
@@ -201,6 +202,8 @@ function AdminUserPage() {
             </div>
           )}
         </section>
+
+        {isOwner ? <AwardAchievements userId={data.id} userName={data.name} /> : null}
 
         <ConfirmSheet
           open={confirmDelete}

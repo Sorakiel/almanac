@@ -17,6 +17,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievement_grants: {
+        Row: {
+          achievement_id: string
+          created_at: string
+          granted_by: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       book_notes: {
         Row: {
           body: string
