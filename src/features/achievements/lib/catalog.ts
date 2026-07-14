@@ -1,4 +1,5 @@
 import {
+  Award,
   BookMarked,
   BookOpen,
   Bug,
@@ -190,6 +191,16 @@ export const CATALOG: AchievementDef[] = [
     manual: true,
     metric: () => 0,
     tiers: manualTier('Bug Hunter'),
+  },
+  {
+    id: 'almanac_honour',
+    title: 'Almanac Honour',
+    description: 'Bestowed by Almanac itself for something special.',
+    icon: Award,
+    tone: 'accent',
+    manual: true,
+    metric: () => 0,
+    tiers: manualTier('Almanac Honour'),
   },
 ]
 
