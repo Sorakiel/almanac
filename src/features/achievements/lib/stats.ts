@@ -44,6 +44,7 @@ export interface AchievementStatsInput {
   workoutsCompleted: number
   booksFinished: number
   pagesRead: number
+  notesWritten: number
   reflections: number
   betaUser: boolean
   todayKey: string
@@ -67,6 +68,7 @@ export function computeAchievementStats(input: AchievementStatsInput): Achieveme
     workoutsCompleted: input.workoutsCompleted,
     booksFinished: input.booksFinished,
     pagesRead: input.pagesRead,
+    notesWritten: input.notesWritten,
     reflections: input.reflections,
     activeModules,
     betaUser: input.betaUser,

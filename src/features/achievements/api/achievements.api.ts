@@ -6,12 +6,13 @@ export interface RawAchievementData {
   workoutsCompleted: number
   booksFinished: number
   pagesRead: number
+  notesWritten: number
   reflections: number
 }
 
 /** One-shot pull of the aggregates achievements are scored from (own-rows RLS). */
 export async function fetchAchievementData(userId: string): Promise<RawAchievementData> {
-  const [logs, habits, workouts, books, reflections] = await Promise.all([
+  const [logs, habits, workouts, books, notes, reflections] = await Promise.all([
     supabase.from('habit_logs').select('date, count').eq('user_id', userId),
     supabase.from('habits').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     supabase
@@ -20,6 +21,7 @@ export async function fetchAchievementData(userId: string): Promise<RawAchieveme
       .eq('user_id', userId)
       .not('completed_at', 'is', null),
     supabase.from('books').select('status, current_unit, progress_mode').eq('user_id', userId),
+    supabase.from('book_notes').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     supabase.from('reflections').select('*', { count: 'exact', head: true }).eq('user_id', userId),
   ])
 
@@ -39,6 +41,7 @@ export async function fetchAchievementData(userId: string): Promise<RawAchieveme
     pagesRead: bookRows
       .filter((b) => b.progress_mode === 'pages')
       .reduce((sum, b) => sum + b.current_unit, 0),
+    notesWritten: notes.count ?? 0,
     reflections: reflections.count ?? 0,
   }
 }

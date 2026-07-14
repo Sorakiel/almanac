@@ -38,6 +38,7 @@ export interface AchievementStats {
   workoutsCompleted: number
   booksFinished: number
   pagesRead: number
+  notesWritten: number
   reflections: number
   /** Distinct life areas the user is active in (habits/workouts/reading/reflect). */
   activeModules: number

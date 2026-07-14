@@ -1,16 +1,16 @@
 import {
-  Award,
   BookMarked,
   BookOpen,
   Bug,
-  Crown,
   Dumbbell,
   Flame,
-  Lightbulb,
+  Highlighter,
   Link2,
   NotebookPen,
   Rocket,
   Sparkles,
+  Target,
+  Zap,
 } from 'lucide-react'
 import type { AchievementDef } from '@/features/achievements/types'
 
@@ -135,17 +135,52 @@ export const CATALOG: AchievementDef[] = [
     tiers: [{ goal: 1, label: '★', title: 'Beta User' }],
   },
 
-  // ── Owner-awarded (manual) ────────────────────────────────────────────────
   {
-    id: 'founder',
-    title: 'Founder',
-    description: 'A founding member, here at the very beginning.',
-    icon: Crown,
-    tone: 'amber',
-    manual: true,
-    metric: () => 0,
-    tiers: manualTier('Founder'),
+    id: 'hot_streak',
+    title: 'Hot Streak',
+    description: 'Your current run of consecutive days.',
+    icon: Zap,
+    tone: 'accent',
+    unit: 'days',
+    metric: (s) => s.currentStreak,
+    tiers: [
+      { goal: 3, label: 'I', title: 'Warming Up' },
+      { goal: 7, label: 'II', title: 'On a Roll' },
+      { goal: 14, label: 'III', title: 'On Fire' },
+      { goal: 30, label: 'IV', title: 'Unstoppable' },
+    ],
   },
+  {
+    id: 'relentless',
+    title: 'Relentless',
+    description: 'Total habit check-offs, all-time.',
+    icon: Target,
+    tone: 'teal',
+    unit: 'check-offs',
+    metric: (s) => s.totalCompletions,
+    tiers: [
+      { goal: 250, label: 'I', title: 'Dedicated' },
+      { goal: 500, label: 'II', title: 'Relentless' },
+      { goal: 1000, label: 'III', title: 'Unyielding' },
+      { goal: 2500, label: 'IV', title: 'Machine' },
+    ],
+  },
+  {
+    id: 'annotator',
+    title: 'Annotator',
+    description: 'Notes captured while reading.',
+    icon: Highlighter,
+    tone: 'amber',
+    unit: 'notes',
+    metric: (s) => s.notesWritten,
+    tiers: [
+      { goal: 5, label: 'I', title: 'Margin Notes' },
+      { goal: 25, label: 'II', title: 'Annotator' },
+      { goal: 100, label: 'III', title: 'Scholar' },
+    ],
+  },
+
+  // ── Owner-awarded (manual) ────────────────────────────────────────────────
   {
     id: 'bug_hunter',
     title: 'Bug Hunter',
@@ -155,26 +190,6 @@ export const CATALOG: AchievementDef[] = [
     manual: true,
     metric: () => 0,
     tiers: manualTier('Bug Hunter'),
-  },
-  {
-    id: 'muse',
-    title: 'Muse',
-    description: 'Suggested an idea that made it into Almanac.',
-    icon: Lightbulb,
-    tone: 'accent',
-    manual: true,
-    metric: () => 0,
-    tiers: manualTier('Muse'),
-  },
-  {
-    id: 'owners_honour',
-    title: "Owner's Honour",
-    description: 'Hand-picked by the owner for something special.',
-    icon: Award,
-    tone: 'amber',
-    manual: true,
-    metric: () => 0,
-    tiers: manualTier("Owner's Honour"),
   },
 ]
 
