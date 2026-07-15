@@ -1,7 +1,7 @@
-import { test, expect, type ConsoleMessage } from '@playwright/test'
+import { expect, test, type ConsoleMessage } from '@playwright/test'
 
 /**
- * Phase-1 smoke checklist (CLAUDE.md §9). Requires a live Supabase project with
+ * Phase-1 smoke checklist. Requires a live Supabase project with
  * email confirmations disabled so a fresh sign-up is immediately authenticated.
  */
 test('almanac phase-1 smoke', async ({ page }) => {
@@ -25,12 +25,17 @@ test('almanac phase-1 smoke', async ({ page }) => {
   await page.getByLabel('Password').fill('password123')
   await page.getByRole('button', { name: /create account/i }).click()
 
-  // 3. Dashboard renders after auth.
+  // 3. New users land on the 3-step welcome flow; skip through it to the app.
+  await expect(page).toHaveURL(/\/welcome$/, { timeout: 15_000 })
+  await page.getByRole('button', { name: /^skip$/i }).click()
   await expect(page).toHaveURL(/\/$/, { timeout: 15_000 })
   await expect(page.getByText(/today · habits/i)).toBeVisible()
 
   // 4. Create a habit → it appears (with the focus block once habits exist).
-  await page.getByRole('button', { name: /add habit/i }).first().click()
+  await page
+    .getByRole('button', { name: /add habit/i })
+    .first()
+    .click()
   await page.getByLabel('Name').fill('Read 20 pages')
   await page.getByRole('button', { name: /create habit/i }).click()
   await expect(page.getByRole('link', { name: 'Read 20 pages' })).toBeVisible()

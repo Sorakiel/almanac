@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
 import { BottomNav } from '@/components/common/BottomNav'
 import { Sidebar } from '@/components/common/desktop/Sidebar'
 import { TopBar } from '@/components/common/desktop/TopBar'
@@ -7,6 +8,7 @@ import { RailActive } from '@/components/common/desktop/RailActive'
 import { RailTargetProvider } from '@/components/common/desktop/rail'
 import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
 import { useDailyReminder } from '@/hooks/useDailyReminder'
+import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useOnboardingStore } from '@/stores/onboarding'
 import { cn } from '@/lib/utils'
 
@@ -21,13 +23,25 @@ import { cn } from '@/lib/utils'
 export function AppLayout() {
   const { pathname } = useLocation()
   const [railEl, setRailEl] = useState<HTMLDivElement | null>(null)
-  const onboarded = useOnboardingStore((s) => s.dismissed)
+  const { profile } = useProfile()
+  const locallyOnboarded = useOnboardingStore((s) => s.dismissed)
 
   // Drive the native/foreground daily habit reminder from the saved preference.
   useDailyReminder()
 
-  // First run: send new users to the welcome splash before the app shell.
-  if (!onboarded) return <Navigate to="/welcome" replace />
+  // Onboarding is gated on `profiles.onboarded` so it survives across devices.
+  // Wait for the profile before deciding, so an already-onboarded user never
+  // flashes the welcome screen; the local flag is a fast-path for the device
+  // that just finished (covers the gap before the row refetches).
+  if (!profile && !locallyOnboarded) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center" role="status" aria-live="polite">
+        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
+        <span className="sr-only">Loading…</span>
+      </div>
+    )
+  }
+  if (!profile?.onboarded && !locallyOnboarded) return <Navigate to="/welcome" replace />
 
   // Habit detail is a focused mobile sub-page: no bottom nav, CTA pins bottom.
   // On desktop the persistent nav rail always stays.

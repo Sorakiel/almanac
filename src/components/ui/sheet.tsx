@@ -33,8 +33,10 @@ export function Sheet({
           className={cn(
             'fixed z-50 border bg-bg shadow-soft focus:outline-none',
             'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in data-[state=closed]:fade-out',
-            // Mobile: bottom sheet that slides up.
-            'inset-x-0 bottom-0 mx-auto max-w-md rounded-t-sheet p-6 pb-8',
+            // Mobile: bottom sheet that slides up. Cap the height and scroll
+            // inside so tall forms (and the on-screen keyboard) never push the
+            // sheet past the top of the screen where it can't be dismissed.
+            'inset-x-0 bottom-0 mx-auto max-h-[90dvh] max-w-md overflow-y-auto rounded-t-sheet p-6 pb-8',
             'max-lg:data-[state=open]:slide-in-from-bottom max-lg:data-[state=closed]:slide-out-to-bottom',
             // Desktop: centered modal dialog (spec board "NEW HABIT · MODAL").
             'lg:inset-x-auto lg:bottom-auto lg:left-1/2 lg:top-1/2 lg:mx-0 lg:w-[520px] lg:max-w-[calc(100vw-2rem)]',

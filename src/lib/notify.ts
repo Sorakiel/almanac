@@ -73,11 +73,15 @@ export async function pushNotification(title: string, body: string): Promise<voi
 }
 
 /**
- * Register a repeating daily reminder that the OS delivers at `hour`:00 local
- * time even when the app is closed. Only meaningful on mobile — desktop has no
+ * Register a repeating daily reminder that the OS delivers at `hour`:`minute`
+ * local time even when the app is closed. Only meaningful on mobile — desktop has no
  * OS-level scheduling, so it relies on the foreground timer instead.
  */
-export async function scheduleDailyReminder(hour: number, body: string): Promise<void> {
+export async function scheduleDailyReminder(
+  hour: number,
+  minute: number,
+  body: string,
+): Promise<void> {
   if (!isTauri() || !isMobilePlatform()) return
   try {
     const n = await import('@tauri-apps/plugin-notification')
@@ -86,8 +90,8 @@ export async function scheduleDailyReminder(hour: number, body: string): Promise
       id: REMINDER_ID,
       title: 'Almanac',
       body,
-      // A partial interval match fires daily at this hour (minute 0).
-      schedule: n.Schedule.interval({ hour, minute: 0 }, true),
+      // A partial interval match fires daily at this hour:minute.
+      schedule: n.Schedule.interval({ hour, minute }, true),
     })
   } catch (err) {
     console.debug('[notify] schedule failed', err)

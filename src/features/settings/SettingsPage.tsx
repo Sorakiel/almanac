@@ -61,6 +61,7 @@ function SettingsPage() {
   const soon = () => toast('This setting is coming soon.')
   const reminderEnabled = profile?.reminder_enabled ?? false
   const reminderHour = profile?.reminder_hour ?? 8
+  const reminderMinute = profile?.reminder_minute ?? 0
 
   const handleSignOut = async () => {
     try {
@@ -120,7 +121,7 @@ function SettingsPage() {
             <Row
               icon={reminderEnabled ? AlarmClock : Bell}
               label="Daily reminder"
-              value={reminderEnabled ? reminderTimeLabel(reminderHour) : 'Off'}
+              value={reminderEnabled ? reminderTimeLabel(reminderHour, reminderMinute) : 'Off'}
               onClick={() => setReminderOpen(true)}
             />
             <Row icon={Download} label="Export data" onClick={soon} />
@@ -175,6 +176,7 @@ function SettingsPage() {
           onOpenChange={setReminderOpen}
           enabled={reminderEnabled}
           hour={reminderHour}
+          minute={reminderMinute}
         />
       ) : null}
       {backgroundOpen ? <BackgroundSheet open onOpenChange={setBackgroundOpen} /> : null}

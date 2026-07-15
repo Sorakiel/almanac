@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { browserTimezone, msUntilNextHour } from '@/lib/date'
+import { browserTimezone, msUntilDailyTime } from '@/lib/date'
 import { setBadgeCount } from '@/lib/desktop'
 import {
   clearScheduledReminders,
@@ -42,6 +42,7 @@ export function useDailyReminder(): void {
 
   const enabled = profile?.reminder_enabled ?? false
   const hour = profile?.reminder_hour ?? 8
+  const minute = profile?.reminder_minute ?? 0
   const timezone = profile?.timezone ?? browserTimezone()
 
   // Read the freshest habits inside the timer without re-arming on every change.
@@ -57,9 +58,9 @@ export function useDailyReminder(): void {
 
   // Native mobile schedule: survives the app being closed.
   useEffect(() => {
-    if (enabled) void scheduleDailyReminder(hour, REMINDER_BODY)
+    if (enabled) void scheduleDailyReminder(hour, minute, REMINDER_BODY)
     else void clearScheduledReminders()
-  }, [enabled, hour])
+  }, [enabled, hour, minute])
 
   // Foreground scheduler for desktop/web (mobile is covered by the OS schedule).
   useEffect(() => {
@@ -70,10 +71,10 @@ export function useDailyReminder(): void {
       timer = window.setTimeout(() => {
         void fireForegroundNudge(habitsRef.current)
         arm()
-      }, msUntilNextHour(hour, timezone))
+      }, msUntilDailyTime(hour, minute, timezone))
     }
     arm()
 
     return () => window.clearTimeout(timer)
-  }, [enabled, hour, timezone])
+  }, [enabled, hour, minute, timezone])
 }

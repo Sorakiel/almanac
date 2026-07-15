@@ -55,7 +55,12 @@ export function timezoneOffsetLabel(timezone: string, instant: Date = new Date()
  * Uses wall-clock arithmetic (not date math) so it's DST- and midnight-safe: if
  * the hour has already passed today, it rolls to tomorrow.
  */
-export function msUntilNextHour(hour: number, timezone: string, instant: Date = new Date()): number {
+export function msUntilDailyTime(
+  hour: number,
+  minute: number,
+  timezone: string,
+  instant: Date = new Date(),
+): number {
   const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: timezone,
     hourCycle: 'h23',
@@ -65,7 +70,7 @@ export function msUntilNextHour(hour: number, timezone: string, instant: Date = 
   }).formatToParts(instant)
   const at = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0)
   const secondsNow = at('hour') * 3600 + at('minute') * 60 + at('second')
-  let delta = hour * 3600 - secondsNow
+  let delta = hour * 3600 + minute * 60 - secondsNow
   if (delta <= 0) delta += 86_400
   return delta * 1000
 }

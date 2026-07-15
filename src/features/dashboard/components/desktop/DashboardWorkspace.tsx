@@ -57,8 +57,8 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
 
   return (
     <div className="mx-auto max-w-[900px]">
-      <header className="flex items-start justify-between">
-        <div>
+      <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+        <div className="min-w-0">
           <p className="label-mono">// {weekday}</p>
           <h1 className="mt-1.5 text-[44px] leading-none tracking-title">
             {greeting}, {firstName}
@@ -68,7 +68,7 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
             {focusRunning ? ' · 1 focus block running' : ''}
           </p>
         </div>
-        <div className="flex items-center gap-5">
+        <div className="ml-auto flex items-center gap-5">
           <div className="text-right">
             <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">load</p>
             <div className="mt-1.5 flex items-center gap-2.5">
