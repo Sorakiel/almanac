@@ -19,6 +19,14 @@ jobs:
   build:
     strategy:
       fail-fast: false
+      # Serialize the OS builds. tauri-action merges each platform into the
+      # release's existing latest.json, but running the three runners in parallel
+      # makes that a read-modify-write race — whoever uploads last wins and the
+      # other platforms vanish from the manifest (that's how v0.2.0 shipped with
+      # only Windows). One at a time = each build merges into the prior one, so
+      # the final latest.json deterministically carries all platforms. Costs wall
+      # time; worth it for a correct updater manifest.
+      max-parallel: 1
       matrix:
         include:
           - platform: macos-latest # -> .dmg (Apple Silicon + Intel universal)
@@ -71,6 +79,28 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+  # Guard: fail loudly if the updater manifest lost a platform to the merge race
+  # (see max-parallel note above). Catches a broken auto-update in CI instead of
+  # letting users silently sit on the old version.
+  verify-updater:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assert latest.json carries every desktop platform
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --pattern latest.json --dir . --clobber
+          for key in darwin-aarch64 darwin-x86_64 windows-x86_64 linux-x86_64; do
+            if ! jq -e --arg k "$key" '.platforms[$k]' latest.json > /dev/null; then
+              echo "::error::latest.json is missing platform '$key' — updater manifest incomplete."
+              echo "--- latest.json platforms present: ---"
+              jq -r '.platforms | keys[]' latest.json
+              exit 1
+            fi
+          done
+          echo "latest.json OK — all desktop platforms present."
 
   # Android OTA: publish the web bundle + manifest so installed APKs self-update
   # over the air (src/lib/androidUpdater.ts reads android-latest.json). Runs
