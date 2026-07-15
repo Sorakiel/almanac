@@ -32,19 +32,20 @@
 }
 
 /* iOS Safari auto-zooms when a focused form control has a font-size below 16px,
-   then leaves the page zoomed-in and shifted. Our inputs use text-sm (14px), so
-   bump form controls to 16px on touch devices — desktop keeps the smaller type.
-   maximum-scale is ignored by modern iOS, so this is the only reliable fix.
+   then leaves the page zoomed-in and shifted (e.g. iPhone Safari). Our inputs
+   use text-sm (14px), so bump form controls to 16px on touch devices — desktop
+   keeps the smaller type. maximum-scale is ignored by modern iOS, so font-size
+   is the only reliable fix.
 
-   Deliberately UNLAYERED: the `.text-sm` utility on the inputs lives in
-   @layer utilities, which outranks any @layer base rule regardless of
-   specificity. An unlayered rule beats every layered one, so this wins without
-   needing !important. */
+   `!important` is REQUIRED: Tailwind v3 flattens @layer at build time, so the
+   `.text-sm` utility ships as a plain class rule that outranks a bare `input`
+   element selector on specificity (class > element). Without !important the
+   inputs stay 14px and keep zooming — which is exactly the bug this fixes. */
 @media (pointer: coarse) {
   input,
   textarea,
   select {
-    font-size: 16px;
+    font-size: 16px !important;
   }
 }
 
