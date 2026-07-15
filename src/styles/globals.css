@@ -29,18 +29,22 @@
   h3 {
     @apply tracking-title font-semibold;
   }
+}
 
-  /* iOS Safari auto-zooms when a focused form control has a font-size below
-     16px, then leaves the page zoomed-in and shifted. Our inputs use text-sm
-     (14px), so bump form controls to 16px on touch devices — desktop keeps the
-     smaller type. This stops the zoom at the source (viewport maximum-scale is
-     ignored by modern iOS, so it isn't a reliable fix). */
-  @media (pointer: coarse) {
-    input,
-    textarea,
-    select {
-      font-size: 16px;
-    }
+/* iOS Safari auto-zooms when a focused form control has a font-size below 16px,
+   then leaves the page zoomed-in and shifted. Our inputs use text-sm (14px), so
+   bump form controls to 16px on touch devices — desktop keeps the smaller type.
+   maximum-scale is ignored by modern iOS, so this is the only reliable fix.
+
+   Deliberately UNLAYERED: the `.text-sm` utility on the inputs lives in
+   @layer utilities, which outranks any @layer base rule regardless of
+   specificity. An unlayered rule beats every layered one, so this wins without
+   needing !important. */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
   }
 }
 
