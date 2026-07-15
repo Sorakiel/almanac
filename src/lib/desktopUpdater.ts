@@ -17,9 +17,12 @@ export async function checkForDesktopUpdate(): Promise<void> {
     await update.downloadAndInstall()
     toast.dismiss(dismiss)
 
-    const { relaunch } = await import('@tauri-apps/plugin-process')
+    // Restart via our own command, not plugin-process `relaunch()`: on macOS the
+    // latter spawns the bundle's raw binary and the app never reappears. The
+    // Rust side reopens through LaunchServices on macOS, plain restart elsewhere.
+    const { invoke } = await import('@tauri-apps/api/core')
     toast.success('Обновление установлено — перезапуск…')
-    await relaunch()
+    await invoke('restart_app')
   } catch (err) {
     // Non-fatal: offline, no release published yet, or signature mismatch.
     console.debug('[updater] check failed', err)
