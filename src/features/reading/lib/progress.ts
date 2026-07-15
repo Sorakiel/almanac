@@ -12,6 +12,12 @@ export function progressPct(book: Pick<Book, 'current_unit' | 'total_units'>): n
   return fraction === null ? null : Math.round(fraction * 100)
 }
 
+/** Whole-percent of a daily reading goal met by `readToday` units (capped 100). */
+export function dailyGoalPct(readToday: number, goal: number): number {
+  if (goal <= 0) return 0
+  return Math.min(100, Math.round((readToday / goal) * 100))
+}
+
 /** Singular unit noun for the tracking mode ("page" / "chapter"). */
 export function unitNoun(mode: BookProgressMode): string {
   return mode === 'chapters' ? 'chapter' : 'page'

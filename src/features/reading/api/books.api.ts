@@ -31,6 +31,7 @@ export type BookPatch = Partial<
     | 'author'
     | 'progress_mode'
     | 'total_units'
+    | 'daily_goal'
     | 'current_unit'
     | 'status'
     | 'started_on'

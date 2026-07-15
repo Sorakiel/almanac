@@ -116,6 +116,7 @@ export type Database = {
           author: string | null
           created_at: string
           current_unit: number
+          daily_goal: number | null
           finished_on: string | null
           id: string
           progress_mode: Database["public"]["Enums"]["book_progress_mode"]
@@ -130,6 +131,7 @@ export type Database = {
           author?: string | null
           created_at?: string
           current_unit?: number
+          daily_goal?: number | null
           finished_on?: string | null
           id?: string
           progress_mode?: Database["public"]["Enums"]["book_progress_mode"]
@@ -144,6 +146,7 @@ export type Database = {
           author?: string | null
           created_at?: string
           current_unit?: number
+          daily_goal?: number | null
           finished_on?: string | null
           id?: string
           progress_mode?: Database["public"]["Enums"]["book_progress_mode"]

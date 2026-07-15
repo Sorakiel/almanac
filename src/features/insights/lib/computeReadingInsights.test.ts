@@ -13,6 +13,7 @@ function book(overrides: Partial<Book> = {}): Book {
     progress_mode: 'pages',
     total_units: 300,
     current_unit: 0,
+    daily_goal: null,
     status: 'reading',
     started_on: null,
     finished_on: null,

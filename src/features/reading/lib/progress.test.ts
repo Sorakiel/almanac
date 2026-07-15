@@ -17,6 +17,7 @@ function makeBook(overrides: Partial<Book> = {}): Book {
     progress_mode: 'pages',
     total_units: 100,
     current_unit: 0,
+    daily_goal: null,
     status: 'to_read',
     started_on: null,
     finished_on: null,

@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Plus } from 'lucide-react'
+import { Check, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { useReadingProgress } from '@/features/reading/hooks/useReadingProgress'
-import { progressPct, unitNoun, unitNounPlural } from '@/features/reading/lib/progress'
+import { dailyGoalPct, progressPct, unitNoun, unitNounPlural } from '@/features/reading/lib/progress'
+import { cn } from '@/lib/utils'
 import { useToday } from '@/hooks/useToday'
 import type { Book, ReadingSession } from '@/features/reading/types'
 
@@ -33,6 +34,9 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
   const readToday = sessions
     .filter((s) => s.date === dateKey)
     .reduce((sum, s) => sum + s.units_read, 0)
+  const goal = book.daily_goal
+  const goalPct = goal ? dailyGoalPct(readToday, goal) : null
+  const goalMet = goal ? readToday >= goal : false
 
   const commit = (nextUnit: number, onDone?: () => void) => {
     logProgress.mutate(
@@ -87,6 +91,40 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
               size="md"
               animated
             />
+          </div>
+        ) : null}
+
+        {goal ? (
+          <div
+            className={cn(
+              'mt-4 rounded-2xl border px-4 py-3 transition-colors',
+              goalMet ? 'border-teal/40 bg-teal/10' : 'border-border bg-bg-deep',
+            )}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <span className="label-mono normal-case">
+                daily goal · {goal} {goal === 1 ? noun : nounPlural}/day
+              </span>
+              <span
+                className={cn(
+                  'flex items-center gap-1 font-mono text-sm tabular-nums',
+                  goalMet ? 'text-teal' : 'text-muted-strong',
+                )}
+              >
+                {goalMet ? <Check className="h-4 w-4" aria-hidden="true" /> : null}
+                {Math.min(readToday, goal)} / {goal}
+              </span>
+            </div>
+            <div className="mt-2.5">
+              <ProgressBlocks
+                value={Math.min(readToday, goal)}
+                total={goal}
+                blocks={20}
+                size="md"
+                animated
+                aria-label={`${goalPct}% of today's reading goal`}
+              />
+            </div>
           </div>
         ) : null}
 

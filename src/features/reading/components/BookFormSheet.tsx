@@ -17,6 +17,7 @@ const schema = z.object({
   title: z.string().trim().min(1, 'Give the book a title').max(160),
   author: z.string().trim().max(160).optional(),
   total: z.string().trim().optional(),
+  dailyGoal: z.string().trim().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -46,17 +47,21 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
       title: book?.title ?? '',
       author: book?.author ?? '',
       total: book?.total_units ? String(book.total_units) : '',
+      dailyGoal: book?.daily_goal ? String(book.daily_goal) : '',
     },
   })
 
   const onSubmit = handleSubmit(async (values) => {
     const parsed = values.total ? Number.parseInt(values.total, 10) : NaN
     const total_units = Number.isFinite(parsed) && parsed > 0 ? parsed : null
+    const parsedGoal = values.dailyGoal ? Number.parseInt(values.dailyGoal, 10) : NaN
+    const daily_goal = Number.isFinite(parsedGoal) && parsedGoal > 0 ? parsedGoal : null
     const fields = {
       title: values.title,
       author: values.author?.trim() ? values.author.trim() : null,
       progress_mode: mode,
       total_units,
+      daily_goal,
     }
 
     try {
@@ -126,6 +131,17 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
           <label className="flex flex-col gap-1.5">
             <span className="label-mono">Total {unitNounPlural(mode)} (optional)</span>
             <Input type="number" inputMode="numeric" min={1} placeholder="e.g. 320" {...register('total')} />
+          </label>
+
+          <label className="flex flex-col gap-1.5">
+            <span className="label-mono">Daily goal · {unitNounPlural(mode)} / day (optional)</span>
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              placeholder="e.g. 20"
+              {...register('dailyGoal')}
+            />
           </label>
 
           <Button type="submit" size="lg" disabled={pending}>

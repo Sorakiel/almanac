@@ -12,10 +12,12 @@ interface StarRatingProps {
   disabled?: boolean
 }
 
+// Larger on mobile for an easier tap target; reverts to the compact desktop
+// sizes at lg+. Bumping mobile stars was a direct ask — they were too small.
 const SIZES = {
-  sm: 'h-5 w-5',
-  md: 'h-7 w-7',
-  lg: 'h-9 w-9',
+  sm: 'h-6 w-6 lg:h-5 lg:w-5',
+  md: 'h-9 w-9 lg:h-7 lg:w-7',
+  lg: 'h-11 w-11 lg:h-9 lg:w-9',
 } as const
 
 /** Tap-to-rate stars; tapping the current value clears it. Sized for touch + PC. */
