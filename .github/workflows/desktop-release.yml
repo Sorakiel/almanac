@@ -157,7 +157,8 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          # Capacitor 8's Android libraries compile against Java 21.
+          java-version: '21'
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
