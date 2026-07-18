@@ -21,7 +21,7 @@ export function WorkoutInsightsSection({ data }: WorkoutInsightsSectionProps) {
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        <div className="rounded-card border bg-surface p-4">
+        <div className="min-w-0 rounded-card border bg-surface p-4">
           <p className="label-mono mb-3">most frequent</p>
           {data.topExercises.length === 0 ? (
             <p className="text-sm text-muted">No exercises logged yet.</p>
@@ -40,7 +40,7 @@ export function WorkoutInsightsSection({ data }: WorkoutInsightsSectionProps) {
           )}
         </div>
 
-        <div className="rounded-card border bg-surface p-4">
+        <div className="min-w-0 rounded-card border bg-surface p-4">
           <p className="label-mono mb-3">personal records</p>
           {data.prs.length === 0 ? (
             <p className="text-sm text-muted">Log a set with weight to set a record.</p>

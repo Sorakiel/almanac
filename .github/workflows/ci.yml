@@ -1,8 +1,5 @@
 name: CI
 
-# Typecheck, lint, unit-test, and build on every push and PR so regressions are
-# caught before they reach main (CLAUDE.md §13 "definition of done").
-
 on:
   push:
     branches: [main]
