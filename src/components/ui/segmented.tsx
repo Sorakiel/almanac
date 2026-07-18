@@ -23,12 +23,27 @@ export function Segmented<T extends string>({
   'aria-label': ariaLabel,
   className,
 }: SegmentedProps<T>) {
+  // The raised "thumb" is one segment wide and slides to the active option.
+  // Its own width is 100%, so translateX by index×100% lands it exactly.
+  const activeIndex = Math.max(
+    0,
+    options.findIndex((option) => option.value === value),
+  )
+
   return (
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className={cn('flex gap-1 rounded-pill border bg-bg-deep p-1', className)}
+      className={cn('relative flex rounded-pill border bg-bg-deep p-1', className)}
     >
+      <span
+        aria-hidden="true"
+        className="absolute bottom-1 left-1 top-1 rounded-pill bg-surface shadow-card transition-transform duration-300 ease-[cubic-bezier(0.34,1.4,0.64,1)] motion-reduce:transition-none"
+        style={{
+          width: `calc((100% - 0.5rem) / ${options.length})`,
+          transform: `translateX(calc(${activeIndex} * 100%))`,
+        }}
+      />
       {options.map((option) => {
         const active = option.value === value
         const Icon = option.icon
@@ -40,9 +55,9 @@ export function Segmented<T extends string>({
             aria-selected={active}
             onClick={() => onChange(option.value)}
             className={cn(
-              'flex flex-1 items-center justify-center gap-1.5 rounded-pill px-3 py-2 text-sm font-medium transition-colors',
+              'relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-pill px-3 py-2 text-sm font-medium transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-              active ? 'bg-surface text-foreground shadow-card' : 'text-muted hover:text-foreground',
+              active ? 'text-foreground' : 'text-muted hover:text-foreground',
             )}
           >
             {Icon ? <Icon className="h-4 w-4" aria-hidden="true" /> : null}
