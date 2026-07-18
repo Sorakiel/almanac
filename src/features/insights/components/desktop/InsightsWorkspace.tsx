@@ -2,19 +2,27 @@ import { CompletionTrend } from '@/features/insights/components/CompletionTrend'
 import { InsightStat } from '@/features/insights/components/InsightStat'
 import { WorkoutInsightsSection } from '@/features/insights/components/WorkoutInsightsSection'
 import { ReadingInsightsSection } from '@/features/insights/components/ReadingInsightsSection'
-import type { Insights, ReadingInsights, WorkoutInsights } from '@/features/insights/types'
+import { ReflectInsightsSection } from '@/features/insights/components/ReflectInsightsSection'
+import type {
+  Insights,
+  ReadingInsights,
+  ReflectInsights,
+  WorkoutInsights,
+} from '@/features/insights/types'
 
 interface InsightsWorkspaceProps {
   insights: Insights
   workoutInsights: WorkoutInsights | null
   readingInsights: ReadingInsights | null
+  reflectInsights: ReflectInsights | null
 }
 
-/** Desktop "Insights" workspace — habit KPIs + trend, then training + reading. */
+/** Desktop "Insights" workspace — habit KPIs + trend, then training, reading, reflect. */
 export function InsightsWorkspace({
   insights,
   workoutInsights,
   readingInsights,
+  reflectInsights,
 }: InsightsWorkspaceProps) {
   const completionPct = Math.round(insights.completionRate * 100)
 
@@ -62,6 +70,12 @@ export function InsightsWorkspace({
       {readingInsights?.hasData ? (
         <div className="mt-9">
           <ReadingInsightsSection data={readingInsights} />
+        </div>
+      ) : null}
+
+      {reflectInsights?.hasData ? (
+        <div className="mt-9">
+          <ReflectInsightsSection data={reflectInsights} />
         </div>
       ) : null}
     </div>

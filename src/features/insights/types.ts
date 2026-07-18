@@ -72,6 +72,23 @@ export interface ReadingProgressItem {
   pct: number | null
 }
 
+/** Journaling stats derived from the user's reflections. */
+export interface ReflectInsights {
+  /** Reflections written in the last 30 days. */
+  entries30d: number
+  /** Distinct days journaled in the last 30 days. */
+  daysJournaled30d: number
+  /** Current consecutive-day journaling streak (ending today or yesterday). */
+  currentStreak: number
+  /** All-time reflection count. */
+  totalEntries: number
+  /** Average day-rating over rated entries in the last 30 days, or null. */
+  avgDayRating30d: number | null
+  /** Journaled-day rate over the last 30 days, 0–1. */
+  consistency30d: number
+  hasData: boolean
+}
+
 /** Reading stats derived from books + logged reading sessions. */
 export interface ReadingInsights {
   booksReading: number
