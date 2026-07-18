@@ -1,30 +1,36 @@
 import { useLocation } from 'react-router-dom'
+import { Caret } from '@/components/common/Caret'
 import { useTheme } from '@/hooks/useTheme'
 
-/** Best-effort window title from the current route, mirroring the spec board. */
-function useWindowTitle(): string {
+/** Current route as a shell path segment, e.g. "today", "flow". */
+function useRouteSegment(): string {
   const { pathname } = useLocation()
-  if (pathname === '/') return 'Today'
-  if (pathname.startsWith('/habits')) return 'Habits'
-  if (pathname.startsWith('/train')) return 'Train'
-  if (pathname.startsWith('/insights')) return 'Insights'
-  if (pathname.startsWith('/reflect')) return 'Reflect'
-  if (pathname.startsWith('/flow')) return 'Flow'
-  if (pathname.startsWith('/more')) return 'Modules'
-  if (pathname.startsWith('/settings')) return 'Settings'
-  if (pathname.startsWith('/admin')) return 'Admin'
-  return 'Almanac'
+  if (pathname === '/') return 'today'
+  if (pathname.startsWith('/habits')) return 'habits'
+  if (pathname.startsWith('/train')) return 'train'
+  if (pathname.startsWith('/insights')) return 'insights'
+  if (pathname.startsWith('/reflect')) return 'reflect'
+  if (pathname.startsWith('/flow')) return 'flow'
+  if (pathname.startsWith('/more')) return 'modules'
+  if (pathname.startsWith('/settings')) return 'settings'
+  if (pathname.startsWith('/admin')) return 'admin'
+  return '~'
 }
 
-/** Desktop window chrome: traffic-light motif, window title, theme toggle. */
+/** Desktop window chrome: shell-prompt path, theme toggle. */
 export function TopBar() {
-  const title = useWindowTitle()
+  const segment = useRouteSegment()
   const { theme, toggleTheme } = useTheme()
 
   return (
     <div className="flex h-[52px] flex-none items-center justify-between border-b bg-chrome px-[22px]">
-      <div className="flex items-center">
-        <span className="font-mono text-[11px] text-muted-strong">Almanac — {title}</span>
+      <div className="flex items-center gap-1 font-mono text-[11px] text-muted-strong">
+        <span className="text-accent">◇</span>
+        <span>almanac</span>
+        <span className="text-muted-strong/50">:</span>
+        <span className="text-muted">~/{segment}</span>
+        <span className="text-accent">$</span>
+        <Caret className="h-[1em]" />
       </div>
 
       <button

@@ -2,6 +2,7 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
+import { StatusLine } from '@/components/common/StatusLine'
 import { NowBlock } from '@/features/dashboard/components/NowBlock'
 import { TodaysWorkoutsBlock } from '@/features/dashboard/components/TodaysWorkoutsBlock'
 import { DesktopHabitTile } from '@/features/dashboard/components/desktop/DesktopHabitTile'
@@ -133,6 +134,8 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
         <StatTile label="this week" value={String(weekRate)} unit="%" accent />
         <StatTile label="active" value={String(habits.length)} unit=" habits" />
       </section>
+
+      <StatusLine habitCount={habits.length} className="mt-6" />
     </div>
   )
 }

@@ -56,18 +56,6 @@
     @apply font-mono text-xs uppercase tracking-label text-muted;
   }
 
-  /* Faint CRT scanlines for hero surfaces — a quiet terminal texture. Sits on
-     an overlay layer at low alpha so it never fights text contrast. */
-  .scanlines {
-    background-image: repeating-linear-gradient(
-      to bottom,
-      rgb(var(--color-foreground) / 0.045) 0,
-      rgb(var(--color-foreground) / 0.045) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-  }
-
   /* Scrollable but chromeless — the heatmap still pans, minus the scrollbar. */
   .no-scrollbar {
     -ms-overflow-style: none;

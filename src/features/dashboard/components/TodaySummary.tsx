@@ -19,9 +19,8 @@ export function TodaySummary({ habits }: TodaySummaryProps) {
   const remaining = total - done
 
   return (
-    <div className="relative overflow-hidden rounded-card border bg-surface p-4">
-      <div aria-hidden="true" className="scanlines pointer-events-none absolute inset-0 opacity-70" />
-      <div className="relative flex items-center gap-4">
+    <div className="rounded-card border bg-surface p-4">
+      <div className="flex items-center gap-4">
         <CompletionDonut completed={done} total={total} size={104} />
         <div className="min-w-0 flex-1">
           <p className="label-mono flex items-center">

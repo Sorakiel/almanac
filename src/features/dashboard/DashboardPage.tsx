@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/common/Avatar'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
+import { StatusLine } from '@/components/common/StatusLine'
 import { Rail } from '@/components/common/desktop/rail'
 import { NowBlock } from '@/features/dashboard/components/NowBlock'
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
@@ -116,6 +117,8 @@ function DashboardPage() {
       </section>
 
       <TodaysWorkoutsBlock />
+
+      <StatusLine habitCount={habits.length} className="mt-1 px-1" />
     </div>
   )
 }
