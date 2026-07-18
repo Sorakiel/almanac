@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Segmented } from '@/components/ui/segmented'
 import { AuthBrandPanel } from '@/features/auth/components/AuthBrandPanel'
+import { PasswordStrengthMeter } from '@/features/auth/components/PasswordStrengthMeter'
+import { MIN_ACCEPTED_LEVEL, scorePassword } from '@/features/auth/passwordStrength'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useSession } from '@/hooks/useSession'
 import { setRememberMe } from '@/lib/supabase'
@@ -32,11 +34,18 @@ function AuthPage() {
     register,
     handleSubmit,
     getValues,
+    control,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) })
+  } = useForm<FormValues>({ resolver: zodResolver(schema), mode: 'onChange' })
 
   const pending =
     signIn.isPending || signUp.isPending || resetRequest.isPending || magicLink.isPending
+
+  // Live strength gate — only enforced on signup; existing accounts sign in
+  // with whatever password they already have.
+  const passwordValue = useWatch({ control, name: 'password' }) ?? ''
+  const passwordStrongEnough = scorePassword(passwordValue).level >= MIN_ACCEPTED_LEVEL
+  const submitBlocked = pending || (mode === 'signup' && !passwordStrongEnough)
 
   const onMagicLink = async () => {
     const email = getValues('email').trim()
@@ -171,6 +180,12 @@ function AuthPage() {
               ) : null}
             </label>
 
+            {mode === 'signup' && passwordValue.length > 0 ? (
+              <div className="duration-500 animate-in fade-in slide-in-from-top-2">
+                <PasswordStrengthMeter password={passwordValue} />
+              </div>
+            ) : null}
+
             <div className="flex items-center justify-between">
               <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
                 <input
@@ -193,8 +208,19 @@ function AuthPage() {
               ) : null}
             </div>
 
-            <Button type="submit" size="lg" disabled={pending} className="shadow-glow">
-              {pending ? 'One moment…' : mode === 'signin' ? 'Sign in →' : 'Create account →'}
+            <Button
+              type="submit"
+              size="lg"
+              disabled={submitBlocked}
+              className="shadow-glow transition-opacity"
+            >
+              {pending
+                ? 'One moment…'
+                : mode === 'signup' && !passwordStrongEnough
+                  ? 'Strengthen your password'
+                  : mode === 'signin'
+                    ? 'Sign in →'
+                    : 'Create account →'}
             </Button>
           </form>
 

@@ -21,6 +21,7 @@
   --color-border: 255 255 255; /* used at low opacity for hairlines */
   --color-teal: 42 157 143; /* #2A9D8F */
   --color-amber: 199 154 58; /* #C79A3A */
+  --color-danger: 229 84 74; /* #E5544A — weak-password red, distinct from accent orange */
 
   /* Desktop shell surfaces (spec board "Almanac — Desktop"). Chrome is the
      nav rail / top bar / context rail; panel is a workspace card sitting on
@@ -45,6 +46,7 @@
   --color-border: 42 32 24; /* espresso hairline on light */
   --color-teal: 42 157 143;
   --color-amber: 199 154 58;
+  --color-danger: 190 52 42; /* #BE342A — deeper red for AA on the warm canvas */
 
   /* Coffee shell surfaces: chrome is a touch deeper than the canvas, panel is
      the warm card that sits on the #F4ECDD workspace. */
