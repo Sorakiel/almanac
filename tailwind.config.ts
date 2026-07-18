@@ -82,6 +82,11 @@ export default {
           '0%': { transform: 'translate(0, 0) rotate(0deg)', opacity: '1' },
           '100%': { transform: 'translate(var(--tx), var(--ty)) rotate(var(--rot))', opacity: '0' },
         },
+        // Hard on/off blink for the terminal caret.
+        'caret-blink': {
+          '0%, 49%': { opacity: '1' },
+          '50%, 100%': { opacity: '0' },
+        },
       },
       animation: {
         pop: 'pop 0.4s ease-out',
@@ -89,6 +94,7 @@ export default {
         shimmer: 'shimmer 1.6s ease-in-out infinite',
         shine: 'shine 0.9s ease-out',
         'confetti-burst': 'confetti-burst 0.9s ease-out forwards',
+        'caret-blink': 'caret-blink 1.1s step-end infinite',
       },
     },
   },

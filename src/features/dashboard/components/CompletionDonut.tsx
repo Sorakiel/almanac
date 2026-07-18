@@ -1,22 +1,25 @@
 import { useEffect, useState } from 'react'
 import { useCountUp } from '@/hooks/useCountUp'
+import { cn } from '@/lib/utils'
 
 interface CompletionDonutProps {
   completed: number
   total: number
+  /** Rendered diameter in px. The SVG geometry scales to fit. */
+  size?: number
 }
 
-const SIZE = 160
+const VIEW = 160
 const STROKE = 14
-const RADIUS = (SIZE - STROKE) / 2
+const RADIUS = (VIEW - STROKE) / 2
 const CIRC = 2 * Math.PI * RADIUS
 
 /**
  * Radial completion gauge for today's habits. The arc draws in from empty on
  * mount and eases to each new value via `stroke-dashoffset`; the centre
- * percentage counts up to match. Hand-rolled SVG so the draw is fully ours.
+ * percentage counts up to match. Mono readout keeps it terminal-flavoured.
  */
-export function CompletionDonut({ completed, total }: CompletionDonutProps) {
+export function CompletionDonut({ completed, total, size = 160 }: CompletionDonutProps) {
   const safeTotal = Math.max(total, 0)
   const pct = safeTotal === 0 ? 0 : Math.round((completed / safeTotal) * 100)
 
@@ -28,25 +31,27 @@ export function CompletionDonut({ completed, total }: CompletionDonutProps) {
   }, [pct])
 
   const displayPct = useCountUp(pct)
+  const big = size >= 140
 
   return (
     <div
-      className="relative h-40 w-40"
+      className="relative shrink-0"
+      style={{ width: size, height: size }}
       role="img"
       aria-label={`${completed} of ${total} habits complete, ${pct} percent`}
     >
-      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="h-full w-full -rotate-90">
+      <svg viewBox={`0 0 ${VIEW} ${VIEW}`} className="h-full w-full -rotate-90">
         <circle
-          cx={SIZE / 2}
-          cy={SIZE / 2}
+          cx={VIEW / 2}
+          cy={VIEW / 2}
           r={RADIUS}
           fill="none"
           stroke="rgb(var(--color-border) / 0.15)"
           strokeWidth={STROKE}
         />
         <circle
-          cx={SIZE / 2}
-          cy={SIZE / 2}
+          cx={VIEW / 2}
+          cy={VIEW / 2}
           r={RADIUS}
           fill="none"
           stroke="rgb(var(--color-accent))"
@@ -58,8 +63,12 @@ export function CompletionDonut({ completed, total }: CompletionDonutProps) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-semibold tabular-nums">{displayPct}%</span>
-        <span className="label-mono mt-1">
+        <span
+          className={cn('font-mono font-semibold tabular-nums', big ? 'text-3xl' : 'text-xl')}
+        >
+          {displayPct}%
+        </span>
+        <span className={cn('label-mono', big ? 'mt-1' : 'mt-0.5 text-[10px]')}>
           {completed}/{total}
         </span>
       </div>

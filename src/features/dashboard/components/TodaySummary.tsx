@@ -1,0 +1,49 @@
+import { CompletionDonut } from '@/features/dashboard/components/CompletionDonut'
+import { Caret } from '@/components/common/Caret'
+import type { HabitWithTodayLog } from '@/features/habits/types'
+
+interface TodaySummaryProps {
+  habits: HabitWithTodayLog[]
+}
+
+/**
+ * Dashboard "now" card: today's completion as a radial gauge plus a mono
+ * readout of done / remaining. Only habits actually due today count (resting
+ * interval habits don't), matching the block-bar summary on the Habits page.
+ */
+export function TodaySummary({ habits }: TodaySummaryProps) {
+  const due = habits.filter((h) => h.dueToday || h.isComplete)
+  const done = due.filter((h) => h.isComplete).length
+  const total = due.length
+  if (total === 0) return null
+  const remaining = total - done
+
+  return (
+    <div className="relative overflow-hidden rounded-card border bg-surface p-4">
+      <div aria-hidden="true" className="scanlines pointer-events-none absolute inset-0 opacity-70" />
+      <div className="relative flex items-center gap-4">
+        <CompletionDonut completed={done} total={total} size={104} />
+        <div className="min-w-0 flex-1">
+          <p className="label-mono flex items-center">
+            // today
+            <Caret />
+          </p>
+          <p className="mt-1 font-mono text-lg tabular-nums">
+            <span className="text-foreground">{done}</span>
+            <span className="text-muted"> / {total} done</span>
+          </p>
+          <div className="mt-2 flex flex-col gap-1 font-mono text-[11px] uppercase tracking-label text-muted">
+            <span>
+              <span className="text-accent">▓</span> done ·{' '}
+              <span className="tabular-nums text-foreground">{done}</span>
+            </span>
+            <span>
+              <span className="text-muted-strong/50">░</span> left ·{' '}
+              <span className="tabular-nums text-foreground">{remaining}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

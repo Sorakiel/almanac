@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
-import { TodayProgress } from '@/features/habits/components/TodayProgress'
+import { TodaySummary } from '@/features/dashboard/components/TodaySummary'
 import { useFocusStore } from '@/stores/focus'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 
@@ -26,7 +26,7 @@ export function NowBlock({ habits }: NowBlockProps) {
   }, [running])
 
   if (!running) {
-    return habits.length > 0 ? <TodayProgress habits={habits} /> : null
+    return habits.length > 0 ? <TodaySummary habits={habits} /> : null
   }
 
   const msLeft = Math.max(endsAt - now, 0)
