@@ -23,13 +23,29 @@ function NavButton({ item }: { item: NavItem }) {
       end={item.end}
       className={({ isActive }) =>
         cn(
-          'flex w-12 flex-col items-center gap-1 py-1 transition-colors',
+          'flex w-12 flex-col items-center gap-1 py-1 transition-colors active:scale-90',
           isActive ? 'text-accent' : 'text-muted hover:text-foreground',
         )
       }
     >
-      <Icon aria-hidden="true" className="h-[18px] w-[18px]" strokeWidth={1.75} />
-      <span className="font-mono text-[8px] uppercase tracking-label">{item.label}</span>
+      {({ isActive }) => (
+        <>
+          <Icon
+            key={isActive ? 'on' : 'off'}
+            aria-hidden="true"
+            className={cn('h-[18px] w-[18px]', isActive && 'motion-safe:animate-pop')}
+            strokeWidth={1.75}
+          />
+          <span className="font-mono text-[8px] uppercase tracking-label">{item.label}</span>
+          <span
+            aria-hidden="true"
+            className={cn(
+              'h-1 w-1 rounded-full bg-accent transition-all duration-300',
+              isActive ? 'scale-100 opacity-100' : 'scale-0 opacity-0',
+            )}
+          />
+        </>
+      )}
     </NavLink>
   )
 }
@@ -67,7 +83,7 @@ export function BottomNav() {
           type="button"
           onClick={handleAdd}
           aria-label="Add habit"
-          className="-mt-6 flex h-[52px] w-[52px] flex-none items-center justify-center rounded-[17px] border-[3px] border-bg bg-accent text-2xl leading-none text-on-accent shadow-glow transition-colors hover:bg-accent-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="-mt-6 flex h-[52px] w-[52px] flex-none items-center justify-center rounded-[17px] border-[3px] border-bg bg-accent text-2xl leading-none text-on-accent shadow-glow transition-[transform,background-color] duration-300 hover:rotate-90 hover:bg-accent-deep active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent motion-reduce:hover:rotate-0"
         >
           <span aria-hidden="true">+</span>
         </button>

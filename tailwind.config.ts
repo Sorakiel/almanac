@@ -55,14 +55,40 @@ export default {
         nav: '20px',
       },
       keyframes: {
-        // One-shot ripple when the strength tier changes (not a loop).
-        'stage-pop': {
-          '0%': { transform: 'scale(0.6)', opacity: '0.55' },
-          '100%': { transform: 'scale(1.45)', opacity: '0' },
+        // Bouncy one-shot scale — completion toggles, badges, icons.
+        pop: {
+          '0%': { transform: 'scale(0.7)' },
+          '55%': { transform: 'scale(1.12)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        // Expanding, fading ring — a "confirmed" pulse behind an action.
+        ripple: {
+          '0%': { transform: 'scale(0.6)', opacity: '0.5' },
+          '100%': { transform: 'scale(1.6)', opacity: '0' },
+        },
+        // Looping sweep for loading skeletons.
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        // One-shot diagonal gloss — achievement unlock sheen.
+        shine: {
+          '0%': { transform: 'translateX(-120%) skewX(-12deg)', opacity: '0' },
+          '20%': { opacity: '0.9' },
+          '100%': { transform: 'translateX(240%) skewX(-12deg)', opacity: '0' },
+        },
+        // Confetti piece — flies out along per-piece CSS vars, then fades.
+        'confetti-burst': {
+          '0%': { transform: 'translate(0, 0) rotate(0deg)', opacity: '1' },
+          '100%': { transform: 'translate(var(--tx), var(--ty)) rotate(var(--rot))', opacity: '0' },
         },
       },
       animation: {
-        'stage-pop': 'stage-pop 0.6s ease-out',
+        pop: 'pop 0.4s ease-out',
+        ripple: 'ripple 0.6s ease-out',
+        shimmer: 'shimmer 1.6s ease-in-out infinite',
+        shine: 'shine 0.9s ease-out',
+        'confetti-burst': 'confetti-burst 0.9s ease-out forwards',
       },
     },
   },

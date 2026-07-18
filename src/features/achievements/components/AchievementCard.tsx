@@ -43,9 +43,9 @@ export function AchievementCard({ item }: { item: EvaluatedAchievement }) {
   return (
     <div
       className={cn(
-        'relative flex flex-col gap-3 rounded-[22px] border p-4 transition-colors',
+        'relative flex flex-col gap-3 rounded-[22px] border p-4 transition-[transform,box-shadow,border-color] hover:-translate-y-0.5',
         unlocked
-          ? cn('bg-gradient-to-br via-surface to-surface shadow-soft', tone.wash, tone.border)
+          ? cn('bg-gradient-to-br via-surface to-surface shadow-soft hover:shadow-card', tone.wash, tone.border)
           : 'border-dashed bg-surface',
       )}
     >
@@ -53,13 +53,19 @@ export function AchievementCard({ item }: { item: EvaluatedAchievement }) {
         <div className="relative">
           <span
             className={cn(
-              'flex h-14 w-14 items-center justify-center rounded-2xl',
+              'relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl',
               unlocked
                 ? cn('bg-gradient-to-br text-bg shadow-glow', tone.tile)
                 : 'bg-bg/40 text-muted-strong/40',
             )}
           >
             <Icon className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
+            {unlocked ? (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 -left-full w-1/2 bg-white/40 blur-[2px] motion-safe:animate-shine"
+              />
+            ) : null}
           </span>
           <span
             className={cn(

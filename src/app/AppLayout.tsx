@@ -68,7 +68,12 @@ export function AppLayout() {
               'app-scroll lg:mx-0 lg:max-w-none lg:overflow-y-auto lg:px-10 lg:py-8',
             )}
           >
-            <Outlet />
+            <div
+              key={pathname}
+              className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
+            >
+              <Outlet />
+            </div>
           </main>
 
           <aside className="app-scroll hidden w-[340px] flex-none flex-col overflow-y-auto border-l bg-chrome px-6 py-6 lg:flex">

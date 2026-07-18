@@ -1,6 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { PartyPopper } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Confetti } from '@/components/common/Confetti'
 
 interface CelebrationModalProps {
   open: boolean
@@ -28,8 +29,9 @@ export function CelebrationModal({
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 bg-gradient-to-br from-accent/20 via-transparent to-transparent"
           />
+          {open ? <Confetti /> : null}
           <div className="relative flex flex-col items-center gap-4">
-            <span className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-gradient-to-br from-accent to-accent-deep text-on-accent shadow-glow">
+            <span className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-gradient-to-br from-accent to-accent-deep text-on-accent shadow-glow motion-safe:animate-pop">
               <PartyPopper className="h-8 w-8" aria-hidden="true" />
             </span>
             <Dialog.Title className="text-2xl font-semibold tracking-title">{title}</Dialog.Title>

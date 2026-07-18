@@ -41,14 +41,25 @@ function DoneToggle({ set, onToggleDone }: { set: SetLog; onToggleDone: (done: b
       aria-pressed={set.done}
       aria-label={set.done ? `Set ${set.set_number} not done` : `Set ${set.set_number} done`}
       className={cn(
-        'flex h-9 w-9 flex-none items-center justify-center rounded-lg border transition-colors',
+        'relative flex h-9 w-9 flex-none items-center justify-center rounded-lg border transition-colors active:scale-90',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
         set.done
           ? 'border-teal/50 bg-teal/15 text-teal'
           : 'text-transparent hover:border-accent hover:text-accent',
       )}
     >
-      <Check className="h-4 w-4" aria-hidden="true" />
+      {set.done ? (
+        <span
+          key="ripple"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-lg border border-teal motion-safe:animate-ripple motion-reduce:hidden"
+        />
+      ) : null}
+      <Check
+        key={set.done ? 'on' : 'off'}
+        className={cn('h-4 w-4', set.done && 'motion-safe:animate-pop')}
+        aria-hidden="true"
+      />
     </button>
   )
 }

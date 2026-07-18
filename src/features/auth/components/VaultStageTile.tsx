@@ -42,7 +42,7 @@ export function VaultStageTile({ level }: VaultStageTileProps) {
         key={level}
         aria-hidden="true"
         className={cn(
-          'pointer-events-none absolute inset-0 rounded-tile border motion-safe:animate-stage-pop motion-reduce:hidden',
+          'pointer-events-none absolute inset-0 rounded-tile border motion-safe:animate-ripple motion-reduce:hidden',
           stage.ring,
         )}
       />

@@ -82,14 +82,25 @@ export function CheckToggle({ habit, onToggle }: CheckToggleProps) {
       aria-pressed={habit.isComplete}
       aria-label={habit.isComplete ? `Mark ${habit.name} incomplete` : `Complete ${habit.name}`}
       className={cn(
-        'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors',
+        'relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors active:scale-90',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
         habit.isComplete
-          ? 'border-accent/50 text-accent'
+          ? 'border-accent/50 bg-accent/10 text-accent'
           : 'text-transparent hover:border-accent hover:text-accent',
       )}
     >
-      <Check className="h-4 w-4" aria-hidden="true" />
+      {habit.isComplete ? (
+        <span
+          key="ripple"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-full border border-accent motion-safe:animate-ripple motion-reduce:hidden"
+        />
+      ) : null}
+      <Check
+        key={habit.isComplete ? 'on' : 'off'}
+        className={cn('h-4 w-4', habit.isComplete && 'motion-safe:animate-pop')}
+        aria-hidden="true"
+      />
     </button>
   )
 }
