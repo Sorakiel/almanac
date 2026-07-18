@@ -7,6 +7,7 @@ import { Sparkline } from '@/components/common/Sparkline'
 import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
+import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 
 interface HabitCardProps {
@@ -20,7 +21,18 @@ export function HabitCard({ habit }: HabitCardProps) {
   const color = resolveHabitColor(habit.color)
   const Icon = resolveHabitIcon(habit.icon)
   const timeLabel = timeOfDayLabel(habit.time_of_day)
-  const subtitle = [habit.description, frequencyLabel(habit), timeLabel]
+  // Resting = an interval/weekday habit that isn't due today and isn't done —
+  // it's locked and struck through until its next due date.
+  const resting = !habit.isComplete && !habit.dueToday
+  const subtitle = [
+    habit.description,
+    resting
+      ? habit.dueInDays > 0
+        ? `resting · in ${habit.dueInDays}d`
+        : 'resting'
+      : frequencyLabel(habit),
+    timeLabel,
+  ]
     .filter(Boolean)
     .join(' · ')
 
@@ -47,7 +59,14 @@ export function HabitCard({ habit }: HabitCardProps) {
       <div className="flex items-start gap-3">
         <IconTile icon={Icon} tone={color.tile} />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold">{habit.name}</p>
+          <p
+            className={cn(
+              'truncate font-semibold',
+              (habit.isComplete || resting) && 'text-muted line-through',
+            )}
+          >
+            {habit.name}
+          </p>
           <p className="truncate text-sm text-muted">{subtitle}</p>
         </div>
         <div className="relative z-10">
@@ -72,13 +91,23 @@ interface CheckToggleProps {
   onToggle: () => void
 }
 
-/** Habit completion checkbox used on cards and rows. */
+/** Habit completion checkbox used on cards and rows. Locked while resting. */
 export function CheckToggle({ habit, onToggle }: CheckToggleProps) {
+  const resting = !habit.isComplete && !habit.dueToday
   return (
     <CompletionToggle
       done={habit.isComplete}
       onToggle={onToggle}
-      aria-label={habit.isComplete ? `Mark ${habit.name} incomplete` : `Complete ${habit.name}`}
+      disabled={resting}
+      aria-label={
+        resting
+          ? habit.dueInDays > 0
+            ? `${habit.name} rests for ${habit.dueInDays} more day(s)`
+            : `${habit.name} is resting`
+          : habit.isComplete
+            ? `Mark ${habit.name} incomplete`
+            : `Complete ${habit.name}`
+      }
     />
   )
 }

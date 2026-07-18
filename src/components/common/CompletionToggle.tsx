@@ -42,8 +42,13 @@ export function CompletionToggle({
       className={cn(
         'relative flex shrink-0 items-center justify-center rounded-[9px] border transition-colors active:scale-90',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
+        'disabled:cursor-not-allowed disabled:active:scale-100',
         SIZE[size],
-        done ? t.on : 'text-transparent hover:border-accent hover:text-accent',
+        done
+          ? t.on
+          : disabled
+            ? 'border-dashed text-transparent opacity-40'
+            : 'text-transparent hover:border-accent hover:text-accent',
       )}
     >
       {done ? (

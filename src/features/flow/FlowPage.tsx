@@ -16,6 +16,7 @@ import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
 import { useBooks } from '@/features/reading/hooks/useBooks'
 import { FlowWorkoutRunner } from '@/features/flow/components/FlowWorkoutRunner'
 import { FlowReadingRunner } from '@/features/flow/components/FlowReadingRunner'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useFocusStore } from '@/stores/focus'
@@ -47,6 +48,7 @@ function FlowPage() {
   const [customLabel, setCustomLabel] = useState('')
   const [duration, setDuration] = useState(25)
   const [now, setNow] = useState(() => Date.now())
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   // If the module behind the selected mode was just disabled, fall back to Habit.
   if ((mode === 'workout' && !workoutsEnabled) || (mode === 'book' && !readingEnabled)) {
@@ -119,46 +121,49 @@ function FlowPage() {
           <h1 className="mt-1 text-2xl">Flow</h1>
         </header>
 
-        <div className="relative overflow-hidden rounded-card border border-accent/25 bg-surface p-5">
+        <div className="relative overflow-hidden rounded-card border border-accent/25 bg-surface p-5 lg:p-8">
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 bg-gradient-to-br from-accent/20 via-transparent to-transparent"
           />
           <div className="relative">
-            <p className="label-mono text-[10px] text-accent">FOCUSING ON</p>
-            <p className="mt-2 truncate text-xl font-semibold leading-tight tracking-title">
+            <p className="label-mono text-[10px] text-accent lg:text-xs">FOCUSING ON</p>
+            <p className="mt-2 truncate text-xl font-semibold leading-tight tracking-title lg:mt-3 lg:text-3xl">
               {label ?? 'Focus session'}
             </p>
-            <div className="mt-3 flex items-center gap-2.5">
+            <div className="mt-3 flex items-center gap-2.5 lg:mt-6 lg:gap-4">
               <ProgressBlocks
                 value={Math.round(elapsedMin * 10)}
                 total={durationMin * 10}
-                blocks={10}
+                blocks={isDesktop ? 24 : 10}
+                size={isDesktop ? 'lg' : 'sm'}
                 animated
                 aria-label={`${minLeft} minutes left`}
               />
-              <span className="font-mono text-xs tabular-nums text-foreground">{pct}%</span>
+              <span className="font-mono text-xs tabular-nums text-foreground lg:text-2xl">
+                {pct}%
+              </span>
             </div>
-            <div className="mt-3.5 flex items-center justify-between gap-3">
-              <span className="font-mono text-[11px] tracking-label text-muted">
+            <div className="mt-3.5 flex items-center justify-between gap-3 lg:mt-7">
+              <span className="font-mono text-[11px] tracking-label text-muted lg:text-sm">
                 ◷ {minLeft} min left
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 lg:gap-3">
                 <button
                   type="button"
                   onClick={stop}
-                  className="inline-flex items-center gap-1.5 rounded-[11px] border bg-surface px-3.5 py-2 font-mono text-[11px] font-bold uppercase tracking-label text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="inline-flex items-center gap-1.5 rounded-[11px] border bg-surface px-3.5 py-2 font-mono text-[11px] font-bold uppercase tracking-label text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent lg:gap-2 lg:px-5 lg:py-3 lg:text-sm"
                 >
-                  <X className="h-3.5 w-3.5" aria-hidden="true" />
+                  <X className="h-3.5 w-3.5 lg:h-4 lg:w-4" aria-hidden="true" />
                   End
                 </button>
                 {workoutId || bookId ? null : (
                   <button
                     type="button"
                     onClick={completeSession}
-                    className="inline-flex items-center gap-1.5 rounded-[11px] bg-accent px-3.5 py-2 font-mono text-[11px] font-bold uppercase tracking-label text-on-accent transition-colors hover:bg-accent-deep hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+                    className="inline-flex items-center gap-1.5 rounded-[11px] bg-accent px-3.5 py-2 font-mono text-[11px] font-bold uppercase tracking-label text-on-accent transition-colors hover:bg-accent-deep hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg lg:gap-2 lg:px-5 lg:py-3 lg:text-sm"
                   >
-                    <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                    <Check className="h-3.5 w-3.5 lg:h-4 lg:w-4" aria-hidden="true" />
                     {habitId ? 'Complete' : 'Done'}
                   </button>
                 )}

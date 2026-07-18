@@ -68,6 +68,30 @@ export function dueInDays(habit: FreqHabit, daysSinceLastDone: number | null): n
 }
 
 /**
+ * How many completions a cadence expects across the given window of local date
+ * keys — the denominator for a schedule-aware completion rate. A "2× / week"
+ * habit expects 2 in a 7-day window, an "every 3 days" habit ~2.3, not 7.
+ */
+export function expectedCompletionsInWindow(habit: FreqHabit, windowKeys: string[]): number {
+  const days = windowKeys.length
+  switch (habit.frequency) {
+    case 'weekdays':
+      return windowKeys.filter((key) => !isWeekendKey(key)).length
+    case 'weekly':
+      return days / 7
+    case 'x_per_week':
+      return (habit.target_count * days) / 7
+    case 'every_n_days':
+      return days / habit.target_count
+    case 'every_n_weeks':
+      return days / (habit.target_count * 7)
+    case 'daily':
+    default:
+      return days
+  }
+}
+
+/**
  * Whether the habit should be acted on for the given local date. Weekdays
  * habits rest on weekends; interval habits rest until their next due day;
  * everything else is due every day.

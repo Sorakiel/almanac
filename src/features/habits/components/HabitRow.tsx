@@ -25,6 +25,8 @@ export function HabitRow({ habit }: HabitRowProps) {
     )
   }
 
+  const resting = !habit.isComplete && !habit.dueToday
+
   return (
     <div className="flex items-center gap-3 py-1.5">
       <CheckToggle habit={habit} onToggle={handleToggle} />
@@ -32,13 +34,13 @@ export function HabitRow({ habit }: HabitRowProps) {
         to={`/habits/${habit.id}`}
         className={cn(
           'min-w-0 flex-1 truncate rounded font-medium transition-colors hover:text-accent',
-          habit.isComplete && 'text-muted line-through',
+          (habit.isComplete || resting) && 'text-muted line-through',
         )}
       >
         {habit.name}
       </Link>
-      {!habit.isComplete && !habit.dueToday ? (
-        <Tag tone="muted">in {habit.dueInDays}d</Tag>
+      {resting ? (
+        <Tag tone="muted">{habit.dueInDays > 0 ? `in ${habit.dueInDays}d` : 'rest'}</Tag>
       ) : (
         <Tag>{frequencyLabel(habit)}</Tag>
       )}

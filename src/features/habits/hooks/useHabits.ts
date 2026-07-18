@@ -4,7 +4,12 @@ import { useToday } from '@/hooks/useToday'
 import { lastNDateKeys } from '@/lib/date'
 import { fetchHabits, fetchLogsSince } from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
-import { dailyTarget, dueInDays, isDueOn } from '@/features/habits/lib/frequency'
+import {
+  dailyTarget,
+  dueInDays,
+  expectedCompletionsInWindow,
+  isDueOn,
+} from '@/features/habits/lib/frequency'
 import type { Habit, HabitLog, HabitWithTodayLog } from '@/features/habits/types'
 
 const WINDOW_DAYS = 7
@@ -22,9 +27,13 @@ function join(habits: Habit[], logs: HabitLog[], windowKeys: string[]): HabitWit
     const target = dailyTarget(habit)
     const doneOn = (key: string): boolean => (counts.get(`${habit.id}:${key}`) ?? 0) >= target
 
-    const series: number[] = windowKeys.slice(-WINDOW_DAYS).map((key) => (doneOn(key) ? 1 : 0))
+    const windowSlice = windowKeys.slice(-WINDOW_DAYS)
+    const series: number[] = windowSlice.map((key) => (doneOn(key) ? 1 : 0))
     const todayCount = counts.get(`${habit.id}:${todayKey}`) ?? 0
     const completedRecent = series.reduce((a, b) => a + b, 0)
+    // Rate is relative to what the cadence expects in the window, not raw days:
+    // a 2×/week habit hits 100% at 2 completions, not 7.
+    const expected = expectedCompletionsInWindow(habit, windowSlice)
 
     // Whole days since the most recent completion (0 = today), for interval due-ness.
     let daysSinceLastDone: number | null = null
@@ -43,7 +52,7 @@ function join(habits: Habit[], logs: HabitLog[], windowKeys: string[]): HabitWit
       series,
       completedRecent,
       windowDays: WINDOW_DAYS,
-      rate: completedRecent / WINDOW_DAYS,
+      rate: expected > 0 ? Math.min(completedRecent / expected, 1) : 0,
       dueInDays: dueIn,
       dueToday: isDueOn(habit, todayKey, daysSinceLastDone),
     }

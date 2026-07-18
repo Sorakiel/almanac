@@ -28,6 +28,8 @@ export function DesktopHabitTile({ habit }: { habit: HabitWithTodayLog }) {
     )
   }
 
+  const resting = !habit.isComplete && !habit.dueToday
+
   return (
     <div className="flex items-center gap-3.5 rounded-2xl border bg-panel px-[18px] py-4">
       <CheckToggle habit={habit} onToggle={handleToggle} />
@@ -35,13 +37,13 @@ export function DesktopHabitTile({ habit }: { habit: HabitWithTodayLog }) {
         to={`/habits/${habit.id}`}
         className={cn(
           'min-w-0 flex-1 truncate rounded font-medium transition-colors hover:text-accent',
-          habit.isComplete && 'text-muted-strong line-through',
+          (habit.isComplete || resting) && 'text-muted-strong line-through',
         )}
       >
         {habit.name}
       </Link>
-      {!habit.isComplete && !habit.dueToday ? (
-        <Tag tone="muted">in {habit.dueInDays}d</Tag>
+      {resting ? (
+        <Tag tone="muted">{habit.dueInDays > 0 ? `in ${habit.dueInDays}d` : 'rest'}</Tag>
       ) : (
         <Tag tone={toneFor(habit.color)}>{frequencyLabel(habit)}</Tag>
       )}
