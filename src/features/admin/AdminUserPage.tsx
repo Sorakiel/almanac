@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { Rail } from '@/components/common/desktop/rail'
 import { AdminUserRail } from '@/features/admin/components/AdminUserRail'
+import { FeedbackManager } from '@/features/admin/components/FeedbackManager'
 import { AwardAchievements } from '@/features/achievements/components/AwardAchievements'
 import { useAdminUser } from '@/features/admin/hooks/useAdminUser'
 import { useUserManagement } from '@/features/admin/hooks/useUserManagement'
@@ -182,25 +183,7 @@ function AdminUserPage() {
 
         <section className="flex flex-col gap-3">
           <SectionLabel>FEEDBACK</SectionLabel>
-          {data.feedback.length === 0 ? (
-            <p className="rounded-card border bg-surface px-4 py-6 text-center text-sm text-muted">
-              No feedback submitted.
-            </p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {data.feedback.map((f) => (
-                <div key={f.id} className="rounded-card border bg-surface px-4 py-3">
-                  <div className="mb-1 flex items-center gap-2">
-                    <Tag tone={f.status === 'open' ? 'accent' : 'muted'}>{f.status}</Tag>
-                    <span className="font-mono text-[10px] text-muted-strong">
-                      {joinedLabel(f.createdAt, dateKey)}
-                    </span>
-                  </div>
-                  <p className="text-sm leading-relaxed">{f.body}</p>
-                </div>
-              ))}
-            </div>
-          )}
+          <FeedbackManager items={data.feedback} todayKey={dateKey} hideAuthor />
         </section>
 
         {isOwner ? <AwardAchievements userId={data.id} userName={data.name} /> : null}

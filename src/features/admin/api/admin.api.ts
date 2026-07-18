@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { Feedback, Profile, UserRole } from '@/features/admin/types'
+import type { Feedback, FeedbackStatus, Profile, UserRole } from '@/features/admin/types'
 import type { Database } from '@/types/database.generated'
 
 type HabitRow = Database['public']['Tables']['habits']['Row']
@@ -47,6 +47,20 @@ export async function fetchAllFeedback(): Promise<Feedback[]> {
     .limit(50)
   if (error) throw error
   return data
+}
+
+// --- Feedback triage (admin/owner: status + delete via RLS, migration 0015) --
+
+/** Change a feedback item's status (open/planned/done/closed). */
+export async function updateFeedbackStatus(id: string, status: FeedbackStatus): Promise<void> {
+  const { error } = await supabase.from('feedback').update({ status }).eq('id', id)
+  if (error) throw error
+}
+
+/** Permanently delete a feedback item. */
+export async function deleteFeedback(id: string): Promise<void> {
+  const { error } = await supabase.from('feedback').delete().eq('id', id)
+  if (error) throw error
 }
 
 // --- User management (owner: roles; admin/owner: delete) ------------------

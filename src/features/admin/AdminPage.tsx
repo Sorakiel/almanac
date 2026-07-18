@@ -6,6 +6,7 @@ import { Rail } from '@/components/common/desktop/rail'
 import { AdminRail } from '@/features/admin/components/AdminRail'
 import { MembersTable } from '@/features/admin/components/MembersTable'
 import { SignupsChart } from '@/features/admin/components/SignupsChart'
+import { FeedbackManager } from '@/features/admin/components/FeedbackManager'
 import { AdminWorkspace } from '@/features/admin/components/desktop/AdminWorkspace'
 import { useAdminData } from '@/features/admin/hooks/useAdminData'
 import { useProfile } from '@/features/settings/hooks/useProfile'
@@ -118,6 +119,11 @@ function AdminPage() {
           isOwner={isOwner}
           currentUserId={currentUserId}
         />
+      </div>
+
+      <div>
+        <p className="label-mono mb-3">// feedback</p>
+        <FeedbackManager items={data.feedback} todayKey={dateKey} />
       </div>
     </section>
   )

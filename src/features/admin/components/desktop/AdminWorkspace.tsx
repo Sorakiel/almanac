@@ -1,5 +1,6 @@
 import { MembersTable } from '@/features/admin/components/MembersTable'
 import { SignupsChart } from '@/features/admin/components/SignupsChart'
+import { FeedbackManager } from '@/features/admin/components/FeedbackManager'
 import type { AdminData } from '@/features/admin/types'
 
 interface AdminWorkspaceProps {
@@ -56,6 +57,9 @@ export function AdminWorkspace({ data, todayKey, isOwner, currentUserId }: Admin
         isOwner={isOwner}
         currentUserId={currentUserId}
       />
+
+      <p className="label-mono mt-8 mb-3">// feedback</p>
+      <FeedbackManager items={data.feedback} todayKey={todayKey} />
     </div>
   )
 }
