@@ -21,26 +21,19 @@ export interface PasswordStrength {
   level: StrengthLevel
   /** Vault-door name for this tier. */
   title: string
-  /** Descriptive band, e.g. "Days to decades". */
-  band: string
   /** Live, humanised time to crack — changes with every keystroke. */
   crackTime: string
   /** 0–1 fill for the segmented meter, easing to a boundary at each tier. */
   fill: number
 }
 
-interface Tier {
-  title: string
-  band: string
-}
-
 // Ordered weak → strong. Vault-door metaphor with a Skynet-cold-storage finish.
-const TIERS: readonly Tier[] = [
-  { title: 'Door left open', band: 'Cracked instantly — under a second' },
-  { title: 'Front-door deadbolt', band: 'Seconds to a couple of hours' },
-  { title: 'Bank vault', band: 'Days to decades of drilling' },
-  { title: 'Skynet cold vault', band: 'Millennia — effectively sealed' },
-]
+const TIERS = [
+  'Door left open',
+  'Front-door deadbolt',
+  'Bank vault',
+  'Skynet cold vault',
+] as const
 
 // Bit thresholds between tiers (upper-exclusive for the tier below).
 const BIT_BREAKS = [35, 53, 71] as const
@@ -111,22 +104,20 @@ function humaniseCrackTime(bits: number): string {
   if (seconds < YEAR) return `${Math.round(seconds / MONTH)} months`
 
   const years = seconds / YEAR
-  if (years < 1000) return `${Math.round(years).toLocaleString('en-US')} years`
   if (years < 1e6) return `${Math.round(years).toLocaleString('en-US')} years`
   if (years < 1e9) return `${Math.round(years / 1e6).toLocaleString('en-US')} million years`
   if (years < 1e12) return `${Math.round(years / 1e9).toLocaleString('en-US')} billion years`
-  return 'Longer than the universe has existed'
+  if (years < 1e15) return `${Math.round(years / 1e12).toLocaleString('en-US')} trillion years`
+  return 'Trillions of years'
 }
 
 export function scorePassword(password: string): PasswordStrength {
   const bits = estimateBits(password)
   const level = levelForBits(bits)
-  const tier = TIERS[level]!
   return {
     bits,
     level,
-    title: tier.title,
-    band: tier.band,
+    title: TIERS[level],
     crackTime: humaniseCrackTime(bits),
     fill: fillForBits(bits),
   }

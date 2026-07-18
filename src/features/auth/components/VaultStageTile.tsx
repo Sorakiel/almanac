@@ -8,40 +8,17 @@ interface VaultStageTileProps {
 
 // One visual per tier. Full literal Tailwind classes so nothing gets purged.
 const STAGES = [
-  {
-    Icon: DoorOpen,
-    text: 'text-danger',
-    aura: 'bg-danger/30',
-    ring: 'border-danger/60',
-    tile: 'border-danger/25 bg-danger/[0.06]',
-  },
-  {
-    Icon: LockKeyhole,
-    text: 'text-accent',
-    aura: 'bg-accent/30',
-    ring: 'border-accent/60',
-    tile: 'border-accent/25 bg-accent/[0.06]',
-  },
-  {
-    Icon: Vault,
-    text: 'text-amber',
-    aura: 'bg-amber/30',
-    ring: 'border-amber/60',
-    tile: 'border-amber/25 bg-amber/[0.06]',
-  },
-  {
-    Icon: ShieldCheck,
-    text: 'text-teal',
-    aura: 'bg-teal/30',
-    ring: 'border-teal/60',
-    tile: 'border-teal/25 bg-teal/[0.06]',
-  },
+  { Icon: DoorOpen, text: 'text-danger', aura: 'bg-danger/25', tile: 'border-danger/25 bg-danger/[0.06]', ring: 'border-danger/50' },
+  { Icon: LockKeyhole, text: 'text-accent', aura: 'bg-accent/25', tile: 'border-accent/25 bg-accent/[0.06]', ring: 'border-accent/50' },
+  { Icon: Vault, text: 'text-amber', aura: 'bg-amber/25', tile: 'border-amber/25 bg-amber/[0.06]', ring: 'border-amber/50' },
+  { Icon: ShieldCheck, text: 'text-teal', aura: 'bg-teal/25', tile: 'border-teal/25 bg-teal/[0.06]', ring: 'border-teal/50' },
 ] as const
 
 /**
- * The animated "stage" square. Each tier gets a distinct idle motion — a
- * rattling open door (weak) → a fortified, orbiting shield (strong) — plus a
- * soft breathing aura. Motion is suppressed under `prefers-reduced-motion`.
+ * The "stage" square. It's static between keystrokes; the icon swap and the
+ * expanding ring fire once, only when the tier actually changes — keying both
+ * on `level` re-mounts them so the one-shot animation replays on each promotion
+ * or demotion. Motion is suppressed under `prefers-reduced-motion`.
  */
 export function VaultStageTile({ level }: VaultStageTileProps) {
   const stage = STAGES[level]
@@ -55,44 +32,28 @@ export function VaultStageTile({ level }: VaultStageTileProps) {
         stage.tile,
       )}
     >
-      {/* Breathing aura behind the glyph. */}
       <span
         aria-hidden="true"
+        className={cn('absolute h-9 w-9 rounded-full blur-md transition-colors duration-500', stage.aura)}
+      />
+
+      {/* Ripple that expands and fades once, marking the transition. */}
+      <span
+        key={level}
+        aria-hidden="true"
         className={cn(
-          'absolute h-9 w-9 rounded-full blur-md motion-safe:animate-vault-glow motion-reduce:opacity-50',
-          stage.aura,
+          'pointer-events-none absolute inset-0 rounded-tile border motion-safe:animate-stage-pop motion-reduce:hidden',
+          stage.ring,
         )}
       />
 
-      {/* Tier-2 (bank vault): a scanning line sweeping the face. */}
-      {level === 2 && (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-1 top-0 h-px bg-amber/80 motion-safe:animate-vault-scan motion-reduce:hidden"
-        />
-      )}
-
-      {/* Tier-3 (Skynet vault): an orbiting containment ring. */}
-      {level === 3 && (
-        <span
-          aria-hidden="true"
-          className={cn(
-            'pointer-events-none absolute h-11 w-11 rounded-full border border-transparent',
-            'motion-safe:animate-vault-orbit motion-reduce:hidden',
-            stage.ring,
-            'border-t-teal',
-          )}
-        />
-      )}
-
       <Icon
-        key={level}
+        key={`icon-${level}`}
         strokeWidth={1.6}
         className={cn(
-          'relative h-6 w-6 duration-500 animate-in fade-in zoom-in-75',
+          'relative h-6 w-6 transition-colors duration-500',
+          'motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-50 motion-safe:duration-500',
           stage.text,
-          level === 0 && 'motion-safe:animate-vault-shake',
-          level === 1 && 'motion-safe:animate-vault-pulse',
         )}
       />
     </div>
