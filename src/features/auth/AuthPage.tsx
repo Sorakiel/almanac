@@ -96,7 +96,7 @@ function AuthPage() {
   return (
     <div className="flex min-h-dvh">
       <AuthBrandPanel />
-      <main className="flex flex-1 items-center justify-center px-6 py-12">
+      <main className="flex flex-1 items-center justify-center px-6 pb-[max(env(safe-area-inset-bottom),3rem)] pt-[max(env(safe-area-inset-top),3rem)]">
         <div className="flex w-full max-w-sm flex-col gap-6 lg:max-w-[400px]">
           <div className="flex flex-col gap-4">
             <span className="relative flex h-11 w-11 items-center justify-center rounded-[13px] bg-gradient-to-br from-accent to-accent-deep shadow-glow lg:hidden">

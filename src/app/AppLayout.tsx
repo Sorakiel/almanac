@@ -61,7 +61,9 @@ export function AppLayout() {
 
           <main
             className={cn(
-              'mx-auto w-full max-w-md flex-1 px-5 pt-6',
+              // Clear the (edge-to-edge) Android status bar on mobile; desktop
+              // overrides padding via lg:py-8 where there's no system bar.
+              'mx-auto w-full max-w-md flex-1 px-5 pt-[max(env(safe-area-inset-top),1.5rem)]',
               hideNav ? 'flex flex-col pb-6' : 'pb-28',
               'app-scroll lg:mx-0 lg:max-w-none lg:overflow-y-auto lg:px-10 lg:py-8',
             )}
