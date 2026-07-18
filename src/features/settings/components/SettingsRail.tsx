@@ -19,7 +19,8 @@ export function SettingsRail() {
   const { profile } = useProfile()
 
   const joined = user?.created_at ? format(new Date(user.created_at), 'MMM yyyy') : '—'
-  const role = profile?.role === 'admin' ? 'Admin' : 'Member'
+  const role =
+    profile?.role === 'owner' ? 'Owner' : profile?.role === 'admin' ? 'Admin' : 'Member'
 
   return (
     <div className="flex flex-col gap-3.5">
@@ -39,7 +40,7 @@ export function SettingsRail() {
       <div className="rounded-[18px] border bg-surface p-[18px]">
         <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">account</p>
         <div className="mt-2 flex flex-col">
-          <Row label="member" value={role} />
+          <Row label="role" value={role} />
           <Row label="joined" value={joined} />
           <Row label="timezone" value={browserTimezone()} />
         </div>
