@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { X } from 'lucide-react'
+import { CompletionToggle } from '@/components/common/CompletionToggle'
 import type { SetLog } from '@/features/workouts/types'
 import { cn } from '@/lib/utils'
 
@@ -35,32 +36,13 @@ const FIELD =
 
 function DoneToggle({ set, onToggleDone }: { set: SetLog; onToggleDone: (done: boolean) => void }) {
   return (
-    <button
-      type="button"
-      onClick={() => onToggleDone(!set.done)}
-      aria-pressed={set.done}
+    <CompletionToggle
+      done={set.done}
+      onToggle={() => onToggleDone(!set.done)}
+      tone="teal"
+      size="md"
       aria-label={set.done ? `Set ${set.set_number} not done` : `Set ${set.set_number} done`}
-      className={cn(
-        'relative flex h-9 w-9 flex-none items-center justify-center rounded-lg border transition-colors active:scale-90',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-        set.done
-          ? 'border-teal/50 bg-teal/15 text-teal'
-          : 'text-transparent hover:border-accent hover:text-accent',
-      )}
-    >
-      {set.done ? (
-        <span
-          key="ripple"
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-lg border border-teal motion-safe:animate-ripple motion-reduce:hidden"
-        />
-      ) : null}
-      <Check
-        key={set.done ? 'on' : 'off'}
-        className={cn('h-4 w-4', set.done && 'motion-safe:animate-pop')}
-        aria-hidden="true"
-      />
-    </button>
+    />
   )
 }
 

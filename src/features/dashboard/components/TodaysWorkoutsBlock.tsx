@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
-import { Check, Dumbbell } from 'lucide-react'
+import { Dumbbell } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
+import { CompletionToggle } from '@/components/common/CompletionToggle'
 import { IconTile } from '@/components/common/IconTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { Tag } from '@/components/common/Tag'
@@ -27,21 +28,13 @@ function Row({ item }: { item: DueWorkout }) {
 
   return (
     <Card className="flex items-center gap-3 p-4">
-      <button
-        type="button"
-        onClick={toggle}
-        aria-pressed={doneToday}
+      <CompletionToggle
+        done={doneToday}
+        onToggle={toggle}
+        tone="teal"
+        size="md"
         aria-label={doneToday ? `Mark ${workout.name} not done` : `Mark ${workout.name} done`}
-        className={cn(
-          'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
-          doneToday
-            ? 'border-teal/50 bg-teal/15 text-teal'
-            : 'text-transparent hover:border-accent hover:text-accent',
-        )}
-      >
-        <Check className="h-4 w-4" aria-hidden="true" />
-      </button>
+      />
       <IconTile icon={Dumbbell} tone="bg-teal/15 text-teal" />
       <Link to={`/train/${workout.id}`} className="min-w-0 flex-1">
         <p className={cn('truncate font-semibold', doneToday && 'text-muted line-through')}>

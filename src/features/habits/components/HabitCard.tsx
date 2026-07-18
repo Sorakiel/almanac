@@ -1,13 +1,12 @@
 import { useNavigate } from 'react-router-dom'
-import { Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
+import { CompletionToggle } from '@/components/common/CompletionToggle'
 import { IconTile } from '@/components/common/IconTile'
 import { Sparkline } from '@/components/common/Sparkline'
 import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
-import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 
 interface HabitCardProps {
@@ -73,34 +72,13 @@ interface CheckToggleProps {
   onToggle: () => void
 }
 
-/** Circular completion toggle used on cards and rows. */
+/** Habit completion checkbox used on cards and rows. */
 export function CheckToggle({ habit, onToggle }: CheckToggleProps) {
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-pressed={habit.isComplete}
+    <CompletionToggle
+      done={habit.isComplete}
+      onToggle={onToggle}
       aria-label={habit.isComplete ? `Mark ${habit.name} incomplete` : `Complete ${habit.name}`}
-      className={cn(
-        'relative flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] border transition-colors active:scale-90',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
-        habit.isComplete
-          ? 'border-accent/50 bg-accent/10 text-accent'
-          : 'text-transparent hover:border-accent hover:text-accent',
-      )}
-    >
-      {habit.isComplete ? (
-        <span
-          key="ripple"
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-[9px] border border-accent motion-safe:animate-ripple motion-reduce:hidden"
-        />
-      ) : null}
-      <Check
-        key={habit.isComplete ? 'on' : 'off'}
-        className={cn('h-4 w-4', habit.isComplete && 'motion-safe:animate-pop')}
-        aria-hidden="true"
-      />
-    </button>
+    />
   )
 }

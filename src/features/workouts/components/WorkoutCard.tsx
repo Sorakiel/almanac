@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom'
-import { Check, Dumbbell } from 'lucide-react'
+import { Dumbbell } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
+import { CompletionToggle } from '@/components/common/CompletionToggle'
 import { IconTile } from '@/components/common/IconTile'
 import { Tag } from '@/components/common/Tag'
 import { useWorkoutMutations } from '@/features/workouts/hooks/useWorkoutMutations'
@@ -56,21 +57,13 @@ export function WorkoutCard({ workout }: WorkoutCardProps) {
 
   return (
     <Card className="flex items-center gap-3 p-4">
-      <button
-        type="button"
-        onClick={handleToggle}
-        aria-pressed={done}
+      <CompletionToggle
+        done={done}
+        onToggle={handleToggle}
+        tone="teal"
+        size="md"
         aria-label={done ? `Mark ${workout.name} not done` : `Mark ${workout.name} done`}
-        className={cn(
-          'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
-          done
-            ? 'border-teal/50 bg-teal/15 text-teal'
-            : 'text-transparent hover:border-accent hover:text-accent',
-        )}
-      >
-        <Check className="h-4 w-4" aria-hidden="true" />
-      </button>
+      />
 
       <IconTile icon={Dumbbell} tone="bg-teal/15 text-teal" />
 

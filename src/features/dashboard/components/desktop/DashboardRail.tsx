@@ -1,4 +1,5 @@
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
+import { TodaySummary } from '@/features/dashboard/components/TodaySummary'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 
 interface DashboardRailProps {
@@ -42,6 +43,8 @@ export function DashboardRail({ habits }: DashboardRailProps) {
           <p className="font-mono text-[10px] text-muted-strong">watching your day</p>
         </div>
       </div>
+
+      <TodaySummary habits={habits} />
 
       <QuoteCard />
 
