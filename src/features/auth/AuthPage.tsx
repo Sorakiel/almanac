@@ -15,7 +15,10 @@ import { useSession } from '@/hooks/useSession'
 import { setRememberMe } from '@/lib/supabase'
 
 const schema = z.object({
-  displayName: z.string().trim().min(1, 'Required').optional(),
+  // Optional in both modes: signup falls back to the email prefix when blank.
+  // No min-length — a stale/autofilled empty value on the hidden signin field
+  // must never silently block submit (the input isn't even rendered there).
+  displayName: z.string().trim().optional(),
   email: z.string().email('Enter a valid email'),
   password: z.string().min(6, 'At least 6 characters'),
 })
