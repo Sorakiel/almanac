@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { Habit, HabitInsert, HabitLog } from '@/features/habits/types'
+import type { Habit, HabitFreeze, HabitInsert, HabitLog } from '@/features/habits/types'
 
 /** Active (non-archived) habits for a user, ordered for display. */
 export async function fetchHabits(userId: string): Promise<Habit[]> {
@@ -34,6 +34,46 @@ export async function fetchLogsSince(userId: string, fromDate: string): Promise<
     .gte('date', fromDate)
   if (error) throw error
   return data
+}
+
+/** Freeze days across the user's habits from `fromDate` onward (list streaks). */
+export async function fetchFreezesSince(userId: string, fromDate: string): Promise<HabitFreeze[]> {
+  const { data, error } = await supabase
+    .from('habit_freezes')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('date', fromDate)
+  if (error) throw error
+  return data
+}
+
+/** All freeze days for one habit from `fromDate` onward (detail streak/heatmap). */
+export async function fetchHabitFreezes(habitId: string, fromDate: string): Promise<HabitFreeze[]> {
+  const { data, error } = await supabase
+    .from('habit_freezes')
+    .select('*')
+    .eq('habit_id', habitId)
+    .gte('date', fromDate)
+  if (error) throw error
+  return data
+}
+
+/** Protect a day for a habit. Idempotent via the (habit_id, date) unique key. */
+export async function addFreeze(userId: string, habitId: string, date: string): Promise<void> {
+  const { error } = await supabase
+    .from('habit_freezes')
+    .upsert({ user_id: userId, habit_id: habitId, date }, { onConflict: 'habit_id,date' })
+  if (error) throw error
+}
+
+/** Remove a day's freeze protection. */
+export async function removeFreeze(habitId: string, date: string): Promise<void> {
+  const { error } = await supabase
+    .from('habit_freezes')
+    .delete()
+    .eq('habit_id', habitId)
+    .eq('date', date)
+  if (error) throw error
 }
 
 /** A single habit by id (own-rows RLS applies). */

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, Loader2, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft, Check, Loader2, MoreHorizontal, Pencil, Snowflake, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { IconTile } from '@/components/common/IconTile'
@@ -16,6 +16,7 @@ import { HabitDetailWorkspace } from '@/features/habits/components/desktop/Habit
 import { HabitDetailRail } from '@/features/habits/components/desktop/HabitDetailRail'
 import { useHabitDetail } from '@/features/habits/hooks/useHabitDetail'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
+import { useToggleFreeze } from '@/features/habits/hooks/useToggleFreeze'
 import { setHabitCount } from '@/features/habits/api/habits.api'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { dailyTarget, frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
@@ -34,6 +35,7 @@ function HabitDetailPage() {
   const openEditHabit = useUiStore((s) => s.openEditHabit)
   const { habit, stats, isLoading, isError } = useHabitDetail(id)
   const { archive } = useHabitMutations()
+  const toggleFreeze = useToggleFreeze()
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const isDesktop = useMediaQuery('(min-width: 1024px)')
@@ -147,6 +149,18 @@ function HabitDetailPage() {
             stats={stats}
             onMarkDone={(done) => markDone.mutate(done)}
             markPending={markDone.isPending}
+            onToggleFreeze={(freeze) =>
+              toggleFreeze.mutate(
+                { habitId: id, freeze },
+                {
+                  onError: (error) =>
+                    toast.error(
+                      error instanceof Error ? error.message : 'Could not update freeze',
+                    ),
+                },
+              )
+            }
+            freezePending={toggleFreeze.isPending}
           />
         </Rail>
         {overlays}
@@ -200,16 +214,40 @@ function HabitDetailPage() {
         </div>
       ) : null}
 
-      <Button
-        size="lg"
-        variant={stats.todayDone ? 'surface' : 'primary'}
-        className={cn('mt-auto w-full', !stats.todayDone && 'shadow-glow')}
-        disabled={markDone.isPending}
-        onClick={() => markDone.mutate(!stats.todayDone)}
-      >
-        <Check className="h-4 w-4" />
-        {stats.todayDone ? 'Completed today' : 'Mark done for today'}
-      </Button>
+      <div className="mt-auto flex flex-col gap-2">
+        {!stats.todayDone ? (
+          <Button
+            size="lg"
+            variant={stats.todayFrozen ? 'primary' : 'surface'}
+            className="w-full"
+            disabled={toggleFreeze.isPending}
+            onClick={() =>
+              toggleFreeze.mutate(
+                { habitId: id, freeze: !stats.todayFrozen },
+                {
+                  onError: (error) =>
+                    toast.error(
+                      error instanceof Error ? error.message : 'Could not update freeze',
+                    ),
+                },
+              )
+            }
+          >
+            <Snowflake className="h-4 w-4" />
+            {stats.todayFrozen ? 'Frozen today · undo' : 'Freeze today'}
+          </Button>
+        ) : null}
+        <Button
+          size="lg"
+          variant={stats.todayDone ? 'surface' : 'primary'}
+          className={cn('w-full', !stats.todayDone && !stats.todayFrozen && 'shadow-glow')}
+          disabled={markDone.isPending}
+          onClick={() => markDone.mutate(!stats.todayDone)}
+        >
+          <Check className="h-4 w-4" />
+          {stats.todayDone ? 'Completed today' : 'Mark done for today'}
+        </Button>
+      </div>
 
       {overlays}
     </div>

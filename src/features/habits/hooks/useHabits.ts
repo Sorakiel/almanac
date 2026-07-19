@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { lastNDateKeys } from '@/lib/date'
-import { fetchHabits, fetchLogsSince } from '@/features/habits/api/habits.api'
+import { fetchFreezesSince, fetchHabits, fetchLogsSince } from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
 import {
   dailyTarget,
@@ -11,22 +11,30 @@ import {
   isDueOn,
 } from '@/features/habits/lib/frequency'
 import { currentStreak } from '@/features/habits/lib/streak'
-import type { Habit, HabitLog, HabitWithTodayLog } from '@/features/habits/types'
+import type { Habit, HabitFreeze, HabitLog, HabitWithTodayLog } from '@/features/habits/types'
 
 const WINDOW_DAYS = 7
 /** Fetch window: long enough to resolve due-ness for the longest interval
  *  cadence the form allows (every 8 weeks = 56 days), plus a small buffer. */
 const FETCH_DAYS = 64
 
-function join(habits: Habit[], logs: HabitLog[], windowKeys: string[]): HabitWithTodayLog[] {
+function join(
+  habits: Habit[],
+  logs: HabitLog[],
+  freezes: HabitFreeze[],
+  windowKeys: string[],
+): HabitWithTodayLog[] {
   // Index counts by habit + date for O(1) lookup.
   const counts = new Map<string, number>()
   for (const log of logs) counts.set(`${log.habit_id}:${log.date}`, log.count)
+  const frozen = new Set<string>()
+  for (const f of freezes) frozen.add(`${f.habit_id}:${f.date}`)
   const todayKey = windowKeys[windowKeys.length - 1]!
 
   return habits.map((habit) => {
     const target = dailyTarget(habit)
     const doneOn = (key: string): boolean => (counts.get(`${habit.id}:${key}`) ?? 0) >= target
+    const frozenOn = (key: string): boolean => frozen.has(`${habit.id}:${key}`)
 
     const windowSlice = windowKeys.slice(-WINDOW_DAYS)
     const series: number[] = windowSlice.map((key) => (doneOn(key) ? 1 : 0))
@@ -48,7 +56,8 @@ function join(habits: Habit[], logs: HabitLog[], windowKeys: string[]): HabitWit
 
     const isComplete = todayCount >= target
     const dueToday = isDueOn(habit, todayKey, daysSinceLastDone)
-    const streak = currentStreak(habit, doneOn, windowKeys)
+    const streak = currentStreak(habit, doneOn, windowKeys, frozenOn)
+    const frozenToday = frozenOn(todayKey)
 
     return {
       ...habit,
@@ -61,9 +70,11 @@ function join(habits: Habit[], logs: HabitLog[], windowKeys: string[]): HabitWit
       dueInDays: dueIn,
       dueToday,
       streak,
+      frozenToday,
       // A streak is "at risk" only while it's still losable today: due, unfinished,
-      // and with a run already going (≥2 days, so a fresh day-one habit isn't nagged).
-      atRisk: dueToday && !isComplete && streak >= 2,
+      // not already protected by a freeze, and with a run already going (≥2 days,
+      // so a fresh day-one habit isn't nagged).
+      atRisk: dueToday && !isComplete && !frozenToday && streak >= 2,
     }
   })
 }
@@ -95,9 +106,15 @@ export function useHabits(): UseHabitsResult {
     enabled,
   })
 
+  const freezesQuery = useQuery({
+    queryKey: habitKeys.recentFreezes(userId, dateKey),
+    queryFn: () => fetchFreezesSince(userId, windowKeys[0]!),
+    enabled,
+  })
+
   const habits =
     habitsQuery.data && logsQuery.data
-      ? join(habitsQuery.data, logsQuery.data, windowKeys)
+      ? join(habitsQuery.data, logsQuery.data, freezesQuery.data ?? [], windowKeys)
       : []
 
   return {
@@ -107,6 +124,7 @@ export function useHabits(): UseHabitsResult {
     refetch: () => {
       void habitsQuery.refetch()
       void logsQuery.refetch()
+      void freezesQuery.refetch()
     },
   }
 }

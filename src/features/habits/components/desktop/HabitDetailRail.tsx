@@ -1,5 +1,5 @@
 import { format, parseISO } from 'date-fns'
-import { Check } from 'lucide-react'
+import { Check, Snowflake } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { Habit } from '@/features/habits/types'
@@ -10,10 +10,19 @@ interface HabitDetailRailProps {
   stats: HabitDetailStats
   onMarkDone: (done: boolean) => void
   markPending: boolean
+  onToggleFreeze: (freeze: boolean) => void
+  freezePending: boolean
 }
 
 /** Desktop habit-detail rail: notes, recent history, and the mark-done CTA. */
-export function HabitDetailRail({ habit, stats, onMarkDone, markPending }: HabitDetailRailProps) {
+export function HabitDetailRail({
+  habit,
+  stats,
+  onMarkDone,
+  markPending,
+  onToggleFreeze,
+  freezePending,
+}: HabitDetailRailProps) {
   // Newest-first, last five days of the window.
   const recent = [...stats.heatmap].slice(-5).reverse()
 
@@ -53,16 +62,31 @@ export function HabitDetailRail({ habit, stats, onMarkDone, markPending }: Habit
 
       <div className="flex-1" />
 
-      <Button
-        size="lg"
-        variant={stats.todayDone ? 'surface' : 'primary'}
-        className={cn('w-full', !stats.todayDone && 'shadow-glow')}
-        disabled={markPending}
-        onClick={() => onMarkDone(!stats.todayDone)}
-      >
-        <Check className="h-4 w-4" />
-        {stats.todayDone ? 'Completed today' : 'Mark done for today'}
-      </Button>
+      <div className="flex flex-col gap-2">
+        {!stats.todayDone ? (
+          <Button
+            size="lg"
+            variant={stats.todayFrozen ? 'primary' : 'surface'}
+            className="w-full"
+            disabled={freezePending}
+            onClick={() => onToggleFreeze(!stats.todayFrozen)}
+          >
+            <Snowflake className="h-4 w-4" />
+            {stats.todayFrozen ? 'Frozen today · undo' : 'Freeze today'}
+          </Button>
+        ) : null}
+
+        <Button
+          size="lg"
+          variant={stats.todayDone ? 'surface' : 'primary'}
+          className={cn('w-full', !stats.todayDone && !stats.todayFrozen && 'shadow-glow')}
+          disabled={markPending}
+          onClick={() => onMarkDone(!stats.todayDone)}
+        >
+          <Check className="h-4 w-4" />
+          {stats.todayDone ? 'Completed today' : 'Mark done for today'}
+        </Button>
+      </div>
     </div>
   )
 }

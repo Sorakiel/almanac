@@ -17,7 +17,12 @@ const weekdays = { frequency: 'weekdays', target_count: 1 } as Pick<
   Habit,
   'frequency' | 'target_count'
 >
+const everyThreeDays = { frequency: 'every_n_days', target_count: 3 } as Pick<
+  Habit,
+  'frequency' | 'target_count'
+>
 const doneIn = (set: Set<string>) => (key: string) => set.has(key)
+const frozenIn = (set: Set<string>) => (key: string) => set.has(key)
 
 describe('currentStreak — daily', () => {
   const keys = keysEndingAt('2026-07-19', 10) // ends Sunday
@@ -39,6 +44,34 @@ describe('currentStreak — daily', () => {
 
   it('is zero with no completions', () => {
     expect(currentStreak(daily, doneIn(new Set()), keys)).toBe(0)
+  })
+})
+
+describe('currentStreak — freeze', () => {
+  const keys = keysEndingAt('2026-07-19', 10)
+
+  it('a frozen missed day bridges the run instead of breaking it', () => {
+    const done = new Set([keys.at(-1)!, keys.at(-3)!]) // gap at yesterday
+    const frozen = new Set([keys.at(-2)!]) // ...but yesterday is protected
+    expect(currentStreak(daily, doneIn(done), keys, frozenIn(frozen))).toBe(2)
+  })
+
+  it('a frozen day is a skip — it never adds to the count', () => {
+    const frozen = new Set([keys.at(-2)!, keys.at(-3)!])
+    expect(currentStreak(daily, doneIn(new Set()), keys, frozenIn(frozen))).toBe(0)
+  })
+
+  it('a frozen open today keeps the yesterday-ending run', () => {
+    const done = new Set(keys.slice(-4, -1)) // 3 days ending yesterday
+    const frozen = new Set([keys.at(-1)!]) // today frozen, not done
+    expect(currentStreak(daily, doneIn(done), keys, frozenIn(frozen))).toBe(3)
+  })
+
+  it('bridges an interval habit gap wider than N with a freeze', () => {
+    // Completions 4 days apart (> 3) would break, but the in-between day is frozen.
+    const done = new Set([keys.at(-1)!, keys.at(-5)!])
+    const frozen = new Set([keys.at(-3)!])
+    expect(currentStreak(everyThreeDays, doneIn(done), keys, frozenIn(frozen))).toBe(2)
   })
 })
 

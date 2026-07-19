@@ -1,11 +1,25 @@
 import { useLayoutEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 
+interface HeatmapDay {
+  date: string
+  done: boolean
+  /** Protected by a streak freeze (shown distinctly, doesn't break the run). */
+  frozen?: boolean
+}
+
 interface HabitHeatmapProps {
   /** Days oldest→newest; length should be a multiple of 7 for clean columns. */
-  days: { date: string; done: boolean }[]
+  days: HeatmapDay[]
   /** Desktop: stretch the grid to fill the card width with larger cells. */
   fill?: boolean
+}
+
+/** Cell fill: completed → accent, frozen → teal, otherwise the empty track. */
+function cellClass(day: HeatmapDay): string {
+  if (day.done) return 'bg-accent'
+  if (day.frozen) return 'bg-teal/70'
+  return 'bg-foreground/10'
 }
 
 /**
@@ -17,8 +31,9 @@ interface HabitHeatmapProps {
 export function HabitHeatmap({ days, fill = false }: HabitHeatmapProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  const weeks: { date: string; done: boolean }[][] = []
+  const weeks: HeatmapDay[][] = []
   for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7))
+  const hasFrozen = days.some((d) => d.frozen && !d.done)
 
   useLayoutEffect(() => {
     if (fill) return
@@ -36,8 +51,8 @@ export function HabitHeatmap({ days, fill = false }: HabitHeatmapProps) {
               {week.map((day) => (
                 <span
                   key={day.date}
-                  title={day.date}
-                  className={cn('h-3 w-full rounded-[2px]', day.done ? 'bg-accent' : 'bg-foreground/10')}
+                  title={day.frozen && !day.done ? `${day.date} · frozen` : day.date}
+                  className={cn('h-3 w-full rounded-[2px]', cellClass(day))}
                 />
               ))}
             </div>
@@ -51,11 +66,8 @@ export function HabitHeatmap({ days, fill = false }: HabitHeatmapProps) {
                 {week.map((day) => (
                   <span
                     key={day.date}
-                    title={day.date}
-                    className={cn(
-                      'h-[6px] w-[6px] rounded-[2px]',
-                      day.done ? 'bg-accent' : 'bg-foreground/10',
-                    )}
+                    title={day.frozen && !day.done ? `${day.date} · frozen` : day.date}
+                    className={cn('h-[6px] w-[6px] rounded-[2px]', cellClass(day))}
                   />
                 ))}
               </div>
@@ -70,6 +82,12 @@ export function HabitHeatmap({ days, fill = false }: HabitHeatmapProps) {
         <span className="h-[9px] w-[9px] rounded-[2px] bg-accent/65" />
         <span className="h-[9px] w-[9px] rounded-[2px] bg-accent" />
         <span className="label-mono normal-case tracking-normal">more</span>
+        {hasFrozen ? (
+          <>
+            <span className="ml-2 h-[9px] w-[9px] rounded-[2px] bg-teal/70" />
+            <span className="label-mono normal-case tracking-normal">frozen</span>
+          </>
+        ) : null}
       </div>
     </div>
   )

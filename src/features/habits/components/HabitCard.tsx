@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Flame } from 'lucide-react'
+import { Flame, Snowflake } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { CompletionToggle } from '@/components/common/CompletionToggle'
 import { IconTile } from '@/components/common/IconTile'
@@ -81,6 +81,16 @@ export function HabitCard({ habit }: HabitCardProps) {
           {' · '}
           <span className="text-accent">{Math.round(habit.rate * 100)}%</span>
           {habit.streak > 0 ? <StreakBadge streak={habit.streak} atRisk={habit.atRisk} /> : null}
+          {habit.frozenToday && !habit.isComplete ? (
+            <span
+              className="ml-1 inline-flex items-center gap-0.5 align-middle text-teal"
+              title="Today is frozen — your streak is safe"
+            >
+              <span aria-hidden="true">· </span>
+              <Snowflake className="h-3 w-3" aria-hidden="true" />
+              <span className="sr-only">frozen today</span>
+            </span>
+          ) : null}
         </span>
         <Sparkline values={habit.series} stroke={color.stroke} />
       </div>

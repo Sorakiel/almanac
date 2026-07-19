@@ -3,4 +3,7 @@ export const habitKeys = {
   all: (userId: string) => ['habits', userId] as const,
   /** Logs across a recent window ending on `date` (drives today + sparklines). */
   recentLogs: (userId: string, date: string) => ['habitLogs', userId, 'recent', date] as const,
+  /** Freeze days across a recent window ending on `date` (protects list streaks). */
+  recentFreezes: (userId: string, date: string) =>
+    ['habitFreezes', userId, 'recent', date] as const,
 }
