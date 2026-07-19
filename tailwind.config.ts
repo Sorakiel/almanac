@@ -30,6 +30,7 @@ export default {
         teal: withOpacity('--color-teal'),
         amber: withOpacity('--color-amber'),
         danger: withOpacity('--color-danger'),
+        success: withOpacity('--color-success'),
       },
       fontFamily: {
         sans: ['Inter', 'SF Pro Text', 'system-ui', 'sans-serif'],

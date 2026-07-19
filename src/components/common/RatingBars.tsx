@@ -1,3 +1,4 @@
+import { ratingBarClass } from '@/lib/ratingColor'
 import { cn } from '@/lib/utils'
 
 interface RatingBarsProps {
@@ -9,9 +10,11 @@ interface RatingBarsProps {
 /**
  * Read-only rating as a compact row of ascending accent bars — the display twin
  * of the StarRating input, so a rating looks the same whether you're setting or
- * reading it. All `max` bars render; filled ones up to `value`.
+ * reading it. All `max` bars render; filled ones up to `value`, tinted
+ * red/orange/green by how high the rating is.
  */
 export function RatingBars({ value, max = 5, 'aria-label': ariaLabel }: RatingBarsProps) {
+  const fillClass = ratingBarClass(value, max)
   return (
     <span
       className="inline-flex h-3.5 items-end gap-[3px] align-middle"
@@ -24,7 +27,7 @@ export function RatingBars({ value, max = 5, 'aria-label': ariaLabel }: RatingBa
           style={{ height: `${45 + (i / (max - 1)) * 55}%` }}
           className={cn(
             'w-[3px] rounded-t-[1px]',
-            i < value ? 'bg-accent' : 'bg-muted-strong/25',
+            i < value ? fillClass : 'bg-muted-strong/25',
           )}
         />
       ))}

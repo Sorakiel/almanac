@@ -1,3 +1,4 @@
+import { ratingBarClass, ratingTextClass } from '@/lib/ratingColor'
 import { cn } from '@/lib/utils'
 
 interface StarRatingProps {
@@ -34,6 +35,7 @@ export function StarRating({
   disabled,
 }: StarRatingProps) {
   const s = SIZES[size]
+  const fillClass = value ? ratingBarClass(value, max) : 'bg-accent'
   return (
     <div className="flex items-center gap-2.5">
       <div className={cn('flex items-end', s.gap)} role="radiogroup" aria-label={ariaLabel}>
@@ -63,14 +65,19 @@ export function StarRating({
                 style={{ height: `${barHeight}%` }}
                 className={cn(
                   'w-full rounded-t-[3px] transition-colors',
-                  active ? 'bg-accent' : 'bg-muted-strong/25',
+                  active ? fillClass : 'bg-muted-strong/25',
                 )}
               />
             </button>
           )
         })}
       </div>
-      <span className="font-mono text-xs tabular-nums text-muted-strong">
+      <span
+        className={cn(
+          'font-mono text-xs tabular-nums',
+          value ? ratingTextClass(value, max) : 'text-muted-strong',
+        )}
+      >
         {value ?? '–'}/{max}
       </span>
     </div>

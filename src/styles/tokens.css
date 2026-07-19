@@ -22,6 +22,7 @@
   --color-teal: 42 157 143; /* #2A9D8F */
   --color-amber: 199 154 58; /* #C79A3A */
   --color-danger: 229 84 74; /* #E5544A — weak-password red, distinct from accent orange */
+  --color-success: 63 158 106; /* #3F9E6A — green for high ratings */
 
   /* Desktop shell surfaces (spec board "Almanac — Desktop"). Chrome is the
      nav rail / top bar / context rail; panel is a workspace card sitting on
@@ -47,6 +48,7 @@
   --color-teal: 42 157 143;
   --color-amber: 199 154 58;
   --color-danger: 190 52 42; /* #BE342A — deeper red for AA on the warm canvas */
+  --color-success: 46 122 82; /* #2E7A52 — deeper green for AA on the warm canvas */
 
   /* Coffee shell surfaces: chrome is a touch deeper than the canvas, panel is
      the warm card that sits on the #F4ECDD workspace. */

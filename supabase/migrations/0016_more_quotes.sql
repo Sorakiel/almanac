@@ -1,19 +1,12 @@
--- Almanac seed data.
--- Quotes are global (read-only to users) and safe to seed unconditionally.
--- The demo habit is only inserted if at least one user exists, and is attached
--- to the earliest-created user so a fresh local project has something to show.
+-- Expand the global quote pool. The dashboard rotates one quote per day by
+-- day-of-year, so a 7-quote pool repeats weekly; this grows it past 50 so the
+-- rotation stays fresh for months. Idempotent: each row inserts only when its
+-- text isn't already present, so re-running never duplicates.
 
 insert into quotes (text, author)
 select v.text, v.author
 from (
   values
-    ('Discipline is choosing between what you want now and what you want most.', 'Abraham Lincoln'),
-    ('We are what we repeatedly do. Excellence, then, is not an act, but a habit.', 'Will Durant'),
-    ('The secret of getting ahead is getting started.', 'Mark Twain'),
-    ('Small daily improvements are the key to staggering long-term results.', 'Anonymous'),
-    ('You do not rise to the level of your goals. You fall to the level of your systems.', 'James Clear'),
-    ('Motivation gets you going, but discipline keeps you growing.', 'John C. Maxwell'),
-    ('How we spend our days is, of course, how we spend our lives.', 'Annie Dillard'),
     ('Success is the sum of small efforts repeated day in and day out.', 'Robert Collier'),
     ('It does not matter how slowly you go as long as you do not stop.', 'Confucius'),
     ('The best time to plant a tree was twenty years ago. The second best time is now.', 'Chinese Proverb'),
@@ -65,11 +58,3 @@ from (
     ('The habit of persistence is the habit of victory.', 'Herbert Kaufman')
 ) as v (text, author)
 where not exists (select 1 from quotes q where q.text = v.text);
-
--- Demo habit for the first user (no-op on an empty auth.users table).
-insert into habits (user_id, name, description, icon, color, frequency, target_count, sort_order)
-select id, 'Drink water', 'Eight glasses a day', 'droplet', '#2A9D8F', 'x_per_week', 8, 0
-from auth.users
-order by created_at
-limit 1
-on conflict do nothing;
