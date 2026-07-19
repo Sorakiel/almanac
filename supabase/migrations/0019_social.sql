@@ -139,4 +139,9 @@ as $$
   limit 8;
 $$;
 
+-- Friend discovery is a signed-in action; keep anon out of the directory. The
+-- RLS helper functions are internal to policies and need no REST surface either.
+revoke execute on function public.search_profiles(text) from public, anon;
 grant execute on function public.search_profiles(text) to authenticated;
+revoke execute on function public.are_friends(uuid, uuid) from public, anon;
+revoke execute on function public.is_connected(uuid) from public, anon;
