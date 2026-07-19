@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react'
+import { ChevronDown, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
 import { RatingBars } from '@/components/common/RatingBars'
@@ -65,7 +65,18 @@ export function ReflectionCard({ reflection, quote }: ReflectionCardProps) {
         <p className="whitespace-pre-wrap text-[14px] leading-relaxed">{reflection.body}</p>
       ) : null}
       {quote ? (
-        <p className="label-mono text-muted-strong/80">◇ {quote.author ?? 'Unknown'}</p>
+        <details className="group -mx-1 mt-0.5">
+          <summary className="label-mono flex cursor-pointer list-none items-center gap-1.5 rounded-md px-1 py-0.5 text-muted-strong/80 outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
+            <ChevronDown
+              className="h-3 w-3 flex-none transition-transform group-open:rotate-180"
+              aria-hidden="true"
+            />
+            <span className="truncate">◇ {quote.author ?? 'Unknown'}</span>
+          </summary>
+          <blockquote className="mt-1.5 border-l-2 border-border pl-3 text-[13px] italic leading-relaxed text-muted-strong">
+            {quote.text}
+          </blockquote>
+        </details>
       ) : null}
     </Card>
   )
