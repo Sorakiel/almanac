@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 interface StarRatingProps {
   /** Current rating 1–max, or null when unrated. */
   value: number | null
-  /** Fired with the new value, or null when the active pip is tapped to clear. */
+  /** Fired with the new value, or null when the active bar is tapped to clear. */
   onChange: (value: number | null) => void
   max?: number
   size?: 'sm' | 'md' | 'lg'
@@ -11,17 +11,19 @@ interface StarRatingProps {
   disabled?: boolean
 }
 
-// Larger on mobile for an easier tap target; compact desktop sizes at lg+.
+// Column height + bar width per size. Bars grow left→right so the control reads
+// as a level meter (higher = more), not a row of ambiguous checkboxes. Larger
+// hit targets on mobile; compact on desktop.
 const SIZES = {
-  sm: 'h-5 w-5 lg:h-4 lg:w-4',
-  md: 'h-7 w-7 lg:h-6 lg:w-6',
-  lg: 'h-9 w-9 lg:h-8 lg:w-8',
+  sm: { col: 'h-6 w-3 lg:h-5', gap: 'gap-1' },
+  md: { col: 'h-8 w-4 lg:h-7', gap: 'gap-1.5' },
+  lg: { col: 'h-10 w-5 lg:h-9', gap: 'gap-1.5' },
 } as const
 
 /**
- * Tap-to-rate control — a row of square "pixel" pips that fill amber up to the
- * chosen value, matching the block-bar / segmented-gauge language rather than
- * generic stars. Tapping the current value clears it. Sized for touch + PC.
+ * Tap-to-rate control — ascending amber bars (an equalizer / level meter) with
+ * a mono `n/max` readout, so intensity is obvious at a glance. Tapping the
+ * current value clears it. Full-height columns keep tap targets generous.
  */
 export function StarRating({
   value,
@@ -31,32 +33,46 @@ export function StarRating({
   'aria-label': ariaLabel,
   disabled,
 }: StarRatingProps) {
+  const s = SIZES[size]
   return (
-    <div className="flex items-center gap-1.5" role="radiogroup" aria-label={ariaLabel}>
-      {Array.from({ length: max }, (_, index) => {
-        const step = index + 1
-        const active = (value ?? 0) >= step
-        return (
-          <button
-            key={step}
-            type="button"
-            role="radio"
-            aria-checked={active}
-            aria-label={`${step} of ${max}`}
-            disabled={disabled}
-            onClick={() => onChange(value === step ? null : step)}
-            className={cn(
-              'rounded-[4px] border transition-[transform,background-color,border-color] hover:scale-110 active:scale-95',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
-              'disabled:opacity-50',
-              SIZES[size],
-              active
-                ? 'border-amber bg-amber'
-                : 'border-muted-strong/40 bg-transparent hover:border-amber',
-            )}
-          />
-        )
-      })}
+    <div className="flex items-center gap-2.5">
+      <div className={cn('flex items-end', s.gap)} role="radiogroup" aria-label={ariaLabel}>
+        {Array.from({ length: max }, (_, index) => {
+          const step = index + 1
+          const active = (value ?? 0) >= step
+          // Shortest bar 45% tall, tallest 100%, evenly stepped.
+          const barHeight = 45 + (index / (max - 1)) * 55
+          return (
+            <button
+              key={step}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              aria-label={`${step} of ${max}`}
+              disabled={disabled}
+              onClick={() => onChange(value === step ? null : step)}
+              className={cn(
+                'flex items-end justify-center transition-transform hover:scale-110 active:scale-95',
+                'focus-visible:outline-none focus-visible:rounded-[3px] focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
+                'disabled:opacity-50 disabled:hover:scale-100',
+                s.col,
+              )}
+            >
+              <span
+                aria-hidden="true"
+                style={{ height: `${barHeight}%` }}
+                className={cn(
+                  'w-full rounded-t-[3px] transition-colors',
+                  active ? 'bg-amber' : 'bg-muted-strong/25',
+                )}
+              />
+            </button>
+          )
+        })}
+      </div>
+      <span className="font-mono text-xs tabular-nums text-muted-strong">
+        {value ?? '–'}/{max}
+      </span>
     </div>
   )
 }

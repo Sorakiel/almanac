@@ -15,13 +15,13 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-interface SuggestModuleSheetProps {
+interface FeedbackSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-/** Free-text suggestion box — writes to the feedback table. */
-export function SuggestModuleSheet({ open, onOpenChange }: SuggestModuleSheetProps) {
+/** Free-text feedback box — ideas, bugs, module requests. Writes to `feedback`. */
+export function FeedbackSheet({ open, onOpenChange }: FeedbackSheetProps) {
   const { user } = useSession()
   const {
     register,
@@ -33,12 +33,12 @@ export function SuggestModuleSheet({ open, onOpenChange }: SuggestModuleSheetPro
   const send = useMutation({
     mutationFn: (body: string) => submitFeedback(user?.id ?? '', body),
     onSuccess: () => {
-      toast.success('Suggestion sent — thank you!')
+      toast.success('Feedback sent — thank you!')
       reset()
       onOpenChange(false)
     },
     onError: (error) =>
-      toast.error(error instanceof Error ? error.message : 'Could not send your suggestion'),
+      toast.error(error instanceof Error ? error.message : 'Could not send your feedback'),
   })
 
   const onSubmit = handleSubmit((values) => send.mutate(values.body))
@@ -47,21 +47,21 @@ export function SuggestModuleSheet({ open, onOpenChange }: SuggestModuleSheetPro
     <Sheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Suggest a module"
-      description="What should Almanac learn to track next?"
+      title="Feedback"
+      description="An idea, a bug, or a module you'd love — tell us."
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <label className="flex flex-col gap-1.5">
-          <span className="label-mono">Your idea</span>
+          <span className="label-mono">Your feedback</span>
           <Textarea
-            placeholder="e.g. A mood tracker with a weekly chart…"
+            placeholder="e.g. A mood tracker with a weekly chart, or a bug you hit…"
             autoFocus
             {...register('body')}
           />
           {errors.body ? <span className="text-xs text-accent">{errors.body.message}</span> : null}
         </label>
         <Button type="submit" size="lg" disabled={send.isPending}>
-          {send.isPending ? 'Sending…' : 'Send suggestion'}
+          {send.isPending ? 'Sending…' : 'Send feedback'}
         </Button>
       </form>
     </Sheet>

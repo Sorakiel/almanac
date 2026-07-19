@@ -7,7 +7,7 @@ import { Tag } from '@/components/common/Tag'
 import { Switch } from '@/components/ui/switch'
 import { Rail } from '@/components/common/desktop/rail'
 import { ModulesRail } from '@/features/modules/components/ModulesRail'
-import { SuggestModuleSheet } from '@/features/modules/components/SuggestModuleSheet'
+import { FeedbackSheet } from '@/features/modules/components/FeedbackSheet'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { NAV_MODULES, useModulesStore, type ModuleKey } from '@/stores/modules'
 import { cn } from '@/lib/utils'
@@ -38,7 +38,7 @@ function ModulesPage() {
   const { habits } = useHabits()
   const enabled = useModulesStore((s) => s.enabled)
   const toggle = useModulesStore((s) => s.toggle)
-  const [suggestOpen, setSuggestOpen] = useState(false)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   const stats: Record<ModuleKey, string> = {
     habits: `${habits.length} active`,
@@ -123,14 +123,14 @@ function ModulesPage() {
 
         <button
           type="button"
-          onClick={() => setSuggestOpen(true)}
+          onClick={() => setFeedbackOpen(true)}
           className="flex items-center gap-3 rounded-card border border-accent/25 bg-gradient-to-br from-accent/[0.06] to-transparent px-4 py-4 text-left text-sm text-muted transition-colors hover:text-foreground"
         >
           <Plus className="h-4 w-4 text-accent" aria-hidden="true" />
-          Suggest a module — Almanac grows with you.
+          Send feedback — help shape Almanac.
         </button>
 
-        <SuggestModuleSheet open={suggestOpen} onOpenChange={setSuggestOpen} />
+        <FeedbackSheet open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       </div>
       <Rail>
         <ModulesRail />

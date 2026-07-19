@@ -130,7 +130,14 @@ jobs:
           (cd dist && zip -qr ../android-bundle.zip .)
           VER="${GITHUB_REF_NAME#v}"
           URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/android-bundle.zip"
-          printf '{"version":"%s","url":"%s"}\n' "$VER" "$URL" > android-latest.json
+          APK="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/Almanac-${VER}.apk"
+          # Min native APK version that can run this web bundle. Bump the file
+          # only when a release ships native changes the OTA layer can't deliver;
+          # then older APKs get the "please reinstall" prompt instead of a bundle
+          # that would crash against the old shell.
+          MIN_NATIVE=$(tr -d '[:space:]' < android/ota-min-native.txt)
+          printf '{"version":"%s","url":"%s","minNative":"%s","apk":"%s"}\n' \
+            "$VER" "$URL" "$MIN_NATIVE" "$APK" > android-latest.json
           cat android-latest.json
 
       - name: Upload to release

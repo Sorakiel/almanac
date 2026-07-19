@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core'
+import { useUpdateStore } from '@/stores/update'
 
 // Self-hosted OTA update for the Android (Capacitor) build. The web layer is
 // where ~all our changes live, so we ship a new web bundle over the air instead
@@ -10,6 +11,11 @@ const MANIFEST_URL =
 interface UpdateManifest {
   version: string
   url: string
+  /** Min native APK version required to run this bundle (set when a release
+   *  ships native changes the OTA layer can't deliver). */
+  minNative?: string
+  /** Direct APK URL for the "please reinstall" prompt. */
+  apk?: string
 }
 
 export async function checkForAndroidUpdate(): Promise<void> {
@@ -29,12 +35,21 @@ export async function checkForAndroidUpdate(): Promise<void> {
     // Compare against the active OTA bundle if present, else the baked-in APK
     // version, so we don't re-download a bundle we already run.
     const current = await CapacitorUpdater.current()
+    const nativeVersion = (await App.getInfo()).version
     const activeVersion =
       current.bundle.version && current.bundle.version !== 'builtin'
         ? current.bundle.version
-        : (await App.getInfo()).version
+        : nativeVersion
 
     if (!isNewer(manifest.version, activeVersion)) return
+
+    // The latest bundle needs native code newer than the installed APK — an OTA
+    // web push can't deliver that. Prompt a reinstall instead of shipping a
+    // bundle that would crash against the old shell.
+    if (manifest.minNative && manifest.apk && isNewer(manifest.minNative, nativeVersion)) {
+      useUpdateStore.getState().setReinstall({ version: manifest.version, apkUrl: manifest.apk })
+      return
+    }
 
     const bundle = await CapacitorUpdater.download({
       url: manifest.url,

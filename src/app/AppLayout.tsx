@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { BottomNav } from '@/components/common/BottomNav'
+import { ReinstallBanner } from '@/components/common/ReinstallBanner'
 import { Sidebar } from '@/components/common/desktop/Sidebar'
 import { TopBar } from '@/components/common/desktop/TopBar'
 import { RailActive } from '@/components/common/desktop/RailActive'
@@ -50,6 +51,7 @@ export function AppLayout() {
   return (
     <RailTargetProvider target={railEl}>
       <div className="flex min-h-dvh flex-col lg:h-dvh lg:overflow-hidden">
+        <ReinstallBanner />
         <div className="hidden lg:block">
           <TopBar />
         </div>
