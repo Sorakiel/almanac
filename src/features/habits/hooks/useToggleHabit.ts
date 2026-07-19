@@ -3,6 +3,8 @@ import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { setHabitCount } from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
+import { dailyTarget } from '@/features/habits/lib/frequency'
+import { emitActivity } from '@/features/social/api/social.api'
 import type { HabitLog, HabitWithTodayLog } from '@/features/habits/types'
 
 interface ToggleArgs {
@@ -51,6 +53,20 @@ export function useToggleHabit() {
 
       queryClient.setQueryData<HabitLog[]>(logsKey, next)
       return { previous }
+    },
+    onSuccess: (_data, { habit }: ToggleArgs) => {
+      // When this tap completes the habit for the day, publish a feed event so
+      // friends see it. Best-effort + idempotent (deduped in the DB); a miss
+      // never affects the completion itself.
+      if (!habit.isComplete && habit.todayCount + 1 >= dailyTarget(habit)) {
+        void emitActivity({
+          user_id: userId,
+          kind: 'habit_completed',
+          habit_id: habit.id,
+          title: habit.name,
+          event_date: dateKey,
+        }).catch(() => undefined)
+      }
     },
     onError: (_error, _vars, context) => {
       if (context?.previous) queryClient.setQueryData(logsKey, context.previous)

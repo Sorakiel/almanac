@@ -13,6 +13,7 @@ import { DashboardWorkspace } from '@/features/dashboard/components/desktop/Dash
 import { DashboardRail } from '@/features/dashboard/components/desktop/DashboardRail'
 import { SortableHabitList } from '@/features/habits/components/SortableHabitList'
 import { useHabits } from '@/features/habits/hooks/useHabits'
+import { useDayCompletionBeacon } from '@/features/social/hooks/useDayCompletionBeacon'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
@@ -26,7 +27,7 @@ function greeting(hour: number): string {
 
 function DashboardPage() {
   const { user } = useSession()
-  const { longDate } = useToday()
+  const { longDate, dateKey } = useToday()
   const { habits, isLoading, isError, refetch } = useHabits()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
   const isDesktop = useMediaQuery('(min-width: 1024px)')
@@ -35,6 +36,10 @@ function DashboardPage() {
   const firstName = name.split(' ')[0] ?? 'there'
   const dueHabits = habits.filter((h) => h.dueToday || h.isComplete)
   const completed = dueHabits.filter((h) => h.isComplete).length
+
+  // Publish a "closed the day" event for the friends feed once all due habits
+  // are done (idempotent no-op if there are no friends / already emitted).
+  useDayCompletionBeacon(completed, dueHabits.length, dateKey)
   const dateLabel = longDate.replace(/,/, ' ·').toUpperCase()
 
   if (isError) {

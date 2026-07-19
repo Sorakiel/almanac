@@ -7,11 +7,19 @@ import {
   ListChecks,
   NotebookPen,
   Timer,
+  Users,
   type LucideIcon,
 } from 'lucide-react'
 
 /** Modules the user can show/hide in the nav (Today + More are fixed). */
-export type ModuleKey = 'habits' | 'workouts' | 'insights' | 'flow' | 'reflect' | 'reading'
+export type ModuleKey =
+  | 'habits'
+  | 'workouts'
+  | 'insights'
+  | 'flow'
+  | 'reflect'
+  | 'reading'
+  | 'social'
 
 /** Nav metadata, in display order. The nav renders enabled entries. */
 export interface NavModule {
@@ -35,6 +43,7 @@ export const NAV_MODULES: NavModule[] = [
   { key: 'flow', label: 'Flow', icon: Timer, to: '/flow' },
   { key: 'reflect', label: 'Reflect', icon: NotebookPen, to: '/reflect' },
   { key: 'reading', label: 'Reading', icon: BookOpen, to: '/reading' },
+  { key: 'social', label: 'Friends', icon: Users, to: '/friends' },
 ]
 
 /** Today + these are the fixed primary nav (left panel / bottom nav). */
@@ -49,6 +58,7 @@ const DEFAULTS: Record<ModuleKey, boolean> = {
   flow: false,
   reflect: false,
   reading: false,
+  social: false,
 }
 
 /** Force core modules on regardless of what a persisted state carried. */

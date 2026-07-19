@@ -41,6 +41,66 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_events: {
+        Row: {
+          created_at: string
+          event_date: string
+          habit_id: string | null
+          id: string
+          kind: string
+          meta: Json
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_date: string
+          habit_id?: string | null
+          id?: string
+          kind: string
+          meta?: Json
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_date?: string
+          habit_id?: string | null
+          id?: string
+          kind?: string
+          meta?: Json
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["friendship_status"]
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["friendship_status"]
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["friendship_status"]
+        }
+        Relationships: []
+      }
       book_notes: {
         Row: {
           body: string
@@ -614,6 +674,15 @@ export type Database = {
     Functions: {
       is_admin: { Args: never; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
+      are_friends: { Args: { a: string; b: string }; Returns: boolean }
+      search_profiles: {
+        Args: { q: string }
+        Returns: {
+          id: string
+          display_name: string | null
+          avatar_url: string | null
+        }[]
+      }
       admin_delete_user: { Args: { target: string }; Returns: undefined }
       set_user_role: {
         Args: { target: string; new_role: Database["public"]["Enums"]["user_role"] }
@@ -632,6 +701,7 @@ export type Database = {
       book_progress_mode: "pages" | "chapters"
       book_status: "to_read" | "reading" | "finished"
       feedback_status: "open" | "planned" | "done" | "closed"
+      friendship_status: "pending" | "accepted"
       habit_frequency:
         | "daily"
         | "weekly"

@@ -25,6 +25,7 @@ const MODULE_TONE: Record<ModuleKey, string> = {
   flow: 'bg-accent/15 text-accent',
   reflect: 'bg-teal/15 text-teal',
   reading: 'bg-amber/15 text-amber',
+  social: 'bg-accent/15 text-accent',
 }
 
 const SOON: SoonModule[] = [
@@ -47,6 +48,7 @@ function ModulesPage() {
     flow: 'Deep work',
     reflect: 'Journal',
     reading: 'Library',
+    social: 'Friends',
   }
 
   return (

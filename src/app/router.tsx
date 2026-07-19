@@ -53,6 +53,7 @@ const ReflectPage = lazyWithReload(() => import('@/features/reflect/ReflectPage'
 const BooksPage = lazyWithReload(() => import('@/features/reading/BooksPage'))
 const BookDetailPage = lazyWithReload(() => import('@/features/reading/BookDetailPage'))
 const AchievementsPage = lazyWithReload(() => import('@/features/achievements/AchievementsPage'))
+const SocialPage = lazyWithReload(() => import('@/features/social/SocialPage'))
 
 /** Wrap a lazy page element in a Suspense boundary with the shared fallback. */
 function suspend(element: ReactElement): ReactElement {
@@ -83,6 +84,7 @@ export const router = createBrowserRouter([
           { path: '/reflect', element: suspend(<ReflectPage />) },
           { path: '/reading', element: suspend(<BooksPage />) },
           { path: '/reading/:id', element: suspend(<BookDetailPage />) },
+          { path: '/friends', element: suspend(<SocialPage />) },
           { path: '/achievements', element: suspend(<AchievementsPage />) },
           { path: '/settings', element: suspend(<SettingsPage />) },
         ],
