@@ -1,6 +1,7 @@
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
+import { RatingBars } from '@/components/common/RatingBars'
 import { reflectionDateLabel } from '@/features/reflect/lib/format'
 import { useReflectionMutations } from '@/features/reflect/hooks/useReflectionMutations'
 import type { Quote } from '@/features/dashboard/api/quotes.api'
@@ -47,9 +48,15 @@ export function ReflectionCard({ reflection, quote }: ReflectionCardProps) {
       {ratings.length > 0 ? (
         <div className="flex flex-wrap gap-x-4 gap-y-1">
           {ratings.map((r) => (
-            <span key={r.key} className="font-mono text-[11px] text-muted-strong">
-              {r.label}{' '}
-              <span className="text-amber">{'★'.repeat(reflection[r.key] as number)}</span>
+            <span
+              key={r.key}
+              className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-strong"
+            >
+              {r.label}
+              <RatingBars
+                value={reflection[r.key] as number}
+                aria-label={`${r.label} ${reflection[r.key]} of 5`}
+              />
             </span>
           ))}
         </div>

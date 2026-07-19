@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
+import { RatingBars } from '@/components/common/RatingBars'
 import { Tag } from '@/components/common/Tag'
 import { progressPct, statusLabel, unitNounPlural } from '@/features/reading/lib/progress'
 import type { Book, BookStatus } from '@/features/reading/types'
@@ -29,9 +30,7 @@ export function BookCard({ book }: { book: Book }) {
           </div>
           <div className="flex flex-none flex-col items-end gap-1">
             <Tag tone={STATUS_TONE[book.status]}>{statusLabel(book.status)}</Tag>
-            {book.rating ? (
-              <span className="font-mono text-[10px] text-amber">{'★'.repeat(book.rating)}</span>
-            ) : null}
+            {book.rating ? <RatingBars value={book.rating} aria-label={`Rated ${book.rating} of 5`} /> : null}
           </div>
         </div>
 

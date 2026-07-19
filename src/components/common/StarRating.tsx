@@ -63,7 +63,7 @@ export function StarRating({
                 style={{ height: `${barHeight}%` }}
                 className={cn(
                   'w-full rounded-t-[3px] transition-colors',
-                  active ? 'bg-amber' : 'bg-muted-strong/25',
+                  active ? 'bg-accent' : 'bg-muted-strong/25',
                 )}
               />
             </button>
