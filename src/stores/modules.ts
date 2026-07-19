@@ -61,6 +61,8 @@ function withCoreOn(enabled: Record<ModuleKey, boolean>): Record<ModuleKey, bool
 interface ModulesState {
   enabled: Record<ModuleKey, boolean>
   toggle: (key: ModuleKey) => void
+  /** Set a module on/off directly (onboarding picks it up); core stays pinned. */
+  setModule: (key: ModuleKey, on: boolean) => void
 }
 
 export const useModulesStore = create<ModulesState>()(
@@ -72,6 +74,11 @@ export const useModulesStore = create<ModulesState>()(
           // Core modules are permanent; ignore attempts to hide them.
           if (NAV_MODULES.find((m) => m.key === key)?.core) return state
           return { enabled: { ...state.enabled, [key]: !state.enabled[key] } }
+        }),
+      setModule: (key, on) =>
+        set((state) => {
+          if (NAV_MODULES.find((m) => m.key === key)?.core) return state
+          return { enabled: { ...state.enabled, [key]: on } }
         }),
     }),
     {
