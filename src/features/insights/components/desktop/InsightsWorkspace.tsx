@@ -3,7 +3,9 @@ import { InsightStat } from '@/features/insights/components/InsightStat'
 import { WorkoutInsightsSection } from '@/features/insights/components/WorkoutInsightsSection'
 import { ReadingInsightsSection } from '@/features/insights/components/ReadingInsightsSection'
 import { ReflectInsightsSection } from '@/features/insights/components/ReflectInsightsSection'
+import { FocusInsightsSection } from '@/features/insights/components/FocusInsightsSection'
 import type {
+  FocusInsights,
   Insights,
   ReadingInsights,
   ReflectInsights,
@@ -15,14 +17,16 @@ interface InsightsWorkspaceProps {
   workoutInsights: WorkoutInsights | null
   readingInsights: ReadingInsights | null
   reflectInsights: ReflectInsights | null
+  focusInsights: FocusInsights | null
 }
 
-/** Desktop "Insights" workspace — habit KPIs + trend, then training, reading, reflect. */
+/** Desktop "Insights" workspace — habit KPIs + trend, then training, reading, reflect, focus. */
 export function InsightsWorkspace({
   insights,
   workoutInsights,
   readingInsights,
   reflectInsights,
+  focusInsights,
 }: InsightsWorkspaceProps) {
   const completionPct = Math.round(insights.completionRate * 100)
 
@@ -76,6 +80,12 @@ export function InsightsWorkspace({
       {reflectInsights?.hasData ? (
         <div className="mt-9">
           <ReflectInsightsSection data={reflectInsights} />
+        </div>
+      ) : null}
+
+      {focusInsights?.hasData ? (
+        <div className="mt-9">
+          <FocusInsightsSection data={focusInsights} />
         </div>
       ) : null}
     </div>

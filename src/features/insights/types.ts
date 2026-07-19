@@ -89,6 +89,27 @@ export interface ReflectInsights {
   hasData: boolean
 }
 
+/** One day's focused minutes, for the Deep Work heatmap. */
+export interface FocusDay {
+  date: string
+  minutes: number
+}
+
+/** Deep Work stats derived from finished Flow focus sessions. */
+export interface FocusInsights {
+  /** Focus sessions logged in the last 30 days. */
+  sessions30d: number
+  /** Minutes focused in the last 30 days. */
+  minutes30d: number
+  /** Total hours focused all-time, rounded to one decimal. */
+  hoursTotal: number
+  /** Consecutive-day focus streak ending today or yesterday. */
+  currentStreak: number
+  /** Daily focused minutes over the last 53 weeks, oldest→newest (heatmap). */
+  heatmap: FocusDay[]
+  hasData: boolean
+}
+
 /** Reading stats derived from books + logged reading sessions. */
 export interface ReadingInsights {
   booksReading: number

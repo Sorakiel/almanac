@@ -159,6 +159,33 @@ export type Database = {
         }
         Relationships: []
       }
+      focus_sessions: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          label: string | null
+          minutes: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          label?: string | null
+          minutes?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          label?: string | null
+          minutes?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       reading_sessions: {
         Row: {
           book_id: string

@@ -9,12 +9,14 @@ import { InsightStat } from '@/features/insights/components/InsightStat'
 import { WorkoutInsightsSection } from '@/features/insights/components/WorkoutInsightsSection'
 import { ReadingInsightsSection } from '@/features/insights/components/ReadingInsightsSection'
 import { ReflectInsightsSection } from '@/features/insights/components/ReflectInsightsSection'
+import { FocusInsightsSection } from '@/features/insights/components/FocusInsightsSection'
 import { InsightsWorkspace } from '@/features/insights/components/desktop/InsightsWorkspace'
 import { InsightsRail } from '@/features/insights/components/desktop/InsightsRail'
 import { useInsights } from '@/features/insights/hooks/useInsights'
 import { useWorkoutInsights } from '@/features/insights/hooks/useWorkoutInsights'
 import { useReadingInsights } from '@/features/insights/hooks/useReadingInsights'
 import { useReflectInsights } from '@/features/insights/hooks/useReflectInsights'
+import { useFocusInsights } from '@/features/insights/hooks/useFocusInsights'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useUiStore } from '@/stores/ui'
 
@@ -25,9 +27,10 @@ function InsightsPage() {
   const { data: workoutInsights, isLoading: woLoading } = useWorkoutInsights()
   const { data: readingInsights, isLoading: rdLoading } = useReadingInsights()
   const { data: reflectInsights, isLoading: rfLoading } = useReflectInsights()
+  const { data: focusInsights, isLoading: fcLoading } = useFocusInsights()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
 
-  if (isLoading || woLoading || rdLoading || rfLoading) {
+  if (isLoading || woLoading || rdLoading || rfLoading || fcLoading) {
     return (
       <div className="flex justify-center py-24" role="status" aria-live="polite">
         <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
@@ -55,8 +58,9 @@ function InsightsPage() {
   const workoutHasData = Boolean(workoutInsights?.hasData)
   const readingHasData = Boolean(readingInsights?.hasData)
   const reflectHasData = Boolean(reflectInsights?.hasData)
+  const focusHasData = Boolean(focusInsights?.hasData)
 
-  if (!habitHasData && !workoutHasData && !readingHasData && !reflectHasData) {
+  if (!habitHasData && !workoutHasData && !readingHasData && !reflectHasData && !focusHasData) {
     // New user, no data yet — point them at the first habit rather than a dead end.
     const startHabit = () => {
       navigate('/habits')
@@ -85,6 +89,7 @@ function InsightsPage() {
           workoutInsights={workoutInsights}
           readingInsights={readingInsights}
           reflectInsights={reflectInsights}
+          focusInsights={focusInsights}
         />
         <Rail>
           <InsightsRail insights={insights} />
@@ -157,6 +162,8 @@ function InsightsPage() {
       {readingHasData && readingInsights ? <ReadingInsightsSection data={readingInsights} /> : null}
 
       {reflectHasData && reflectInsights ? <ReflectInsightsSection data={reflectInsights} /> : null}
+
+      {focusHasData && focusInsights ? <FocusInsightsSection data={focusInsights} /> : null}
     </section>
   )
 }

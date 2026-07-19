@@ -16,6 +16,7 @@ import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
 import { useBooks } from '@/features/reading/hooks/useBooks'
 import { FlowWorkoutRunner } from '@/features/flow/components/FlowWorkoutRunner'
 import { FlowReadingRunner } from '@/features/flow/components/FlowReadingRunner'
+import { useLogFocusSession } from '@/features/flow/hooks/useLogFocusSession'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
@@ -41,6 +42,7 @@ function FlowPage() {
   const { dateKey } = useToday()
   const queryClient = useQueryClient()
   const { endsAt, durationMin, label, habitId, workoutId, bookId, start, stop } = useFocusStore()
+  const logFocus = useLogFocusSession()
   const [mode, setMode] = useState<Mode>('habit')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null)
@@ -72,7 +74,8 @@ function FlowPage() {
           : customLabel.trim() || null
 
   // Mark the session's habit done (if any), then end. "End" just stops.
-  const completeSession = async () => {
+  const completeSession = async (minutes: number) => {
+    logFocus(minutes, label)
     const habit = habitId ? habits.find((h) => h.id === habitId) : null
     if (habit && user) {
       try {
@@ -103,16 +106,23 @@ function FlowPage() {
 
   useEffect(() => {
     if (running && endsAt - now <= 0) {
+      // Ran the full block to completion — log the whole planned duration.
+      logFocus(durationMin, label)
       stop()
       toast.success('Flow session complete — nice work.')
     }
-  }, [running, endsAt, now, stop])
+  }, [running, endsAt, now, durationMin, label, logFocus, stop])
 
   if (running) {
     const msLeft = Math.max(endsAt - now, 0)
     const minLeft = Math.ceil(msLeft / 60_000)
     const elapsedMin = durationMin - msLeft / 60_000
+    const focusedMin = Math.max(0, Math.round(elapsedMin))
     const pct = durationMin ? Math.round((elapsedMin / durationMin) * 100) : 0
+    const endSession = () => {
+      logFocus(focusedMin, label)
+      stop()
+    }
 
     return (
       <div className="flex flex-col gap-5 lg:mx-auto lg:max-w-xl">
@@ -151,7 +161,7 @@ function FlowPage() {
               <div className="flex items-center gap-2 lg:gap-3">
                 <button
                   type="button"
-                  onClick={stop}
+                  onClick={endSession}
                   className="inline-flex items-center gap-1.5 rounded-[11px] border bg-surface px-3.5 py-2 font-mono text-[11px] font-bold uppercase tracking-label text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent lg:gap-2 lg:px-5 lg:py-3 lg:text-sm"
                 >
                   <X className="h-3.5 w-3.5 lg:h-4 lg:w-4" aria-hidden="true" />
@@ -160,7 +170,7 @@ function FlowPage() {
                 {workoutId || bookId ? null : (
                   <button
                     type="button"
-                    onClick={completeSession}
+                    onClick={() => void completeSession(focusedMin)}
                     className="inline-flex items-center gap-1.5 rounded-[11px] bg-accent px-3.5 py-2 font-mono text-[11px] font-bold uppercase tracking-label text-on-accent transition-colors hover:bg-accent-deep hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg lg:gap-2 lg:px-5 lg:py-3 lg:text-sm"
                   >
                     <Check className="h-3.5 w-3.5 lg:h-4 lg:w-4" aria-hidden="true" />
@@ -172,9 +182,9 @@ function FlowPage() {
           </div>
         </div>
 
-        {workoutId ? <FlowWorkoutRunner workoutId={workoutId} onFinish={stop} /> : null}
+        {workoutId ? <FlowWorkoutRunner workoutId={workoutId} onFinish={endSession} /> : null}
         {bookId ? (
-          <FlowReadingRunner bookId={bookId} minutes={durationMin} onFinish={stop} />
+          <FlowReadingRunner bookId={bookId} minutes={durationMin} onFinish={endSession} />
         ) : null}
       </div>
     )
