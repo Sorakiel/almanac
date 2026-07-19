@@ -250,7 +250,7 @@ export function HabitFormSheet() {
                       active ? 'border-foreground/40 scale-105' : 'border-transparent',
                     )}
                   >
-                    <span className={cn('h-5 w-5 rounded-full', HABIT_COLORS[key].solid)} />
+                    <span className={cn('h-5 w-5 rounded-[6px]', HABIT_COLORS[key].solid)} />
                   </button>
                 )
               })}

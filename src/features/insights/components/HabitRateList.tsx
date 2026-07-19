@@ -1,3 +1,4 @@
+import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { resolveHabitColor } from '@/features/habits/lib/habitVisuals'
 import type { HabitRate } from '@/features/insights/types'
 
@@ -20,16 +21,15 @@ export function HabitRateList({ habits }: HabitRateListProps) {
                 {pct}%
               </span>
             </div>
-            <div
-              className="h-2 overflow-hidden rounded-full bg-border/15"
-              role="progressbar"
-              aria-valuenow={pct}
-              aria-valuemin={0}
-              aria-valuemax={100}
+            <ProgressBlocks
+              value={pct}
+              total={100}
+              blocks={22}
+              color={color.stroke}
+              animated
+              className="w-full"
               aria-label={`${habit.name} completion`}
-            >
-              <div className={`h-full rounded-full ${color.solid}`} style={{ width: `${pct}%` }} />
-            </div>
+            />
           </div>
         )
       })}

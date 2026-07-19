@@ -12,6 +12,8 @@ interface ProgressBlocksProps {
   size?: 'sm' | 'md' | 'lg'
   /** Animate the fill in on mount / when the value changes. */
   animated?: boolean
+  /** CSS color for the filled glyphs; defaults to the brand accent. */
+  color?: string
   className?: string
   'aria-label'?: string
 }
@@ -35,6 +37,7 @@ export function ProgressBlocks({
   blocks = DEFAULT_BLOCKS,
   size = 'sm',
   animated = false,
+  color,
   className,
   'aria-label': ariaLabel,
 }: ProgressBlocksProps) {
@@ -73,7 +76,7 @@ export function ProgressBlocks({
           animated && 'transition-[width] duration-700 ease-out',
           SIZES[size],
         )}
-        style={{ width: `${shown * 100}%` }}
+        style={{ width: `${shown * 100}%`, color }}
       >
         {'▓'.repeat(blocks)}
       </span>
