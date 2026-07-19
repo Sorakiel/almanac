@@ -20,6 +20,10 @@ export interface HabitWithTodayLog extends Habit {
   rate: number
   /** Days until next due (interval cadences only; 0 for everything else). */
   dueInDays: number
+  /** Consecutive completed days ending today (or yesterday if today is open). */
+  streak: number
+  /** Due today, not yet done, and sitting on a live streak — one miss ends it. */
+  atRisk: boolean
   /** False for an interval habit still resting, or a weekdays habit on a weekend. */
   dueToday: boolean
 }

@@ -1,3 +1,4 @@
+import { Flame } from 'lucide-react'
 import { CompletionDonut } from '@/features/dashboard/components/CompletionDonut'
 import { Caret } from '@/components/common/Caret'
 import type { HabitWithTodayLog } from '@/features/habits/types'
@@ -17,6 +18,7 @@ export function TodaySummary({ habits }: TodaySummaryProps) {
   const total = due.length
   if (total === 0) return null
   const remaining = total - done
+  const atRisk = due.filter((h) => h.atRisk).length
 
   return (
     <div className="rounded-card border bg-surface p-4">
@@ -43,6 +45,12 @@ export function TodaySummary({ habits }: TodaySummaryProps) {
           </div>
         </div>
       </div>
+      {atRisk > 0 ? (
+        <p className="mt-3 flex items-center gap-1.5 border-t border-border pt-3 font-mono text-[11px] uppercase tracking-label text-accent">
+          <Flame className="h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
+          <span className="tabular-nums">{atRisk}</span> streak{atRisk > 1 ? 's' : ''} at risk today
+        </p>
+      ) : null}
     </div>
   )
 }

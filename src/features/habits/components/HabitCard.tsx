@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { Flame } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { CompletionToggle } from '@/components/common/CompletionToggle'
 import { IconTile } from '@/components/common/IconTile'
@@ -79,10 +80,33 @@ export function HabitCard({ habit }: HabitCardProps) {
           <span className="tabular-nums">{habit.completedRecent}</span> of last {habit.windowDays}
           {' · '}
           <span className="text-accent">{Math.round(habit.rate * 100)}%</span>
+          {habit.streak > 0 ? <StreakBadge streak={habit.streak} atRisk={habit.atRisk} /> : null}
         </span>
         <Sparkline values={habit.series} stroke={color.stroke} />
       </div>
     </Card>
+  )
+}
+
+interface StreakBadgeProps {
+  streak: number
+  atRisk: boolean
+}
+
+/** Inline flame + day count. Glows on the accent when the streak is at risk. */
+export function StreakBadge({ streak, atRisk }: StreakBadgeProps) {
+  return (
+    <span
+      className={cn(
+        'ml-1 inline-flex items-center gap-0.5 align-middle tabular-nums',
+        atRisk ? 'text-accent' : 'text-muted-strong',
+      )}
+      title={atRisk ? 'Streak at risk — finish today to keep it' : `${streak}-day streak`}
+    >
+      <span aria-hidden="true">· </span>
+      <Flame className={cn('h-3 w-3', atRisk && 'animate-pulse')} aria-hidden="true" />
+      <span>{streak}d</span>
+    </span>
   )
 }
 

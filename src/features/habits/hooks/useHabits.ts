@@ -10,6 +10,7 @@ import {
   expectedCompletionsInWindow,
   isDueOn,
 } from '@/features/habits/lib/frequency'
+import { currentStreak } from '@/features/habits/lib/streak'
 import type { Habit, HabitLog, HabitWithTodayLog } from '@/features/habits/types'
 
 const WINDOW_DAYS = 7
@@ -45,16 +46,24 @@ function join(habits: Habit[], logs: HabitLog[], windowKeys: string[]): HabitWit
     }
     const dueIn = dueInDays(habit, daysSinceLastDone)
 
+    const isComplete = todayCount >= target
+    const dueToday = isDueOn(habit, todayKey, daysSinceLastDone)
+    const streak = currentStreak(habit, doneOn, windowKeys)
+
     return {
       ...habit,
       todayCount,
-      isComplete: todayCount >= target,
+      isComplete,
       series,
       completedRecent,
       windowDays: WINDOW_DAYS,
       rate: expected > 0 ? Math.min(completedRecent / expected, 1) : 0,
       dueInDays: dueIn,
-      dueToday: isDueOn(habit, todayKey, daysSinceLastDone),
+      dueToday,
+      streak,
+      // A streak is "at risk" only while it's still losable today: due, unfinished,
+      // and with a run already going (≥2 days, so a fresh day-one habit isn't nagged).
+      atRisk: dueToday && !isComplete && streak >= 2,
     }
   })
 }
