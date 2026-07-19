@@ -14,22 +14,24 @@ export function HabitRateList({ habits }: HabitRateListProps) {
         const color = resolveHabitColor(habit.color)
         const pct = Math.round(habit.rate * 100)
         return (
-          <div key={habit.id}>
-            <div className="mb-1.5 flex items-center justify-between gap-3 text-[13px]">
-              <span className="min-w-0 truncate">{habit.name}</span>
-              <span className="flex-none font-mono tabular-nums" style={{ color: color.stroke }}>
+          <div key={habit.id} className="flex flex-col gap-1.5">
+            <span className="truncate text-[13px]">{habit.name}</span>
+            <div className="flex items-center gap-2.5">
+              <ProgressBlocks
+                value={pct}
+                total={100}
+                blocks={18}
+                color={color.stroke}
+                animated
+                aria-label={`${habit.name} completion`}
+              />
+              <span
+                className="flex-none font-mono text-[13px] tabular-nums"
+                style={{ color: color.stroke }}
+              >
                 {pct}%
               </span>
             </div>
-            <ProgressBlocks
-              value={pct}
-              total={100}
-              blocks={22}
-              color={color.stroke}
-              animated
-              className="w-full"
-              aria-label={`${habit.name} completion`}
-            />
           </div>
         )
       })}
