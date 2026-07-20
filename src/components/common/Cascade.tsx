@@ -7,6 +7,8 @@ interface CascadeProps {
   step?: number
   /** ms before the first child starts. */
   delay?: number
+  /** Cap the number of stagger steps so long lists don't drag the tail out. */
+  maxSteps?: number
   className?: string
 }
 
@@ -17,8 +19,17 @@ interface CascadeProps {
  *
  * Wrapping (not cloning) keeps it agnostic to what the children are: the
  * wrapper div becomes the flex/grid item, so parent `gap` still applies.
+ *
+ * For places a wrapper div isn't allowed (`<li>`, grid cells), use the
+ * `riseStagger` helper in `@/lib/motion` to style items in place instead.
  */
-export function Cascade({ children, step = 80, delay = 40, className }: CascadeProps) {
+export function Cascade({
+  children,
+  step = 80,
+  delay = 40,
+  maxSteps = 8,
+  className,
+}: CascadeProps) {
   const items = Children.toArray(children).filter(isValidElement)
   const reduce = prefersReducedMotion()
 
@@ -28,7 +39,9 @@ export function Cascade({ children, step = 80, delay = 40, className }: CascadeP
         <div
           key={child.key ?? i}
           className={reduce ? className : `animate-rise ${className ?? ''}`}
-          style={reduce ? undefined : { animationDelay: `${delay + i * step}ms` }}
+          style={
+            reduce ? undefined : { animationDelay: `${delay + Math.min(i, maxSteps) * step}ms` }
+          }
         >
           {child}
         </div>

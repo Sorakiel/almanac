@@ -8,6 +8,7 @@ import { TodayProgress } from '@/features/habits/components/TodayProgress'
 import { HabitsWorkspace } from '@/features/habits/components/desktop/HabitsWorkspace'
 import { HabitsRail } from '@/features/habits/components/desktop/HabitsRail'
 import { useHabits } from '@/features/habits/hooks/useHabits'
+import { riseStagger } from '@/lib/motion'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useUiStore } from '@/stores/ui'
 import type { HabitFrequency } from '@/features/habits/types'
@@ -31,6 +32,7 @@ function HabitsPage() {
   const filter = FILTERS[filterIndex]!
   const visible =
     filter.value === 'all' ? habits : habits.filter((h) => h.frequency === filter.value)
+  const stagger = riseStagger()
 
   if (isDesktop) {
     return (
@@ -109,11 +111,14 @@ function HabitsPage() {
             />
           ) : (
             <ul className="flex flex-col gap-3">
-              {visible.map((habit) => (
-                <li key={habit.id}>
-                  <HabitCard habit={habit} />
-                </li>
-              ))}
+              {visible.map((habit, i) => {
+                const rise = stagger(i)
+                return (
+                  <li key={habit.id} className={rise.className} style={rise.style}>
+                    <HabitCard habit={habit} />
+                  </li>
+                )
+              })}
             </ul>
           )}
           <Button size="lg" onClick={openNewHabit} className="w-full shadow-glow">

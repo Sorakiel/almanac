@@ -1,15 +1,19 @@
 import { ArrowLeft, Loader2, RefreshCw, Trophy } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { CountUp } from '@/components/common/CountUp'
 import { EmptyState } from '@/components/common/EmptyState'
 import { AchievementCard } from '@/features/achievements/components/AchievementCard'
 import { useAchievements } from '@/features/achievements/hooks/useAchievements'
+import { riseStagger } from '@/lib/motion'
 import { levelsEarned, unlockedCount } from '@/features/achievements/lib/evaluate'
 
 function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col">
-      <span className="font-mono text-2xl tabular-nums">{value}</span>
+      <span className="font-mono text-2xl tabular-nums">
+        <CountUp value={value} />
+      </span>
       <span className="label-mono text-muted-strong">{label}</span>
     </div>
   )
@@ -43,6 +47,7 @@ function AchievementsPage() {
   }
 
   const unlocked = unlockedCount(achievements)
+  const stagger = riseStagger()
 
   return (
     <div className="mx-auto flex max-w-[900px] flex-col gap-6">
@@ -71,9 +76,14 @@ function AchievementsPage() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {achievements.map((item) => (
-          <AchievementCard key={item.def.id} item={item} />
-        ))}
+        {achievements.map((item, i) => {
+          const rise = stagger(i)
+          return (
+            <div key={item.def.id} className={rise.className} style={rise.style}>
+              <AchievementCard item={item} />
+            </div>
+          )
+        })}
       </div>
     </div>
   )

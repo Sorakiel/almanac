@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { BarChart3, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Rail } from '@/components/common/desktop/rail'
 import { CompletionTrend } from '@/features/insights/components/CompletionTrend'
@@ -107,63 +108,71 @@ function InsightsPage() {
         <h1 className="mt-1 text-2xl">Insights</h1>
       </header>
 
-      {habitHasData ? (
-        <div className="flex flex-col gap-5">
-          <div className="grid grid-cols-2 gap-3">
-            <InsightStat
-              label="completion"
-              value={String(completionPct)}
-              unit="%"
-              delta={insights.completionDelta}
-              deltaSuffix="% vs prev"
-            />
-            <InsightStat label="best streak" value={`${insights.bestStreak}d`} accent />
-            <InsightStat label="active" value={String(insights.activeHabits)} />
-            <InsightStat label="done · 30d" value={String(insights.totalDone)} />
-          </div>
+      <Cascade>
+        {habitHasData ? (
+          <div className="flex flex-col gap-5">
+            <div className="grid grid-cols-2 gap-3">
+              <InsightStat
+                label="completion"
+                value={String(completionPct)}
+                unit="%"
+                delta={insights.completionDelta}
+                deltaSuffix="% vs prev"
+              />
+              <InsightStat label="best streak" value={`${insights.bestStreak}d`} accent />
+              <InsightStat label="active" value={String(insights.activeHabits)} />
+              <InsightStat label="done · 30d" value={String(insights.totalDone)} />
+            </div>
 
-          <div>
-            <p className="label-mono mb-3">// completion over time</p>
-            <CompletionTrend weekly={insights.weekly} height={150} />
-          </div>
-
-          {insights.byHabit.length > 0 ? (
             <div>
-              <p className="label-mono mb-3">// by habit</p>
-              <div className="rounded-card border bg-surface p-4">
-                <HabitRateList habits={insights.byHabit} />
+              <p className="label-mono mb-3">// completion over time</p>
+              <CompletionTrend weekly={insights.weekly} height={150} />
+            </div>
+
+            {insights.byHabit.length > 0 ? (
+              <div>
+                <p className="label-mono mb-3">// by habit</p>
+                <div className="rounded-card border bg-surface p-4">
+                  <HabitRateList habits={insights.byHabit} />
+                </div>
               </div>
-            </div>
-          ) : null}
+            ) : null}
 
-          {insights.bestWeekday ? (
-            <div className="rounded-card border border-accent/25 bg-gradient-to-br from-accent/10 to-transparent p-4">
-              <p className="label-mono text-accent">read-out</p>
-              <p className="mt-2 text-sm leading-relaxed text-muted">
-                You&rsquo;re most consistent on{' '}
-                <span className="font-medium text-accent">{insights.bestWeekday}</span>
-                {insights.worstWeekday ? (
-                  <>
-                    {' '}
-                    — <span className="text-foreground">{insights.worstWeekday}</span> is your weak
-                    point.
-                  </>
-                ) : (
-                  '.'
-                )}
-              </p>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
+            {insights.bestWeekday ? (
+              <div className="rounded-card border border-accent/25 bg-gradient-to-br from-accent/10 to-transparent p-4">
+                <p className="label-mono text-accent">read-out</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted">
+                  You&rsquo;re most consistent on{' '}
+                  <span className="font-medium text-accent">{insights.bestWeekday}</span>
+                  {insights.worstWeekday ? (
+                    <>
+                      {' '}
+                      — <span className="text-foreground">{insights.worstWeekday}</span> is your
+                      weak point.
+                    </>
+                  ) : (
+                    '.'
+                  )}
+                </p>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
-      {workoutHasData && workoutInsights ? <WorkoutInsightsSection data={workoutInsights} /> : null}
+        {workoutHasData && workoutInsights ? (
+          <WorkoutInsightsSection data={workoutInsights} />
+        ) : null}
 
-      {readingHasData && readingInsights ? <ReadingInsightsSection data={readingInsights} /> : null}
+        {readingHasData && readingInsights ? (
+          <ReadingInsightsSection data={readingInsights} />
+        ) : null}
 
-      {reflectHasData && reflectInsights ? <ReflectInsightsSection data={reflectInsights} /> : null}
+        {reflectHasData && reflectInsights ? (
+          <ReflectInsightsSection data={reflectInsights} />
+        ) : null}
 
-      {focusHasData && focusInsights ? <FocusInsightsSection data={focusInsights} /> : null}
+        {focusHasData && focusInsights ? <FocusInsightsSection data={focusInsights} /> : null}
+      </Cascade>
     </section>
   )
 }

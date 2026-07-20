@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Loader2, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Rail } from '@/components/common/desktop/rail'
 import { AddFriend } from '@/features/social/components/AddFriend'
@@ -91,27 +92,29 @@ function SocialPage() {
         <h1 className="mt-1 text-2xl">Friends</h1>
       </header>
 
-      <AddFriend
-        connectedIds={connectedIds}
-        selfId={selfId}
-        onAdd={(id) => send.mutate(id)}
-        isAdding={send.isPending}
-      />
+      <Cascade>
+        <AddFriend
+          connectedIds={connectedIds}
+          selfId={selfId}
+          onAdd={(id) => send.mutate(id)}
+          isAdding={send.isPending}
+        />
 
-      <RequestsList
-        incoming={data.incoming}
-        outgoing={data.outgoing}
-        onAccept={(id) => accept.mutate(id)}
-        onRemove={(id) => remove.mutate(id)}
-        busy={busy}
-      />
+        <RequestsList
+          incoming={data.incoming}
+          outgoing={data.outgoing}
+          onAccept={(id) => accept.mutate(id)}
+          onRemove={(id) => remove.mutate(id)}
+          busy={busy}
+        />
 
-      <section className="flex flex-col gap-3">
-        <p className="label-mono">// activity</p>
-        <ActivityFeed feed={feed} todayKey={dateKey} hasFriends={data.friends.length > 0} />
-      </section>
+        <section className="flex flex-col gap-3">
+          <p className="label-mono">// activity</p>
+          <ActivityFeed feed={feed} todayKey={dateKey} hasFriends={data.friends.length > 0} />
+        </section>
 
-      <FriendsList friends={data.friends} onRemove={(id) => remove.mutate(id)} busy={busy} />
+        <FriendsList friends={data.friends} onRemove={(id) => remove.mutate(id)} busy={busy} />
+      </Cascade>
     </section>
   )
 }

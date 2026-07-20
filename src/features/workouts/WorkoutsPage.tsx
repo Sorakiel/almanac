@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Dumbbell, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { Rail } from '@/components/common/desktop/rail'
@@ -79,7 +80,7 @@ function WorkoutsPage() {
           }
         />
       ) : (
-        <>
+        <Cascade>
           {active.length > 0 ? (
             <div className="flex flex-col gap-3">
               <SectionLabel>TO DO</SectionLabel>
@@ -102,7 +103,7 @@ function WorkoutsPage() {
             <Plus className="h-4 w-4" />
             New workout
           </Button>
-        </>
+        </Cascade>
       )}
 
       {formSheet}

@@ -1,3 +1,4 @@
+import { Cascade } from '@/components/common/Cascade'
 import { AddFriend } from '@/features/social/components/AddFriend'
 import { ActivityFeed } from '@/features/social/components/ActivityFeed'
 import type { FeedItem, FriendsData } from '@/features/social/types'
@@ -33,11 +34,18 @@ export function SocialWorkspace({
       </header>
 
       <div className="flex flex-col gap-6">
-        <AddFriend connectedIds={connectedIds} selfId={selfId} onAdd={onAdd} isAdding={isAdding} />
-        <section className="flex flex-col gap-3">
-          <p className="label-mono">// activity</p>
-          <ActivityFeed feed={feed} todayKey={todayKey} hasFriends={data.friends.length > 0} />
-        </section>
+        <Cascade>
+          <AddFriend
+            connectedIds={connectedIds}
+            selfId={selfId}
+            onAdd={onAdd}
+            isAdding={isAdding}
+          />
+          <section className="flex flex-col gap-3">
+            <p className="label-mono">// activity</p>
+            <ActivityFeed feed={feed} todayKey={todayKey} hasFriends={data.friends.length > 0} />
+          </section>
+        </Cascade>
       </div>
     </div>
   )

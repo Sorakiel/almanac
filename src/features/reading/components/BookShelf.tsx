@@ -1,17 +1,24 @@
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { BookCard } from '@/features/reading/components/BookCard'
 import { groupBooks } from '@/features/reading/lib/library'
+import { riseStagger } from '@/lib/motion'
 import type { Book } from '@/features/reading/types'
 
 function Shelf({ title, books }: { title: string; books: Book[] }) {
   if (books.length === 0) return null
+  const stagger = riseStagger()
   return (
     <div className="flex flex-col gap-3">
       <SectionLabel accessory={String(books.length)}>{title}</SectionLabel>
       <div className="grid gap-3 lg:grid-cols-2">
-        {books.map((book) => (
-          <BookCard key={book.id} book={book} />
-        ))}
+        {books.map((book, i) => {
+          const rise = stagger(i)
+          return (
+            <div key={book.id} className={rise.className} style={rise.style}>
+              <BookCard book={book} />
+            </div>
+          )
+        })}
       </div>
     </div>
   )

@@ -1,5 +1,7 @@
 import { Dumbbell, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Cascade } from '@/components/common/Cascade'
+import { CountUp } from '@/components/common/CountUp'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { WorkoutCard } from '@/features/workouts/components/WorkoutCard'
@@ -21,7 +23,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
       <p
         className={`mt-1 text-[27px] font-semibold tabular-nums tracking-title ${accent ? 'text-accent' : ''}`}
       >
-        {value}
+        {/^\d+$/.test(value) ? <CountUp value={Number(value)} /> : value}
       </p>
     </div>
   )
@@ -85,7 +87,7 @@ export function WorkoutsWorkspace({
           />
         </div>
       ) : (
-        <>
+        <Cascade>
           <section className="mt-7 flex gap-3.5">
             <Stat label="sessions" value={String(stats.total)} accent />
             <Stat label="completed" value={String(stats.completed)} />
@@ -109,7 +111,7 @@ export function WorkoutsWorkspace({
               ))}
             </section>
           ) : null}
-        </>
+        </Cascade>
       )}
     </div>
   )

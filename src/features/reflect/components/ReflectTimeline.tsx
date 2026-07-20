@@ -1,3 +1,4 @@
+import { Cascade } from '@/components/common/Cascade'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { ReflectionCard } from '@/features/reflect/components/ReflectionCard'
 import { ReflectionComposer } from '@/features/reflect/components/ReflectionComposer'
@@ -16,24 +17,28 @@ interface ReflectTimelineProps {
 export function ReflectTimeline({ dateKey, today, past, quoteById }: ReflectTimelineProps) {
   return (
     <div className="flex flex-col gap-5">
-      <ReflectionComposer dateKey={dateKey} today={today} />
+      <Cascade>
+        <ReflectionComposer dateKey={dateKey} today={today} />
 
-      <div className="flex flex-col gap-3">
-        <SectionLabel accessory={past.length > 0 ? `${past.length}` : undefined}>PAST</SectionLabel>
-        {past.length > 0 ? (
-          past.map((reflection) => (
-            <ReflectionCard
-              key={reflection.id}
-              reflection={reflection}
-              quote={reflection.quote_id ? (quoteById.get(reflection.quote_id) ?? null) : null}
-            />
-          ))
-        ) : (
-          <p className="rounded-card border border-dashed px-4 py-6 text-center text-sm text-muted">
-            Your past reflections will collect here, one day at a time.
-          </p>
-        )}
-      </div>
+        <div className="flex flex-col gap-3">
+          <SectionLabel accessory={past.length > 0 ? `${past.length}` : undefined}>
+            PAST
+          </SectionLabel>
+          {past.length > 0 ? (
+            past.map((reflection) => (
+              <ReflectionCard
+                key={reflection.id}
+                reflection={reflection}
+                quote={reflection.quote_id ? (quoteById.get(reflection.quote_id) ?? null) : null}
+              />
+            ))
+          ) : (
+            <p className="rounded-card border border-dashed px-4 py-6 text-center text-sm text-muted">
+              Your past reflections will collect here, one day at a time.
+            </p>
+          )}
+        </div>
+      </Cascade>
     </div>
   )
 }

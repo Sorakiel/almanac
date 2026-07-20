@@ -2,6 +2,7 @@ import { ListChecks, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { HabitCard } from '@/features/habits/components/HabitCard'
+import { riseStagger } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 import type { HabitFrequency, HabitWithTodayLog } from '@/features/habits/types'
 
@@ -30,6 +31,7 @@ export function HabitsWorkspace({
   const filter = filters[filterIndex]!
   const visible =
     filter.value === 'all' ? habits : habits.filter((h) => h.frequency === filter.value)
+  const stagger = riseStagger()
 
   return (
     <div className="mx-auto max-w-[900px]">
@@ -106,9 +108,14 @@ export function HabitsWorkspace({
         </div>
       ) : (
         <div className="mt-[22px] grid grid-cols-2 gap-3.5">
-          {visible.map((habit) => (
-            <HabitCard key={habit.id} habit={habit} />
-          ))}
+          {visible.map((habit, i) => {
+            const rise = stagger(i)
+            return (
+              <div key={habit.id} className={rise.className} style={rise.style}>
+                <HabitCard habit={habit} />
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
