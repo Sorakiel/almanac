@@ -13,13 +13,7 @@ import {
 
 /** Modules the user can show/hide in the nav (Today + More are fixed). */
 export type ModuleKey =
-  | 'habits'
-  | 'workouts'
-  | 'insights'
-  | 'flow'
-  | 'reflect'
-  | 'reading'
-  | 'social'
+  'habits' | 'workouts' | 'insights' | 'flow' | 'reflect' | 'reading' | 'social'
 
 /** Nav metadata, in display order. The nav renders enabled entries. */
 export interface NavModule {

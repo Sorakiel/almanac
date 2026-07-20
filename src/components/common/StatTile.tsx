@@ -16,7 +16,7 @@ export function StatTile({ label, value, accent = false, className }: StatTilePr
       <span className="label-mono">{label}</span>
       <span
         className={cn(
-          'text-2xl font-semibold tracking-title tabular-nums',
+          'text-2xl font-semibold tabular-nums tracking-title',
           accent ? 'text-accent' : 'text-foreground',
         )}
       >

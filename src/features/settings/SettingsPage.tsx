@@ -55,7 +55,9 @@ function SettingsPage() {
   const joinedDays = user?.created_at
     ? Math.max(
         1,
-        Math.floor((new Date(dateKey).getTime() - new Date(user.created_at).getTime()) / 86_400_000),
+        Math.floor(
+          (new Date(dateKey).getTime() - new Date(user.created_at).getTime()) / 86_400_000,
+        ),
       )
     : 0
   const soon = () => toast('This setting is coming soon.')
@@ -80,7 +82,8 @@ function SettingsPage() {
             <h1 className="truncate text-xl">{name}</h1>
             <p className="truncate text-sm text-muted">{email}</p>
             <Tag tone="accent" className="mt-1.5">
-              ◇ {profile?.role && profile.role !== 'user' ? profile.role : 'member'} · {joinedDays}-day
+              ◇ {profile?.role && profile.role !== 'user' ? profile.role : 'member'} · {joinedDays}
+              -day
             </Tag>
           </div>
         </header>
@@ -101,11 +104,7 @@ function SettingsPage() {
         <section className="flex flex-col gap-2">
           <SectionLabel>YOU</SectionLabel>
           <div className="flex flex-col">
-            <Row
-              icon={Trophy}
-              label="Achievements"
-              onClick={() => navigate('/achievements')}
-            />
+            <Row icon={Trophy} label="Achievements" onClick={() => navigate('/achievements')} />
           </div>
         </section>
 

@@ -1,11 +1,5 @@
 import { lastNDateKeys } from '@/lib/date'
-import type {
-  AdminData,
-  Feedback,
-  MemberRow,
-  Profile,
-  SignupWeek,
-} from '@/features/admin/types'
+import type { AdminData, Feedback, MemberRow, Profile, SignupWeek } from '@/features/admin/types'
 
 const SIGNUP_WEEKS = 8
 const RECENT_MEMBERS = 8

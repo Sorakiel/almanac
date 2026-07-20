@@ -6,7 +6,12 @@ import { Input } from '@/components/ui/input'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { useReadingProgress } from '@/features/reading/hooks/useReadingProgress'
-import { dailyGoalPct, progressPct, unitNoun, unitNounPlural } from '@/features/reading/lib/progress'
+import {
+  dailyGoalPct,
+  progressPct,
+  unitNoun,
+  unitNounPlural,
+} from '@/features/reading/lib/progress'
 import { cn } from '@/lib/utils'
 import { useToday } from '@/hooks/useToday'
 import type { Book, ReadingSession } from '@/features/reading/types'

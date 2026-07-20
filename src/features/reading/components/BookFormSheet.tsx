@@ -130,7 +130,13 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
 
           <label className="flex flex-col gap-1.5">
             <span className="label-mono">Total {unitNounPlural(mode)} (optional)</span>
-            <Input type="number" inputMode="numeric" min={1} placeholder="e.g. 320" {...register('total')} />
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              placeholder="e.g. 320"
+              {...register('total')}
+            />
           </label>
 
           <label className="flex flex-col gap-1.5">

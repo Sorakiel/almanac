@@ -66,7 +66,7 @@ export function ReflectionCard({ reflection, quote }: ReflectionCardProps) {
       ) : null}
       {quote ? (
         <details className="group -mx-1 mt-0.5">
-          <summary className="label-mono flex cursor-pointer list-none items-center gap-1.5 rounded-md px-1 py-0.5 text-muted-strong/80 outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
+          <summary className="label-mono focus-visible:ring-ring flex cursor-pointer list-none items-center gap-1.5 rounded-md px-1 py-0.5 text-muted-strong/80 outline-none transition-colors hover:text-foreground focus-visible:ring-2">
             <ChevronDown
               className="h-3 w-3 flex-none transition-transform group-open:rotate-180"
               aria-hidden="true"

@@ -19,7 +19,7 @@ export function StatCard({ label, value, hint, icon: Icon, className }: StatCard
         <span className="label-mono">{label}</span>
         {Icon ? <Icon className="h-4 w-4 text-muted" aria-hidden="true" /> : null}
       </div>
-      <span className="text-3xl font-semibold tracking-title tabular-nums">{value}</span>
+      <span className="text-3xl font-semibold tabular-nums tracking-title">{value}</span>
       {hint ? <span className="text-sm text-muted">{hint}</span> : null}
     </Card>
   )

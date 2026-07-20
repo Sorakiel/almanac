@@ -56,7 +56,12 @@ export function AddFriend({ connectedIds, selfId, onAdd, isAdding }: AddFriendPr
                 <span className="min-w-0 flex-1 truncate text-sm font-medium">
                   {person.displayName}
                 </span>
-                <Button size="sm" variant="outline" disabled={isAdding} onClick={() => onAdd(person.id)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={isAdding}
+                  onClick={() => onAdd(person.id)}
+                >
                   <UserPlus className="h-4 w-4" aria-hidden="true" />
                   Add
                 </Button>

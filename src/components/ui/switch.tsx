@@ -8,7 +8,12 @@ interface SwitchProps {
 }
 
 /** Accessible on/off toggle (role="switch") — no external dependency. */
-export function Switch({ checked, onCheckedChange, disabled, 'aria-label': ariaLabel }: SwitchProps) {
+export function Switch({
+  checked,
+  onCheckedChange,
+  disabled,
+  'aria-label': ariaLabel,
+}: SwitchProps) {
   return (
     <button
       type="button"
@@ -26,7 +31,7 @@ export function Switch({ checked, onCheckedChange, disabled, 'aria-label': ariaL
     >
       <span
         className={cn(
-          'inline-block h-5 w-5 transform rounded-full bg-foreground transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
+          'ease-[cubic-bezier(0.34,1.56,0.64,1)] inline-block h-5 w-5 transform rounded-full bg-foreground transition-transform duration-300',
           checked ? 'translate-x-[18px]' : 'translate-x-0.5',
         )}
       />

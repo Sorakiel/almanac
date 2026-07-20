@@ -72,7 +72,7 @@ export function AppLayout() {
           >
             <div
               key={pathname}
-              className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
+              className="motion-safe:duration-300 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2"
             >
               <Outlet />
             </div>

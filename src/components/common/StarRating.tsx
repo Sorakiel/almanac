@@ -55,7 +55,7 @@ export function StarRating({
               onClick={() => onChange(value === step ? null : step)}
               className={cn(
                 'flex items-end justify-center transition-transform hover:scale-110 active:scale-95',
-                'focus-visible:outline-none focus-visible:rounded-[3px] focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
+                'focus-visible:rounded-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
                 'disabled:opacity-50 disabled:hover:scale-100',
                 s.col,
               )}

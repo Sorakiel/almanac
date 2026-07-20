@@ -48,7 +48,9 @@ export function ActivityFeed({ feed, todayKey, hasFriends }: ActivityFeedProps) 
                 <span className="font-semibold">{item.friend.displayName}</span>{' '}
                 <span className="text-muted">{activitySummary(item)}</span>
               </p>
-              <p className="label-mono mt-0.5 text-[10px]">{feedDayLabel(item.eventDate, todayKey)}</p>
+              <p className="label-mono mt-0.5 text-[10px]">
+                {feedDayLabel(item.eventDate, todayKey)}
+              </p>
             </div>
             <Icon className={`h-4 w-4 shrink-0 ${tone}`} aria-hidden="true" />
           </li>

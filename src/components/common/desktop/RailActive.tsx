@@ -28,7 +28,9 @@ export function RailActive() {
 
   return (
     <div className="mb-5">
-      <p className="mb-3 font-mono text-[10px] uppercase tracking-label text-accent">▶ now · active</p>
+      <p className="mb-3 font-mono text-[10px] uppercase tracking-label text-accent">
+        ▶ now · active
+      </p>
       <Link
         to="/flow"
         className="relative block overflow-hidden rounded-[18px] border border-accent/25 bg-gradient-to-br from-accent/15 to-transparent p-4 transition-colors hover:border-accent/50"

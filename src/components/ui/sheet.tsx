@@ -88,7 +88,7 @@ export function Sheet({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-bg-deep/70 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in data-[state=closed]:fade-out" />
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-bg-deep/70 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:fade-in" />
         <Dialog.Content
           ref={contentRef}
           onOpenAutoFocus={preventInitialFocus ? (event) => event.preventDefault() : undefined}
@@ -104,7 +104,7 @@ export function Sheet({
           }
           className={cn(
             'fixed z-50 border bg-bg shadow-soft focus:outline-none',
-            'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in data-[state=closed]:fade-out',
+            'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:fade-in',
             // Mobile: bottom sheet that slides up. Cap the height and scroll
             // inside so tall forms (and the on-screen keyboard) never push the
             // sheet past the top of the screen where it can't be dismissed.
@@ -112,7 +112,7 @@ export function Sheet({
             // Skip Radix's slide keyframes while a drag is in flight, else the
             // inline transform and the keyframe fight each other.
             dragY === 0 &&
-              'max-lg:data-[state=open]:slide-in-from-bottom max-lg:data-[state=closed]:slide-out-to-bottom',
+              'max-lg:data-[state=closed]:slide-out-to-bottom max-lg:data-[state=open]:slide-in-from-bottom',
             // Desktop: centered modal dialog (spec board "NEW HABIT · MODAL").
             'lg:inset-x-auto lg:bottom-auto lg:left-1/2 lg:top-1/2 lg:mx-0 lg:w-[520px] lg:max-w-[calc(100vw-2rem)]',
             'lg:max-h-[calc(100vh-4rem)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:overflow-y-auto lg:rounded-[24px] lg:px-8 lg:py-7',
@@ -129,7 +129,9 @@ export function Sheet({
             <span aria-hidden="true" className="h-1 w-10 rounded-full bg-border" />
           </div>
           <div className="flex items-start justify-between gap-4">
-            <Dialog.Title className={cn(mono ? 'label-mono' : 'text-lg font-semibold tracking-title')}>
+            <Dialog.Title
+              className={cn(mono ? 'label-mono' : 'text-lg font-semibold tracking-title')}
+            >
               {mono ? `// ${title}` : title}
             </Dialog.Title>
             <Dialog.Close

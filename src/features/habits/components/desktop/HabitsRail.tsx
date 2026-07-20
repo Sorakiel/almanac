@@ -20,7 +20,9 @@ export function HabitsRail({ habits }: HabitsRailProps) {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">this week</p>
+        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
+          this week
+        </p>
         <div className="mt-3.5 flex gap-3">
           <div className="flex-1 rounded-2xl border bg-surface p-4">
             <p className="font-mono text-[9px] uppercase tracking-label text-muted-strong">
@@ -29,14 +31,18 @@ export function HabitsRail({ habits }: HabitsRailProps) {
             <p className="mt-1 text-[26px] font-semibold text-accent">{weekRate}%</p>
           </div>
           <div className="flex-1 rounded-2xl border bg-surface p-4">
-            <p className="font-mono text-[9px] uppercase tracking-label text-muted-strong">active</p>
+            <p className="font-mono text-[9px] uppercase tracking-label text-muted-strong">
+              active
+            </p>
             <p className="mt-1 text-[26px] font-semibold">{habits.length}</p>
           </div>
         </div>
       </div>
 
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">strongest</p>
+        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
+          strongest
+        </p>
         <div className="mt-2.5 flex items-center gap-3 rounded-2xl border bg-surface p-[15px]">
           <IconTile icon={StrongIcon} tone={strongColor.tile} size="sm" />
           <div className="min-w-0 flex-1">

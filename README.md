@@ -34,7 +34,7 @@ the screen is cluttered, or when a missed day feels like failure. Almanac
 attacks that on three fronts:
 
 - **Friction kills habits, so logging is one tap.** Marking a habit done is a
-  single press, and the screen updates *instantly* — it never makes you wait for
+  single press, and the screen updates _instantly_ — it never makes you wait for
   the network before showing your progress.
 - **A wall of numbers is discouraging, so the dashboard leads with clarity.**
   Today's habits, a simple completion ring, and a rotating quote — the answer to
@@ -76,17 +76,17 @@ simple to reason about:
 
 ## Tech stack
 
-| Area          | Built with                                          |
-| ------------- | --------------------------------------------------- |
-| Framework     | **Vite** + React + **TypeScript**                   |
-| Styling       | **Tailwind CSS** + shadcn/ui (Radix)                |
-| Data & auth   | **Supabase** (Postgres + Auth)                      |
-| Data fetching | **TanStack Query** (React Query)                    |
-| App state     | **Zustand**                                         |
-| Charts        | Recharts                                            |
-| Forms         | react-hook-form + **zod**                           |
-| Testing       | **Playwright**                                      |
-| Hosting       | **Vercel**                                          |
+| Area          | Built with                           |
+| ------------- | ------------------------------------ |
+| Framework     | **Vite** + React + **TypeScript**    |
+| Styling       | **Tailwind CSS** + shadcn/ui (Radix) |
+| Data & auth   | **Supabase** (Postgres + Auth)       |
+| Data fetching | **TanStack Query** (React Query)     |
+| App state     | **Zustand**                          |
+| Charts        | Recharts                             |
+| Forms         | react-hook-form + **zod**            |
+| Testing       | **Playwright**                       |
+| Hosting       | **Vercel**                           |
 
 ## Running it locally
 

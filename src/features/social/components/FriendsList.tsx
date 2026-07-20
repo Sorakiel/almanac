@@ -25,9 +25,14 @@ export function FriendsList({ friends, onRemove, busy }: FriendsListProps) {
         </p>
       ) : (
         friends.map((friend) => (
-          <div key={friend.friendshipId} className="flex items-center gap-3 rounded-card border bg-surface px-4 py-3">
+          <div
+            key={friend.friendshipId}
+            className="flex items-center gap-3 rounded-card border bg-surface px-4 py-3"
+          >
             <Avatar name={friend.displayName} size="sm" />
-            <span className="min-w-0 flex-1 truncate text-sm font-medium">{friend.displayName}</span>
+            <span className="min-w-0 flex-1 truncate text-sm font-medium">
+              {friend.displayName}
+            </span>
             <Button
               size="icon"
               variant="ghost"

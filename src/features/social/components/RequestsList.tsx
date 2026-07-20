@@ -22,7 +22,10 @@ export function RequestsList({ incoming, outgoing, onAccept, onRemove, busy }: R
         <section className="flex flex-col gap-2">
           <SectionLabel>Requests · {incoming.length}</SectionLabel>
           {incoming.map((req) => (
-            <div key={req.friendshipId} className="flex items-center gap-3 rounded-card border bg-surface px-4 py-3">
+            <div
+              key={req.friendshipId}
+              className="flex items-center gap-3 rounded-card border bg-surface px-4 py-3"
+            >
               <Avatar name={req.profile.displayName} size="sm" />
               <span className="min-w-0 flex-1 truncate text-sm font-medium">
                 {req.profile.displayName}
@@ -56,7 +59,10 @@ export function RequestsList({ incoming, outgoing, onAccept, onRemove, busy }: R
         <section className="flex flex-col gap-2">
           <SectionLabel>Sent · {outgoing.length}</SectionLabel>
           {outgoing.map((req) => (
-            <div key={req.friendshipId} className="flex items-center gap-3 rounded-card border bg-surface px-4 py-3">
+            <div
+              key={req.friendshipId}
+              className="flex items-center gap-3 rounded-card border bg-surface px-4 py-3"
+            >
               <Avatar name={req.profile.displayName} size="sm" />
               <span className="min-w-0 flex-1 truncate text-sm font-medium">
                 {req.profile.displayName}

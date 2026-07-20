@@ -156,9 +156,7 @@ function HabitDetailPage() {
                 { habitId: id, freeze },
                 {
                   onError: (error) =>
-                    toast.error(
-                      error instanceof Error ? error.message : 'Could not update freeze',
-                    ),
+                    toast.error(error instanceof Error ? error.message : 'Could not update freeze'),
                 },
               )
             }
@@ -228,9 +226,7 @@ function HabitDetailPage() {
                 { habitId: id, freeze: !stats.todayFrozen },
                 {
                   onError: (error) =>
-                    toast.error(
-                      error instanceof Error ? error.message : 'Could not update freeze',
-                    ),
+                    toast.error(error instanceof Error ? error.message : 'Could not update freeze'),
                 },
               )
             }

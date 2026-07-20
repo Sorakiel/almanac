@@ -83,7 +83,7 @@ export function BottomNav() {
           type="button"
           onClick={handleAdd}
           aria-label="Add habit"
-          className="-mt-6 flex h-[52px] w-[52px] flex-none items-center justify-center rounded-[17px] border-[3px] border-bg bg-accent text-2xl leading-none text-on-accent shadow-glow transition-[transform,background-color] duration-300 hover:rotate-90 hover:bg-accent-deep active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent motion-reduce:hover:rotate-0"
+          className="-mt-6 flex h-[52px] w-[52px] flex-none items-center justify-center rounded-[17px] border-[3px] border-bg bg-accent text-2xl leading-none text-on-accent shadow-glow transition-[transform,background-color] duration-300 hover:rotate-90 hover:bg-accent-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-90 motion-reduce:hover:rotate-0"
         >
           <span aria-hidden="true">+</span>
         </button>

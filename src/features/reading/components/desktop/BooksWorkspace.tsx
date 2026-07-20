@@ -20,7 +20,9 @@ export function BooksWorkspace({ books, isLoading, isError, refetch, onNew }: Bo
         <div>
           <p className="label-mono">// your shelf</p>
           <h1 className="mt-1.5 text-[44px] leading-none tracking-title">Reading</h1>
-          <p className="mt-2 text-[15px] text-muted">Track books, progress, and what you learned.</p>
+          <p className="mt-2 text-[15px] text-muted">
+            Track books, progress, and what you learned.
+          </p>
         </div>
         <Button onClick={onNew}>
           <Plus className="h-4 w-4" />

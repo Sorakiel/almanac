@@ -24,12 +24,54 @@ interface HabitTemplate {
 }
 
 const HABIT_TEMPLATES: HabitTemplate[] = [
-  { key: 'water', name: 'Drink water', icon: 'droplet', color: 'teal', frequency: 'daily', time_of_day: 'anytime' },
-  { key: 'read', name: 'Read', icon: 'book', color: 'amber', frequency: 'daily', time_of_day: 'evening' },
-  { key: 'move', name: 'Move my body', icon: 'dumbbell', color: 'accent', frequency: 'weekdays', time_of_day: 'anytime' },
-  { key: 'meditate', name: 'Meditate', icon: 'brain', color: 'teal', frequency: 'daily', time_of_day: 'morning' },
-  { key: 'sunlight', name: 'Morning sunlight', icon: 'sun', color: 'amber', frequency: 'daily', time_of_day: 'morning' },
-  { key: 'sleep', name: 'Sleep by 23:00', icon: 'moon', color: 'muted', frequency: 'daily', time_of_day: 'evening' },
+  {
+    key: 'water',
+    name: 'Drink water',
+    icon: 'droplet',
+    color: 'teal',
+    frequency: 'daily',
+    time_of_day: 'anytime',
+  },
+  {
+    key: 'read',
+    name: 'Read',
+    icon: 'book',
+    color: 'amber',
+    frequency: 'daily',
+    time_of_day: 'evening',
+  },
+  {
+    key: 'move',
+    name: 'Move my body',
+    icon: 'dumbbell',
+    color: 'accent',
+    frequency: 'weekdays',
+    time_of_day: 'anytime',
+  },
+  {
+    key: 'meditate',
+    name: 'Meditate',
+    icon: 'brain',
+    color: 'teal',
+    frequency: 'daily',
+    time_of_day: 'morning',
+  },
+  {
+    key: 'sunlight',
+    name: 'Morning sunlight',
+    icon: 'sun',
+    color: 'amber',
+    frequency: 'daily',
+    time_of_day: 'morning',
+  },
+  {
+    key: 'sleep',
+    name: 'Sleep by 23:00',
+    icon: 'moon',
+    color: 'muted',
+    frequency: 'daily',
+    time_of_day: 'evening',
+  },
 ]
 
 /** Two templates pre-checked so the common path is a single tap. */
@@ -225,8 +267,12 @@ function WelcomeStep() {
       <span className="relative mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-[22px] bg-gradient-to-br from-accent to-accent-deep shadow-glow">
         <span aria-hidden="true" className="h-6 w-6 rotate-45 border-[2.4px] border-bg" />
       </span>
-      <p className="mt-8 font-mono text-xs uppercase tracking-[0.18em] text-accent">// welcome to</p>
-      <p className="mt-2.5 font-mono text-5xl font-bold tracking-[0.04em] sm:text-[58px]">ALMANAC</p>
+      <p className="mt-8 font-mono text-xs uppercase tracking-[0.18em] text-accent">
+        // welcome to
+      </p>
+      <p className="mt-2.5 font-mono text-5xl font-bold tracking-[0.04em] sm:text-[58px]">
+        ALMANAC
+      </p>
       <p className="mx-auto mt-4 max-w-[460px] text-lg leading-relaxed text-muted">
         Your personal command center. Build habits, track training, and hold your own line — one day
         at a time.
@@ -326,7 +372,9 @@ function SelectTile({ on, onClick, compact, children }: SelectTileProps) {
       className={cn(
         'flex items-center gap-3 rounded-card border text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
         compact ? 'px-4 py-3.5' : 'px-4 py-4',
-        on ? 'border-accent/60 bg-accent/[0.07]' : 'border-border bg-surface/60 hover:border-accent/30',
+        on
+          ? 'border-accent/60 bg-accent/[0.07]'
+          : 'border-border bg-surface/60 hover:border-accent/30',
       )}
     >
       {children}

@@ -37,8 +37,7 @@ export function useHabitMutations() {
   })
 
   const update = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: HabitFormInput }) =>
-      updateHabit(id, input),
+    mutationFn: ({ id, input }: { id: string; input: HabitFormInput }) => updateHabit(id, input),
     onSuccess: invalidate,
   })
 

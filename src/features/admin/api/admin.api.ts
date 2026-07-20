@@ -24,9 +24,7 @@ export async function fetchAllProfiles(): Promise<Profile[]> {
 
 /** Exact row count for a table (head request, no rows transferred). */
 export async function countRows(table: 'habits' | 'habit_logs'): Promise<number> {
-  const { count, error } = await supabase
-    .from(table)
-    .select('*', { count: 'exact', head: true })
+  const { count, error } = await supabase.from(table).select('*', { count: 'exact', head: true })
   if (error) throw error
   return count ?? 0
 }
@@ -99,7 +97,10 @@ export async function fetchUserHabits(userId: string): Promise<HabitRow[]> {
 }
 
 /** A user's habit logs on/after a date key (for recent-completion stats). */
-export async function fetchUserLogsSince(userId: string, sinceKey: string): Promise<HabitLogLite[]> {
+export async function fetchUserLogsSince(
+  userId: string,
+  sinceKey: string,
+): Promise<HabitLogLite[]> {
   const { data, error } = await supabase
     .from('habit_logs')
     .select('habit_id, date, count')

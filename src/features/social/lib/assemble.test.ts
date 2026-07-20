@@ -80,7 +80,12 @@ describe('assembleFeed', () => {
     const feed = assembleFeed(
       [
         event({ id: 's', kind: 'streak_reached', subject: 'h1', meta: { days: 7 } }),
-        event({ id: 'r', kind: 'reading_progress', subject: 'b1', meta: { units: 12, unit: 'pages' } }),
+        event({
+          id: 'r',
+          kind: 'reading_progress',
+          subject: 'b1',
+          meta: { units: 12, unit: 'pages' },
+        }),
       ],
       profiles,
     )

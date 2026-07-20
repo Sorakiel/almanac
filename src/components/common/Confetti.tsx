@@ -41,7 +41,7 @@ export function Confetti({ count = 16 }: ConfettiProps) {
       {pieces.map((p, i) => (
         <span
           key={i}
-          className={`absolute top-0 h-2 w-1.5 rounded-[1px] animate-confetti-burst ${p.color}`}
+          className={`absolute top-0 h-2 w-1.5 animate-confetti-burst rounded-[1px] ${p.color}`}
           style={
             {
               left: p.left,

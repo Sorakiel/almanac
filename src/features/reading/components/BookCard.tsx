@@ -30,7 +30,9 @@ export function BookCard({ book }: { book: Book }) {
           </div>
           <div className="flex flex-none flex-col items-end gap-1">
             <Tag tone={STATUS_TONE[book.status]}>{statusLabel(book.status)}</Tag>
-            {book.rating ? <RatingBars value={book.rating} aria-label={`Rated ${book.rating} of 5`} /> : null}
+            {book.rating ? (
+              <RatingBars value={book.rating} aria-label={`Rated ${book.rating} of 5`} />
+            ) : null}
           </div>
         </div>
 

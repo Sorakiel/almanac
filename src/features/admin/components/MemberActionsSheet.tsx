@@ -40,7 +40,9 @@ export function MemberActionsSheet({
     const next = member.role === 'admin' ? 'user' : 'admin'
     try {
       await setRole({ target: member.id, role: next })
-      toast.success(next === 'admin' ? `${member.name} is now an admin` : `${member.name} is now a member`)
+      toast.success(
+        next === 'admin' ? `${member.name} is now an admin` : `${member.name} is now a member`,
+      )
       onOpenChange(false)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not change role')
@@ -107,7 +109,9 @@ export function MemberActionsSheet({
           ) : null}
 
           {!canManageRole && !canDelete ? (
-            <p className="px-4 py-2 text-sm text-muted-strong">No actions available for this member.</p>
+            <p className="px-4 py-2 text-sm text-muted-strong">
+              No actions available for this member.
+            </p>
           ) : null}
         </div>
       </Sheet>

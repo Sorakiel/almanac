@@ -45,7 +45,11 @@ export function AchievementCard({ item }: { item: EvaluatedAchievement }) {
       className={cn(
         'relative flex flex-col gap-3 rounded-[22px] border p-4 transition-[transform,box-shadow,border-color] hover:-translate-y-0.5',
         unlocked
-          ? cn('bg-gradient-to-br via-surface to-surface shadow-soft hover:shadow-card', tone.wash, tone.border)
+          ? cn(
+              'bg-gradient-to-br via-surface to-surface shadow-soft hover:shadow-card',
+              tone.wash,
+              tone.border,
+            )
           : 'border-dashed bg-surface',
       )}
     >
@@ -99,7 +103,12 @@ export function AchievementCard({ item }: { item: EvaluatedAchievement }) {
 
       {nextGoal !== null ? (
         <div className="flex items-center gap-3">
-          <ProgressBlocks value={value} total={nextGoal} blocks={16} aria-label="Progress to next tier" />
+          <ProgressBlocks
+            value={value}
+            total={nextGoal}
+            blocks={16}
+            aria-label="Progress to next tier"
+          />
           <span className="ml-auto whitespace-nowrap font-mono text-[10px] text-muted-strong">
             {value} / {nextGoal}
             {def.unit ? ` ${def.unit}` : ''}

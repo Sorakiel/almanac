@@ -16,7 +16,12 @@ const SIZES = {
 } as const
 
 /** Rounded, category-tinted tile holding a single icon — a core mockup motif. */
-export function IconTile({ icon: Icon, tone = 'bg-accent/15 text-accent', size = 'md', className }: IconTileProps) {
+export function IconTile({
+  icon: Icon,
+  tone = 'bg-accent/15 text-accent',
+  size = 'md',
+  className,
+}: IconTileProps) {
   const s = SIZES[size]
   return (
     <span className={cn('flex shrink-0 items-center justify-center', s.box, tone, className)}>

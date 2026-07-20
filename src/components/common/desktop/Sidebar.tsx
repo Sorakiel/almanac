@@ -104,7 +104,10 @@ export function Sidebar() {
 
   return (
     <aside className="flex w-[250px] flex-none flex-col border-r bg-chrome px-[18px] py-6">
-      <Link to="/" className="mb-[22px] flex items-center gap-[11px] px-2 focus-visible:outline-none">
+      <Link
+        to="/"
+        className="mb-[22px] flex items-center gap-[11px] px-2 focus-visible:outline-none"
+      >
         <BrandMark className="h-[30px] w-[30px]" />
         <span className="font-mono text-[17px] font-bold tracking-[0.06em]">ALMANAC</span>
       </Link>

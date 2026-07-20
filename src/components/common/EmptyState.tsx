@@ -12,13 +12,7 @@ interface EmptyStateProps {
 }
 
 /** Shared empty-state placeholder — one of the three required data views. */
-export function EmptyState({
-  icon: Icon,
-  title,
-  description,
-  action,
-  className,
-}: EmptyStateProps) {
+export function EmptyState({ icon: Icon, title, description, action, className }: EmptyStateProps) {
   return (
     <div
       className={cn(

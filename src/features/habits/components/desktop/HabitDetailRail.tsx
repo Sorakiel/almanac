@@ -41,7 +41,9 @@ export function HabitDetailRail({
     <div className="flex min-h-full flex-col gap-6">
       {habit.description ? (
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">// notes</p>
+          <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
+            // notes
+          </p>
           <p className="mt-3 rounded-r-2xl border-l-2 border-accent bg-surface px-4 py-3.5 text-[13.5px] leading-relaxed text-foreground/85">
             {habit.description}
           </p>
@@ -64,7 +66,9 @@ export function HabitDetailRail({
                 <span aria-hidden="true" className={cn('text-[13px]', meta.tone)}>
                   {meta.glyph}
                 </span>
-                <span className="flex-1 text-[13px]">{format(parseISO(day.date), 'EEE · dd MMM')}</span>
+                <span className="flex-1 text-[13px]">
+                  {format(parseISO(day.date), 'EEE · dd MMM')}
+                </span>
                 <span className="font-mono text-[10px] text-muted-strong">{meta.label}</span>
               </li>
             )

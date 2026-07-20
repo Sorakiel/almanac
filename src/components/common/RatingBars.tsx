@@ -25,10 +25,7 @@ export function RatingBars({ value, max = 5, 'aria-label': ariaLabel }: RatingBa
         <span
           key={i}
           style={{ height: `${45 + (i / (max - 1)) * 55}%` }}
-          className={cn(
-            'w-[3px] rounded-t-[1px]',
-            i < value ? fillClass : 'bg-muted-strong/25',
-          )}
+          className={cn('w-[3px] rounded-t-[1px]', i < value ? fillClass : 'bg-muted-strong/25')}
         />
       ))}
     </span>

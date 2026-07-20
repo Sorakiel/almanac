@@ -28,12 +28,7 @@ export interface PasswordStrength {
 }
 
 // Ordered weak → strong. Vault-door metaphor with a Skynet-cold-storage finish.
-const TIERS = [
-  'Door left open',
-  'Front-door deadbolt',
-  'Bank vault',
-  'Skynet cold vault',
-] as const
+const TIERS = ['Door left open', 'Front-door deadbolt', 'Bank vault', 'Skynet cold vault'] as const
 
 // Bit thresholds between tiers (upper-exclusive for the tier below).
 const BIT_BREAKS = [35, 53, 71] as const

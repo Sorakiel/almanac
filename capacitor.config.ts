@@ -1,4 +1,4 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'com.almanac.app',
@@ -22,6 +22,6 @@ const config: CapacitorConfig = {
       resetWhenUpdate: true,
     },
   },
-};
+}
 
-export default config;
+export default config

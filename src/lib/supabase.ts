@@ -25,8 +25,7 @@ export function setRememberMe(remember: boolean): void {
 const remembered = (): boolean => localStorage.getItem(REMEMBER_FLAG) !== '0'
 
 const authStorage = {
-  getItem: (key: string): string | null =>
-    sessionStorage.getItem(key) ?? localStorage.getItem(key),
+  getItem: (key: string): string | null => sessionStorage.getItem(key) ?? localStorage.getItem(key),
   setItem: (key: string, value: string): void => {
     if (remembered()) localStorage.setItem(key, value)
     else sessionStorage.setItem(key, value)

@@ -19,8 +19,7 @@ export function SettingsRail() {
   const { profile } = useProfile()
 
   const joined = user?.created_at ? format(new Date(user.created_at), 'MMM yyyy') : '—'
-  const role =
-    profile?.role === 'owner' ? 'Owner' : profile?.role === 'admin' ? 'Admin' : 'Member'
+  const role = profile?.role === 'owner' ? 'Owner' : profile?.role === 'admin' ? 'Admin' : 'Member'
 
   return (
     <div className="flex flex-col gap-3.5">

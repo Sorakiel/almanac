@@ -102,12 +102,7 @@ export async function createHabit(input: HabitInsert): Promise<Habit> {
 }
 
 export async function updateHabit(id: string, patch: Partial<HabitInsert>): Promise<Habit> {
-  const { data, error } = await supabase
-    .from('habits')
-    .update(patch)
-    .eq('id', id)
-    .select()
-    .single()
+  const { data, error } = await supabase.from('habits').update(patch).eq('id', id).select().single()
   if (error) throw error
   return data
 }
@@ -158,9 +153,6 @@ export async function setHabitCount({ userId, habitId, date, count }: SetLogArgs
 
   const { error } = await supabase
     .from('habit_logs')
-    .upsert(
-      { user_id: userId, habit_id: habitId, date, count },
-      { onConflict: 'habit_id,date' },
-    )
+    .upsert({ user_id: userId, habit_id: habitId, date, count }, { onConflict: 'habit_id,date' })
   if (error) throw error
 }

@@ -1,5 +1,9 @@
 import { CATALOG } from '@/features/achievements/lib/catalog'
-import type { AchievementDef, AchievementStats, EvaluatedAchievement } from '@/features/achievements/types'
+import type {
+  AchievementDef,
+  AchievementStats,
+  EvaluatedAchievement,
+} from '@/features/achievements/types'
 
 /** Resolve one definition against the stats: current tier, next goal, progress. */
 export function evaluate(

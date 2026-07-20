@@ -26,14 +26,7 @@ const schema = z.object({
   description: z.string().trim().max(160).optional(),
   icon: z.enum(HABIT_ICON_OPTIONS as [HabitIcon, ...HabitIcon[]]),
   color: z.enum(HABIT_COLOR_OPTIONS as [HabitColor, ...HabitColor[]]),
-  frequency: z.enum([
-    'daily',
-    'weekly',
-    'weekdays',
-    'x_per_week',
-    'every_n_days',
-    'every_n_weeks',
-  ]),
+  frequency: z.enum(['daily', 'weekly', 'weekdays', 'x_per_week', 'every_n_days', 'every_n_weeks']),
   target_count: z.number().int().min(1).max(50),
   time_of_day: z.enum(['anytime', 'morning', 'afternoon', 'evening']),
 })
@@ -223,7 +216,9 @@ export function HabitFormSheet() {
                     onClick={() => setValue('icon', key)}
                     className={cn(
                       'flex h-9 w-9 items-center justify-center rounded-tile border transition-colors',
-                      active ? 'border-accent bg-accent/15 text-accent' : 'text-muted hover:text-foreground',
+                      active
+                        ? 'border-accent bg-accent/15 text-accent'
+                        : 'text-muted hover:text-foreground',
                     )}
                   >
                     <Icon className="h-4 w-4" aria-hidden="true" />
@@ -247,7 +242,7 @@ export function HabitFormSheet() {
                     onClick={() => setValue('color', key)}
                     className={cn(
                       'flex h-9 w-9 items-center justify-center rounded-tile border transition-transform',
-                      active ? 'border-foreground/40 scale-105' : 'border-transparent',
+                      active ? 'scale-105 border-foreground/40' : 'border-transparent',
                     )}
                   >
                     <span className={cn('h-5 w-5 rounded-[6px]', HABIT_COLORS[key].solid)} />

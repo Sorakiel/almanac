@@ -101,7 +101,12 @@ describe('completionRate — counted from creation', () => {
 
   it('ignores pre-creation days for a daily habit', () => {
     const w = ['2026-07-18', '2026-07-19', '2026-07-20']
-    const rate = completionRate(habit({ frequency: 'daily' }), new Set(['2026-07-20']), w, '2026-07-20')
+    const rate = completionRate(
+      habit({ frequency: 'daily' }),
+      new Set(['2026-07-20']),
+      w,
+      '2026-07-20',
+    )
     // Only today existed → expected 1, done 1 → 100%.
     expect(rate).toBe(100)
   })

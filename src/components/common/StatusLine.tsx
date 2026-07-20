@@ -47,10 +47,7 @@ export function StatusLine({ habitCount, className }: StatusLineProps) {
       </span>
       <span aria-hidden="true">·</span>
       <span className="flex items-center gap-1.5">
-        <span
-          aria-hidden="true"
-          className={cn('h-1.5 w-1.5 rounded-full', status.dot)}
-        />
+        <span aria-hidden="true" className={cn('h-1.5 w-1.5 rounded-full', status.dot)} />
         {status.label}
       </span>
     </p>

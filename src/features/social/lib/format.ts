@@ -26,7 +26,14 @@ export function activitySummary(item: FeedItem): string {
       return item.days !== null ? `reached a ${item.days}-day streak` : 'hit a streak'
     case 'reading_progress': {
       if (item.units === null) return 'read today'
-      const noun = item.unit === 'chapters' ? (item.units === 1 ? 'chapter' : 'chapters') : item.units === 1 ? 'page' : 'pages'
+      const noun =
+        item.unit === 'chapters'
+          ? item.units === 1
+            ? 'chapter'
+            : 'chapters'
+          : item.units === 1
+            ? 'page'
+            : 'pages'
       return `read ${item.units} ${noun}`
     }
     default:

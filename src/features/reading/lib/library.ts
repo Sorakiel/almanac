@@ -30,7 +30,8 @@ export function libraryStats(books: Book[], dateKey: string): LibraryStats {
     total: books.length,
     reading: count('reading'),
     finished: count('finished'),
-    finishedThisYear: books.filter((b) => b.status === 'finished' && b.finished_on?.startsWith(year))
-      .length,
+    finishedThisYear: books.filter(
+      (b) => b.status === 'finished' && b.finished_on?.startsWith(year),
+    ).length,
   }
 }

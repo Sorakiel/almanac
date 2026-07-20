@@ -68,10 +68,13 @@ export function useDailyReminder(): void {
 
     let timer: number
     const arm = () => {
-      timer = window.setTimeout(() => {
-        void fireForegroundNudge(habitsRef.current)
-        arm()
-      }, msUntilDailyTime(hour, minute, timezone))
+      timer = window.setTimeout(
+        () => {
+          void fireForegroundNudge(habitsRef.current)
+          arm()
+        },
+        msUntilDailyTime(hour, minute, timezone),
+      )
     }
     arm()
 

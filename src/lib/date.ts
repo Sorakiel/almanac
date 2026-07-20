@@ -36,7 +36,14 @@ export function browserTimezone(): string {
 export function listTimezones(): string[] {
   const supported = (Intl as { supportedValuesOf?: (key: string) => string[] }).supportedValuesOf
   if (supported) return supported('timeZone')
-  return ['UTC', 'Europe/London', 'Europe/Moscow', 'America/New_York', 'America/Los_Angeles', 'Asia/Tokyo']
+  return [
+    'UTC',
+    'Europe/London',
+    'Europe/Moscow',
+    'America/New_York',
+    'America/Los_Angeles',
+    'Asia/Tokyo',
+  ]
 }
 
 /** Current UTC offset for a timezone as a short label, e.g. "UTC+03:00". */

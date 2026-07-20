@@ -36,7 +36,9 @@ describe('activitySummary', () => {
   })
 
   it('summarises a streak milestone without any name', () => {
-    expect(activitySummary(item({ kind: 'streak_reached', days: 7 }))).toBe('reached a 7-day streak')
+    expect(activitySummary(item({ kind: 'streak_reached', days: 7 }))).toBe(
+      'reached a 7-day streak',
+    )
   })
 
   it('summarises reading with the right unit noun', () => {

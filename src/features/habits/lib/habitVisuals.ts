@@ -25,7 +25,11 @@ interface ColorStyle {
 }
 
 export const HABIT_COLORS: Record<HabitColor, ColorStyle> = {
-  accent: { tile: 'bg-accent/15 text-accent', solid: 'bg-accent', stroke: 'rgb(var(--color-accent))' },
+  accent: {
+    tile: 'bg-accent/15 text-accent',
+    solid: 'bg-accent',
+    stroke: 'rgb(var(--color-accent))',
+  },
   teal: { tile: 'bg-teal/15 text-teal', solid: 'bg-teal', stroke: 'rgb(var(--color-teal))' },
   amber: { tile: 'bg-amber/15 text-amber', solid: 'bg-amber', stroke: 'rgb(var(--color-amber))' },
   muted: { tile: 'bg-border/10 text-muted', solid: 'bg-muted', stroke: 'rgb(var(--color-muted))' },

@@ -13,9 +13,7 @@ export async function fetchReadingSessions(bookId: string): Promise<ReadingSessi
   return data
 }
 
-export async function createReadingSession(
-  input: ReadingSessionInsert,
-): Promise<ReadingSession> {
+export async function createReadingSession(input: ReadingSessionInsert): Promise<ReadingSession> {
   const { data, error } = await supabase.from('reading_sessions').insert(input).select().single()
   if (error) throw error
   return data

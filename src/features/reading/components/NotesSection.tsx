@@ -43,7 +43,9 @@ export function NotesSection({ book, notes }: { book: Book; notes: BookNote[] })
 
   return (
     <section className="flex flex-col gap-3">
-      <SectionLabel accessory={notes.length > 0 ? `${notes.length}` : undefined}>NOTES</SectionLabel>
+      <SectionLabel accessory={notes.length > 0 ? `${notes.length}` : undefined}>
+        NOTES
+      </SectionLabel>
 
       <Card className="flex flex-col gap-3 p-4">
         <Textarea

@@ -18,7 +18,9 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   return (
     <div className="flex-1 rounded-2xl border bg-panel px-5 py-[18px]">
       <p className="font-mono text-[9px] uppercase tracking-label text-muted-strong">{label}</p>
-      <p className={`mt-1 text-[28px] font-semibold tracking-title tabular-nums ${accent ? 'text-accent' : ''}`}>
+      <p
+        className={`mt-1 text-[28px] font-semibold tabular-nums tracking-title ${accent ? 'text-accent' : ''}`}
+      >
         {value}
       </p>
     </div>
@@ -26,7 +28,12 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 }
 
 /** Desktop habit-detail workspace: identity header, stat tiles, year heatmap. */
-export function HabitDetailWorkspace({ habit, stats, onEdit, onDelete }: HabitDetailWorkspaceProps) {
+export function HabitDetailWorkspace({
+  habit,
+  stats,
+  onEdit,
+  onDelete,
+}: HabitDetailWorkspaceProps) {
   const color = resolveHabitColor(habit.color)
   const Icon = resolveHabitIcon(habit.icon)
   const subtitle = [frequencyLabel(habit), habit.description, timeOfDayLabel(habit.time_of_day)]

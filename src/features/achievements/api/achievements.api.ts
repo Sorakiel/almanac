@@ -28,9 +28,7 @@ export async function fetchAchievementData(userId: string): Promise<RawAchieveme
   if (logs.error) throw logs.error
   if (books.error) throw books.error
 
-  const completionDates = (logs.data ?? [])
-    .filter((row) => row.count >= 1)
-    .map((row) => row.date)
+  const completionDates = (logs.data ?? []).filter((row) => row.count >= 1).map((row) => row.date)
   const bookRows = books.data ?? []
 
   return {
