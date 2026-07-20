@@ -11,6 +11,7 @@ import {
   isDueOn,
 } from '@/features/habits/lib/frequency'
 import { currentStreak } from '@/features/habits/lib/streak'
+import { computeDayCells } from '@/features/habits/lib/schedule'
 import type { Habit, HabitFreeze, HabitLog, HabitWithTodayLog } from '@/features/habits/types'
 
 const WINDOW_DAYS = 7
@@ -38,14 +39,29 @@ function join(
     const frozenOn = (key: string): boolean => frozen.has(`${habit.id}:${key}`)
 
     const windowSlice = windowKeys.slice(-WINDOW_DAYS)
-    const series: number[] = windowSlice.map((key) => (doneOn(key) ? 1 : 0))
     const todayCount = counts.get(`${habit.id}:${todayKey}`) ?? 0
-    const completedRecent = series.reduce((a, b) => a + b, 0)
+    const completedRecent = windowSlice.reduce((sum, key) => sum + (doneOn(key) ? 1 : 0), 0)
     // Rate is relative to what the cadence expects in the window, not raw days:
     // a 2×/week habit hits 100% at 2 completions, not 7. Only count days since
     // the habit was created, so a brand-new habit isn't dragged down by a full
     // window of "expected" days it never existed for.
     const createdKey = localDateKey(timezone, new Date(habit.created_at))
+
+    // Sparkline holds the line across scheduled rest days (an "every 3 days"
+    // gap isn't a dip) and only falls on a genuine missed due-day — so a habit
+    // that's on cadence never reads as trending down.
+    const cells = computeDayCells(
+      habit,
+      new Set(windowSlice.filter(doneOn)),
+      new Set(windowSlice.filter(frozenOn)),
+      windowSlice,
+      todayKey,
+      createdKey,
+    )
+    let held = 0
+    const series: number[] = cells.map((cell) =>
+      cell.status === 'done' ? (held = 1) : cell.status === 'missed' ? (held = 0) : held,
+    )
     const expected = expectedCompletionsInWindow(
       habit,
       windowSlice.filter((k) => k >= createdKey),

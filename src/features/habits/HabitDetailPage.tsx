@@ -204,7 +204,7 @@ function HabitDetailPage() {
 
       <div className="flex flex-col gap-3">
         <SectionLabel>LAST 12 MONTHS</SectionLabel>
-        <HabitHeatmap days={stats.heatmap} />
+        <HabitHeatmap days={stats.heatmap} createdKey={stats.createdKey} />
       </div>
 
       {habit.description ? (

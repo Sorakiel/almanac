@@ -21,6 +21,8 @@ export interface HabitDetailStats {
   total: number
   /** One entry per day over the heatmap window, oldest→newest. */
   heatmap: DayCell[]
+  /** Local date key the habit was created — days before it are void, not rest. */
+  createdKey: string
   todayDone: boolean
   /** Today is protected by a streak freeze. */
   todayFrozen: boolean
@@ -119,6 +121,7 @@ function computeStats(
     ratePct: completionRate(habit, completed, windowKeys, createdKey),
     total: completed.size,
     heatmap,
+    createdKey,
     todayDone: completed.has(todayKey),
     todayFrozen: frozen.has(todayKey),
   }

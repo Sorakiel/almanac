@@ -70,7 +70,7 @@ export function HabitDetailWorkspace({ habit, stats, onEdit, onDelete }: HabitDe
 
       <div className="mt-7 flex flex-col gap-3">
         <SectionLabel>LAST 12 MONTHS</SectionLabel>
-        <HabitHeatmap days={stats.heatmap} fill />
+        <HabitHeatmap days={stats.heatmap} createdKey={stats.createdKey} fill />
       </div>
     </div>
   )
