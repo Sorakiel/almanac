@@ -1,4 +1,5 @@
 import { IconTile } from '@/components/common/IconTile'
+import { AlmanacNarrator } from '@/features/dashboard/components/AlmanacNarrator'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 
@@ -13,12 +14,13 @@ export function HabitsRail({ habits }: HabitsRailProps) {
   const weekRate = Math.round((habits.reduce((s, h) => s + h.rate, 0) / habits.length) * 100)
   const sorted = [...habits].sort((a, b) => b.rate - a.rate)
   const strongest = sorted[0]!
-  const weakest = sorted[sorted.length - 1]!
   const StrongIcon = resolveHabitIcon(strongest.icon)
   const strongColor = resolveHabitColor(strongest.color)
 
   return (
     <div className="flex flex-col gap-5">
+      <AlmanacNarrator habits={habits} />
+
       <div>
         <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
           this week
@@ -54,23 +56,6 @@ export function HabitsRail({ habits }: HabitsRailProps) {
           </div>
         </div>
       </div>
-
-      {habits.length > 1 && weakest.rate < strongest.rate ? (
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-            needs attention
-          </p>
-          <div className="mt-2.5 flex items-start gap-3 rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/10 to-transparent p-4">
-            <span aria-hidden="true" className="text-lg text-accent">
-              ◇
-            </span>
-            <p className="text-[13px] leading-relaxed text-muted">
-              <span className="font-semibold text-foreground">{weakest.name}</span> is slipping at{' '}
-              {Math.round(weakest.rate * 100)}%. Anchor it to something you already do daily.
-            </p>
-          </div>
-        </div>
-      ) : null}
     </div>
   )
 }

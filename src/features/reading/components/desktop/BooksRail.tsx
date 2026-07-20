@@ -1,4 +1,5 @@
 import { BookOpen } from 'lucide-react'
+import { BookTicker } from '@/features/reading/components/BookTicker'
 import { libraryStats } from '@/features/reading/lib/library'
 import { useToday } from '@/hooks/useToday'
 import type { Book } from '@/features/reading/types'
@@ -43,12 +44,7 @@ export function BooksRail({ books }: { books: Book[] }) {
         </div>
       </div>
 
-      <div className="rounded-[16px] border border-amber/25 bg-gradient-to-br from-amber/10 to-transparent p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-amber">tip</p>
-        <p className="mt-2 text-[13px] leading-relaxed text-muted">
-          Start a reading session in Flow to log time and pages in one go.
-        </p>
-      </div>
+      <BookTicker books={books} />
     </div>
   )
 }

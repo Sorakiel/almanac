@@ -11,6 +11,7 @@ import { WorkoutInsightsSection } from '@/features/insights/components/WorkoutIn
 import { ReadingInsightsSection } from '@/features/insights/components/ReadingInsightsSection'
 import { ReflectInsightsSection } from '@/features/insights/components/ReflectInsightsSection'
 import { FocusInsightsSection } from '@/features/insights/components/FocusInsightsSection'
+import { InsightsTicker } from '@/features/insights/components/InsightsTicker'
 import { InsightsWorkspace } from '@/features/insights/components/desktop/InsightsWorkspace'
 import { InsightsRail } from '@/features/insights/components/desktop/InsightsRail'
 import { useInsights } from '@/features/insights/hooks/useInsights'
@@ -109,6 +110,8 @@ function InsightsPage() {
       </header>
 
       <Cascade>
+        <InsightsTicker habits={insights} />
+
         {habitHasData ? (
           <div className="flex flex-col gap-5">
             <div className="grid grid-cols-2 gap-3">

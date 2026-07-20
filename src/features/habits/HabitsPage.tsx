@@ -3,6 +3,7 @@ import { ListChecks, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Rail } from '@/components/common/desktop/rail'
+import { AlmanacNarrator } from '@/features/dashboard/components/AlmanacNarrator'
 import { HabitCard } from '@/features/habits/components/HabitCard'
 import { TodayProgress } from '@/features/habits/components/TodayProgress'
 import { HabitsWorkspace } from '@/features/habits/components/desktop/HabitsWorkspace'
@@ -103,6 +104,7 @@ function HabitsPage() {
         />
       ) : (
         <>
+          <AlmanacNarrator habits={habits} />
           <TodayProgress habits={habits} />
           {visible.length === 0 ? (
             <EmptyState

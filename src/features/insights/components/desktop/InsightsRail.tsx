@@ -1,4 +1,5 @@
 import { HabitRateList } from '@/features/insights/components/HabitRateList'
+import { InsightsTicker } from '@/features/insights/components/InsightsTicker'
 import type { Insights } from '@/features/insights/types'
 
 interface InsightsRailProps {
@@ -9,6 +10,8 @@ interface InsightsRailProps {
 export function InsightsRail({ insights }: InsightsRailProps) {
   return (
     <div className="flex flex-col gap-3.5">
+      <InsightsTicker habits={insights} />
+
       <div className="flex items-center gap-3">
         <span
           aria-hidden="true"

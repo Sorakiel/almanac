@@ -1,4 +1,5 @@
 import { Dumbbell } from 'lucide-react'
+import { WorkoutTicker } from '@/features/workouts/components/WorkoutTicker'
 import { summarize } from '@/features/workouts/lib/summary'
 import type { WorkoutView } from '@/features/workouts/types'
 
@@ -45,12 +46,7 @@ export function WorkoutsRail({ workouts }: WorkoutsRailProps) {
         </div>
       </div>
 
-      <div className="rounded-[16px] border border-teal/25 bg-gradient-to-br from-teal/10 to-transparent p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-teal">next up</p>
-        <p className="mt-2 text-[13px] leading-relaxed text-muted">
-          Exercise library and set-by-set logging land in the next update.
-        </p>
-      </div>
+      <WorkoutTicker workouts={workouts} />
     </div>
   )
 }

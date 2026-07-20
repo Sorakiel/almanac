@@ -1,4 +1,5 @@
 import { NotebookPen } from 'lucide-react'
+import { ReflectTicker } from '@/features/reflect/components/ReflectTicker'
 import { journalStreak } from '@/features/reflect/lib/format'
 import type { Reflection } from '@/features/reflect/types'
 
@@ -47,12 +48,7 @@ export function ReflectRail({ reflections, dateKey }: ReflectRailProps) {
         </div>
       </div>
 
-      <div className="rounded-[16px] border border-teal/25 bg-gradient-to-br from-teal/10 to-transparent p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-teal">why it helps</p>
-        <p className="mt-2 text-[13px] leading-relaxed text-muted">
-          A minute of reflection turns days into a story you can look back on.
-        </p>
-      </div>
+      <ReflectTicker reflections={reflections} dateKey={dateKey} />
     </div>
   )
 }

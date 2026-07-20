@@ -7,6 +7,7 @@ import { SectionLabel } from '@/components/common/SectionLabel'
 import { Rail } from '@/components/common/desktop/rail'
 import { WorkoutCard } from '@/features/workouts/components/WorkoutCard'
 import { WorkoutFormSheet } from '@/features/workouts/components/WorkoutFormSheet'
+import { WorkoutTicker } from '@/features/workouts/components/WorkoutTicker'
 import { WorkoutsWorkspace } from '@/features/workouts/components/desktop/WorkoutsWorkspace'
 import { WorkoutsRail } from '@/features/workouts/components/desktop/WorkoutsRail'
 import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
@@ -81,6 +82,8 @@ function WorkoutsPage() {
         />
       ) : (
         <Cascade>
+          <WorkoutTicker workouts={workouts} />
+
           {active.length > 0 ? (
             <div className="flex flex-col gap-3">
               <SectionLabel>TO DO</SectionLabel>
