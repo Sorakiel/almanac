@@ -4,6 +4,17 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { Habit } from '@/features/habits/types'
 import type { HabitDetailStats } from '@/features/habits/hooks/useHabitDetail'
+import type { DayStatus } from '@/features/habits/lib/schedule'
+
+/** Label + glyph + tone for each history-row status. Rest days read neutral,
+ *  never as a miss — key for interval/weekday cadences. */
+const STATUS_META: Record<DayStatus, { label: string; glyph: string; tone: string }> = {
+  done: { label: 'done', glyph: '✓', tone: 'text-accent' },
+  frozen: { label: 'frozen', glyph: '❄', tone: 'text-teal' },
+  due: { label: 'today', glyph: '○', tone: 'text-foreground' },
+  missed: { label: 'missed', glyph: '○', tone: 'text-muted-strong' },
+  rest: { label: 'rest', glyph: '·', tone: 'text-muted-strong' },
+}
 
 interface HabitDetailRailProps {
   habit: Habit
@@ -40,23 +51,24 @@ export function HabitDetailRail({
       <div>
         <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">recent</p>
         <ul className="mt-3 flex flex-col gap-2.5">
-          {recent.map((day) => (
-            <li
-              key={day.date}
-              className={cn(
-                'flex items-center gap-3 rounded-xl bg-surface px-3.5 py-3',
-                !day.done && 'opacity-60',
-              )}
-            >
-              <span aria-hidden="true" className={cn('text-[13px]', day.done ? 'text-accent' : 'text-muted-strong')}>
-                {day.done ? '✓' : '○'}
-              </span>
-              <span className="flex-1 text-[13px]">{format(parseISO(day.date), 'EEE · dd MMM')}</span>
-              <span className="font-mono text-[10px] text-muted-strong">
-                {day.done ? 'done' : 'missed'}
-              </span>
-            </li>
-          ))}
+          {recent.map((day) => {
+            const meta = STATUS_META[day.status]
+            return (
+              <li
+                key={day.date}
+                className={cn(
+                  'flex items-center gap-3 rounded-xl bg-surface px-3.5 py-3',
+                  day.status !== 'done' && day.status !== 'due' && 'opacity-60',
+                )}
+              >
+                <span aria-hidden="true" className={cn('text-[13px]', meta.tone)}>
+                  {meta.glyph}
+                </span>
+                <span className="flex-1 text-[13px]">{format(parseISO(day.date), 'EEE · dd MMM')}</span>
+                <span className="font-mono text-[10px] text-muted-strong">{meta.label}</span>
+              </li>
+            )
+          })}
         </ul>
       </div>
 

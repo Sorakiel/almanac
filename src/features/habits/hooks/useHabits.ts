@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
-import { lastNDateKeys } from '@/lib/date'
+import { lastNDateKeys, localDateKey } from '@/lib/date'
 import { fetchFreezesSince, fetchHabits, fetchLogsSince } from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
 import {
@@ -23,6 +23,7 @@ function join(
   logs: HabitLog[],
   freezes: HabitFreeze[],
   windowKeys: string[],
+  timezone: string,
 ): HabitWithTodayLog[] {
   // Index counts by habit + date for O(1) lookup.
   const counts = new Map<string, number>()
@@ -41,8 +42,14 @@ function join(
     const todayCount = counts.get(`${habit.id}:${todayKey}`) ?? 0
     const completedRecent = series.reduce((a, b) => a + b, 0)
     // Rate is relative to what the cadence expects in the window, not raw days:
-    // a 2×/week habit hits 100% at 2 completions, not 7.
-    const expected = expectedCompletionsInWindow(habit, windowSlice)
+    // a 2×/week habit hits 100% at 2 completions, not 7. Only count days since
+    // the habit was created, so a brand-new habit isn't dragged down by a full
+    // window of "expected" days it never existed for.
+    const createdKey = localDateKey(timezone, new Date(habit.created_at))
+    const expected = expectedCompletionsInWindow(
+      habit,
+      windowSlice.filter((k) => k >= createdKey),
+    )
 
     // Whole days since the most recent completion (0 = today), for interval due-ness.
     let daysSinceLastDone: number | null = null
@@ -89,7 +96,7 @@ interface UseHabitsResult {
 /** Active habits joined with today's completion and a 7-day history. */
 export function useHabits(): UseHabitsResult {
   const { user } = useSession()
-  const { dateKey } = useToday()
+  const { dateKey, timezone } = useToday()
   const userId = user?.id ?? ''
   const enabled = Boolean(userId)
   const windowKeys = lastNDateKeys(dateKey, FETCH_DAYS)
@@ -114,7 +121,7 @@ export function useHabits(): UseHabitsResult {
 
   const habits =
     habitsQuery.data && logsQuery.data
-      ? join(habitsQuery.data, logsQuery.data, freezesQuery.data ?? [], windowKeys)
+      ? join(habitsQuery.data, logsQuery.data, freezesQuery.data ?? [], windowKeys, timezone)
       : []
 
   return {

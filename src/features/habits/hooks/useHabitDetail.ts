@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useToday } from '@/hooks/useToday'
-import { lastNDateKeys } from '@/lib/date'
+import { lastNDateKeys, localDateKey } from '@/lib/date'
 import { weekdayOfKey } from '@/lib/date'
 import {
   fetchHabitById,
@@ -8,6 +8,7 @@ import {
   fetchHabitHistory,
 } from '@/features/habits/api/habits.api'
 import { dailyTarget, intervalDays } from '@/features/habits/lib/frequency'
+import { completionRate, computeDayCells, type DayCell } from '@/features/habits/lib/schedule'
 import type { Habit } from '@/features/habits/types'
 
 const HEATMAP_DAYS = 371 // 53 weeks
@@ -19,7 +20,7 @@ export interface HabitDetailStats {
   /** Total completed days over the heatmap window. */
   total: number
   /** One entry per day over the heatmap window, oldest→newest. */
-  heatmap: { date: string; done: boolean; frozen: boolean }[]
+  heatmap: DayCell[]
   todayDone: boolean
   /** Today is protected by a streak freeze. */
   todayFrozen: boolean
@@ -48,11 +49,7 @@ function computeDailyStats(completed: Set<string>, frozen: Set<string>, windowKe
     else break
   }
 
-  const last30 = windowKeys.slice(-30)
-  const done30 = last30.filter((k) => completed.has(k)).length
-  const ratePct = Math.round((done30 / last30.length) * 100)
-
-  return { streak, best, ratePct }
+  return { streak, best }
 }
 
 /**
@@ -89,12 +86,7 @@ function computeIntervalStats(
   const last = marks.at(-1)
   if (last !== undefined && today - last.i <= n) streak = runFrom(marks.length - 1)
 
-  const last30 = windowKeys.slice(-30)
-  const done30 = last30.filter((k) => completed.has(k)).length
-  const expected = Math.max(Math.floor(30 / n), 1)
-  const ratePct = Math.min(Math.round((done30 / expected) * 100), 100)
-
-  return { streak, best, ratePct }
+  return { streak, best }
 }
 
 function computeStats(
@@ -102,16 +94,13 @@ function computeStats(
   completed: Set<string>,
   frozen: Set<string>,
   windowKeys: string[],
+  createdKey: string,
 ): HabitDetailStats {
-  const heatmap = windowKeys.map((date) => ({
-    date,
-    done: completed.has(date),
-    // Only surface a freeze on days that weren't completed anyway.
-    frozen: frozen.has(date) && !completed.has(date),
-  }))
+  const todayKey = windowKeys.at(-1)!
+  const heatmap = computeDayCells(habit, completed, frozen, windowKeys, todayKey, createdKey)
   const interval = intervalDays(habit)
 
-  let core: { streak: number; best: number; ratePct: number }
+  let core: { streak: number; best: number }
   if (interval !== null) {
     core = computeIntervalStats(completed, frozen, windowKeys, interval)
   } else if (habit.frequency === 'weekdays') {
@@ -125,9 +114,9 @@ function computeStats(
     core = computeDailyStats(completed, frozen, windowKeys)
   }
 
-  const todayKey = windowKeys.at(-1)!
   return {
     ...core,
+    ratePct: completionRate(habit, completed, windowKeys, createdKey),
     total: completed.size,
     heatmap,
     todayDone: completed.has(todayKey),
@@ -143,7 +132,7 @@ interface UseHabitDetailResult {
 }
 
 export function useHabitDetail(habitId: string): UseHabitDetailResult {
-  const { dateKey } = useToday()
+  const { dateKey, timezone } = useToday()
   const windowKeys = lastNDateKeys(dateKey, HEATMAP_DAYS)
 
   const habitQuery = useQuery({
@@ -167,7 +156,10 @@ export function useHabitDetail(habitId: string): UseHabitDetailResult {
     const target = dailyTarget(habit)
     const completed = new Set(historyQuery.data.filter((l) => l.count >= target).map((l) => l.date))
     const frozen = new Set((freezesQuery.data ?? []).map((f) => f.date))
-    stats = computeStats(habit, completed, frozen, windowKeys)
+    // The habit only "exists" from its creation day — days before it don't count
+    // as misses. created_at is a UTC instant; resolve it in the user's zone.
+    const createdKey = localDateKey(timezone, new Date(habit.created_at))
+    stats = computeStats(habit, completed, frozen, windowKeys, createdKey)
   }
 
   return {
