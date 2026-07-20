@@ -131,18 +131,17 @@ export function FocusConsole({
             ))}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="font-mono text-4xl font-semibold tabular-nums">
+            <span className="font-mono text-4xl font-semibold tabular-nums lg:text-5xl">
               {clock(msLeft)}
-              <span className="animate-caret-blink text-accent">_</span>
             </span>
-            <span className="mt-1 font-mono text-[10px] uppercase tracking-label text-muted">
+            <span className="mt-1.5 font-mono text-[13px] uppercase tracking-label text-muted lg:text-sm">
               {pct}% · {Math.max(0, Math.ceil(msLeft / 60_000))}m left
             </span>
           </div>
         </div>
 
         {/* Terminal readout. */}
-        <div className="w-full rounded-[14px] border border-accent/15 bg-bg/50 p-3 font-mono text-[11px] leading-relaxed text-muted">
+        <div className="w-full space-y-1 rounded-[16px] border border-accent/15 bg-bg/50 p-4 font-mono text-[13px] leading-relaxed text-muted lg:p-5 lg:text-[15px]">
           <p className="truncate">
             <span className="text-accent">$</span> target{' '}
             <span className="text-foreground">{label}</span>
@@ -152,7 +151,7 @@ export function FocusConsole({
             <span className="tabular-nums text-foreground">{clock(elapsedMin * 60_000)}</span> /{' '}
             {String(durationMin).padStart(2, '0')}:00
           </p>
-          <p className="mt-0.5 text-accent">
+          <p className="text-accent">
             [{bar}] {pct}%
           </p>
         </div>
