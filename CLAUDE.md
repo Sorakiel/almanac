@@ -20,9 +20,9 @@
 
 | Concern                  | Choice                                                                               |
 | ------------------------ | ------------------------------------------------------------------------------------ |
-| Build tool               | **Vite** + React 18 + **TypeScript** (strict)                                        |
+| Build tool               | **Vite** + React 19 + **TypeScript** (strict)                                        |
 | Styling                  | **Tailwind CSS** + **shadcn/ui** (Radix primitives)                                  |
-| Routing                  | React Router v6                                                                      |
+| Routing                  | React Router v7 (data router)                                                        |
 | Backend                  | **Supabase** — Postgres + Auth + RLS + Storage (client SDK; no custom server for v1) |
 | Server state             | **TanStack Query** (React Query)                                                     |
 | UI / cross-cutting state | React state + **Zustand** (theme, session)                                           |
@@ -70,8 +70,13 @@ almanac/
 │  │  │  ├─ api/           # habits.queries.ts (supabase calls)
 │  │  │  └─ types.ts
 │  │  ├─ workouts/
+│  │  ├─ reading/
+│  │  ├─ flow/            # deep-work focus timer
 │  │  ├─ insights/
+│  │  ├─ achievements/
 │  │  ├─ reflect/
+│  │  ├─ social/
+│  │  ├─ onboarding/
 │  │  ├─ modules/
 │  │  ├─ settings/
 │  │  └─ admin/
@@ -216,19 +221,17 @@ Guidelines: keep specs in `/tests`; select by **role/label**, not brittle CSS; f
 - Playwright smoke green.
 - Committed with a Conventional Commit message.
 
-## 14. Roadmap (build order)
+## 14. Roadmap
 
-- **Phase 1 — ship a vertical slice, then dogfood 2 weeks:** auth → dashboard shell → habits CRUD → one-tap completion → basic dashboard (today's habits, completion donut, rotating quote). Deploy.
-- **Phase 2:** workouts + exercise library + sessions; habit-detail heatmap; settings + timezone; theme toggle; keep-alive job.
-- **Phase 3:** insights/progress, reflect/journal, admin + feedback, polish, theme refinements.
-- **Phase 4+:** new modules (finances, reading, goals, sleep) behind the modules hub.
+**Shipped:** auth + dashboard, habits (schedule-aware streaks, freezes, heatmap), workouts, reading, reflect, flow (deep-work), insights, achievements, friends, onboarding, admin/feedback — plus a motion & celebration layer (cascade entrances, view-transition theme wipe, confetti, streak flames, focus console, the Almanac narrator).
 
-Resist building breadth (all modules) before the habits slice is live and used. Working and lived-in beats complete and abandoned.
+**Next:** goals, habit routines + subtasks, workout PRs; then finances/sleep behind the modules hub. Each life area stays a self-contained module under `features/`.
+
+Keep the daily loop fast and low-friction above all — the #1 risk is still abandonment, not a missing feature.
 
 ## 15. How Claude Code should work here
 
 - **Read this file first** and follow it.
-- Build the **Phase-1 vertical slice before breadth**. Working > complete.
 - After each slice: `tsc` → lint → Playwright smoke → commit.
 - Prefer **small PRs and frequent commits** over big drops.
 - **Ask before destructive/irreversible actions:** deleting data, rewriting already-applied migrations, force-pushing, or changing auth/RLS in ways that could lock the owner out.

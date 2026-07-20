@@ -64,15 +64,24 @@ simple to reason about:
 
 ## Features
 
-- ✅ **One-tap habits** — create, track, and complete daily or weekly habits with
-  instant feedback.
-- 📊 **A dashboard that answers "how's my day?"** — today's habits, a completion
-  ring, and a daily quote.
-- 🔐 **Private accounts** — email sign-in, with each user's data isolated from
-  everyone else's.
-- 🎨 **Two themes** — dark and coffee, switchable anytime.
-- ♿ **Accessible by default** — keyboard-friendly, screen-reader sane, and legible
-  in both themes.
+- ✅ **One-tap habits** — daily / weekly / interval habits with instant feedback,
+  schedule-aware streaks, streak freezes, and a year-at-a-glance heatmap.
+- 🏋️ **Workouts** — an exercise library and set-by-set training sessions.
+- 📚 **Reading & reflection** — track books you're reading and keep a daily journal.
+- 🎯 **Flow** — a deep-work focus timer with a console-style session visualizer,
+  feeding a Deep Work heatmap.
+- 📊 **Insights & achievements** — progress charts, tiered achievement badges, and
+  **The Almanac** — a narrator that reads your day from your own data.
+- 👥 **Friends** — a privacy-safe activity feed to stay accountable together.
+- ✨ **Alive, not static** — cascade entrances, view-transition theme wipes,
+  celebration confetti, living streak flames, and perfect-day moments (all
+  respecting reduced-motion).
+- 🔐 **Private accounts** — email sign-in, each user's data isolated from everyone
+  else's.
+- 🎨 **Two themes** — dark and coffee, switchable anytime; accessible and legible
+  in both.
+- 📱 **Everywhere** — a web app (Vercel), an Android build (Capacitor), and a
+  desktop app (Tauri) from one codebase.
 
 ## Tech stack
 
@@ -103,11 +112,17 @@ steps are documented there and in the `supabase/` folder.
 
 ## Roadmap
 
-- **Phase 1 (now)** — habits, one-tap completion, and the daily dashboard.
-- **Phase 2** — workouts and an exercise library; habit history; timezone-aware
-  streaks.
-- **Phase 3** — progress insights and a reflection journal.
-- **Beyond** — new life modules (finances, reading, goals, sleep).
+Shipped so far: habits + the daily dashboard, workouts, reading, a reflection
+journal, focus/deep-work, insights, achievements, friends, and a layer of motion
+and celebration polish across the app.
+
+Next up:
+
+- **Goals** — set a goal and roll up progress from the habits, workouts, and
+  reading that feed it.
+- **Routines & subtasks** — group habits into named routines and add a checklist
+  inside a habit.
+- **More life modules** — finances and sleep, behind the modules hub.
 
 ## License
 
