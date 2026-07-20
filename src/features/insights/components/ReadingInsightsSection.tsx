@@ -38,17 +38,17 @@ export function ReadingInsightsSection({ data }: ReadingInsightsSectionProps) {
                     </span>
                   ) : null}
                   {book.pct !== null ? (
-                    <span className="mt-1.5 flex items-center gap-2">
+                    <span className="mt-2 flex items-center gap-2.5">
+                      <span className="shrink-0 font-mono text-sm text-amber">{book.pct}%</span>
                       <ProgressBlocks
                         value={book.pct}
                         total={100}
-                        blocks={20}
-                        size="sm"
+                        blocks={24}
+                        size="md"
                         color="rgb(var(--color-amber))"
-                        className="min-w-0 flex-1"
+                        className="min-w-0"
                         aria-label={`${book.pct}% read`}
                       />
-                      <span className="shrink-0 font-mono text-[11px] text-amber">{book.pct}%</span>
                     </span>
                   ) : null}
                 </span>
