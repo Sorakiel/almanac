@@ -48,7 +48,7 @@ export function InsightStat({
 }
 
 /** Count plain-integer values up on mount; render anything else verbatim. */
-function StatValue({ value }: { value: string }): JSX.Element {
+function StatValue({ value }: { value: string }) {
   const isInt = /^\d+$/.test(value)
   const display = useCountUp(isInt ? Number(value) : 0)
   return <>{isInt ? display : value}</>
