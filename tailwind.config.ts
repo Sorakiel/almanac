@@ -112,6 +112,17 @@ export default {
           '0%': { opacity: '0', transform: 'scale(0.4)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
+        // Focus console: a radar wedge sweeping around the orb.
+        'radar-sweep': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        // Focus console: a CRT scanline gliding down the panel (top is relative
+        // to the panel, so it spans whatever height the console ends up).
+        scanline: {
+          '0%': { top: '-15%' },
+          '100%': { top: '115%' },
+        },
       },
       animation: {
         pop: 'pop 0.4s ease-out',
@@ -126,6 +137,8 @@ export default {
         'flame-flicker': 'flame-flicker 1.8s ease-in-out infinite',
         'soft-pulse': 'soft-pulse 2.2s ease-in-out infinite',
         'cell-in': 'cell-in 0.3s ease-out both',
+        'radar-sweep': 'radar-sweep 4.5s linear infinite',
+        scanline: 'scanline 4.5s linear infinite',
       },
     },
   },
