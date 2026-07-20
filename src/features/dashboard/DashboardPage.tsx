@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Loader2, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/common/Avatar'
+import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { StatusLine } from '@/components/common/StatusLine'
@@ -94,36 +95,38 @@ function DashboardPage() {
         </Link>
       </header>
 
-      <QuoteCard />
+      <Cascade>
+        <QuoteCard />
 
-      <NowBlock habits={habits} />
+        <NowBlock habits={habits} />
 
-      <section className="flex flex-col gap-2">
-        <SectionLabel
-          accessory={habits.length > 0 ? `${completed} / ${dueHabits.length} done` : undefined}
-        >
-          TODAY · HABITS
-        </SectionLabel>
+        <section className="flex flex-col gap-2">
+          <SectionLabel
+            accessory={habits.length > 0 ? `${completed} / ${dueHabits.length} done` : undefined}
+          >
+            TODAY · HABITS
+          </SectionLabel>
 
-        {habits.length === 0 ? (
-          <EmptyState
-            title="Start your first habit"
-            description="One small daily action, tracked."
-            action={
-              <Button size="sm" onClick={openNewHabit}>
-                <Plus className="h-4 w-4" />
-                Add habit
-              </Button>
-            }
-          />
-        ) : (
-          <SortableHabitList habits={habits} />
-        )}
-      </section>
+          {habits.length === 0 ? (
+            <EmptyState
+              title="Start your first habit"
+              description="One small daily action, tracked."
+              action={
+                <Button size="sm" onClick={openNewHabit}>
+                  <Plus className="h-4 w-4" />
+                  Add habit
+                </Button>
+              }
+            />
+          ) : (
+            <SortableHabitList habits={habits} />
+          )}
+        </section>
 
-      <TodaysWorkoutsBlock />
+        <TodaysWorkoutsBlock />
 
-      <StatusLine habitCount={habits.length} className="mt-1 px-1" />
+        <StatusLine habitCount={habits.length} className="mt-1 px-1" />
+      </Cascade>
     </div>
   )
 }

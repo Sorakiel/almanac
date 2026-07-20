@@ -1,11 +1,13 @@
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { StatusLine } from '@/components/common/StatusLine'
 import { NowBlock } from '@/features/dashboard/components/NowBlock'
 import { TodaysWorkoutsBlock } from '@/features/dashboard/components/TodaysWorkoutsBlock'
 import { DesktopHabitTile } from '@/features/dashboard/components/desktop/DesktopHabitTile'
+import { useCountUp } from '@/hooks/useCountUp'
 import { useFocusStore } from '@/stores/focus'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
@@ -28,13 +30,15 @@ function StatTile({
   unit?: string
   accent?: boolean
 }) {
+  const isInt = /^\d+$/.test(value)
+  const display = useCountUp(isInt ? Number(value) : 0)
   return (
     <div className="flex-1 rounded-2xl border bg-panel px-5 py-[18px]">
       <p className="font-mono text-[9.5px] uppercase tracking-label text-muted-strong">{label}</p>
       <p
         className={`mt-1 text-[30px] font-semibold tabular-nums tracking-title ${accent ? 'text-accent' : ''}`}
       >
-        {value}
+        {isInt ? display : value}
         {unit ? <span className="text-base text-muted-strong">{unit}</span> : null}
       </p>
     </div>
@@ -91,51 +95,53 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
         </div>
       </header>
 
-      {focusRunning ? (
+      <Cascade>
+        {focusRunning ? (
+          <section className="mt-8">
+            <p className="label-mono mb-3 text-accent">▶ now · focus block</p>
+            <NowBlock habits={habits} />
+          </section>
+        ) : null}
+
         <section className="mt-8">
-          <p className="label-mono mb-3 text-accent">▶ now · focus block</p>
-          <NowBlock habits={habits} />
-        </section>
-      ) : null}
-
-      <section className="mt-8">
-        <div className="mb-3 flex items-baseline justify-between">
-          <span className="label-mono">today · habits</span>
-          <span className="font-mono text-[11px] text-muted-strong">
-            {completed} / {due.length} done
-          </span>
-        </div>
-        {habits.length === 0 ? (
-          <EmptyState
-            title="Start your first habit"
-            description="One small daily action, tracked."
-            action={
-              <Button size="sm" onClick={openNewHabit}>
-                <Plus className="h-4 w-4" />
-                Add habit
-              </Button>
-            }
-          />
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {habits.map((habit) => (
-              <DesktopHabitTile key={habit.id} habit={habit} />
-            ))}
+          <div className="mb-3 flex items-baseline justify-between">
+            <span className="label-mono">today · habits</span>
+            <span className="font-mono text-[11px] text-muted-strong">
+              {completed} / {due.length} done
+            </span>
           </div>
-        )}
-      </section>
+          {habits.length === 0 ? (
+            <EmptyState
+              title="Start your first habit"
+              description="One small daily action, tracked."
+              action={
+                <Button size="sm" onClick={openNewHabit}>
+                  <Plus className="h-4 w-4" />
+                  Add habit
+                </Button>
+              }
+            />
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {habits.map((habit) => (
+                <DesktopHabitTile key={habit.id} habit={habit} />
+              ))}
+            </div>
+          )}
+        </section>
 
-      <div className="mt-8">
-        <TodaysWorkoutsBlock />
-      </div>
+        <div className="mt-8">
+          <TodaysWorkoutsBlock />
+        </div>
 
-      <section className="mt-6 flex gap-3">
-        <StatTile label="today" value={String(pct)} unit="%" />
-        <StatTile label="this week" value={String(weekRate)} unit="%" accent />
-        <StatTile label="active" value={String(habits.length)} unit=" habits" />
-      </section>
+        <section className="mt-6 flex gap-3">
+          <StatTile label="today" value={String(pct)} unit="%" />
+          <StatTile label="this week" value={String(weekRate)} unit="%" accent />
+          <StatTile label="active" value={String(habits.length)} unit=" habits" />
+        </section>
 
-      <StatusLine habitCount={habits.length} className="mt-6" />
+        <StatusLine habitCount={habits.length} className="mt-6" />
+      </Cascade>
     </div>
   )
 }

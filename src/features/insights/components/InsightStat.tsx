@@ -1,3 +1,4 @@
+import { useCountUp } from '@/hooks/useCountUp'
 import { cn } from '@/lib/utils'
 
 interface InsightStatProps {
@@ -33,7 +34,7 @@ export function InsightStat({
           accent && 'text-accent',
         )}
       >
-        {value}
+        <StatValue value={value} />
         {unit ? <span className="text-sm text-muted-strong">{unit}</span> : null}
       </p>
       {showDelta ? (
@@ -44,4 +45,11 @@ export function InsightStat({
       ) : null}
     </div>
   )
+}
+
+/** Count plain-integer values up on mount; render anything else verbatim. */
+function StatValue({ value }: { value: string }): JSX.Element {
+  const isInt = /^\d+$/.test(value)
+  const display = useCountUp(isInt ? Number(value) : 0)
+  return <>{isInt ? display : value}</>
 }

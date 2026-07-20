@@ -88,6 +88,12 @@ export default {
           '0%, 49%': { opacity: '1' },
           '50%, 100%': { opacity: '0' },
         },
+        // Content settles into place — fade up a few px. Staggered by <Cascade>
+        // to make a view assemble on open rather than snapping in at once.
+        rise: {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
       },
       animation: {
         pop: 'pop 0.4s ease-out',
@@ -96,6 +102,9 @@ export default {
         shine: 'shine 0.9s ease-out',
         'confetti-burst': 'confetti-burst 0.9s ease-out forwards',
         'caret-blink': 'caret-blink 1.1s step-end infinite',
+        // `both` fill: the item holds at opacity 0 through its stagger delay,
+        // so nothing flashes before its turn.
+        rise: 'rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both',
       },
     },
   },
