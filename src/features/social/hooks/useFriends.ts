@@ -30,6 +30,9 @@ export function useFriends(): UseFriendsResult {
       return assembleFriends(friendships, byId, userId)
     },
     enabled: Boolean(userId),
+    // Surface new incoming requests / accepted friends without an app restart.
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
   })
 
   const data = query.data ?? EMPTY

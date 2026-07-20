@@ -45,31 +45,28 @@ export type Database = {
         Row: {
           created_at: string
           event_date: string
-          habit_id: string | null
           id: string
           kind: string
           meta: Json
-          title: string | null
+          subject: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           event_date: string
-          habit_id?: string | null
           id?: string
           kind: string
           meta?: Json
-          title?: string | null
+          subject?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           event_date?: string
-          habit_id?: string | null
           id?: string
           kind?: string
           meta?: Json
-          title?: string | null
+          subject?: string | null
           user_id?: string
         }
         Relationships: []

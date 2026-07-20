@@ -15,11 +15,21 @@ export function feedDayLabel(eventDate: string, todayKey: string): string {
   return `${day} ${MONTHS[month - 1]}`
 }
 
-/** One-line summary of what a friend did, for the feed row. */
+/** One-line summary of what a friend did — privacy-safe, never a habit/book name. */
 export function activitySummary(item: FeedItem): string {
-  if (item.kind === 'day_completed') {
-    if (item.done !== null && item.total !== null) return `closed the day · ${item.done}/${item.total}`
-    return 'closed the day'
+  switch (item.kind) {
+    case 'day_completed':
+      return item.done !== null && item.total !== null
+        ? `closed the day · ${item.done}/${item.total}`
+        : 'closed the day'
+    case 'streak_reached':
+      return item.days !== null ? `reached a ${item.days}-day streak` : 'hit a streak'
+    case 'reading_progress': {
+      if (item.units === null) return 'read today'
+      const noun = item.unit === 'chapters' ? (item.units === 1 ? 'chapter' : 'chapters') : item.units === 1 ? 'page' : 'pages'
+      return `read ${item.units} ${noun}`
+    }
+    default:
+      return 'was active'
   }
-  return item.title ? `completed “${item.title}”` : 'completed a habit'
 }

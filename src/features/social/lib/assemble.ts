@@ -5,6 +5,7 @@ import type {
   Friendship,
   FriendProfile,
   FriendsData,
+  ReadingUnit,
 } from '@/features/social/types'
 
 /** The counterparty id of a friendship relative to the current user. */
@@ -40,10 +41,14 @@ export function assembleFriends(
   return data
 }
 
-const KNOWN_KINDS: ActivityKind[] = ['habit_completed', 'day_completed']
+const KNOWN_KINDS: ActivityKind[] = ['day_completed', 'streak_reached', 'reading_progress']
 
 function toNumber(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function toUnit(value: unknown): ReadingUnit | null {
+  return value === 'pages' || value === 'chapters' ? value : null
 }
 
 /** Join raw activity rows to friend profiles, dropping unknown event kinds. */
@@ -60,9 +65,11 @@ export function assembleFeed(
       id: e.id,
       friend,
       kind: e.kind as ActivityKind,
-      title: e.title,
       done: toNumber(meta.done),
       total: toNumber(meta.total),
+      days: toNumber(meta.days),
+      units: toNumber(meta.units),
+      unit: toUnit(meta.unit),
       eventDate: e.event_date,
       createdAt: e.created_at,
     })

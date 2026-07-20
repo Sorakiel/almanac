@@ -4,6 +4,7 @@ import { useToday } from '@/hooks/useToday'
 import { updateBook, type BookPatch } from '@/features/reading/api/books.api'
 import { createReadingSession } from '@/features/reading/api/sessions.api'
 import { statusForProgress } from '@/features/reading/lib/progress'
+import { emitActivity } from '@/features/social/api/social.api'
 import type { Book } from '@/features/reading/types'
 
 interface LogProgressInput {
@@ -48,6 +49,17 @@ export function useReadingProgress() {
           units_read: delta,
           date: dateKey,
         })
+      }
+      // Share pages/chapters read with friends — a count only, never the title.
+      // Deduped per book per day in the DB; best-effort.
+      if (delta > 0) {
+        void emitActivity({
+          user_id: userId,
+          kind: 'reading_progress',
+          subject: book.id,
+          meta: { units: delta, unit: book.progress_mode },
+          event_date: dateKey,
+        }).catch(() => undefined)
       }
     },
     onSuccess: (_data, { book }) => {

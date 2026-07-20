@@ -57,9 +57,8 @@ describe('assembleFeed', () => {
     return {
       id: 'e1',
       user_id: A,
-      kind: 'habit_completed',
-      habit_id: 'h1',
-      title: 'Meditate',
+      kind: 'day_completed',
+      subject: null,
       meta: {},
       event_date: '2026-07-19',
       created_at: '2026-07-19T08:00:00Z',
@@ -69,7 +68,7 @@ describe('assembleFeed', () => {
 
   it('joins events to friend profiles and reads day totals from meta', () => {
     const feed = assembleFeed(
-      [event({ kind: 'day_completed', title: null, meta: { done: 5, total: 5 } })],
+      [event({ kind: 'day_completed', meta: { done: 5, total: 5 } })],
       profiles,
     )
     expect(feed[0]?.friend.displayName).toBe('Alice')
@@ -77,8 +76,23 @@ describe('assembleFeed', () => {
     expect(feed[0]?.total).toBe(5)
   })
 
-  it('drops unknown event kinds', () => {
-    const feed = assembleFeed([event({ kind: 'mystery' })], profiles)
+  it('reads streak + reading meta and never exposes a name', () => {
+    const feed = assembleFeed(
+      [
+        event({ id: 's', kind: 'streak_reached', subject: 'h1', meta: { days: 7 } }),
+        event({ id: 'r', kind: 'reading_progress', subject: 'b1', meta: { units: 12, unit: 'pages' } }),
+      ],
+      profiles,
+    )
+    expect(feed.find((f) => f.id === 's')?.days).toBe(7)
+    expect(feed.find((f) => f.id === 'r')?.units).toBe(12)
+    expect(feed.find((f) => f.id === 'r')?.unit).toBe('pages')
+    // No field on FeedItem can carry a habit/book name.
+    expect(feed.every((f) => !('title' in f))).toBe(true)
+  })
+
+  it('drops unknown / legacy event kinds', () => {
+    const feed = assembleFeed([event({ kind: 'habit_completed' })], profiles)
     expect(feed).toHaveLength(0)
   })
 })

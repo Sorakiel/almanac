@@ -5,6 +5,7 @@ import { setHabitCount } from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
 import { dailyTarget } from '@/features/habits/lib/frequency'
 import { emitActivity } from '@/features/social/api/social.api'
+import { isStreakMilestone } from '@/features/social/lib/milestones'
 import type { HabitLog, HabitWithTodayLog } from '@/features/habits/types'
 
 interface ToggleArgs {
@@ -55,15 +56,18 @@ export function useToggleHabit() {
       return { previous }
     },
     onSuccess: (_data, { habit }: ToggleArgs) => {
-      // When this tap completes the habit for the day, publish a feed event so
-      // friends see it. Best-effort + idempotent (deduped in the DB); a miss
-      // never affects the completion itself.
-      if (!habit.isComplete && habit.todayCount + 1 >= dailyTarget(habit)) {
+      // When this tap completes the habit and pushes its streak to a milestone,
+      // publish a privacy-safe feed event (a day count only — never the habit
+      // name). Completing on a due day extends the run by one. Best-effort +
+      // idempotent (deduped in the DB); a miss never affects the completion.
+      const completing = !habit.isComplete && habit.todayCount + 1 >= dailyTarget(habit)
+      const newStreak = habit.streak + 1
+      if (completing && isStreakMilestone(newStreak)) {
         void emitActivity({
           user_id: userId,
-          kind: 'habit_completed',
-          habit_id: habit.id,
-          title: habit.name,
+          kind: 'streak_reached',
+          subject: habit.id,
+          meta: { days: newStreak },
           event_date: dateKey,
         }).catch(() => undefined)
       }

@@ -5,8 +5,14 @@ export type FriendshipInsert = Database['public']['Tables']['friendships']['Inse
 export type ActivityEvent = Database['public']['Tables']['activity_events']['Row']
 export type ActivityEventInsert = Database['public']['Tables']['activity_events']['Insert']
 
-/** Feed event kinds emitted client-side on notable moments. */
-export type ActivityKind = 'habit_completed' | 'day_completed'
+/**
+ * Feed event kinds — deliberately privacy-safe. None carries a habit name or
+ * book title: only "closed the day", a streak milestone, and pages/chapters read.
+ */
+export type ActivityKind = 'day_completed' | 'streak_reached' | 'reading_progress'
+
+/** Reading unit noun stored on a reading_progress event. */
+export type ReadingUnit = 'pages' | 'chapters'
 
 /** A minimal public view of another user, for lists and the feed. */
 export interface FriendProfile {
@@ -35,14 +41,20 @@ export interface FriendsData {
   outgoing: FriendRequest[]
 }
 
-/** A feed row: what a friend did, joined with who they are. */
+/** A feed row: what a friend did, joined with who they are. All fields are
+ *  privacy-safe counts — never a name or title. */
 export interface FeedItem {
   id: string
   friend: FriendProfile
   kind: ActivityKind
-  title: string | null
+  /** day_completed */
   done: number | null
   total: number | null
+  /** streak_reached */
+  days: number | null
+  /** reading_progress */
+  units: number | null
+  unit: ReadingUnit | null
   eventDate: string
   createdAt: string
 }

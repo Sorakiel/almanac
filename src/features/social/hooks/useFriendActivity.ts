@@ -29,6 +29,11 @@ export function useFriendActivity(friendIds: string[]): UseFriendActivityResult 
       return assembleFeed(events, byId)
     },
     enabled: Boolean(userId) && friendIds.length > 0,
+    // Near-real-time: poll while the tab is open and refresh on focus, so a
+    // friend's activity shows up without reopening the app.
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+    staleTime: 15_000,
   })
 
   return {
