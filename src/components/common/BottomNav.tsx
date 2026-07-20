@@ -1,7 +1,7 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { Home, LayoutGrid, type LucideIcon } from 'lucide-react'
+import { RadialAddMenu } from '@/components/common/RadialAddMenu'
 import { CORE_MODULES } from '@/stores/modules'
-import { useUiStore } from '@/stores/ui'
 import { cn } from '@/lib/utils'
 
 interface NavItem {
@@ -53,20 +53,12 @@ function NavButton({ item }: { item: NavItem }) {
 
 /** Glassmorphism bottom nav (spec board): Today + core modules + More. */
 export function BottomNav() {
-  const navigate = useNavigate()
-  const openNewHabit = useUiStore((s) => s.openNewHabit)
-
   // A fixed, uncluttered mobile nav: Today, the core modules (Habits, Insights),
   // then More. Optional modules stay one tap away inside the More hub — the small
   // bottom bar never has to grow or reshuffle as the user toggles modules.
   const core: NavItem[] = CORE_MODULES.map((m) => ({ to: m.to, label: m.label, icon: m.icon }))
   const left: NavItem[] = [TODAY, ...core.slice(0, 1)]
   const right: NavItem[] = [...core.slice(1), MORE]
-
-  const handleAdd = () => {
-    navigate('/habits')
-    openNewHabit()
-  }
 
   return (
     <nav
@@ -80,14 +72,7 @@ export function BottomNav() {
           ))}
         </div>
 
-        <button
-          type="button"
-          onClick={handleAdd}
-          aria-label="Add habit"
-          className="-mt-6 flex h-[52px] w-[52px] flex-none items-center justify-center rounded-[17px] border-[3px] border-bg bg-accent text-2xl leading-none text-on-accent shadow-glow transition-[transform,background-color] duration-300 hover:rotate-90 hover:bg-accent-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-90 motion-reduce:hover:rotate-0"
-        >
-          <span aria-hidden="true">+</span>
-        </button>
+        <RadialAddMenu />
 
         <div className="flex flex-1 justify-around">
           {right.map((item) => (

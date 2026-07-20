@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import type { DayStatus } from '@/features/habits/lib/schedule'
 
@@ -52,21 +52,26 @@ function LegendKey({ className, label }: { className: string; label: string }) {
   )
 }
 
-/** Hover label: date plus its status, so a rest day reads as intentional. */
+/** Hover/tap label: date plus its status, so a rest day reads as intentional. */
 function cellTitle(day: HeatmapDay): string {
   if (day.done) return `${day.date} · done`
   if (day.frozen) return `${day.date} · frozen`
   return day.status ? `${day.date} · ${day.status}` : day.date
 }
 
+// Cap the diagonal wave delay so a full year still finishes filling promptly.
+const WAVE_STEP = 7
+const WAVE_MAX = 520
+
 /**
- * GitHub-style contribution grid: one column per week, one cell per day.
- * The full year is wider than a phone screen, so the grid scrolls
- * horizontally and starts pinned to the newest week — recent activity must
- * never be clipped out of view.
+ * GitHub-style contribution grid: one column per week, one cell per day. Cells
+ * fill in as a diagonal wave from the corner on mount, and hovering/tapping any
+ * cell reports its day in a readout line. The full year is wider than a phone,
+ * so the grid scrolls horizontally, pinned to the newest week.
  */
 export function HabitHeatmap({ days, createdKey, fill = false }: HabitHeatmapProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [active, setActive] = useState<HeatmapDay | null>(null)
 
   const weeks: HeatmapDay[][] = []
   for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7))
@@ -78,20 +83,33 @@ export function HabitHeatmap({ days, createdKey, fill = false }: HabitHeatmapPro
     if (el) el.scrollLeft = el.scrollWidth
   }, [days.length, fill])
 
+  const cell = (day: HeatmapDay, wi: number, di: number, sizeClass: string) => (
+    <span
+      key={day.date}
+      title={cellTitle(day)}
+      onMouseEnter={() => setActive(day)}
+      onFocus={() => setActive(day)}
+      onClick={() => setActive(day)}
+      className={cn(
+        'rounded-[2px] motion-safe:animate-cell-in',
+        sizeClass,
+        cellClass(day, createdKey),
+      )}
+      style={{ animationDelay: `${Math.min((wi + di) * WAVE_STEP, WAVE_MAX)}ms` }}
+    />
+  )
+
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border bg-surface p-4">
+    <div
+      className="flex flex-col gap-3 rounded-2xl border bg-surface p-4"
+      onMouseLeave={() => setActive(null)}
+    >
       {fill ? (
         // Desktop: 53 week-columns stretch to fill the card, taller cells.
         <div className="flex w-full gap-[3px]">
           {weeks.map((week, wi) => (
             <div key={wi} className="flex flex-1 flex-col gap-[3px]">
-              {week.map((day) => (
-                <span
-                  key={day.date}
-                  title={cellTitle(day)}
-                  className={cn('h-3 w-full rounded-[2px]', cellClass(day, createdKey))}
-                />
-              ))}
+              {week.map((day, di) => cell(day, wi, di, 'h-3 w-full'))}
             </div>
           ))}
         </div>
@@ -100,24 +118,26 @@ export function HabitHeatmap({ days, createdKey, fill = false }: HabitHeatmapPro
           <div className="flex w-max gap-[2px]">
             {weeks.map((week, wi) => (
               <div key={wi} className="flex flex-col gap-[2px]">
-                {week.map((day) => (
-                  <span
-                    key={day.date}
-                    title={cellTitle(day)}
-                    className={cn('h-[6px] w-[6px] rounded-[2px]', cellClass(day, createdKey))}
-                  />
-                ))}
+                {week.map((day, di) => cell(day, wi, di, 'h-[6px] w-[6px]'))}
               </div>
             ))}
           </div>
         </div>
       )}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-        <LegendKey className="bg-accent" label="done" />
-        <LegendKey className="bg-teal/20" label="rest" />
-        <LegendKey className="bg-foreground/15" label="missed" />
-        {hasFrozen ? <LegendKey className="bg-teal/70" label="frozen" /> : null}
-      </div>
+
+      {/* Readout: the focused cell's day, or the legend when nothing's active. */}
+      {active ? (
+        <p className="label-mono normal-case tracking-normal text-foreground">
+          {cellTitle(active)}
+        </p>
+      ) : (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          <LegendKey className="bg-accent" label="done" />
+          <LegendKey className="bg-teal/20" label="rest" />
+          <LegendKey className="bg-foreground/15" label="missed" />
+          {hasFrozen ? <LegendKey className="bg-teal/70" label="frozen" /> : null}
+        </div>
+      )}
     </div>
   )
 }

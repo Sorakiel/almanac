@@ -106,6 +106,12 @@ export default {
           '0%, 100%': { opacity: '0.35' },
           '50%': { opacity: '0.75' },
         },
+        // Heatmap cell settling in — used with a diagonal per-cell delay so the
+        // grid fills as a wave from the corner.
+        'cell-in': {
+          '0%': { opacity: '0', transform: 'scale(0.4)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
       },
       animation: {
         pop: 'pop 0.4s ease-out',
@@ -119,6 +125,7 @@ export default {
         rise: 'rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both',
         'flame-flicker': 'flame-flicker 1.8s ease-in-out infinite',
         'soft-pulse': 'soft-pulse 2.2s ease-in-out infinite',
+        'cell-in': 'cell-in 0.3s ease-out both',
       },
     },
   },
