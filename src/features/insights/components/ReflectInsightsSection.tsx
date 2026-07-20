@@ -27,15 +27,15 @@ export function ReflectInsightsSection({ data }: ReflectInsightsSectionProps) {
       <div className="rounded-card border bg-surface p-4">
         <p className="label-mono mb-3">consistency</p>
         <div className="flex items-center gap-3">
+          <span className="shrink-0 font-mono text-lg text-accent">{consistencyPct}%</span>
           <ProgressBlocks
             value={data.daysJournaled30d}
             total={30}
             blocks={30}
             size="lg"
-            className="min-w-0 flex-1"
+            className="min-w-0"
             aria-label={`${data.daysJournaled30d} of 30 days journaled`}
           />
-          <span className="shrink-0 font-mono text-base text-accent">{consistencyPct}%</span>
         </div>
         <p className="mt-3 text-sm text-muted">
           {data.daysJournaled30d} of the last 30 days journaled · {data.totalEntries} entries

@@ -1,3 +1,4 @@
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { APP_VERSION } from '@/lib/version'
 import { cn } from '@/lib/utils'
 
@@ -9,9 +10,12 @@ interface StatusLineProps {
 
 /**
  * A thin mono "system status" line — version, counters, a live dot. Reads as a
- * terminal status bar and quietly signals the app is a tool, not a toy.
+ * terminal status bar and quietly signals the app is a tool, not a toy. The dot
+ * tracks real network reachability, not a hardcoded label.
  */
 export function StatusLine({ habitCount, className }: StatusLineProps) {
+  const online = useOnlineStatus()
+
   return (
     <p
       className={cn(
@@ -31,8 +35,14 @@ export function StatusLine({ habitCount, className }: StatusLineProps) {
       </span>
       <span aria-hidden="true">·</span>
       <span className="flex items-center gap-1.5">
-        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-teal" />
-        online
+        <span
+          aria-hidden="true"
+          className={cn(
+            'h-1.5 w-1.5 rounded-full',
+            online ? 'bg-teal' : 'bg-muted-strong',
+          )}
+        />
+        {online ? 'online' : 'offline'}
       </span>
     </p>
   )
