@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { applyNativeStatusBar } from '@/lib/statusBar'
+import { themeViewTransition } from '@/lib/viewTransition'
 
 export type Theme = 'dark' | 'coffee'
 
@@ -24,13 +25,20 @@ export const useThemeStore = create<ThemeState>()(
     (set, get) => ({
       theme: 'dark',
       setTheme: (theme) => {
-        applyTheme(theme)
-        set({ theme })
+        // data-theme is an attribute swap, so the new theme paints synchronously
+        // inside the transition callback — the captured "new" snapshot is correct
+        // without waiting on React to re-render.
+        themeViewTransition(() => {
+          applyTheme(theme)
+          set({ theme })
+        })
       },
       toggleTheme: () => {
         const next: Theme = get().theme === 'dark' ? 'coffee' : 'dark'
-        applyTheme(next)
-        set({ theme: next })
+        themeViewTransition(() => {
+          applyTheme(next)
+          set({ theme: next })
+        })
       },
     }),
     {

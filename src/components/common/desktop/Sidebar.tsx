@@ -38,6 +38,7 @@ function NavRow({ entry }: { entry: NavEntry }) {
     <NavLink
       to={entry.to}
       end={entry.end}
+      viewTransition
       className={({ isActive }) =>
         cn(
           'flex items-center gap-3 rounded-[13px] px-3.5 py-3 text-[14.5px] transition-colors',
@@ -106,6 +107,7 @@ export function Sidebar() {
     <aside className="flex w-[250px] flex-none flex-col border-r bg-chrome px-[18px] py-6">
       <Link
         to="/"
+        viewTransition
         className="mb-[22px] flex items-center gap-[11px] px-2 focus-visible:outline-none"
       >
         <BrandMark className="h-[30px] w-[30px]" />
@@ -130,6 +132,7 @@ export function Sidebar() {
       ) : null}
       <NavLink
         to="/more"
+        viewTransition
         className={({ isActive }) =>
           cn(
             'flex items-center gap-[11px] rounded-[11px] px-3.5 py-[9px] text-[13.5px] transition-colors',
@@ -146,6 +149,7 @@ export function Sidebar() {
 
       <Link
         to="/settings"
+        viewTransition
         className="flex items-center gap-[11px] rounded-tile border bg-surface p-[11px] transition-colors hover:border-accent/40"
       >
         <Avatar name={name} size="sm" className="h-9 w-9 rounded-[11px]" />

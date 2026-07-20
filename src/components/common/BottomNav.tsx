@@ -21,6 +21,7 @@ function NavButton({ item }: { item: NavItem }) {
     <NavLink
       to={item.to}
       end={item.end}
+      viewTransition
       className={({ isActive }) =>
         cn(
           'flex w-12 flex-col items-center gap-1 py-1 transition-colors active:scale-90',
