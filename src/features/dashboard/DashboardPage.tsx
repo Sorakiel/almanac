@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/common/Avatar'
 import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
+import { AlmanacNarrator } from '@/features/dashboard/components/AlmanacNarrator'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { StatusLine } from '@/components/common/StatusLine'
 import { Rail } from '@/components/common/desktop/rail'
@@ -96,6 +97,8 @@ function DashboardPage() {
       </header>
 
       <Cascade>
+        <AlmanacNarrator habits={habits} />
+
         <QuoteCard />
 
         <NowBlock habits={habits} />

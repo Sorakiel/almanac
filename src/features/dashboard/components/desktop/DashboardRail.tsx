@@ -1,3 +1,4 @@
+import { AlmanacNarrator } from '@/features/dashboard/components/AlmanacNarrator'
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
 import { TodaySummary } from '@/features/dashboard/components/TodaySummary'
 import type { HabitWithTodayLog } from '@/features/habits/types'
@@ -31,18 +32,7 @@ export function DashboardRail({ habits }: DashboardRailProps) {
 
   return (
     <div className="flex flex-col gap-3.5">
-      <div className="flex items-center gap-3">
-        <span
-          aria-hidden="true"
-          className="flex h-[38px] w-[38px] items-center justify-center rounded-xl bg-accent/15 text-[17px] text-accent"
-        >
-          ◇
-        </span>
-        <div>
-          <p className="text-[15px] font-semibold">The Almanac</p>
-          <p className="font-mono text-[10px] text-muted-strong">watching your day</p>
-        </div>
-      </div>
+      <AlmanacNarrator habits={habits} />
 
       <TodaySummary habits={habits} />
 
