@@ -1,3 +1,5 @@
+import { useIsMutating } from '@tanstack/react-query'
+
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { APP_VERSION } from '@/lib/version'
 import { cn } from '@/lib/utils'
@@ -8,13 +10,23 @@ interface StatusLineProps {
   className?: string
 }
 
+const STATUS = {
+  offline: { label: 'offline', dot: 'bg-muted-strong' },
+  syncing: { label: 'syncing', dot: 'bg-amber animate-pulse' },
+  online: { label: 'online', dot: 'bg-teal' },
+} as const
+
 /**
  * A thin mono "system status" line — version, counters, a live dot. Reads as a
  * terminal status bar and quietly signals the app is a tool, not a toy. The dot
- * tracks real network reachability, not a hardcoded label.
+ * tracks real state: network reachability plus in-flight writes to Supabase,
+ * never a hardcoded label.
  */
 export function StatusLine({ habitCount, className }: StatusLineProps) {
   const online = useOnlineStatus()
+  const mutating = useIsMutating() > 0
+
+  const status = !online ? STATUS.offline : mutating ? STATUS.syncing : STATUS.online
 
   return (
     <p
@@ -37,12 +49,9 @@ export function StatusLine({ habitCount, className }: StatusLineProps) {
       <span className="flex items-center gap-1.5">
         <span
           aria-hidden="true"
-          className={cn(
-            'h-1.5 w-1.5 rounded-full',
-            online ? 'bg-teal' : 'bg-muted-strong',
-          )}
+          className={cn('h-1.5 w-1.5 rounded-full', status.dot)}
         />
-        {online ? 'online' : 'offline'}
+        {status.label}
       </span>
     </p>
   )
