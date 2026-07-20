@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import { prefersReducedMotion } from '@/lib/motion'
 
 /**
- * Tween a number toward `target` whenever it changes, easing out over
- * `duration` ms. Honours `prefers-reduced-motion` by snapping instantly.
- * Returns the value to render (rounded).
+ * Tween a number up to `target` — on first mount (from 0) and again whenever it
+ * changes, easing out over `duration` ms. Honours `prefers-reduced-motion` by
+ * snapping instantly. Returns the value to render (rounded).
  */
 export function useCountUp(target: number, duration = 600): number {
-  const [display, setDisplay] = useState(target)
-  const fromRef = useRef(target)
+  // Seed from 0 so numbers roll up when a view opens, not only on later changes.
+  const seed = prefersReducedMotion() ? target : 0
+  const [display, setDisplay] = useState(seed)
+  const fromRef = useRef(seed)
   const rafRef = useRef<number | null>(null)
 
   useEffect(() => {

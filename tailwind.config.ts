@@ -91,7 +91,7 @@ export default {
         // Content settles into place — fade up a few px. Staggered by <Cascade>
         // to make a view assemble on open rather than snapping in at once.
         rise: {
-          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '0%': { opacity: '0', transform: 'translateY(18px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },
@@ -104,7 +104,7 @@ export default {
         'caret-blink': 'caret-blink 1.1s step-end infinite',
         // `both` fill: the item holds at opacity 0 through its stagger delay,
         // so nothing flashes before its turn.
-        rise: 'rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both',
+        rise: 'rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both',
       },
     },
   },

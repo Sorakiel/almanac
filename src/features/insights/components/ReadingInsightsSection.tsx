@@ -1,4 +1,5 @@
 import { BookOpen } from 'lucide-react'
+import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { IconTile } from '@/components/common/IconTile'
 import { InsightStat } from '@/features/insights/components/InsightStat'
 import type { ReadingInsights } from '@/features/insights/types'
@@ -25,7 +26,7 @@ export function ReadingInsightsSection({ data }: ReadingInsightsSectionProps) {
         {data.currentlyReading.length === 0 ? (
           <p className="text-sm text-muted">No books in progress right now.</p>
         ) : (
-          <ul className="flex flex-col gap-2.5">
+          <ul className="flex flex-col gap-3.5">
             {data.currentlyReading.map((book) => (
               <li key={book.id} className="flex items-center gap-3">
                 <IconTile icon={BookOpen} tone="bg-amber/15 text-amber" size="sm" />
@@ -36,10 +37,21 @@ export function ReadingInsightsSection({ data }: ReadingInsightsSectionProps) {
                       {book.author}
                     </span>
                   ) : null}
+                  {book.pct !== null ? (
+                    <span className="mt-1.5 flex items-center gap-2">
+                      <ProgressBlocks
+                        value={book.pct}
+                        total={100}
+                        blocks={20}
+                        size="sm"
+                        color="rgb(var(--color-amber))"
+                        className="min-w-0 flex-1"
+                        aria-label={`${book.pct}% read`}
+                      />
+                      <span className="shrink-0 font-mono text-[11px] text-amber">{book.pct}%</span>
+                    </span>
+                  ) : null}
                 </span>
-                {book.pct !== null ? (
-                  <span className="font-mono text-[11px] text-muted-strong">{book.pct}%</span>
-                ) : null}
               </li>
             ))}
           </ul>

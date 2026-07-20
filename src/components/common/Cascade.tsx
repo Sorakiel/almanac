@@ -18,7 +18,7 @@ interface CascadeProps {
  * Wrapping (not cloning) keeps it agnostic to what the children are: the
  * wrapper div becomes the flex/grid item, so parent `gap` still applies.
  */
-export function Cascade({ children, step = 45, delay = 0, className }: CascadeProps) {
+export function Cascade({ children, step = 80, delay = 40, className }: CascadeProps) {
   const items = Children.toArray(children).filter(isValidElement)
   const reduce = prefersReducedMotion()
 

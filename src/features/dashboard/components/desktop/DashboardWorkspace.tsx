@@ -1,13 +1,13 @@
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Cascade } from '@/components/common/Cascade'
+import { CountUp } from '@/components/common/CountUp'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { StatusLine } from '@/components/common/StatusLine'
 import { NowBlock } from '@/features/dashboard/components/NowBlock'
 import { TodaysWorkoutsBlock } from '@/features/dashboard/components/TodaysWorkoutsBlock'
 import { DesktopHabitTile } from '@/features/dashboard/components/desktop/DesktopHabitTile'
-import { useCountUp } from '@/hooks/useCountUp'
 import { useFocusStore } from '@/stores/focus'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
@@ -31,14 +31,13 @@ function StatTile({
   accent?: boolean
 }) {
   const isInt = /^\d+$/.test(value)
-  const display = useCountUp(isInt ? Number(value) : 0)
   return (
     <div className="flex-1 rounded-2xl border bg-panel px-5 py-[18px]">
       <p className="font-mono text-[9.5px] uppercase tracking-label text-muted-strong">{label}</p>
       <p
         className={`mt-1 text-[30px] font-semibold tabular-nums tracking-title ${accent ? 'text-accent' : ''}`}
       >
-        {isInt ? display : value}
+        {isInt ? <CountUp value={Number(value)} /> : value}
         {unit ? <span className="text-base text-muted-strong">{unit}</span> : null}
       </p>
     </div>
@@ -85,7 +84,9 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
                 animated
                 aria-label={`${pct}% of today done`}
               />
-              <span className="font-mono text-lg font-semibold tabular-nums">{pct}%</span>
+              <span className="font-mono text-lg font-semibold tabular-nums">
+                <CountUp value={pct} />%
+              </span>
             </div>
           </div>
           <Button onClick={openNewHabit} className="rounded-[13px] shadow-glow">

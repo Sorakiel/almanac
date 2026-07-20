@@ -25,17 +25,18 @@ export function ReflectInsightsSection({ data }: ReflectInsightsSectionProps) {
       </div>
 
       <div className="rounded-card border bg-surface p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <p className="label-mono">consistency</p>
-          <span className="font-mono text-[11px] text-muted-strong">{consistencyPct}%</span>
+        <p className="label-mono mb-3">consistency</p>
+        <div className="flex items-center gap-3">
+          <ProgressBlocks
+            value={data.daysJournaled30d}
+            total={30}
+            blocks={30}
+            size="lg"
+            className="min-w-0 flex-1"
+            aria-label={`${data.daysJournaled30d} of 30 days journaled`}
+          />
+          <span className="shrink-0 font-mono text-base text-accent">{consistencyPct}%</span>
         </div>
-        <ProgressBlocks
-          value={data.daysJournaled30d}
-          total={30}
-          blocks={15}
-          size="md"
-          aria-label={`${data.daysJournaled30d} of 30 days journaled`}
-        />
         <p className="mt-3 text-sm text-muted">
           {data.daysJournaled30d} of the last 30 days journaled · {data.totalEntries} entries
           all-time.
