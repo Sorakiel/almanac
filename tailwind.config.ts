@@ -94,6 +94,18 @@ export default {
           '0%': { opacity: '0', transform: 'translateY(18px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        // Living streak flame — a gentle, irregular breathe/lick so lit streaks
+        // feel alive without being distracting.
+        'flame-flicker': {
+          '0%, 100%': { transform: 'scale(1) translateY(0)', opacity: '1' },
+          '35%': { transform: 'scale(1.12) translateY(-0.5px)', opacity: '0.85' },
+          '70%': { transform: 'scale(0.96) translateY(0.5px)', opacity: '0.95' },
+        },
+        // Soft breathing glow — the completion donut at a perfect 100%.
+        'soft-pulse': {
+          '0%, 100%': { opacity: '0.35' },
+          '50%': { opacity: '0.75' },
+        },
       },
       animation: {
         pop: 'pop 0.4s ease-out',
@@ -105,6 +117,8 @@ export default {
         // `both` fill: the item holds at opacity 0 through its stagger delay,
         // so nothing flashes before its turn.
         rise: 'rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'flame-flicker': 'flame-flicker 1.8s ease-in-out infinite',
+        'soft-pulse': 'soft-pulse 2.2s ease-in-out infinite',
       },
     },
   },

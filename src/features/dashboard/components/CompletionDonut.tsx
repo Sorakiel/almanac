@@ -49,6 +49,7 @@ export function CompletionDonut({ completed, total, size = 160 }: CompletionDonu
   const filled = Math.round(shown * TICKS)
   const displayPct = useCountUp(pct)
   const big = size >= 140
+  const perfect = safeTotal > 0 && pct === 100
 
   return (
     <div
@@ -57,6 +58,17 @@ export function CompletionDonut({ completed, total, size = 160 }: CompletionDonu
       role="img"
       aria-label={`${completed} of ${total} habits complete, ${pct} percent`}
     >
+      {/* Perfect day: a soft breathing halo behind the ring. */}
+      {perfect ? (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-full motion-safe:animate-soft-pulse"
+          style={{
+            background:
+              'radial-gradient(circle, rgb(var(--color-accent) / 0.35) 0%, transparent 68%)',
+          }}
+        />
+      ) : null}
       <svg viewBox={`0 0 ${VIEW} ${VIEW}`} className="h-full w-full">
         {ticks.map((t, i) => (
           <line

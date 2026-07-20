@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { BottomNav } from '@/components/common/BottomNav'
+import { CelebrationHost } from '@/components/common/CelebrationHost'
 import { ReinstallBanner } from '@/components/common/ReinstallBanner'
 import { Sidebar } from '@/components/common/desktop/Sidebar'
 import { TopBar } from '@/components/common/desktop/TopBar'
 import { RailActive } from '@/components/common/desktop/RailActive'
 import { RailTargetProvider } from '@/components/common/desktop/rail'
 import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
+import { useCelebrationWatchers } from '@/hooks/useCelebrationWatchers'
 import { useDailyReminder } from '@/hooks/useDailyReminder'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useOnboardingStore } from '@/stores/onboarding'
@@ -29,6 +31,10 @@ export function AppLayout() {
 
   // Drive the native/foreground daily habit reminder from the saved preference.
   useDailyReminder()
+
+  // Watch live data for moments worth celebrating (perfect day, streak
+  // milestones, achievement unlocks). Rendered visuals come from <CelebrationHost>.
+  useCelebrationWatchers()
 
   // Onboarding is gated on `profiles.onboarded` so it survives across devices.
   // Wait for the profile before deciding, so an already-onboarded user never
@@ -70,10 +76,10 @@ export function AppLayout() {
               'app-scroll lg:mx-0 lg:max-w-none lg:overflow-y-auto lg:px-10 lg:py-8',
             )}
           >
-            <div
-              key={pathname}
-              className="motion-safe:duration-300 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2"
-            >
+            {/* Keyed so the page remounts per route (replays the Cascade). The
+                cross-fade itself is the View Transition (see viewTransition on
+                the nav links + globals.css), so no per-route animation here. */}
+            <div key={pathname}>
               <Outlet />
             </div>
           </main>
@@ -90,6 +96,7 @@ export function AppLayout() {
           </div>
         )}
         <HabitFormSheet />
+        <CelebrationHost />
       </div>
     </RailTargetProvider>
   )

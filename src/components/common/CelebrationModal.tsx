@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { PartyPopper } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -8,16 +9,20 @@ interface CelebrationModalProps {
   onOpenChange: (open: boolean) => void
   title: string
   message: string
+  /** Badge glyph. Defaults to a party popper. */
+  icon?: ComponentType<{ className?: string }>
   /** CTA label; defaults to a simple dismiss. */
   actionLabel?: string
 }
 
-/** Centered congratulatory modal — shown when a goal is fully completed. */
+/** Centered congratulatory scene — a badge that pops with a diagonal sheen,
+ *  confetti, and a headline. Used for goal completions and achievement unlocks. */
 export function CelebrationModal({
   open,
   onOpenChange,
   title,
   message,
+  icon: Icon = PartyPopper,
   actionLabel = 'Nice',
 }: CelebrationModalProps) {
   return (
@@ -31,8 +36,13 @@ export function CelebrationModal({
           />
           {open ? <Confetti /> : null}
           <div className="relative flex flex-col items-center gap-4">
-            <span className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-gradient-to-br from-accent to-accent-deep text-on-accent shadow-glow motion-safe:animate-pop">
-              <PartyPopper className="h-8 w-8" aria-hidden="true" />
+            <span className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-[20px] bg-gradient-to-br from-accent to-accent-deep text-on-accent shadow-glow motion-safe:animate-pop">
+              <Icon className="h-8 w-8" />
+              {/* Diagonal gloss sweeping once across the badge. */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 bg-gradient-to-r from-transparent via-white/70 to-transparent motion-safe:animate-shine"
+              />
             </span>
             <Dialog.Title className="text-2xl font-semibold tracking-title">{title}</Dialog.Title>
             <Dialog.Description className="text-[15px] leading-relaxed text-muted">

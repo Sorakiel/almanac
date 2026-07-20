@@ -12,10 +12,12 @@ import {
   Moon,
   ShieldCheck,
   Trophy,
+  Volume2,
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Segmented } from '@/components/ui/segmented'
+import { Switch } from '@/components/ui/switch'
 import { Avatar } from '@/components/common/Avatar'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { Tag } from '@/components/common/Tag'
@@ -28,6 +30,7 @@ import { reminderTimeLabel } from '@/features/settings/lib/reminder'
 import { isDesktopApp } from '@/lib/desktop'
 import { APP_VERSION } from '@/lib/version'
 import { useDesktopStore } from '@/stores/desktop'
+import { usePrefsStore } from '@/stores/prefs'
 import { useSession } from '@/hooks/useSession'
 import { useTheme } from '@/hooks/useTheme'
 import { useToday } from '@/hooks/useToday'
@@ -39,6 +42,8 @@ function SettingsPage() {
   const navigate = useNavigate()
   const { user, status } = useSession()
   const { theme, setTheme } = useTheme()
+  const sound = usePrefsStore((s) => s.sound)
+  const setSound = usePrefsStore((s) => s.setSound)
   const { logOut } = useAuthActions()
   const { profile } = useProfile()
   const { dateKey } = useToday()
@@ -99,6 +104,13 @@ function SettingsPage() {
               { value: 'coffee', label: 'Coffee', icon: Coffee },
             ]}
           />
+          <label className="flex items-center justify-between rounded-tile border bg-surface px-4 py-3">
+            <span className="flex items-center gap-3">
+              <Volume2 className="h-[18px] w-[18px] text-muted-strong" aria-hidden="true" />
+              <span className="text-[15px]">Sound effects</span>
+            </span>
+            <Switch checked={sound} onCheckedChange={setSound} aria-label="Sound effects" />
+          </label>
         </section>
 
         <section className="flex flex-col gap-2">

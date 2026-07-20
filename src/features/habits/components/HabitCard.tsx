@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Flame, Snowflake } from 'lucide-react'
+import { Snowflake } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { CompletionToggle } from '@/components/common/CompletionToggle'
 import { IconTile } from '@/components/common/IconTile'
 import { Sparkline } from '@/components/common/Sparkline'
+import { StreakFlame } from '@/features/habits/components/StreakFlame'
 import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
@@ -114,7 +115,7 @@ export function StreakBadge({ streak, atRisk }: StreakBadgeProps) {
       title={atRisk ? 'Streak at risk — finish today to keep it' : `${streak}-day streak`}
     >
       <span aria-hidden="true">· </span>
-      <Flame className={cn('h-3 w-3', atRisk && 'animate-pulse')} aria-hidden="true" />
+      <StreakFlame streak={streak} atRisk={atRisk} />
       <span>{streak}d</span>
     </span>
   )

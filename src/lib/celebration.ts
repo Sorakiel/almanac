@@ -1,17 +1,15 @@
 import { haptic } from '@/lib/haptics'
+import { playChime } from '@/lib/sound'
+import { useCelebrationStore, type CelebrationPayload } from '@/stores/celebration'
 
 /**
- * The one path every "moment" goes through — Perfect Day, achievement unlock,
- * a new PR. Centralising it keeps celebrations consistent and tasteful instead
- * of scattered one-offs.
- *
- * Phase 1 wires the seam and the haptic. Phase 3 grows this into a store + a
- * portal host that also fires accent-scheme confetti, an optional terminal
- * chime, and (for the big ones) a modal — without call sites having to change.
+ * The one path every "moment" goes through — Perfect Day, a streak milestone,
+ * an achievement unlock, a new PR. Centralising it keeps celebrations
+ * consistent: the same haptic, the same optional chime, the same accent-scheme
+ * confetti, without call sites having to wire any of it.
  */
-export type CelebrationKind = 'perfect-day' | 'achievement' | 'pr' | 'milestone'
-
-export function celebrate(kind: CelebrationKind): void {
-  haptic(kind === 'milestone' ? 'medium' : 'success')
-  // Phase 3: visual burst + sound + modal dispatched from here.
+export function celebrate(payload: CelebrationPayload): void {
+  haptic(payload.kind === 'milestone' ? 'medium' : 'success')
+  playChime(payload.kind)
+  useCelebrationStore.getState().show(payload)
 }
