@@ -17,6 +17,7 @@ import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
 import { useExerciseLibrary } from '@/features/workouts/hooks/useExerciseLibrary'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
+import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import { cn } from '@/lib/utils'
 
 /** Friendly label for a `YYYY-MM-DD` date, UTC-safe. */
@@ -33,6 +34,7 @@ function WorkoutDetailPage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
+  useBreadcrumbLeaf(workout?.name)
   const mutations = useSessionMutations(id)
   const { exercises: library } = useExerciseLibrary()
   const [editOpen, setEditOpen] = useState(false)

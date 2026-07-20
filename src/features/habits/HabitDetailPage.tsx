@@ -24,6 +24,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
+import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import { cn } from '@/lib/utils'
 
 function HabitDetailPage() {
@@ -34,6 +35,7 @@ function HabitDetailPage() {
   const { dateKey } = useToday()
   const openEditHabit = useUiStore((s) => s.openEditHabit)
   const { habit, stats, isLoading, isError } = useHabitDetail(id)
+  useBreadcrumbLeaf(habit?.name)
   const { archive } = useHabitMutations()
   const toggleFreeze = useToggleFreeze()
   const [menuOpen, setMenuOpen] = useState(false)

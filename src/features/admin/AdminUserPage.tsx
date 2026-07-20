@@ -17,6 +17,7 @@ import { joinedLabel } from '@/features/admin/lib/format'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
+import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import type { UserRole } from '@/features/admin/types'
 
 const ROLE_TONE: Record<UserRole, 'accent' | 'muted' | 'teal'> = {
@@ -46,6 +47,7 @@ function AdminUserPage() {
   const isAdmin = profile?.role === 'admin' || profile?.role === 'owner'
   const isOwner = profile?.role === 'owner'
   const { data, isLoading, isError } = useAdminUser(id, isAdmin)
+  useBreadcrumbLeaf(data?.name)
   const { setRole, remove, isSettingRole, isRemoving } = useUserManagement()
   const [confirmDelete, setConfirmDelete] = useState(false)
 

@@ -12,6 +12,7 @@ import { NotesSection } from '@/features/reading/components/NotesSection'
 import { useBook } from '@/features/reading/hooks/useBook'
 import { statusLabel, unitNounPlural } from '@/features/reading/lib/progress'
 import { useFocusStore } from '@/stores/focus'
+import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import type { BookStatus } from '@/features/reading/types'
 
 const STATUS_TONE: Record<BookStatus, 'muted' | 'accent' | 'teal'> = {
@@ -27,6 +28,7 @@ function BookDetailPage() {
   const navigate = useNavigate()
   const startFocus = useFocusStore((s) => s.start)
   const { book, notes, sessions, isLoading, isError } = useBook(id)
+  useBreadcrumbLeaf(book?.title)
   const [editOpen, setEditOpen] = useState(false)
 
   if (isLoading) {

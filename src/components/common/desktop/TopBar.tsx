@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { Caret } from '@/components/common/Caret'
 import { useTheme } from '@/hooks/useTheme'
+import { useBreadcrumbStore } from '@/stores/breadcrumb'
 
 /**
  * Current route as a shell-style path, nested to mirror the real IA so the
@@ -10,12 +11,15 @@ import { useTheme } from '@/hooks/useTheme'
  */
 function useRoutePath(): string {
   const { pathname } = useLocation()
+  // Detail pages register their entity name here (slugified); until it loads we
+  // fall back to a generic segment so the prompt never shows a raw id.
+  const leaf = useBreadcrumbStore((s) => s.leaf)
   if (pathname === '/') return 'today'
-  if (pathname.startsWith('/habits/')) return 'habits/detail'
+  if (pathname.startsWith('/habits/')) return `habits/${leaf ?? 'detail'}`
   if (pathname.startsWith('/habits')) return 'habits'
-  if (pathname.startsWith('/train/')) return 'train/detail'
+  if (pathname.startsWith('/train/')) return `train/${leaf ?? 'detail'}`
   if (pathname.startsWith('/train')) return 'train'
-  if (pathname.startsWith('/reading/')) return 'reading/detail'
+  if (pathname.startsWith('/reading/')) return `reading/${leaf ?? 'detail'}`
   if (pathname.startsWith('/reading')) return 'reading'
   if (pathname.startsWith('/insights')) return 'insights'
   if (pathname.startsWith('/reflect')) return 'reflect'
@@ -24,7 +28,7 @@ function useRoutePath(): string {
   if (pathname.startsWith('/achievements')) return 'achievements'
   if (pathname.startsWith('/more')) return 'modules'
   // Admin lives behind Settings (SettingsPage → "Admin console").
-  if (pathname.startsWith('/admin/user')) return 'settings/admin/user'
+  if (pathname.startsWith('/admin/user')) return `settings/admin/user/${leaf ?? '…'}`
   if (pathname.startsWith('/admin')) return 'settings/admin'
   if (pathname.startsWith('/settings')) return 'settings'
   return '~'
