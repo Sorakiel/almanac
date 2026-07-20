@@ -1,13 +1,6 @@
 import { STREAK_MILESTONES } from '@/features/habits/lib/milestones'
 import type { HabitWithTodayLog } from '@/features/habits/types'
-
-export type NarratorTone = 'urgent' | 'good' | 'info'
-
-export interface NarratorLine {
-  id: string
-  text: string
-  tone: NarratorTone
-}
+import type { InsightLine } from '@/lib/insight'
 
 function nextMilestone(streak: number): number | undefined {
   return STREAK_MILESTONES.find((m) => m > streak)
@@ -19,12 +12,12 @@ function nextMilestone(streak: number): number | undefined {
  * first so the narrator can lead with what matters (an at-risk streak) and rotate
  * through the rest.
  */
-export function buildNarratorLines(habits: HabitWithTodayLog[]): NarratorLine[] {
+export function buildNarratorLines(habits: HabitWithTodayLog[]): InsightLine[] {
   if (habits.length === 0) {
     return [{ id: 'empty', text: 'No habits tracked yet — add the first to begin.', tone: 'info' }]
   }
 
-  const lines: NarratorLine[] = []
+  const lines: InsightLine[] = []
   const due = habits.filter((h) => h.dueToday || h.isComplete)
   const completed = due.filter((h) => h.isComplete).length
   const left = due.length - completed
