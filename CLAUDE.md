@@ -109,6 +109,8 @@ All user-owned tables carry `user_id` and are protected by RLS. Use `timestamptz
 | `workout_exercises` | id, workout_id, exercise_id, target_sets, target_reps, target_weight, sort_order                                                            |
 | `set_logs`          | id, workout_exercise_id, set_number, reps, weight, done, logged_at                                                                          |
 | `quotes`            | id, text, author — **global, read-only to users**                                                                                           |
+| `support_methods`   | id, kind (`link`\|`crypto`), label, hint, network, value, enabled, sort_order — **global; users read enabled rows, owner writes** (donations) |
+| `app_settings`      | id (singleton), support_enabled — **global flags; any auth reads, owner writes**                                                             |
 | `reflections`       | id, user_id, date, body, quote_id, created_at                                                                                               |
 | `feedback`          | id, user_id, body, status, created_at                                                                                                       |
 

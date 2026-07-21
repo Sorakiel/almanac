@@ -71,30 +71,21 @@ export type Database = {
         }
         Relationships: []
       }
-      friendships: {
+      app_settings: {
         Row: {
-          addressee_id: string
-          created_at: string
-          id: string
-          requester_id: string
-          responded_at: string | null
-          status: Database["public"]["Enums"]["friendship_status"]
+          id: boolean
+          support_enabled: boolean
+          updated_at: string
         }
         Insert: {
-          addressee_id: string
-          created_at?: string
-          id?: string
-          requester_id: string
-          responded_at?: string | null
-          status?: Database["public"]["Enums"]["friendship_status"]
+          id?: boolean
+          support_enabled?: boolean
+          updated_at?: string
         }
         Update: {
-          addressee_id?: string
-          created_at?: string
-          id?: string
-          requester_id?: string
-          responded_at?: string | null
-          status?: Database["public"]["Enums"]["friendship_status"]
+          id?: boolean
+          support_enabled?: boolean
+          updated_at?: string
         }
         Relationships: []
       }
@@ -216,71 +207,6 @@ export type Database = {
         }
         Relationships: []
       }
-      focus_sessions: {
-        Row: {
-          created_at: string
-          date: string
-          id: string
-          label: string | null
-          minutes: number
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          date: string
-          id?: string
-          label?: string | null
-          minutes?: number
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          date?: string
-          id?: string
-          label?: string | null
-          minutes?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
-      reading_sessions: {
-        Row: {
-          book_id: string
-          created_at: string
-          date: string
-          id: string
-          minutes: number
-          units_read: number
-          user_id: string
-        }
-        Insert: {
-          book_id: string
-          created_at?: string
-          date: string
-          id?: string
-          minutes?: number
-          units_read?: number
-          user_id: string
-        }
-        Update: {
-          book_id?: string
-          created_at?: string
-          date?: string
-          id?: string
-          minutes?: number
-          units_read?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reading_sessions_book_id_fkey"
-            columns: ["book_id"]
-            isOneToOne: false
-            referencedRelation: "books"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       exercises: {
         Row: {
           created_at: string
@@ -326,6 +252,60 @@ export type Database = {
           id?: string
           status?: Database["public"]["Enums"]["feedback_status"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      focus_sessions: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          label: string | null
+          minutes: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          label?: string | null
+          minutes?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          label?: string | null
+          minutes?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["friendship_status"]
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["friendship_status"]
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["friendship_status"]
         }
         Relationships: []
       }
@@ -501,6 +481,44 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_sessions: {
+        Row: {
+          book_id: string
+          created_at: string
+          date: string
+          id: string
+          minutes: number
+          units_read: number
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          date: string
+          id?: string
+          minutes?: number
+          units_read?: number
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          minutes?: number
+          units_read?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_sessions_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reflections: {
         Row: {
           body: string
@@ -582,6 +600,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      support_methods: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          hint: string | null
+          id: string
+          kind: string
+          label: string
+          network: string | null
+          sort_order: number
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          hint?: string | null
+          id?: string
+          kind: string
+          label: string
+          network?: string | null
+          sort_order?: number
+          value?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          hint?: string | null
+          id?: string
+          kind?: string
+          label?: string
+          network?: string | null
+          sort_order?: number
+          value?: string
+        }
+        Relationships: []
       }
       workout_exercises: {
         Row: {
@@ -669,29 +723,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_admin: { Args: never; Returns: boolean }
-      is_owner: { Args: never; Returns: boolean }
-      are_friends: { Args: { a: string; b: string }; Returns: boolean }
-      search_profiles: {
-        Args: { q: string }
-        Returns: {
-          id: string
-          display_name: string | null
-          avatar_url: string | null
-        }[]
-      }
       admin_delete_user: { Args: { target: string }; Returns: undefined }
-      set_user_role: {
-        Args: { target: string; new_role: Database["public"]["Enums"]["user_role"] }
-        Returns: undefined
-      }
+      are_friends: { Args: { a: string; b: string }; Returns: boolean }
+      is_admin: { Args: never; Returns: boolean }
+      is_connected: { Args: { target: string }; Returns: boolean }
+      is_owner: { Args: never; Returns: boolean }
       landing_stats: {
         Args: never
         Returns: {
-          members: number
-          longest_streak: number
           avg_completion: number
+          longest_streak: number
+          members: number
         }[]
+      }
+      search_profiles: {
+        Args: { q: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+        }[]
+      }
+      set_user_role: {
+        Args: {
+          new_role: Database["public"]["Enums"]["user_role"]
+          target: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
@@ -839,6 +897,7 @@ export const Constants = {
       book_progress_mode: ["pages", "chapters"],
       book_status: ["to_read", "reading", "finished"],
       feedback_status: ["open", "planned", "done", "closed"],
+      friendship_status: ["pending", "accepted"],
       habit_frequency: [
         "daily",
         "weekly",

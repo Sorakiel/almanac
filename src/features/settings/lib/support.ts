@@ -1,60 +1,50 @@
-import type { LucideIcon } from 'lucide-react'
-import { Coffee, Gem } from 'lucide-react'
+import { Coffee, Gem, type LucideIcon } from 'lucide-react'
+import type { Database } from '@/types/database.generated'
 
 /**
- * Ways to support Almanac. Adding a method later = one entry here; the sheet
- * renders links and crypto addresses generically. RU + worldwide by design:
- * Boosty covers fiat from Russia, crypto covers everyone (and is withdrawable
- * without a foreign bank). No in-app payments — links out, addresses copy.
+ * Donation methods for the "Support Almanac" sheet. The rows live in the
+ * `support_methods` table so the owner can add/edit/enable them from the admin
+ * console (migration 0021) — no redeploy to change a link. Users read enabled
+ * rows; the owner reads all. No in-app payments: links open out, addresses copy.
  */
-export type SupportMethod =
-  | {
-      kind: 'link'
-      id: string
-      label: string
-      hint: string
-      icon: LucideIcon
-      /** Public URL. While it equals PLACEHOLDER_URL the method shows as "soon". */
-      url: string
-    }
-  | {
-      kind: 'crypto'
-      id: string
-      label: string
-      hint: string
-      icon: LucideIcon
-      network: string
-      /** Public wallet address. Empty string ⇒ the method shows as "soon". */
-      address: string
-    }
 
-/** Sentinel for a not-yet-filled link — keeps a broken href from shipping. */
-export const PLACEHOLDER_URL = 'REPLACE_ME'
+export type SupportKind = 'link' | 'crypto'
 
-export const SUPPORT_METHODS: readonly SupportMethod[] = [
-  {
-    kind: 'link',
-    id: 'boosty',
-    label: 'Boosty',
-    hint: 'One-off tip or monthly support',
-    icon: Coffee,
-    url: 'https://boosty.to/sorakield',
-  },
-  {
-    kind: 'crypto',
-    id: 'ton',
-    label: 'TON',
-    hint: 'The Open Network',
-    icon: Gem,
-    network: 'TON',
-    // TODO: paste the TON wallet address (UQ… / EQ…)
-    address: '',
-  },
-] as const
+export interface SupportMethod {
+  id: string
+  kind: SupportKind
+  label: string
+  hint: string | null
+  network: string | null
+  /** URL for links, wallet address for crypto. Empty ⇒ shown as "soon". */
+  value: string
+  enabled: boolean
+  sortOrder: number
+}
 
-/** A method is "live" once its link/address is filled in — otherwise "soon". */
+type SupportMethodRow = Database['public']['Tables']['support_methods']['Row']
+
+/** Icon per method kind — links wear the coffee cup, crypto the gem. */
+export const SUPPORT_KIND_ICON: Record<SupportKind, LucideIcon> = {
+  link: Coffee,
+  crypto: Gem,
+}
+
+/** Narrow a raw DB row to the domain type (kind is a free-text check column). */
+export function mapSupportMethod(row: SupportMethodRow): SupportMethod {
+  return {
+    id: row.id,
+    kind: row.kind === 'crypto' ? 'crypto' : 'link',
+    label: row.label,
+    hint: row.hint,
+    network: row.network,
+    value: row.value,
+    enabled: row.enabled,
+    sortOrder: row.sort_order,
+  }
+}
+
+/** A method is "live" (actionable) once its link/address is filled in. */
 export function isMethodLive(method: SupportMethod): boolean {
-  return method.kind === 'link'
-    ? method.url !== PLACEHOLDER_URL && method.url.length > 0
-    : method.address.length > 0
+  return method.value.trim().length > 0
 }

@@ -38,6 +38,7 @@ import { useTheme } from '@/hooks/useTheme'
 import { useToday } from '@/hooks/useToday'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useProfile } from '@/features/settings/hooks/useProfile'
+import { useSupportConfig } from '@/features/settings/hooks/useSupportConfig'
 import { browserTimezone } from '@/lib/date'
 
 function SettingsPage() {
@@ -48,6 +49,7 @@ function SettingsPage() {
   const setSound = usePrefsStore((s) => s.setSound)
   const { logOut } = useAuthActions()
   const { profile } = useProfile()
+  const { config: supportConfig } = useSupportConfig()
   const { dateKey } = useToday()
   const [timezoneOpen, setTimezoneOpen] = useState(false)
   const [reminderOpen, setReminderOpen] = useState(false)
@@ -69,6 +71,7 @@ function SettingsPage() {
       )
     : 0
   const soon = () => toast('This setting is coming soon.')
+  const supportVisible = Boolean(supportConfig?.enabled && supportConfig.methods.length > 0)
   const reminderEnabled = profile?.reminder_enabled ?? false
   const reminderHour = profile?.reminder_hour ?? 8
   const reminderMinute = profile?.reminder_minute ?? 0
@@ -120,7 +123,9 @@ function SettingsPage() {
           <SectionLabel>YOU</SectionLabel>
           <div className="flex flex-col">
             <Row icon={Trophy} label="Achievements" onClick={() => navigate('/achievements')} />
-            <Row icon={Heart} label="Support Almanac" onClick={() => setSupportOpen(true)} />
+            {supportVisible ? (
+              <Row icon={Heart} label="Support Almanac" onClick={() => setSupportOpen(true)} />
+            ) : null}
           </div>
         </section>
 

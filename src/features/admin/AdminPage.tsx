@@ -7,6 +7,7 @@ import { AdminRail } from '@/features/admin/components/AdminRail'
 import { MembersTable } from '@/features/admin/components/MembersTable'
 import { SignupsChart } from '@/features/admin/components/SignupsChart'
 import { FeedbackManager } from '@/features/admin/components/FeedbackManager'
+import { SupportManager } from '@/features/admin/components/SupportManager'
 import { AdminWorkspace } from '@/features/admin/components/desktop/AdminWorkspace'
 import { useAdminData } from '@/features/admin/hooks/useAdminData'
 import { useProfile } from '@/features/settings/hooks/useProfile'
@@ -125,6 +126,13 @@ function AdminPage() {
         <p className="label-mono mb-3">// feedback</p>
         <FeedbackManager items={data.feedback} todayKey={dateKey} />
       </div>
+
+      {isOwner ? (
+        <div>
+          <p className="label-mono mb-3">// support &amp; donations</p>
+          <SupportManager />
+        </div>
+      ) : null}
     </section>
   )
 }
