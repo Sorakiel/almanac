@@ -8,6 +8,7 @@ import {
   Clock,
   Coffee,
   Download,
+  Heart,
   Laptop,
   Moon,
   ShieldCheck,
@@ -26,6 +27,7 @@ import { SettingsRail } from '@/features/settings/components/SettingsRail'
 import { TimezoneSheet } from '@/features/settings/components/TimezoneSheet'
 import { ReminderSheet } from '@/features/settings/components/ReminderSheet'
 import { BackgroundSheet } from '@/features/settings/components/BackgroundSheet'
+import { SupportSheet } from '@/features/settings/components/SupportSheet'
 import { reminderTimeLabel } from '@/features/settings/lib/reminder'
 import { isDesktopApp } from '@/lib/desktop'
 import { APP_VERSION } from '@/lib/version'
@@ -50,6 +52,7 @@ function SettingsPage() {
   const [timezoneOpen, setTimezoneOpen] = useState(false)
   const [reminderOpen, setReminderOpen] = useState(false)
   const [backgroundOpen, setBackgroundOpen] = useState(false)
+  const [supportOpen, setSupportOpen] = useState(false)
   const runInBackground = useDesktopStore((s) => s.runInBackground)
   const showDesktop = isDesktopApp()
 
@@ -117,6 +120,7 @@ function SettingsPage() {
           <SectionLabel>YOU</SectionLabel>
           <div className="flex flex-col">
             <Row icon={Trophy} label="Achievements" onClick={() => navigate('/achievements')} />
+            <Row icon={Heart} label="Support Almanac" onClick={() => setSupportOpen(true)} />
           </div>
         </section>
 
@@ -191,6 +195,7 @@ function SettingsPage() {
         />
       ) : null}
       {backgroundOpen ? <BackgroundSheet open onOpenChange={setBackgroundOpen} /> : null}
+      {supportOpen ? <SupportSheet open onOpenChange={setSupportOpen} /> : null}
     </>
   )
 }
