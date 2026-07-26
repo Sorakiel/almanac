@@ -109,7 +109,7 @@ export function ReminderSheet({ open, onOpenChange, enabled, hour, minute }: Rem
                     'rounded-tile border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
                     active
-                      ? 'border-transparent bg-accent text-on-accent'
+                      ? 'border-transparent bg-accent-solid text-on-accent-solid'
                       : 'border-border text-muted hover:text-foreground',
                   )}
                 >

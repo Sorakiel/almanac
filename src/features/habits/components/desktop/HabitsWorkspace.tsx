@@ -57,7 +57,7 @@ export function HabitsWorkspace({
               className={cn(
                 'rounded-pill px-[15px] py-2 font-mono text-[11px] uppercase tracking-label transition-colors',
                 i === filterIndex
-                  ? 'bg-accent font-semibold text-on-accent'
+                  ? 'bg-accent-solid font-semibold text-on-accent-solid'
                   : 'border text-muted hover:text-foreground',
               )}
             >

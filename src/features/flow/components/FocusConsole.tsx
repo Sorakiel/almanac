@@ -169,7 +169,7 @@ export function FocusConsole({
             <button
               type="button"
               onClick={onComplete}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-[11px] bg-accent py-2.5 font-mono text-[11px] font-bold uppercase tracking-label text-on-accent transition-colors hover:bg-accent-deep hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-[11px] bg-accent-solid py-2.5 font-mono text-[11px] font-bold uppercase tracking-label text-on-accent-solid transition-colors hover:bg-accent-solid-hover hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
             >
               <Check className="h-3.5 w-3.5" aria-hidden="true" />
               {completeLabel}

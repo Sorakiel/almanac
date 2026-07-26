@@ -11,7 +11,7 @@ const TONES: Record<
     tile: 'from-accent to-accent-deep',
     wash: 'from-accent/[0.10]',
     border: 'border-accent/30',
-    chip: 'bg-accent text-on-accent',
+    chip: 'bg-accent-solid text-on-accent-solid',
     pip: 'bg-accent',
     text: 'text-accent',
   },

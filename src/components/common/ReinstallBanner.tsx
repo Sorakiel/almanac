@@ -25,7 +25,7 @@ export function ReinstallBanner() {
         href={reinstall.apkUrl}
         target="_blank"
         rel="noreferrer"
-        className="shrink-0 rounded-[10px] bg-accent px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-label text-on-accent transition-colors hover:bg-accent-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="shrink-0 rounded-[10px] bg-accent-solid px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-label text-on-accent-solid transition-colors hover:bg-accent-solid-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         Get APK
       </a>

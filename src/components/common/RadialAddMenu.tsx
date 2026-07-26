@@ -127,7 +127,7 @@ export function RadialAddMenu() {
         aria-label={open ? 'Close quick add' : 'Quick add'}
         aria-expanded={open}
         className={cn(
-          'flex h-[52px] w-[52px] items-center justify-center rounded-[17px] border-[3px] border-bg bg-accent text-2xl leading-none text-on-accent shadow-glow transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-90',
+          'flex h-[52px] w-[52px] items-center justify-center rounded-[17px] border-[3px] border-bg bg-accent-solid text-2xl leading-none text-on-accent-solid shadow-glow transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-90',
           open && 'opacity-0',
         )}
       >
@@ -166,7 +166,7 @@ export function RadialAddMenu() {
                       onClick={() => act(item.run)}
                       disabled={!interactive}
                       aria-label={item.label}
-                      className="absolute flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[15px] border border-accent/25 bg-surface text-accent shadow-glow transition-colors hover:bg-accent hover:text-on-accent disabled:pointer-events-none motion-safe:animate-cell-in"
+                      className="absolute flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[15px] border border-accent/25 bg-surface text-accent shadow-glow transition-colors hover:bg-accent-solid hover:text-on-accent-solid disabled:pointer-events-none motion-safe:animate-cell-in"
                       style={{
                         left: anchor.x + pos.x,
                         top: anchor.y + pos.y,
@@ -201,7 +201,7 @@ export function RadialAddMenu() {
                 type="button"
                 onClick={close}
                 aria-label="Close quick add"
-                className="absolute flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[17px] border-[3px] border-bg bg-accent text-on-accent shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-90"
+                className="absolute flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[17px] border-[3px] border-bg bg-accent-solid text-on-accent-solid shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-90"
                 style={{ left: anchor.x, top: anchor.y }}
               >
                 <X className="h-6 w-6" strokeWidth={2.25} aria-hidden="true" />

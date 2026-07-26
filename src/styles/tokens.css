@@ -18,9 +18,14 @@
   --color-accent: 239 136 87; /* #EF8857 */
   --color-accent-deep: 194 86 42; /* #C2562A */
   --color-on-accent: 14 14 16; /* dark ink for text on the orange accent */
-  /* Active nav pill — bright accent on dark (spec board reads its ink dark). */
-  --color-nav-active: 239 136 87; /* #EF8857 */
-  --color-on-nav-active: 14 14 16;
+  /* Solid accent fills (buttons, active toggles/tabs, the FAB) — measured off
+     the handoff: dark reads bright #EF8857 with dark ink; coffee reads deep
+     #C2562A with light ink (bright orange washes out on warm paper). Kept
+     separate from --color-accent/-deep, which stay theme-invariant because
+     the brand-mark gradient and low-opacity tints hardcode that literal pair. */
+  --color-accent-solid: 239 136 87; /* #EF8857 */
+  --color-on-accent-solid: 14 14 16;
+  --color-accent-solid-hover: 194 86 42; /* #C2562A */
   --color-border: 255 255 255; /* used at low opacity for hairlines */
   --color-teal: 42 157 143; /* #2A9D8F */
   --color-amber: 199 154 58; /* #C79A3A */
@@ -55,10 +60,11 @@
   --color-accent: 239 136 87; /* #EF8857 shared brand accent */
   --color-accent-deep: 194 86 42; /* #C2562A */
   --color-on-accent: 14 14 16; /* same dark ink — accent is identical in both themes */
-  /* Active nav pill — the deep accent on coffee (bright #EF8857 washes out on
-     warm paper); its ink is the light paper, not dark. */
-  --color-nav-active: 194 86 42; /* #C2562A */
-  --color-on-nav-active: 244 236 221; /* #F4ECDD */
+  /* Solid accent fills flip to the deep shade + light ink on coffee — see the
+     dark-theme block above for why this is a separate token from --color-accent. */
+  --color-accent-solid: 194 86 42; /* #C2562A */
+  --color-on-accent-solid: 244 236 221; /* #F4ECDD */
+  --color-accent-solid-hover: 239 136 87; /* #EF8857 */
   --color-border: 42 32 24; /* espresso hairline on light */
   --color-teal: 42 157 143;
   --color-amber: 199 154 58;

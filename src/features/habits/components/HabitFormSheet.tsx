@@ -270,7 +270,7 @@ export function HabitFormSheet() {
                     'rounded-tile border px-4 py-2.5 text-sm font-medium transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
                     active
-                      ? 'border-transparent bg-accent text-on-accent'
+                      ? 'border-transparent bg-accent-solid text-on-accent-solid'
                       : 'border-border text-muted hover:text-foreground',
                   )}
                 >
