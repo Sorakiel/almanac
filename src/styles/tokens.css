@@ -30,6 +30,12 @@
   --color-chrome: 21 21 23; /* #151517 */
   --color-panel: 36 36 39; /* #242427 */
 
+  /* Canvas glow — the spec board never paints a flat page; a warm radial glow
+     rises from the top and settles into the base. Mobile is centred at the top
+     edge; desktop shifts the origin left (see --bg-gradient-lg). */
+  --bg-gradient: radial-gradient(125% 85% at 50% 0%, #2a1f16 0%, rgb(var(--color-bg)) 48%);
+  --bg-gradient-lg: radial-gradient(140% 120% at 12% 0%, #2a1f16 0%, rgb(var(--color-bg)) 58%);
+
   --border-opacity: 0.08;
   color-scheme: dark;
 }
@@ -54,6 +60,11 @@
      the warm card that sits on the #F4ECDD workspace. */
   --color-chrome: 239 230 212; /* #EFE6D4 */
   --color-panel: 236 227 210; /* #ECE3D2 */
+
+  /* Coffee canvas glow — warm peach rising from the top into the beige canvas
+     (spec board: #f6ddc7 → #f4ecdd on mobile, #efe8d8 → #e2dac8 on desktop). */
+  --bg-gradient: radial-gradient(125% 85% at 50% 0%, #f6ddc7 0%, #f4ecdd 48%);
+  --bg-gradient-lg: radial-gradient(140% 120% at 12% 0%, #efe8d8 0%, #e8e1d1 46%, #e2dac8 100%);
 
   --border-opacity: 0.12;
   color-scheme: light;

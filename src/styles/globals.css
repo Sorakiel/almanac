@@ -17,6 +17,17 @@
   body {
     @apply bg-bg font-sans text-foreground;
     min-height: 100dvh;
+    /* Warm radial canvas glow (spec board) instead of a flat fill. Fixed to the
+       viewport so the glow stays anchored at the top edge while content scrolls;
+       bg-bg above is the fallback for the theme wipe / no-gradient contexts. */
+    background-image: var(--bg-gradient);
+    background-attachment: fixed;
+  }
+
+  @media (min-width: 1024px) {
+    body {
+      background-image: var(--bg-gradient-lg);
+    }
   }
 
   /* Visible focus ring for keyboard users (accessibility is not optional). */
