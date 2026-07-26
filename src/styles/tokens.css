@@ -18,6 +18,9 @@
   --color-accent: 239 136 87; /* #EF8857 */
   --color-accent-deep: 194 86 42; /* #C2562A */
   --color-on-accent: 14 14 16; /* dark ink for text on the orange accent */
+  /* Active nav pill — bright accent on dark (spec board reads its ink dark). */
+  --color-nav-active: 239 136 87; /* #EF8857 */
+  --color-on-nav-active: 14 14 16;
   --color-border: 255 255 255; /* used at low opacity for hairlines */
   --color-teal: 42 157 143; /* #2A9D8F */
   --color-amber: 199 154 58; /* #C79A3A */
@@ -30,26 +33,32 @@
   --color-chrome: 21 21 23; /* #151517 */
   --color-panel: 36 36 39; /* #242427 */
 
-  /* Canvas glow — the spec board never paints a flat page; a warm radial glow
-     rises from the top and settles into the base. Mobile is centred at the top
-     edge; desktop shifts the origin left (see --bg-gradient-lg). */
-  --bg-gradient: radial-gradient(125% 85% at 50% 0%, #2a1f16 0%, rgb(var(--color-bg)) 48%);
-  --bg-gradient-lg: radial-gradient(140% 120% at 12% 0%, #2a1f16 0%, rgb(var(--color-bg)) 58%);
+  /* Mobile canvas glow — the phone frame lifts a warm radial glow from the top
+     edge into the base (spec board). Desktop keeps the frame flat (globals.css
+     drops the gradient at lg, matching the measured #1b1b1d workspace). */
+  --bg-gradient: radial-gradient(120% 80% at 50% 0%, #2a1f16 0%, rgb(var(--color-bg)) 46%);
 
   --border-opacity: 0.08;
   color-scheme: dark;
 }
 
 :root[data-theme='coffee'] {
-  --color-bg: 236 227 210; /* #ECE3D2 canvas */
+  /* Measured off the desktop handoff: the workspace frame is the lighter paper
+     (#F4ECDD) and cards/panels sit a step darker (#ECE3D2) — the inverse of a
+     dark theme. Getting these two the same made panels vanish into the canvas. */
+  --color-bg: 244 236 221; /* #F4ECDD canvas / workspace frame */
   --color-bg-deep: 224 210 188; /* #E0D2BC deep panel */
-  --color-surface: 244 236 221; /* #F4ECDD */
+  --color-surface: 236 227 210; /* #ECE3D2 cards / inputs (a step below canvas) */
   --color-foreground: 42 32 24; /* #2A2018 espresso */
   --color-muted: 110 95 78; /* #6E5F4E */
   --color-muted-strong: 138 122 102; /* darker mute for AA on light */
   --color-accent: 239 136 87; /* #EF8857 shared brand accent */
   --color-accent-deep: 194 86 42; /* #C2562A */
   --color-on-accent: 14 14 16; /* same dark ink — accent is identical in both themes */
+  /* Active nav pill — the deep accent on coffee (bright #EF8857 washes out on
+     warm paper); its ink is the light paper, not dark. */
+  --color-nav-active: 194 86 42; /* #C2562A */
+  --color-on-nav-active: 244 236 221; /* #F4ECDD */
   --color-border: 42 32 24; /* espresso hairline on light */
   --color-teal: 42 157 143;
   --color-amber: 199 154 58;
@@ -61,10 +70,9 @@
   --color-chrome: 239 230 212; /* #EFE6D4 */
   --color-panel: 236 227 210; /* #ECE3D2 */
 
-  /* Coffee canvas glow — warm peach rising from the top into the beige canvas
-     (spec board: #f6ddc7 → #f4ecdd on mobile, #efe8d8 → #e2dac8 on desktop). */
-  --bg-gradient: radial-gradient(125% 85% at 50% 0%, #f6ddc7 0%, #f4ecdd 48%);
-  --bg-gradient-lg: radial-gradient(140% 120% at 12% 0%, #efe8d8 0%, #e8e1d1 46%, #e2dac8 100%);
+  /* Coffee mobile glow — warm peach rising from the top into the paper canvas
+     (spec board phone). Desktop stays flat #F4ECDD (globals.css drops it at lg). */
+  --bg-gradient: radial-gradient(120% 80% at 50% 0%, #f6ddc7 0%, rgb(var(--color-bg)) 48%);
 
   --border-opacity: 0.12;
   color-scheme: light;

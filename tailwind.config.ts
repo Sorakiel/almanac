@@ -26,6 +26,8 @@ export default {
         accent: withOpacity('--color-accent'),
         'accent-deep': withOpacity('--color-accent-deep'),
         'on-accent': withOpacity('--color-on-accent'),
+        'nav-active': withOpacity('--color-nav-active'),
+        'on-nav-active': withOpacity('--color-on-nav-active'),
         border: withOpacity('--color-border'),
         teal: withOpacity('--color-teal'),
         amber: withOpacity('--color-amber'),

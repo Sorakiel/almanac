@@ -43,7 +43,7 @@ function NavRow({ entry }: { entry: NavEntry }) {
         cn(
           'flex items-center gap-3 rounded-[13px] px-3.5 py-3 text-[14.5px] transition-colors',
           isActive
-            ? 'bg-accent font-semibold text-on-accent'
+            ? 'bg-nav-active font-semibold text-on-nav-active'
             : 'text-muted hover:bg-surface/60 hover:text-foreground',
         )
       }
