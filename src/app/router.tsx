@@ -49,6 +49,7 @@ const ModulesPage = lazyWithReload(() => import('@/features/modules/ModulesPage'
 const SettingsPage = lazyWithReload(() => import('@/features/settings/SettingsPage'))
 const WorkoutsPage = lazyWithReload(() => import('@/features/workouts/WorkoutsPage'))
 const WorkoutDetailPage = lazyWithReload(() => import('@/features/workouts/WorkoutDetailPage'))
+const WorkoutSessionPage = lazyWithReload(() => import('@/features/workouts/WorkoutSessionPage'))
 const ReflectPage = lazyWithReload(() => import('@/features/reflect/ReflectPage'))
 const BooksPage = lazyWithReload(() => import('@/features/reading/BooksPage'))
 const BookDetailPage = lazyWithReload(() => import('@/features/reading/BookDetailPage'))
@@ -68,6 +69,7 @@ export const router = createBrowserRouter([
     errorElement: <RouteError />,
     children: [
       { path: '/welcome', element: suspend(<OnboardingPage />) },
+      { path: '/train/:id/session', element: suspend(<WorkoutSessionPage />) },
       {
         element: <AppLayout />,
         children: [

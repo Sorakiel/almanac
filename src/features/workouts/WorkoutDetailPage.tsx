@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, Dumbbell, Loader2, Pencil, Plus } from 'lucide-react'
+import { ArrowLeft, Check, Dumbbell, Loader2, Pencil, Play, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { IconTile } from '@/components/common/IconTile'
 import { Tag } from '@/components/common/Tag'
@@ -15,10 +15,10 @@ import { WorkoutFormSheet } from '@/features/workouts/components/WorkoutFormShee
 import { WorkoutSessionRail } from '@/features/workouts/components/desktop/WorkoutSessionRail'
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
+import { useWorkoutSessionStore } from '@/stores/workoutSession'
 import { useExerciseLibrary } from '@/features/workouts/hooks/useExerciseLibrary'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
-import { cn } from '@/lib/utils'
 
 /** Friendly label for a `YYYY-MM-DD` date, UTC-safe. */
 function formatDate(dateKey: string): string {
@@ -37,6 +37,7 @@ function WorkoutDetailPage() {
   useBreadcrumbLeaf(workout?.name)
   const mutations = useSessionMutations(id)
   const { exercises: library } = useExerciseLibrary()
+  const startSessionClock = useWorkoutSessionStore((s) => s.start)
   const [editOpen, setEditOpen] = useState(false)
   const [addOpen, setAddOpen] = useState(false)
 
@@ -71,6 +72,12 @@ function WorkoutDetailPage() {
     mutations.setCompleted.mutate(!done, {
       onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not update the workout'),
     })
+
+  const startSession = () => {
+    startSessionClock(id)
+    navigate(`/train/${id}/session`)
+  }
+  const hasExercises = exercises.length > 0
 
   return (
     <>
@@ -123,16 +130,24 @@ function WorkoutDetailPage() {
           </Button>
         </section>
 
-        <Button
-          size="lg"
-          variant={done ? 'surface' : 'primary'}
-          className={cn('w-full', !done && 'shadow-glow')}
-          disabled={mutations.setCompleted.isPending}
-          onClick={toggleComplete}
-        >
-          <Check className="h-4 w-4" />
-          {done ? 'Completed — tap to reopen' : 'Complete workout'}
-        </Button>
+        <div className="flex flex-col gap-3">
+          {hasExercises ? (
+            <Button size="lg" className="w-full shadow-glow" onClick={startSession}>
+              <Play className="h-4 w-4" />
+              {done ? 'Train again' : 'Start session'}
+            </Button>
+          ) : null}
+          <Button
+            size="lg"
+            variant="surface"
+            className="w-full"
+            disabled={mutations.setCompleted.isPending}
+            onClick={toggleComplete}
+          >
+            <Check className="h-4 w-4" />
+            {done ? 'Completed — tap to reopen' : 'Mark complete'}
+          </Button>
+        </div>
       </div>
 
       <Rail>

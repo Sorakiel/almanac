@@ -5,11 +5,15 @@ import { CountUp } from '@/components/common/CountUp'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { WorkoutCard } from '@/features/workouts/components/WorkoutCard'
+import { WeekStrip } from '@/features/workouts/components/WeekStrip'
+import { TodaySessionCard } from '@/features/workouts/components/TodaySessionCard'
 import { splitWorkouts, summarize } from '@/features/workouts/lib/summary'
+import type { TrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import type { WorkoutView } from '@/features/workouts/types'
 
 interface WorkoutsWorkspaceProps {
   workouts: WorkoutView[]
+  overview: TrainingOverview
   isLoading: boolean
   isError: boolean
   refetch: () => void
@@ -32,6 +36,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 /** Desktop workouts workspace: header, stat tiles, to-do / completed sections. */
 export function WorkoutsWorkspace({
   workouts,
+  overview,
   isLoading,
   isError,
   refetch,
@@ -44,8 +49,8 @@ export function WorkoutsWorkspace({
     <div className="mx-auto w-full max-w-[900px]">
       <header className="flex items-start justify-between">
         <div>
-          <p className="label-mono">// train</p>
-          <h1 className="mt-1.5 text-[40px] leading-none tracking-title">Workouts</h1>
+          <p className="label-mono">// {overview.week.label}</p>
+          <h1 className="mt-1.5 text-[40px] leading-none tracking-title">Training</h1>
           <p className="mt-2 text-[15px] text-muted">
             Plan sessions and log what you actually did.
           </p>
@@ -88,7 +93,18 @@ export function WorkoutsWorkspace({
         </div>
       ) : (
         <Cascade>
-          <section className="mt-7 flex gap-3.5">
+          <section className="mt-7">
+            <WeekStrip days={overview.week.days} />
+          </section>
+
+          {overview.todaysWorkout ? (
+            <section className="mt-6 flex flex-col gap-3">
+              <SectionLabel>TODAY</SectionLabel>
+              <TodaySessionCard workout={overview.todaysWorkout} doneToday={overview.todayDone} />
+            </section>
+          ) : null}
+
+          <section className="mt-8 flex gap-3.5">
             <Stat label="sessions" value={String(stats.total)} accent />
             <Stat label="completed" value={String(stats.completed)} />
             <Stat label="planned" value={String(stats.planned)} />
