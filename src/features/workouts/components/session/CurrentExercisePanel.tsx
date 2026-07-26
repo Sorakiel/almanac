@@ -1,6 +1,5 @@
-import { Check, Play, Timer } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { exerciseTargetLabel, formatClock } from '@/features/workouts/lib/session'
+import { Check, Play } from 'lucide-react'
+import { exerciseTargetLabel } from '@/features/workouts/lib/session'
 import type { SessionExercise, SetLog } from '@/features/workouts/types'
 import { cn } from '@/lib/utils'
 
@@ -8,92 +7,76 @@ interface CurrentExercisePanelProps {
   exercise: SessionExercise
   /** The set to complete next, or null when every set is done. */
   currentSet: SetLog | null
-  restMs: number | null
-  onCompleteSet: () => void
-  onSkipRest: () => void
-  disabled: boolean
 }
 
-/** One set chip: ✓ when done, accent ring when current, muted when upcoming. */
-function SetChip({ set, isCurrent }: { set: SetLog; isCurrent: boolean }) {
-  const value = set.reps != null ? `${set.reps}${set.weight != null ? `×${set.weight}` : ''}` : '—'
+/** One set cell: ✓ when done, rep-count with an accent ring when current, else ○. */
+function SetCell({ set, isCurrent }: { set: SetLog; isCurrent: boolean }) {
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center rounded-2xl border py-3',
-        set.done && 'border-teal/40 bg-teal/10 text-teal',
-        isCurrent && !set.done && 'border-accent bg-accent/10',
-        !set.done && !isCurrent && 'bg-surface text-muted',
+        'flex-1 rounded-[14px] bg-bg py-4 text-center',
+        isCurrent && 'border-[1.5px] border-accent',
       )}
     >
-      <span className="font-mono text-[9px] uppercase tracking-label text-muted-strong">
+      <div
+        className={cn(
+          'font-mono text-[10px] uppercase tracking-label',
+          isCurrent ? 'text-accent' : 'text-muted-strong',
+        )}
+      >
         set {set.set_number}
-      </span>
-      <span className="mt-1 text-sm font-semibold tabular-nums">
-        {set.done ? <Check className="h-4 w-4" aria-hidden="true" /> : value}
-      </span>
+      </div>
+      <div className="mt-1.5 flex h-6 items-center justify-center">
+        {set.done ? (
+          <Check className="h-5 w-5 text-accent" aria-hidden="true" />
+        ) : isCurrent ? (
+          <span className="font-mono text-[20px] font-semibold leading-none tabular-nums">
+            {set.reps ?? '—'}
+          </span>
+        ) : (
+          <span
+            aria-hidden="true"
+            className="h-5 w-5 rounded-full border-[1.5px] border-muted-strong/40"
+          />
+        )}
+      </div>
     </div>
   )
 }
 
-/** The focused current-exercise block: target, set grid, rest timer, complete CTA. */
-export function CurrentExercisePanel({
-  exercise,
-  currentSet,
-  restMs,
-  onCompleteSet,
-  onSkipRest,
-  disabled,
-}: CurrentExercisePanelProps) {
+/** The focused current-exercise block: warm gradient card, target, and set grid. */
+export function CurrentExercisePanel({ exercise, currentSet }: CurrentExercisePanelProps) {
   const target = exerciseTargetLabel(exercise)
-  const resting = restMs !== null
 
   return (
-    <section className="rounded-[28px] border bg-panel p-5 lg:p-6">
-      <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-accent">
-        <Play className="h-3 w-3" aria-hidden="true" />
+    <>
+      <p className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
+        <Play className="h-3 w-3 fill-current" aria-hidden="true" />
         current exercise
       </p>
-      <h2 className="mt-2 text-2xl font-semibold tracking-title lg:text-[28px]">{exercise.name}</h2>
-      {target ? (
-        <p className="mt-1 font-mono text-xs uppercase tracking-label text-muted-strong">{target}</p>
-      ) : null}
 
-      {exercise.sets.length > 0 ? (
-        <div className="mt-5 grid grid-cols-4 gap-2 sm:grid-cols-6">
-          {exercise.sets.map((set) => (
-            <SetChip key={set.id} set={set} isCurrent={set.id === currentSet?.id} />
-          ))}
+      <div className="mt-3.5 rounded-[24px] border border-accent/30 bg-gradient-to-br from-accent/[0.12] to-surface p-6 lg:p-8">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="min-w-0 truncate text-[26px] font-semibold tracking-title lg:text-[32px]">
+            {exercise.name}
+          </h2>
+          {target ? (
+            <span className="flex-none font-mono text-[13px] uppercase text-accent lg:text-sm">
+              {target}
+            </span>
+          ) : null}
         </div>
-      ) : (
-        <p className="mt-5 text-sm text-muted">No sets planned — add sets on the workout page.</p>
-      )}
 
-      {resting ? (
-        <div className="mt-4 flex items-center justify-between rounded-2xl border border-accent/30 bg-accent/5 px-4 py-2.5">
-          <span className="flex items-center gap-2 font-mono text-xs uppercase tracking-label text-accent">
-            <Timer className="h-3.5 w-3.5" aria-hidden="true" />
-            rest {formatClock(restMs)}
-          </span>
-          <button
-            type="button"
-            onClick={onSkipRest}
-            className="font-mono text-[10px] uppercase tracking-label text-muted hover:text-foreground"
-          >
-            skip
-          </button>
-        </div>
-      ) : null}
-
-      <Button
-        size="lg"
-        className="mt-5 w-full shadow-glow"
-        disabled={disabled || !currentSet}
-        onClick={onCompleteSet}
-      >
-        <Check className="h-4 w-4" />
-        {currentSet ? `Complete set ${currentSet.set_number}` : 'Exercise complete'}
-      </Button>
-    </section>
+        {exercise.sets.length > 0 ? (
+          <div className="mt-5 flex gap-2.5 lg:gap-3">
+            {exercise.sets.map((set) => (
+              <SetCell key={set.id} set={set} isCurrent={set.id === currentSet?.id} />
+            ))}
+          </div>
+        ) : (
+          <p className="mt-5 text-sm text-muted">No sets planned — add sets on the workout page.</p>
+        )}
+      </div>
+    </>
   )
 }

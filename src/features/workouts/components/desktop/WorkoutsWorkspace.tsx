@@ -1,13 +1,14 @@
+import { useState } from 'react'
 import { Dumbbell, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Cascade } from '@/components/common/Cascade'
-import { CountUp } from '@/components/common/CountUp'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { WorkoutCard } from '@/features/workouts/components/WorkoutCard'
 import { WeekStrip } from '@/features/workouts/components/WeekStrip'
 import { TodaySessionCard } from '@/features/workouts/components/TodaySessionCard'
-import { splitWorkouts, summarize } from '@/features/workouts/lib/summary'
+import { workoutForDay } from '@/features/workouts/lib/week'
+import { splitWorkouts } from '@/features/workouts/lib/summary'
 import type { TrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import type { WorkoutView } from '@/features/workouts/types'
 
@@ -20,20 +21,15 @@ interface WorkoutsWorkspaceProps {
   onNew: () => void
 }
 
-function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div className="flex-1 rounded-2xl border bg-panel px-5 py-[18px]">
-      <p className="font-mono text-[9.5px] uppercase tracking-label text-muted-strong">{label}</p>
-      <p
-        className={`mt-1 text-[27px] font-semibold tabular-nums tracking-title ${accent ? 'text-accent' : ''}`}
-      >
-        {/^\d+$/.test(value) ? <CountUp value={Number(value)} /> : value}
-      </p>
-    </div>
+/** Friendly "Monday, 6 July" from a `YYYY-MM-DD` key, UTC-safe. */
+function dayLabel(dateKey: string): string {
+  const [y, m, d] = dateKey.split('-').map(Number)
+  return new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).format(
+    new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)),
   )
 }
 
-/** Desktop workouts workspace: header, stat tiles, to-do / completed sections. */
+/** Desktop training workspace: week strip, the selected day's session, sessions. */
 export function WorkoutsWorkspace({
   workouts,
   overview,
@@ -42,8 +38,9 @@ export function WorkoutsWorkspace({
   refetch,
   onNew,
 }: WorkoutsWorkspaceProps) {
+  const [selectedKey, setSelectedKey] = useState(overview.todayKey)
   const { active, completed } = splitWorkouts(workouts)
-  const stats = summarize(workouts)
+  const selected = workoutForDay(overview.workouts, selectedKey, overview.timezone)
 
   return (
     <div className="mx-auto w-full max-w-[900px]">
@@ -94,20 +91,24 @@ export function WorkoutsWorkspace({
       ) : (
         <Cascade>
           <section className="mt-7">
-            <WeekStrip days={overview.week.days} />
+            <WeekStrip
+              days={overview.week.days}
+              selectedKey={selectedKey}
+              onSelect={setSelectedKey}
+            />
           </section>
 
-          {overview.todaysWorkout ? (
-            <section className="mt-6 flex flex-col gap-3">
-              <SectionLabel>TODAY</SectionLabel>
-              <TodaySessionCard workout={overview.todaysWorkout} doneToday={overview.todayDone} />
-            </section>
-          ) : null}
-
-          <section className="mt-8 flex gap-3.5">
-            <Stat label="sessions" value={String(stats.total)} accent />
-            <Stat label="completed" value={String(stats.completed)} />
-            <Stat label="planned" value={String(stats.planned)} />
+          <section className="mt-8">
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-strong">
+              {selectedKey === overview.todayKey ? 'today' : dayLabel(selectedKey)}
+            </p>
+            {selected ? (
+              <TodaySessionCard workout={selected.workout} doneToday={selected.done} />
+            ) : (
+              <div className="rounded-[22px] border border-dashed p-7 text-center">
+                <p className="text-sm text-muted">No session scheduled — rest day.</p>
+              </div>
+            )}
           </section>
 
           {active.length > 0 ? (

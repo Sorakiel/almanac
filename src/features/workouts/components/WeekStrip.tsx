@@ -3,57 +3,63 @@ import { cn } from '@/lib/utils'
 
 interface WeekStripProps {
   days: WeekDay[]
+  /** Currently selected day's `YYYY-MM-DD`. */
+  selectedKey: string
+  onSelect: (dateKey: string) => void
 }
 
-/** A day marker: filled when all due workouts are done, ring when some remain. */
-function DayMarker({ day }: { day: WeekDay }) {
-  if (day.dueCount === 0) return <span className="mt-2 block h-1.5 w-1.5" aria-hidden="true" />
-  const allDone = day.doneCount >= day.dueCount
+/** Monday-anchored 7-day strip; each day is selectable, today/selected accented. */
+export function WeekStrip({ days, selectedKey, onSelect }: WeekStripProps) {
   return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        'mt-2 block h-1.5 w-1.5 rounded-full',
-        allDone ? 'bg-teal' : 'border border-teal/60',
-      )}
-    />
-  )
-}
-
-/** Monday-anchored 7-day training strip; today's cell is accent-highlighted. */
-export function WeekStrip({ days }: WeekStripProps) {
-  return (
-    <ol className="grid grid-cols-7 gap-1.5">
+    <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
       {days.map((day) => {
+        const selected = day.dateKey === selectedKey
         const label =
           day.dueCount === 0
             ? `${day.weekday} ${day.dayOfMonth}, rest day`
-            : `${day.weekday} ${day.dayOfMonth}, ${day.doneCount} of ${day.dueCount} done`
+            : `${day.weekday} ${day.dayOfMonth}, ${day.dueCount} session${day.dueCount > 1 ? 's' : ''}`
         return (
-          <li
-            key={day.dateKey}
-            aria-current={day.isToday ? 'date' : undefined}
-            aria-label={label}
-            className={cn(
-              'flex flex-col items-center rounded-2xl border py-2.5 transition-colors',
-              day.isToday ? 'border-accent/50 bg-accent/10' : 'bg-surface',
-            )}
-          >
-            <span className="font-mono text-[9px] uppercase tracking-label text-muted-strong">
-              {day.weekday}
-            </span>
-            <span
+          <div key={day.dateKey} className="min-w-0 text-center">
+            <div
               className={cn(
-                'mt-1 text-[15px] font-semibold tabular-nums',
-                day.isToday && 'text-accent',
+                'font-mono text-[10px] uppercase tracking-label',
+                selected ? 'text-accent' : 'text-muted-strong',
               )}
             >
-              {day.dayOfMonth}
-            </span>
-            <DayMarker day={day} />
-          </li>
+              {day.weekday}
+            </div>
+            <button
+              type="button"
+              onClick={() => onSelect(day.dateKey)}
+              aria-pressed={selected}
+              aria-current={day.isToday ? 'date' : undefined}
+              aria-label={label}
+              className={cn(
+                'mt-2 flex h-[62px] w-full flex-col items-center justify-center gap-2 rounded-[15px] border transition-colors sm:h-[70px]',
+                selected
+                  ? 'border-accent/40 bg-gradient-to-br from-accent/15 to-panel'
+                  : 'border-transparent bg-panel hover:border-border/25',
+              )}
+            >
+              <span
+                className={cn(
+                  'text-base font-semibold tabular-nums',
+                  selected && 'text-accent',
+                )}
+              >
+                {day.dayOfMonth}
+              </span>
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'h-1.5 w-1.5 rounded-full',
+                  day.dueCount > 0 ? 'bg-accent' : 'bg-muted-strong/40',
+                )}
+              />
+            </button>
+          </div>
         )
       })}
-    </ol>
+    </div>
   )
 }

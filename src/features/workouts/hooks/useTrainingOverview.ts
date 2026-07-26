@@ -2,17 +2,20 @@ import { useMemo } from 'react'
 import { useToday } from '@/hooks/useToday'
 import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
 import { buildWeek, type WeekView } from '@/features/workouts/lib/week'
-import { isDoneOn, isDueOn } from '@/features/workouts/lib/recurrence'
 import type { WorkoutView } from '@/features/workouts/types'
 
 export interface TrainingOverview {
   week: WeekView
-  /** Today's session to surface, preferring one not yet done. Null on a rest day. */
-  todaysWorkout: WorkoutView | null
-  /** Whether `todaysWorkout` is already completed today. */
-  todayDone: boolean
+  /** All of the user's workouts (for per-day lookups + list rendering). */
+  workouts: WorkoutView[]
+  /** The user's local `YYYY-MM-DD` today — the default selected day. */
+  todayKey: string
+  /** IANA timezone used for day math. */
+  timezone: string
   /** Most recently completed sessions, newest first. */
   recent: WorkoutView[]
+  /** Total completed sessions all-time. */
+  completedCount: number
   /** Due / done slot counts across the current week. */
   weekDue: number
   weekDone: number
@@ -29,13 +32,8 @@ export function useTrainingOverview(): TrainingOverview {
   return useMemo(() => {
     const week = buildWeek(dateKey, workouts, timezone)
 
-    const dueToday = workouts.filter((w) => isDueOn(w, dateKey))
-    const todaysWorkout =
-      dueToday.find((w) => !isDoneOn(w, dateKey, timezone)) ?? dueToday[0] ?? null
-    const todayDone = todaysWorkout ? isDoneOn(todaysWorkout, dateKey, timezone) : false
-
-    const recent = workouts
-      .filter((w) => w.completed_at)
+    const completed = workouts.filter((w) => w.completed_at)
+    const recent = [...completed]
       .sort((a, b) => (b.completed_at ?? '').localeCompare(a.completed_at ?? ''))
       .slice(0, 4)
 
@@ -44,9 +42,11 @@ export function useTrainingOverview(): TrainingOverview {
 
     return {
       week,
-      todaysWorkout,
-      todayDone,
+      workouts,
+      todayKey: dateKey,
+      timezone,
       recent,
+      completedCount: completed.length,
       weekDue,
       weekDone,
       isLoading,

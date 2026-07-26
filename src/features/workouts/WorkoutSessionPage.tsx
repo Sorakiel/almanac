@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ChevronLeft, Loader2, Timer } from 'lucide-react'
+import { Check, ChevronLeft, Loader2, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
@@ -18,8 +18,9 @@ import {
   formatClock,
   sessionProgress,
 } from '@/features/workouts/lib/session'
+import { cn } from '@/lib/utils'
 
-/** Focused live-session runner (no app shell) — the spec-board session screen. */
+/** Focused live-session runner (no app shell) — spec-board screen 08. */
 function WorkoutSessionPage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
@@ -63,6 +64,10 @@ function WorkoutSessionPage() {
   const currentIndex = currentExerciseIndex(exercises)
   const currentExercise = currentIndex >= 0 ? exercises[currentIndex] : null
   const currentSet = currentExercise ? firstUndoneSet(currentExercise) : null
+  const exerciseLabel =
+    exercises.length > 0
+      ? `exercise ${Math.min(currentIndex + 1, exercises.length)} / ${exercises.length}`
+      : 'no exercises'
 
   const completeCurrentSet = () => {
     if (!currentSet) return
@@ -76,69 +81,109 @@ function WorkoutSessionPage() {
   const leave = () => navigate(`/train/${id}`)
 
   return (
-    <div className="min-h-dvh bg-bg px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] lg:px-8">
-      <div className="mx-auto w-full max-w-[1040px]">
-        <header className="flex items-center gap-3 py-3">
+    <div className="flex min-h-dvh flex-col bg-bg text-foreground">
+      {/* Focused top bar (replaces the nav shell) */}
+      <header className="flex h-14 flex-none items-center justify-between gap-3 border-b bg-chrome px-4 pt-[env(safe-area-inset-top)] lg:px-6">
+        <div className="flex min-w-0 items-center gap-3.5">
           <button
             type="button"
             onClick={leave}
             aria-label="Leave session"
-            className="rounded-full p-1 text-muted hover:text-foreground"
+            className="-ml-1 rounded-full p-1 text-muted hover:text-foreground"
           >
-            <ChevronLeft className="h-6 w-6" aria-hidden="true" />
+            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           </button>
-          <h1 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-title">
-            {workout.name}
-          </h1>
-          <span className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-label text-muted">
+          <span className="truncate font-mono text-xs font-semibold">{workout.name}</span>
+          <span className="flex flex-none items-center gap-1.5 font-mono text-[11px] uppercase tracking-label text-accent">
             <Timer className="h-3.5 w-3.5" aria-hidden="true" />
             {formatClock(elapsedMs)} elapsed
           </span>
-        </header>
+        </div>
+        <span className="flex-none rounded-full bg-surface px-3.5 py-[7px] font-mono text-[11px] text-muted">
+          {exerciseLabel}
+        </span>
+      </header>
 
-        <div className="flex items-center gap-3 pb-5">
-          <span className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-            {exercises.length > 0 ? `exercise ${Math.min(currentIndex + 1, exercises.length)} / ${exercises.length}` : 'no exercises'}
-          </span>
-          <ProgressBlocks
-            value={progress.doneSets}
-            total={progress.totalSets}
-            blocks={14}
-            size="sm"
-            animated
-            className="flex-1"
-            aria-label={`${progress.doneSets} of ${progress.totalSets} sets done`}
-          />
-          <span className="font-mono text-xs tabular-nums text-muted">{progress.pct}%</span>
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        {/* Workspace */}
+        <div className="flex min-w-0 flex-1 flex-col px-5 py-6 lg:px-11 lg:py-9">
+          <div className="flex items-center gap-4">
+            <ProgressBlocks
+              value={progress.doneSets}
+              total={progress.totalSets}
+              blocks={14}
+              size="md"
+              animated
+              aria-label={`${progress.doneSets} of ${progress.totalSets} sets done`}
+            />
+            <div className="flex-1" />
+            <span className="font-mono text-[15px] font-semibold tabular-nums">{progress.pct}%</span>
+          </div>
+
+          {exercises.length === 0 ? (
+            <div className="mt-10">
+              <EmptyState
+                title="No exercises in this session"
+                description="Plan the workout first, then come back to run it."
+                action={
+                  <Button size="sm" onClick={leave}>
+                    Plan this workout
+                  </Button>
+                }
+              />
+            </div>
+          ) : (
+            <>
+              <div className="mt-7">
+                {currentExercise ? (
+                  <CurrentExercisePanel exercise={currentExercise} currentSet={currentSet} />
+                ) : null}
+              </div>
+
+              <div className="hidden flex-1 lg:block" />
+
+              {/* Action bar: persistent rest + complete */}
+              <div className="mt-7 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => (restMs !== null ? skipRest() : startRest())}
+                  className={cn(
+                    'flex-none rounded-[15px] border px-4 font-mono text-[13px] transition-colors sm:w-[120px]',
+                    restMs !== null
+                      ? 'border-accent/40 bg-accent/10 text-accent'
+                      : 'bg-surface text-muted hover:text-foreground',
+                  )}
+                >
+                  <span className="flex items-center justify-center gap-1.5 py-[18px]">
+                    <Timer className="h-3.5 w-3.5" aria-hidden="true" />
+                    {restMs !== null ? formatClock(restMs) : 'rest 90s'}
+                  </span>
+                </button>
+                <Button
+                  size="lg"
+                  className="h-auto flex-1 py-[18px] text-base shadow-glow"
+                  disabled={!currentSet || mutations.editSet.isPending}
+                  onClick={completeCurrentSet}
+                >
+                  <Check className="h-4 w-4" />
+                  {currentSet ? `Complete set ${currentSet.set_number}` : 'Session complete'}
+                </Button>
+              </div>
+
+              {/* Mobile queue (rail is desktop-only) */}
+              <div className="mt-9 lg:hidden">
+                <SessionQueue exercises={exercises} currentIndex={currentIndex} />
+              </div>
+            </>
+          )}
         </div>
 
-        {exercises.length === 0 ? (
-          <EmptyState
-            title="No exercises in this session"
-            description="Plan the workout first, then come back to run it."
-            action={
-              <Button size="sm" onClick={leave}>
-                Plan this workout
-              </Button>
-            }
-          />
-        ) : (
-          <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
-            {currentExercise ? (
-              <CurrentExercisePanel
-                exercise={currentExercise}
-                currentSet={currentSet}
-                restMs={restMs}
-                onCompleteSet={completeCurrentSet}
-                onSkipRest={skipRest}
-                disabled={mutations.editSet.isPending}
-              />
-            ) : null}
-            <aside className="lg:pt-1">
-              <SessionQueue exercises={exercises} currentIndex={currentIndex} />
-            </aside>
-          </div>
-        )}
+        {/* Desktop queue rail */}
+        {exercises.length > 0 ? (
+          <aside className="hidden w-[360px] flex-none overflow-y-auto border-l bg-chrome px-6 py-7 lg:block">
+            <SessionQueue exercises={exercises} currentIndex={currentIndex} />
+          </aside>
+        ) : null}
       </div>
 
       <CelebrationModal

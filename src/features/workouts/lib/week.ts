@@ -64,3 +64,18 @@ export function buildWeek(
 
   return { label, days }
 }
+
+/**
+ * The session to surface for a given day: the one due that day, preferring one
+ * not yet completed, with a per-day done flag. Null when nothing is scheduled.
+ */
+export function workoutForDay(
+  workouts: WorkoutView[],
+  dateKey: string,
+  timezone: string,
+): { workout: WorkoutView; done: boolean } | null {
+  const due = workouts.filter((w) => isDueOn(w, dateKey))
+  const workout = due.find((w) => !isDoneOn(w, dateKey, timezone)) ?? due[0]
+  if (!workout) return null
+  return { workout, done: isDoneOn(workout, dateKey, timezone) }
+}

@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react'
 import { exerciseTargetLabel, isExerciseDone } from '@/features/workouts/lib/session'
 import type { SessionExercise } from '@/features/workouts/types'
+import { cn } from '@/lib/utils'
 
 interface SessionQueueProps {
   exercises: SessionExercise[]
@@ -8,43 +9,43 @@ interface SessionQueueProps {
   currentIndex: number
 }
 
-function QueueRow({
+function Eyebrow({ children }: { children: string }) {
+  return (
+    <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-strong">{children}</p>
+  )
+}
+
+function QueueCard({
   exercise,
-  meta,
-  done,
+  right,
+  muted,
+  dim,
 }: {
   exercise: SessionExercise
-  meta: string
-  done?: boolean
+  right: React.ReactNode
+  muted?: boolean
+  dim?: number
 }) {
   const target = exerciseTargetLabel(exercise)
   return (
-    <div className="flex items-center gap-3 py-2.5">
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[13.5px] font-medium">{exercise.name}</p>
-        {target ? <p className="truncate text-xs text-muted">{target}</p> : null}
+    <div
+      style={dim !== undefined ? { opacity: dim } : undefined}
+      className="flex items-center justify-between gap-3 rounded-2xl border bg-surface px-4 py-3.5"
+    >
+      <div className="min-w-0">
+        <p className={cn('truncate text-[14.5px] font-medium', muted && 'text-muted')}>
+          {exercise.name}
+        </p>
+        {target ? (
+          <p className="mt-0.5 truncate font-mono text-[10px] text-muted-strong">{target}</p>
+        ) : null}
       </div>
-      {done ? (
-        <Check className="h-4 w-4 flex-none text-teal" aria-hidden="true" />
-      ) : (
-        <span className="flex-none font-mono text-[10px] uppercase tracking-label text-muted-strong">
-          {meta}
-        </span>
-      )}
+      <span className="flex-none">{right}</span>
     </div>
   )
 }
 
-function Group({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-[18px] border bg-surface px-4 py-3">
-      <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">{label}</p>
-      <div className="mt-1 divide-y divide-border/60">{children}</div>
-    </div>
-  )
-}
-
-/** The session queue: exercises still ahead, and the ones already finished. */
+/** The session queue: exercises still ahead (Up Next) and finished ones (Done). */
 export function SessionQueue({ exercises, currentIndex }: SessionQueueProps) {
   const upNext = exercises
     .map((exercise, index) => ({ exercise, index }))
@@ -52,25 +53,46 @@ export function SessionQueue({ exercises, currentIndex }: SessionQueueProps) {
   const done = exercises.filter(isExerciseDone)
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-6">
       {upNext.length > 0 ? (
-        <Group label="up next">
-          {upNext.map(({ exercise, index }) => (
-            <QueueRow
-              key={exercise.id}
-              exercise={exercise}
-              meta={`${index + 1}/${exercises.length}`}
-            />
-          ))}
-        </Group>
+        <section>
+          <Eyebrow>up next</Eyebrow>
+          <div className="mt-3 flex flex-col gap-2.5">
+            {upNext.map(({ exercise, index }, i) => (
+              <QueueCard
+                key={exercise.id}
+                exercise={exercise}
+                dim={[1, 0.75, 0.55][i] ?? 0.45}
+                right={
+                  <span
+                    className={cn(
+                      'font-mono text-[10px] tabular-nums',
+                      i === 0 ? 'text-accent' : 'text-muted-strong',
+                    )}
+                  >
+                    {index + 1}/{exercises.length}
+                  </span>
+                }
+              />
+            ))}
+          </div>
+        </section>
       ) : null}
 
       {done.length > 0 ? (
-        <Group label="done">
-          {done.map((exercise) => (
-            <QueueRow key={exercise.id} exercise={exercise} meta="" done />
-          ))}
-        </Group>
+        <section>
+          <Eyebrow>done</Eyebrow>
+          <div className="mt-3 flex flex-col gap-2.5">
+            {done.map((exercise) => (
+              <QueueCard
+                key={exercise.id}
+                exercise={exercise}
+                muted
+                right={<Check className="h-4 w-4 text-accent" aria-hidden="true" />}
+              />
+            ))}
+          </div>
+        </section>
       ) : null}
     </div>
   )

@@ -15,6 +15,7 @@ import { WorkoutsRail } from '@/features/workouts/components/desktop/WorkoutsRai
 import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
 import { useTrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import { splitWorkouts } from '@/features/workouts/lib/summary'
+import { workoutForDay } from '@/features/workouts/lib/week'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 function WorkoutsPage() {
@@ -22,6 +23,7 @@ function WorkoutsPage() {
   const overview = useTrainingOverview()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [formOpen, setFormOpen] = useState(false)
+  const [selectedKey, setSelectedKey] = useState(overview.todayKey)
 
   const openNew = () => setFormOpen(true)
 
@@ -47,6 +49,14 @@ function WorkoutsPage() {
   }
 
   const { active, completed } = splitWorkouts(workouts)
+  const selectedDay = workoutForDay(overview.workouts, selectedKey, overview.timezone)
+  const selectedDayLabel = new Intl.DateTimeFormat('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  })
+    .format(new Date(`${selectedKey}T00:00:00Z`))
+    .toUpperCase()
 
   return (
     <section className="flex flex-col gap-4">
@@ -87,17 +97,22 @@ function WorkoutsPage() {
         />
       ) : (
         <Cascade>
-          <WeekStrip days={overview.week.days} />
+          <WeekStrip
+            days={overview.week.days}
+            selectedKey={selectedKey}
+            onSelect={setSelectedKey}
+          />
 
-          {overview.todaysWorkout ? (
-            <div className="flex flex-col gap-3">
-              <SectionLabel>TODAY</SectionLabel>
-              <TodaySessionCard
-                workout={overview.todaysWorkout}
-                doneToday={overview.todayDone}
-              />
-            </div>
-          ) : null}
+          <div className="flex flex-col gap-2">
+            <SectionLabel>{selectedKey === overview.todayKey ? 'TODAY' : selectedDayLabel}</SectionLabel>
+            {selectedDay ? (
+              <TodaySessionCard workout={selectedDay.workout} doneToday={selectedDay.done} />
+            ) : (
+              <div className="rounded-[22px] border border-dashed p-6 text-center">
+                <p className="text-sm text-muted">No session scheduled — rest day.</p>
+              </div>
+            )}
+          </div>
 
           {active.length > 0 ? (
             <div className="flex flex-col gap-3">
