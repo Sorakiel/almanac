@@ -7,6 +7,8 @@ import { SectionLabel } from '@/components/common/SectionLabel'
 import { WorkoutCard } from '@/features/workouts/components/WorkoutCard'
 import { WeekStrip } from '@/features/workouts/components/WeekStrip'
 import { TodaySessionCard } from '@/features/workouts/components/TodaySessionCard'
+import { SessionResumeBanner } from '@/features/workouts/components/SessionResumeBanner'
+import { dayStateFor } from '@/features/workouts/lib/week'
 import { workoutForDay } from '@/features/workouts/lib/week'
 import { splitWorkouts } from '@/features/workouts/lib/summary'
 import type { TrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
@@ -44,18 +46,16 @@ export function WorkoutsWorkspace({
 
   return (
     <div className="mx-auto w-full max-w-[900px]">
-      <header className="flex items-start justify-between">
-        <div>
-          <p className="label-mono">// {overview.week.label}</p>
-          <h1 className="mt-1.5 text-[40px] leading-none tracking-title">Training</h1>
-          <p className="mt-2 text-[15px] text-muted">
-            Plan sessions and log what you actually did.
-          </p>
+      <header>
+        <p className="label-mono">// {overview.week.label}</p>
+        <div className="mt-1.5 flex items-center justify-between gap-4">
+          <h1 className="text-[40px] leading-none tracking-title">Training</h1>
+          <Button onClick={onNew} className="flex-none shadow-glow">
+            <Plus className="h-4 w-4" />
+            New workout
+          </Button>
         </div>
-        <Button onClick={onNew} className="shadow-glow">
-          <Plus className="h-4 w-4" />
-          New workout
-        </Button>
+        <p className="mt-2 text-[15px] text-muted">Plan sessions and log what you actually did.</p>
       </header>
 
       {isLoading ? (
@@ -90,6 +90,8 @@ export function WorkoutsWorkspace({
         </div>
       ) : (
         <Cascade>
+          <SessionResumeBanner workouts={overview.workouts} />
+
           <section className="mt-7">
             <WeekStrip
               days={overview.week.days}
@@ -103,7 +105,11 @@ export function WorkoutsWorkspace({
               {selectedKey === overview.todayKey ? 'today' : dayLabel(selectedKey)}
             </p>
             {selected ? (
-              <TodaySessionCard workout={selected.workout} doneToday={selected.done} />
+              <TodaySessionCard
+                workout={selected.workout}
+                doneToday={selected.done}
+                dayState={dayStateFor(selectedKey, overview.todayKey)}
+              />
             ) : (
               <div className="rounded-[22px] border border-dashed p-7 text-center">
                 <p className="text-sm text-muted">No session scheduled — rest day.</p>

@@ -65,6 +65,12 @@ export function buildWeek(
   return { label, days }
 }
 
+/** Where a day sits relative to today — gates the "start session" action. */
+export function dayStateFor(dateKey: string, todayKey: string): 'today' | 'past' | 'future' {
+  if (dateKey === todayKey) return 'today'
+  return dateKey < todayKey ? 'past' : 'future'
+}
+
 /**
  * The session to surface for a given day: the one due that day, preferring one
  * not yet completed, with a per-day done flag. Null when nothing is scheduled.

@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { DEFAULT_REST_SECONDS } from '@/features/workouts/lib/session'
+import { sessionElapsed, type SessionRecord } from '@/stores/workoutSession'
 
 interface SessionClock {
-  /** Milliseconds since the session started (0 when not yet started). */
+  /** Milliseconds elapsed for the session (frozen while paused). */
   elapsedMs: number
+  /** True while the elapsed clock is running (false when paused / absent). */
+  running: boolean
   /** Remaining rest in ms, or null when no rest timer is running. */
   restMs: number | null
   /** Start a rest countdown (defaults to the standard rest interval). */
@@ -13,11 +16,11 @@ interface SessionClock {
 }
 
 /**
- * Drives the live-session timers: a 1 Hz elapsed clock from the persisted
- * `startedAt`, plus an optional rest countdown started when a set is ticked.
- * Both derive from wall-clock deltas so they stay correct across a reload.
+ * Drives the live-session timers: a 1 Hz elapsed clock derived from the
+ * persisted session record (so it survives reloads and honours a pause), plus
+ * an optional rest countdown started when a set is ticked.
  */
-export function useSessionClock(startedAt: number | null): SessionClock {
+export function useSessionClock(record: SessionRecord | null | undefined): SessionClock {
   const [now, setNow] = useState(() => Date.now())
   const [restEndsAt, setRestEndsAt] = useState<number | null>(null)
 
@@ -32,10 +35,11 @@ export function useSessionClock(startedAt: number | null): SessionClock {
 
   const skipRest = useCallback(() => setRestEndsAt(null), [])
 
-  // Once the countdown reaches the target instant it simply reads as null — no
-  // effect needed to reset state, which keeps renders from cascading.
+  // The rest timer reads as null once it passes its target — no effect needed
+  // to reset state, which keeps renders from cascading.
   return {
-    elapsedMs: startedAt ? Math.max(0, now - startedAt) : 0,
+    elapsedMs: sessionElapsed(record, now),
+    running: Boolean(record?.startedAt),
     restMs: restEndsAt !== null && restEndsAt > now ? restEndsAt - now : null,
     startRest,
     skipRest,

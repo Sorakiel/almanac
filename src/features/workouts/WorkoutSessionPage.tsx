@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Check, ChevronLeft, Loader2, Timer } from 'lucide-react'
+import { Check, ChevronLeft, Loader2, Pause, Play, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
@@ -26,15 +26,17 @@ function WorkoutSessionPage() {
   const navigate = useNavigate()
   const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
   const mutations = useSessionMutations(id)
-  const startedAt = useWorkoutSessionStore((s) => s.startedAt[id] ?? null)
+  const record = useWorkoutSessionStore((s) => s.sessions[id])
   const start = useWorkoutSessionStore((s) => s.start)
+  const pause = useWorkoutSessionStore((s) => s.pause)
   const end = useWorkoutSessionStore((s) => s.end)
-  const { elapsedMs, restMs, startRest, skipRest } = useSessionClock(startedAt)
+  const { elapsedMs, running, restMs, startRest, skipRest } = useSessionClock(record)
 
-  // Deep-linking straight to the session (or a reload) starts the clock once.
+  // Deep-linking straight to the session (or a reload) starts the clock once,
+  // but a paused session is left paused — the user resumes it explicitly.
   useEffect(() => {
-    if (id) start(id)
-  }, [id, start])
+    if (id && !record) start(id)
+  }, [id, record, start])
 
   if (isLoading) {
     return (
@@ -78,13 +80,14 @@ function WorkoutSessionPage() {
     startRest()
   }
 
+  const togglePause = () => (running ? pause(id) : start(id))
   const leave = () => navigate(`/train/${id}`)
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg text-foreground">
       {/* Focused top bar (replaces the nav shell) */}
       <header className="flex h-14 flex-none items-center justify-between gap-3 border-b bg-chrome px-4 pt-[env(safe-area-inset-top)] lg:px-6">
-        <div className="flex min-w-0 items-center gap-3.5">
+        <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
             onClick={leave}
@@ -94,10 +97,28 @@ function WorkoutSessionPage() {
             <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           </button>
           <span className="truncate font-mono text-xs font-semibold">{workout.name}</span>
-          <span className="flex flex-none items-center gap-1.5 font-mono text-[11px] uppercase tracking-label text-accent">
+          <span
+            className={cn(
+              'flex flex-none items-center gap-1.5 font-mono text-[11px] uppercase tracking-label tabular-nums',
+              running ? 'text-accent' : 'text-muted-strong',
+            )}
+          >
             <Timer className="h-3.5 w-3.5" aria-hidden="true" />
-            {formatClock(elapsedMs)} elapsed
+            {formatClock(elapsedMs)}
+            <span className="hidden sm:inline">{running ? 'elapsed' : 'paused'}</span>
           </span>
+          <button
+            type="button"
+            onClick={togglePause}
+            aria-label={running ? 'Pause session' : 'Resume session'}
+            className="flex h-7 w-7 flex-none items-center justify-center rounded-full border text-muted transition-colors hover:text-foreground"
+          >
+            {running ? (
+              <Pause className="h-3.5 w-3.5" aria-hidden="true" />
+            ) : (
+              <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+            )}
+          </button>
         </div>
         <span className="flex-none rounded-full bg-surface px-3.5 py-[7px] font-mono text-[11px] text-muted">
           {exerciseLabel}
@@ -112,12 +133,14 @@ function WorkoutSessionPage() {
               value={progress.doneSets}
               total={progress.totalSets}
               blocks={14}
-              size="md"
+              size="lg"
               animated
               aria-label={`${progress.doneSets} of ${progress.totalSets} sets done`}
             />
             <div className="flex-1" />
-            <span className="font-mono text-[15px] font-semibold tabular-nums">{progress.pct}%</span>
+            <span className="font-mono text-2xl font-semibold tabular-nums lg:text-[28px]">
+              {progress.pct}%
+            </span>
           </div>
 
           {exercises.length === 0 ? (
@@ -134,7 +157,7 @@ function WorkoutSessionPage() {
             </div>
           ) : (
             <>
-              <div className="mt-7">
+              <div className="mt-8">
                 {currentExercise ? (
                   <CurrentExercisePanel exercise={currentExercise} currentSet={currentSet} />
                 ) : null}

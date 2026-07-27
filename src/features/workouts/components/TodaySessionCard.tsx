@@ -12,6 +12,8 @@ interface TodaySessionCardProps {
   workout: WorkoutView
   /** Already completed on the selected day. */
   doneToday: boolean
+  /** Where the selected day sits relative to today — only today can start. */
+  dayState: 'today' | 'past' | 'future'
 }
 
 /** Unique muscle groups across the session, e.g. "CHEST · SHOULDERS". */
@@ -29,19 +31,30 @@ function Meta({ icon: Icon, children }: { icon: typeof Layers; children: string 
   )
 }
 
+/** Right-aligned status tag for a non-today day. */
+function DayStatus({ dayState, done }: { dayState: 'past' | 'future'; done: boolean }) {
+  const text = done ? 'completed' : dayState === 'future' ? 'scheduled' : 'missed'
+  const tone = done ? 'text-teal' : dayState === 'future' ? 'text-muted' : 'text-muted-strong'
+  return (
+    <span className={`font-mono text-[10px] uppercase tracking-label ${tone}`}>{text}</span>
+  )
+}
+
 /** The selected day's session card — the warm spec-board "today" panel. */
-export function TodaySessionCard({ workout, doneToday }: TodaySessionCardProps) {
+export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionCardProps) {
   const navigate = useNavigate()
   const start = useWorkoutSessionStore((s) => s.start)
   const { exercises } = useWorkoutDetail(workout.id)
   const hasPlan = exercises.length > 0
   const volume = plannedVolume(exercises)
   const overline = muscleSummary(exercises) ?? recurrenceLabel(workout)?.toUpperCase() ?? 'SESSION'
+  const isToday = dayState === 'today'
 
   const startSession = () => {
     start(workout.id)
     navigate(`/train/${workout.id}/session`)
   }
+  const openDetail = () => navigate(`/train/${workout.id}`)
 
   return (
     <div className="rounded-[22px] border border-accent/28 bg-gradient-to-br from-accent/[0.12] to-surface p-6 lg:p-7">
@@ -52,7 +65,10 @@ export function TodaySessionCard({ workout, doneToday }: TodaySessionCardProps) 
             {workout.name}
           </h3>
         </div>
-        <IconTile icon={Dumbbell} tone="bg-accent/16 text-accent" size="lg" />
+        <div className="flex flex-none items-center gap-3">
+          {!isToday ? <DayStatus dayState={dayState} done={doneToday} /> : null}
+          <IconTile icon={Dumbbell} tone="bg-accent/16 text-accent" size="lg" />
+        </div>
       </div>
 
       {hasPlan ? (
@@ -66,12 +82,13 @@ export function TodaySessionCard({ workout, doneToday }: TodaySessionCardProps) 
       )}
 
       <div className="mt-5">
-        {!hasPlan ? (
-          <Button
-            variant="surface"
-            className="w-full sm:w-auto sm:min-w-[220px]"
-            onClick={() => navigate(`/train/${workout.id}`)}
-          >
+        {!isToday ? (
+          <Button variant="surface" className="w-full sm:w-auto sm:min-w-[220px]" onClick={openDetail}>
+            <Layers className="h-4 w-4" />
+            View plan
+          </Button>
+        ) : !hasPlan ? (
+          <Button variant="surface" className="w-full sm:w-auto sm:min-w-[220px]" onClick={openDetail}>
             <Layers className="h-4 w-4" />
             Plan session
           </Button>

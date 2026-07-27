@@ -9,13 +9,14 @@ import { WorkoutCard } from '@/features/workouts/components/WorkoutCard'
 import { WorkoutFormSheet } from '@/features/workouts/components/WorkoutFormSheet'
 import { WeekStrip } from '@/features/workouts/components/WeekStrip'
 import { TodaySessionCard } from '@/features/workouts/components/TodaySessionCard'
+import { SessionResumeBanner } from '@/features/workouts/components/SessionResumeBanner'
 import { RecentSessions } from '@/features/workouts/components/RecentSessions'
 import { WorkoutsWorkspace } from '@/features/workouts/components/desktop/WorkoutsWorkspace'
 import { WorkoutsRail } from '@/features/workouts/components/desktop/WorkoutsRail'
 import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
 import { useTrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import { splitWorkouts } from '@/features/workouts/lib/summary'
-import { workoutForDay } from '@/features/workouts/lib/week'
+import { dayStateFor, workoutForDay } from '@/features/workouts/lib/week'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 function WorkoutsPage() {
@@ -97,6 +98,8 @@ function WorkoutsPage() {
         />
       ) : (
         <Cascade>
+          <SessionResumeBanner workouts={overview.workouts} />
+
           <WeekStrip
             days={overview.week.days}
             selectedKey={selectedKey}
@@ -106,7 +109,11 @@ function WorkoutsPage() {
           <div className="flex flex-col gap-2">
             <SectionLabel>{selectedKey === overview.todayKey ? 'TODAY' : selectedDayLabel}</SectionLabel>
             {selectedDay ? (
-              <TodaySessionCard workout={selectedDay.workout} doneToday={selectedDay.done} />
+              <TodaySessionCard
+                workout={selectedDay.workout}
+                doneToday={selectedDay.done}
+                dayState={dayStateFor(selectedKey, overview.todayKey)}
+              />
             ) : (
               <div className="rounded-[22px] border border-dashed p-6 text-center">
                 <p className="text-sm text-muted">No session scheduled — rest day.</p>

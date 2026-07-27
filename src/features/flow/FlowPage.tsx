@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { BookOpen, Dumbbell, Timer } from 'lucide-react'
+import { BookOpen, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Segmented } from '@/components/ui/segmented'
@@ -11,9 +11,7 @@ import { useHabits } from '@/features/habits/hooks/useHabits'
 import { setHabitCount } from '@/features/habits/api/habits.api'
 import { dailyTarget } from '@/features/habits/lib/frequency'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
-import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
 import { useBooks } from '@/features/reading/hooks/useBooks'
-import { FlowWorkoutRunner } from '@/features/flow/components/FlowWorkoutRunner'
 import { FlowReadingRunner } from '@/features/flow/components/FlowReadingRunner'
 import { FocusConsole } from '@/features/flow/components/FocusConsole'
 import { useLogFocusSession } from '@/features/flow/hooks/useLogFocusSession'
@@ -24,52 +22,45 @@ import { useModulesStore } from '@/stores/modules'
 import { cn } from '@/lib/utils'
 
 const DURATIONS_MIN = [15, 25, 45]
-type Mode = 'habit' | 'workout' | 'book' | 'custom'
+type Mode = 'habit' | 'book' | 'custom'
 
 /**
- * Flow — a standalone deep-work module. Pick a habit to focus on or describe a
- * custom task, choose a length, and run a device-local timer (useFocusStore).
- * Flow is deliberately not a habit: finishing a session only stops the timer.
+ * Flow — a standalone deep-work module. Pick a habit to focus on, a book to
+ * read, or describe a custom task, choose a length, and run a device-local
+ * timer. Workouts run their own live session under Train, not here.
  */
 function FlowPage() {
   const { habits } = useHabits()
-  const { workouts } = useWorkouts()
   const { books } = useBooks()
-  const workoutsEnabled = useModulesStore((s) => s.enabled.workouts)
   const readingEnabled = useModulesStore((s) => s.enabled.reading)
   const { user } = useSession()
   const { dateKey } = useToday()
   const queryClient = useQueryClient()
-  const { endsAt, durationMin, label, habitId, workoutId, bookId, start, stop } = useFocusStore()
+  const { endsAt, durationMin, label, habitId, bookId, start, stop } = useFocusStore()
   const logFocus = useLogFocusSession()
   const [mode, setMode] = useState<Mode>('habit')
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null)
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null)
   const [customLabel, setCustomLabel] = useState('')
   const [duration, setDuration] = useState(25)
   const [now, setNow] = useState(() => Date.now())
 
-  // If the module behind the selected mode was just disabled, fall back to Habit.
-  if ((mode === 'workout' && !workoutsEnabled) || (mode === 'book' && !readingEnabled)) {
+  // If Reading was just disabled, fall back to Habit.
+  if (mode === 'book' && !readingEnabled) {
     setMode('habit')
   }
 
   const running = endsAt !== null && durationMin !== null
   const dueHabits = habits.filter((h) => h.dueToday && !h.isComplete)
-  const openWorkouts = workouts.filter((w) => w.status !== 'completed')
   const openBooks = books.filter((b) => b.status !== 'finished')
   const selectedHabit = habits.find((h) => h.id === selectedId) ?? null
-  const selectedWorkout = workouts.find((w) => w.id === selectedWorkoutId) ?? null
   const selectedBook = books.find((b) => b.id === selectedBookId) ?? null
   const targetLabel =
     mode === 'habit'
       ? (selectedHabit?.name ?? null)
-      : mode === 'workout'
-        ? (selectedWorkout?.name ?? null)
-        : mode === 'book'
-          ? (selectedBook?.title ?? null)
-          : customLabel.trim() || null
+      : mode === 'book'
+        ? (selectedBook?.title ?? null)
+        : customLabel.trim() || null
 
   // Mark the session's habit done (if any), then end. "End" just stops.
   const completeSession = async (minutes: number) => {
@@ -135,11 +126,10 @@ function FlowPage() {
           elapsedMin={elapsedMin}
           pct={pct}
           onEnd={endSession}
-          onComplete={workoutId || bookId ? undefined : () => void completeSession(focusedMin)}
+          onComplete={bookId ? undefined : () => void completeSession(focusedMin)}
           completeLabel={habitId ? 'Complete' : 'Done'}
         />
 
-        {workoutId ? <FlowWorkoutRunner workoutId={workoutId} onFinish={endSession} /> : null}
         {bookId ? (
           <FlowReadingRunner bookId={bookId} minutes={durationMin} onFinish={endSession} />
         ) : null}
@@ -160,44 +150,12 @@ function FlowPage() {
         onChange={setMode}
         options={[
           { value: 'habit' as const, label: 'Habit' },
-          ...(workoutsEnabled ? [{ value: 'workout' as const, label: 'Workout' }] : []),
           ...(readingEnabled ? [{ value: 'book' as const, label: 'Read' }] : []),
           { value: 'custom' as const, label: 'Describe' },
         ]}
       />
 
-      {mode === 'workout' ? (
-        <div className="flex flex-col gap-3">
-          <SectionLabel>PICK A WORKOUT</SectionLabel>
-          {openWorkouts.length === 0 ? (
-            <p className="rounded-card border border-dashed p-4 text-sm text-muted">
-              No open workouts — create one under Train first.
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {openWorkouts.map((workout) => {
-                const active = selectedWorkoutId === workout.id
-                return (
-                  <li key={workout.id}>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedWorkoutId(workout.id)}
-                      aria-pressed={active}
-                      className={cn(
-                        'flex w-full items-center gap-3 rounded-card border p-3 text-left transition-colors',
-                        active ? 'border-accent bg-accent/10' : 'hover:border-accent/40',
-                      )}
-                    >
-                      <IconTile icon={Dumbbell} tone="bg-teal/15 text-teal" size="sm" />
-                      <span className="font-medium">{workout.name}</span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </div>
-      ) : mode === 'habit' ? (
+      {mode === 'habit' ? (
         <div className="flex flex-col gap-3">
           <SectionLabel>DUE TODAY</SectionLabel>
           {dueHabits.length === 0 ? (
@@ -311,7 +269,6 @@ function FlowPage() {
           targetLabel &&
           start(duration, targetLabel, {
             habitId: mode === 'habit' ? (selectedHabit?.id ?? null) : null,
-            workoutId: mode === 'workout' ? (selectedWorkout?.id ?? null) : null,
             bookId: mode === 'book' ? (selectedBook?.id ?? null) : null,
           })
         }
