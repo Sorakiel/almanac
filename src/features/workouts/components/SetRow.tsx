@@ -1,18 +1,11 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
-import { CompletionToggle } from '@/components/common/CompletionToggle'
 import type { SetLog } from '@/features/workouts/types'
-import { cn } from '@/lib/utils'
 
 interface SetRowProps {
   set: SetLog
-  onToggleDone: (done: boolean) => void
-  /** Edit-only: commit reps/weight changes. */
-  onCommit?: (patch: { reps?: number | null; weight?: number | null }) => void
-  /** Edit-only: remove the set. */
-  onRemove?: () => void
-  /** 'edit' (plan) shows inputs; 'run' (session) shows the plan read-only. */
-  variant?: 'edit' | 'run'
+  onCommit: (patch: { reps?: number | null; weight?: number | null }) => void
+  onRemove: () => void
 }
 
 /** Parse an input string to a non-negative number, or null when blank. */
@@ -23,88 +16,49 @@ function parseNum(value: string): number | null {
   return Number.isFinite(n) && n >= 0 ? n : null
 }
 
-/** Static plan label for a set, e.g. "8 × 60kg", "8 reps", or "Set 2". */
-function planLabel(set: SetLog): string {
-  if (set.reps != null && set.weight != null) return `${set.reps} × ${set.weight}kg`
-  if (set.reps != null) return `${set.reps} reps`
-  if (set.weight != null) return `${set.weight}kg`
-  return `Set ${set.set_number}`
-}
-
 const FIELD =
-  'h-9 w-full rounded-lg border bg-bg text-center text-sm tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent'
+  'h-10 rounded-xl border bg-bg text-center text-sm tabular-nums transition-colors focus-visible:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
 
-function DoneToggle({ set, onToggleDone }: { set: SetLog; onToggleDone: (done: boolean) => void }) {
-  return (
-    <CompletionToggle
-      done={set.done}
-      onToggle={() => onToggleDone(!set.done)}
-      tone="teal"
-      size="md"
-      aria-label={set.done ? `Set ${set.set_number} not done` : `Set ${set.set_number} done`}
-    />
-  )
-}
-
-/**
- * One set. In 'run' mode it's execution-only — tick the planned set done or not,
- * with no editing; reps/weight are shaped on the plan (the detail page).
- */
-export function SetRow({ set, onToggleDone, onCommit, onRemove, variant = 'edit' }: SetRowProps) {
+/** One editable planned set: "set n · reps × weight kg" with a remove control. */
+export function SetRow({ set, onCommit, onRemove }: SetRowProps) {
   const [reps, setReps] = useState(set.reps?.toString() ?? '')
   const [weight, setWeight] = useState(set.weight?.toString() ?? '')
 
-  if (variant === 'run') {
-    return (
-      <div className="flex items-center gap-3">
-        <DoneToggle set={set} onToggleDone={onToggleDone} />
-        <span className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-          set {set.set_number}
-        </span>
-        <span className={cn('text-sm tabular-nums', set.done && 'text-muted line-through')}>
-          {planLabel(set)}
-        </span>
-      </div>
-    )
-  }
-
   return (
-    <div className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2.5">
-      <DoneToggle set={set} onToggleDone={onToggleDone} />
-
-      <label className="flex items-center gap-1.5">
-        <span className="sr-only">Reps for set {set.set_number}</span>
-        <input
-          type="number"
-          inputMode="numeric"
-          min={0}
-          value={reps}
-          placeholder="reps"
-          onChange={(e) => setReps(e.target.value)}
-          onBlur={() => onCommit?.({ reps: parseNum(reps) })}
-          className={FIELD}
-        />
-      </label>
-
-      <label className="flex items-center gap-1.5">
-        <span className="sr-only">Weight for set {set.set_number}</span>
-        <input
-          type="number"
-          inputMode="decimal"
-          min={0}
-          value={weight}
-          placeholder="kg"
-          onChange={(e) => setWeight(e.target.value)}
-          onBlur={() => onCommit?.({ weight: parseNum(weight) })}
-          className={FIELD}
-        />
-      </label>
-
+    <div className="flex items-center gap-2.5">
+      <span className="w-11 flex-none font-mono text-[10px] uppercase tracking-label text-muted-strong">
+        set {set.set_number}
+      </span>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={0}
+        value={reps}
+        placeholder="reps"
+        aria-label={`Reps for set ${set.set_number}`}
+        onChange={(e) => setReps(e.target.value)}
+        onBlur={() => onCommit({ reps: parseNum(reps) })}
+        className={`${FIELD} w-16`}
+      />
+      <span className="text-sm text-muted-strong">×</span>
+      <input
+        type="number"
+        inputMode="decimal"
+        min={0}
+        value={weight}
+        placeholder="kg"
+        aria-label={`Weight for set ${set.set_number}`}
+        onChange={(e) => setWeight(e.target.value)}
+        onBlur={() => onCommit({ weight: parseNum(weight) })}
+        className={`${FIELD} w-20`}
+      />
+      <span className="font-mono text-[11px] text-muted-strong">kg</span>
+      <div className="flex-1" />
       <button
         type="button"
         onClick={onRemove}
         aria-label={`Remove set ${set.set_number}`}
-        className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-strong transition-colors hover:bg-surface hover:text-accent"
+        className="flex h-9 w-9 flex-none items-center justify-center rounded-lg text-muted-strong transition-colors hover:bg-bg hover:text-accent"
       >
         <X className="h-4 w-4" aria-hidden="true" />
       </button>

@@ -10,12 +10,10 @@ import { WorkoutFormSheet } from '@/features/workouts/components/WorkoutFormShee
 import { WeekStrip } from '@/features/workouts/components/WeekStrip'
 import { TodaySessionCard } from '@/features/workouts/components/TodaySessionCard'
 import { SessionResumeBanner } from '@/features/workouts/components/SessionResumeBanner'
-import { RecentSessions } from '@/features/workouts/components/RecentSessions'
 import { WorkoutsWorkspace } from '@/features/workouts/components/desktop/WorkoutsWorkspace'
 import { WorkoutsRail } from '@/features/workouts/components/desktop/WorkoutsRail'
 import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
 import { useTrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
-import { splitWorkouts } from '@/features/workouts/lib/summary'
 import { dayStateFor, workoutForDay } from '@/features/workouts/lib/week'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
@@ -49,7 +47,6 @@ function WorkoutsPage() {
     )
   }
 
-  const { active, completed } = splitWorkouts(workouts)
   const selectedDay = workoutForDay(overview.workouts, selectedKey, overview.timezone)
   const selectedDayLabel = new Intl.DateTimeFormat('en-GB', {
     weekday: 'short',
@@ -121,23 +118,12 @@ function WorkoutsPage() {
             )}
           </div>
 
-          {active.length > 0 ? (
-            <div className="flex flex-col gap-3">
-              <SectionLabel>TO DO</SectionLabel>
-              {active.map((w) => (
-                <WorkoutCard key={w.id} workout={w} />
-              ))}
-            </div>
-          ) : null}
-
-          {completed.length > 0 ? (
-            <div className="flex flex-col gap-3">
-              <SectionLabel accessory={`${overview.recent.length}`}>RECENT</SectionLabel>
-              <div className="rounded-card border bg-surface px-4 py-2">
-                <RecentSessions workouts={overview.recent} />
-              </div>
-            </div>
-          ) : null}
+          <div className="flex flex-col gap-3">
+            <SectionLabel accessory={`${workouts.length}`}>ALL WORKOUTS</SectionLabel>
+            {workouts.map((w) => (
+              <WorkoutCard key={w.id} workout={w} />
+            ))}
+          </div>
 
           <Button size="lg" onClick={openNew} className="w-full shadow-glow">
             <Plus className="h-4 w-4" />

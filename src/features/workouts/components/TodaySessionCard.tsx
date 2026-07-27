@@ -35,51 +35,58 @@ function Meta({ icon: Icon, children }: { icon: typeof Layers; children: string 
 function DayStatus({ dayState, done }: { dayState: 'past' | 'future'; done: boolean }) {
   const text = done ? 'completed' : dayState === 'future' ? 'scheduled' : 'missed'
   const tone = done ? 'text-teal' : dayState === 'future' ? 'text-muted' : 'text-muted-strong'
-  return (
-    <span className={`font-mono text-[10px] uppercase tracking-label ${tone}`}>{text}</span>
-  )
+  return <span className={`font-mono text-[10px] uppercase tracking-label ${tone}`}>{text}</span>
 }
 
 /** The selected day's session card — the warm spec-board "today" panel. */
 export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionCardProps) {
   const navigate = useNavigate()
   const start = useWorkoutSessionStore((s) => s.start)
+  const hasActiveSession = useWorkoutSessionStore((s) => Boolean(s.sessions[workout.id]))
   const { exercises } = useWorkoutDetail(workout.id)
   const hasPlan = exercises.length > 0
   const volume = plannedVolume(exercises)
   const overline = muscleSummary(exercises) ?? recurrenceLabel(workout)?.toUpperCase() ?? 'SESSION'
   const isToday = dayState === 'today'
 
+  const openDetail = () => navigate(`/train/${workout.id}`)
   const startSession = () => {
     start(workout.id)
     navigate(`/train/${workout.id}/session`)
   }
-  const openDetail = () => navigate(`/train/${workout.id}`)
 
   return (
     <div className="rounded-[22px] border border-accent/28 bg-gradient-to-br from-accent/[0.12] to-surface p-6 lg:p-7">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-accent">{overline}</p>
-          <h3 className="mt-2 truncate text-[22px] font-semibold tracking-title lg:text-[26px]">
-            {workout.name}
-          </h3>
+      {/* The card body previews the plan; the action button is separate below. */}
+      <button
+        type="button"
+        onClick={openDetail}
+        aria-label={`View ${workout.name} plan`}
+        className="group block w-full text-left"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-accent">{overline}</p>
+            <h3 className="mt-2 truncate text-[22px] font-semibold tracking-title decoration-accent/40 underline-offset-4 group-hover:underline lg:text-[26px]">
+              {workout.name}
+            </h3>
+          </div>
+          <div className="flex flex-none items-center gap-3">
+            {!isToday ? <DayStatus dayState={dayState} done={doneToday} /> : null}
+            <IconTile icon={Dumbbell} tone="bg-accent/16 text-accent" size="lg" />
+          </div>
         </div>
-        <div className="flex flex-none items-center gap-3">
-          {!isToday ? <DayStatus dayState={dayState} done={doneToday} /> : null}
-          <IconTile icon={Dumbbell} tone="bg-accent/16 text-accent" size="lg" />
-        </div>
-      </div>
 
-      {hasPlan ? (
-        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5">
-          <Meta icon={Layers}>{`${exercises.length} exercises`}</Meta>
-          <Meta icon={Timer}>{`~${estimateMinutes(exercises)} min`}</Meta>
-          {volume > 0 ? <Meta icon={TrendingUp}>{`${volume.toLocaleString('en-US')} kg`}</Meta> : null}
-        </div>
-      ) : (
-        <p className="mt-4 text-sm text-muted">No exercises planned yet — add some to start a session.</p>
-      )}
+        {hasPlan ? (
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5">
+            <Meta icon={Layers}>{`${exercises.length} exercises`}</Meta>
+            <Meta icon={Timer}>{`~${estimateMinutes(exercises)} min`}</Meta>
+            {volume > 0 ? <Meta icon={TrendingUp}>{`${volume.toLocaleString('en-US')} kg`}</Meta> : null}
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-muted">No exercises planned yet — add some to start a session.</p>
+        )}
+      </button>
 
       <div className="mt-5">
         {!isToday ? (
@@ -92,12 +99,13 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
             <Layers className="h-4 w-4" />
             Plan session
           </Button>
+        ) : hasActiveSession ? (
+          <Button className="w-full shadow-glow sm:w-auto sm:min-w-[220px]" onClick={startSession}>
+            <Play className="h-4 w-4 fill-current" />
+            Resume session
+          </Button>
         ) : doneToday ? (
-          <Button
-            variant="surface"
-            className="w-full sm:w-auto sm:min-w-[220px]"
-            onClick={startSession}
-          >
+          <Button variant="surface" className="w-full sm:w-auto sm:min-w-[220px]" onClick={startSession}>
             <Check className="h-4 w-4" />
             Done — train again
           </Button>

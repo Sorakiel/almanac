@@ -10,7 +10,6 @@ import { TodaySessionCard } from '@/features/workouts/components/TodaySessionCar
 import { SessionResumeBanner } from '@/features/workouts/components/SessionResumeBanner'
 import { dayStateFor } from '@/features/workouts/lib/week'
 import { workoutForDay } from '@/features/workouts/lib/week'
-import { splitWorkouts } from '@/features/workouts/lib/summary'
 import type { TrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import type { WorkoutView } from '@/features/workouts/types'
 
@@ -41,7 +40,6 @@ export function WorkoutsWorkspace({
   onNew,
 }: WorkoutsWorkspaceProps) {
   const [selectedKey, setSelectedKey] = useState(overview.todayKey)
-  const { active, completed } = splitWorkouts(workouts)
   const selected = workoutForDay(overview.workouts, selectedKey, overview.timezone)
 
   return (
@@ -117,23 +115,12 @@ export function WorkoutsWorkspace({
             )}
           </section>
 
-          {active.length > 0 ? (
-            <section className="mt-8 flex flex-col gap-3">
-              <SectionLabel>TO DO</SectionLabel>
-              {active.map((w) => (
-                <WorkoutCard key={w.id} workout={w} />
-              ))}
-            </section>
-          ) : null}
-
-          {completed.length > 0 ? (
-            <section className="mt-8 flex flex-col gap-3">
-              <SectionLabel>COMPLETED</SectionLabel>
-              {completed.map((w) => (
-                <WorkoutCard key={w.id} workout={w} />
-              ))}
-            </section>
-          ) : null}
+          <section className="mt-8 flex flex-col gap-3">
+            <SectionLabel accessory={`${workouts.length}`}>ALL WORKOUTS</SectionLabel>
+            {workouts.map((w) => (
+              <WorkoutCard key={w.id} workout={w} />
+            ))}
+          </section>
         </Cascade>
       )}
     </div>
