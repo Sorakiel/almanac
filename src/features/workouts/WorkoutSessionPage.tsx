@@ -9,6 +9,7 @@ import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { CelebrationModal } from '@/components/common/CelebrationModal'
 import { CurrentExercisePanel } from '@/features/workouts/components/session/CurrentExercisePanel'
+import { SessionPulse } from '@/features/workouts/components/session/SessionPulse'
 import { SessionQueue } from '@/features/workouts/components/session/SessionQueue'
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
@@ -198,7 +199,14 @@ function WorkoutSessionPage() {
                 ) : null}
               </div>
 
-              <div className="hidden flex-1 lg:block" />
+              <SessionPulse
+                running={running}
+                restMs={restMs}
+                doneSets={progress.doneSets}
+                totalSets={progress.totalSets}
+                elapsedMs={elapsedMs}
+                className="mt-7 h-[152px] flex-none lg:mt-9 lg:h-auto lg:min-h-0 lg:flex-1"
+              />
 
               {/* Action bar: persistent rest + complete */}
               <div className="mt-7 flex gap-3">
