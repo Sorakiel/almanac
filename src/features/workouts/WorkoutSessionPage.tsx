@@ -1,9 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Check, ChevronLeft, Loader2, Pause, Play, Timer } from 'lucide-react'
+import { Ban, Check, ChevronLeft, EllipsisVertical, Flag, Loader2, Pause, Play, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Sheet } from '@/components/ui/sheet'
 import { EmptyState } from '@/components/common/EmptyState'
+import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { CelebrationModal } from '@/components/common/CelebrationModal'
 import { CurrentExercisePanel } from '@/features/workouts/components/session/CurrentExercisePanel'
@@ -31,12 +33,17 @@ function WorkoutSessionPage() {
   const pause = useWorkoutSessionStore((s) => s.pause)
   const end = useWorkoutSessionStore((s) => s.end)
   const { elapsedMs, running, restMs, startRest, skipRest } = useSessionClock(record)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [confirmDiscard, setConfirmDiscard] = useState(false)
+  const [finishing, setFinishing] = useState(false)
 
   // Deep-linking straight to the session (or a reload) starts the clock once,
-  // but a paused session is left paused — the user resumes it explicitly.
+  // but a paused session is left paused — the user resumes it explicitly. Read
+  // the store imperatively (not via the `record` dep) so clearing the session
+  // on finish/discard doesn't immediately re-create it before we navigate away.
   useEffect(() => {
-    if (id && !record) start(id)
-  }, [id, record, start])
+    if (id && !useWorkoutSessionStore.getState().sessions[id]) start(id)
+  }, [id, start])
 
   if (isLoading) {
     return (
@@ -83,6 +90,24 @@ function WorkoutSessionPage() {
   const togglePause = () => (running ? pause(id) : start(id))
   const leave = () => navigate(`/train/${id}`)
 
+  // Finish now — mark the workout done even if some sets are unticked, then
+  // reuse the celebration to bow out (its dismiss clears the clock + navigates).
+  const finishWorkout = () => {
+    setMenuOpen(false)
+    mutations.setCompleted.mutate(true, {
+      onSuccess: () => setFinishing(true),
+      onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not finish the workout'),
+    })
+  }
+
+  // Abandon the live session: drop the timer, keep whatever sets were logged.
+  const discardSession = () => {
+    end(id)
+    setConfirmDiscard(false)
+    toast('Session discarded')
+    navigate(`/train/${id}`)
+  }
+
   return (
     <div className="flex min-h-dvh flex-col bg-bg text-foreground">
       {/* Focused top bar (replaces the nav shell) */}
@@ -120,9 +145,19 @@ function WorkoutSessionPage() {
             )}
           </button>
         </div>
-        <span className="flex-none rounded-full bg-surface px-3.5 py-[7px] font-mono text-[11px] text-muted">
-          {exerciseLabel}
-        </span>
+        <div className="flex flex-none items-center gap-2">
+          <span className="rounded-full bg-surface px-3.5 py-[7px] font-mono text-[11px] text-muted">
+            {exerciseLabel}
+          </span>
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Session options"
+            className="flex h-8 w-8 items-center justify-center rounded-full border text-muted transition-colors hover:text-foreground"
+          >
+            <EllipsisVertical className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
@@ -209,17 +244,52 @@ function WorkoutSessionPage() {
         ) : null}
       </div>
 
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen} title="Session" mono>
+        <div className="flex flex-col gap-3">
+          <Button
+            size="lg"
+            disabled={mutations.setCompleted.isPending}
+            onClick={finishWorkout}
+          >
+            <Flag className="h-4 w-4" />
+            Finish workout
+          </Button>
+          <Button
+            size="lg"
+            variant="ghost"
+            className="text-accent"
+            onClick={() => {
+              setMenuOpen(false)
+              setConfirmDiscard(true)
+            }}
+          >
+            <Ban className="h-4 w-4" />
+            Discard session
+          </Button>
+        </div>
+      </Sheet>
+
+      <ConfirmSheet
+        open={confirmDiscard}
+        onOpenChange={setConfirmDiscard}
+        title="Discard this session?"
+        description="The timer is dropped; sets you already ticked stay logged."
+        confirmLabel="Discard session"
+        onConfirm={discardSession}
+      />
+
       <CelebrationModal
-        open={mutations.celebrate}
+        open={mutations.celebrate || finishing}
         onOpenChange={(o) => {
           if (!o) {
             mutations.dismissCelebrate()
+            setFinishing(false)
             end(id)
             navigate(`/train/${id}`)
           }
         }}
         title="Session complete!"
-        message={`Every set of ${workout.name} is logged. Strong work — recovery counts too.`}
+        message={`Nice work on ${workout.name} — logged and done. Recovery counts too.`}
         actionLabel="Finish"
       />
     </div>
