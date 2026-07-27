@@ -71,16 +71,36 @@ interface AddExerciseInput {
   targetWeight: number | null
 }
 
-/** Attach an exercise to a workout. */
-export async function addWorkoutExercise(input: AddExerciseInput): Promise<void> {
-  const { error } = await supabase.from('workout_exercises').insert({
-    workout_id: input.workoutId,
-    exercise_id: input.exerciseId,
-    sort_order: input.sortOrder,
-    target_sets: input.targetSets,
-    target_reps: input.targetReps,
-    target_weight: input.targetWeight,
-  })
+/** Attach an exercise to a workout, returning the new workout_exercises id. */
+export async function addWorkoutExercise(input: AddExerciseInput): Promise<string> {
+  const { data, error } = await supabase
+    .from('workout_exercises')
+    .insert({
+      workout_id: input.workoutId,
+      exercise_id: input.exerciseId,
+      sort_order: input.sortOrder,
+      target_sets: input.targetSets,
+      target_reps: input.targetReps,
+      target_weight: input.targetWeight,
+    })
+    .select('id')
+    .single()
+  if (error) throw error
+  return data.id
+}
+
+/** Patch a workout_exercise (order / targets / swapped exercise). */
+export async function updateWorkoutExercise(
+  id: string,
+  patch: Partial<{
+    sort_order: number
+    exercise_id: string
+    target_sets: number | null
+    target_reps: number | null
+    target_weight: number | null
+  }>,
+): Promise<void> {
+  const { error } = await supabase.from('workout_exercises').update(patch).eq('id', id)
   if (error) throw error
 }
 
@@ -89,25 +109,32 @@ export async function removeWorkoutExercise(id: string): Promise<void> {
   if (error) throw error
 }
 
-/** Append a set to an exercise, prefilled from the target where available. */
-export async function addSet(
-  workoutExerciseId: string,
-  setNumber: number,
-  reps: number | null,
-  weight: number | null,
-): Promise<void> {
-  const { error } = await supabase.from('set_logs').insert({
-    workout_exercise_id: workoutExerciseId,
-    set_number: setNumber,
-    reps,
-    weight,
-  })
+/** Append a set to an exercise, returning its new id. */
+export async function addSet(input: {
+  workoutExerciseId: string
+  setNumber: number
+  reps: number | null
+  weight: number | null
+  restSeconds?: number | null
+}): Promise<string> {
+  const { data, error } = await supabase
+    .from('set_logs')
+    .insert({
+      workout_exercise_id: input.workoutExerciseId,
+      set_number: input.setNumber,
+      reps: input.reps,
+      weight: input.weight,
+      rest_seconds: input.restSeconds ?? null,
+    })
+    .select('id')
+    .single()
   if (error) throw error
+  return data.id
 }
 
 export async function updateSet(
   id: string,
-  patch: Partial<Pick<SetLog, 'reps' | 'weight' | 'done'>>,
+  patch: Partial<Pick<SetLog, 'reps' | 'weight' | 'done' | 'set_number' | 'rest_seconds'>>,
 ): Promise<void> {
   const { error } = await supabase.from('set_logs').update(patch).eq('id', id)
   if (error) throw error

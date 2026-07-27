@@ -87,7 +87,7 @@ export function useSessionMutations(workoutId: string) {
       setNumber: number
       reps: number | null
       weight: number | null
-    }) => addSet(args.workoutExerciseId, args.setNumber, args.reps, args.weight),
+    }) => addSet(args),
     onSuccess: invalidateSession,
   })
 

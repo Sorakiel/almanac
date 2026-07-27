@@ -50,9 +50,9 @@ export function AppLayout() {
   }
   if (!profile?.onboarded && !locallyOnboarded) return <Navigate to="/welcome" replace />
 
-  // Habit detail is a focused mobile sub-page: no bottom nav, CTA pins bottom.
-  // On desktop the persistent nav rail always stays.
-  const hideNav = /^\/habits\/[^/]+$/.test(pathname)
+  // Focused mobile sub-pages hide the bottom nav (their CTAs own the bottom):
+  // habit detail and the workout edit template. Desktop keeps its nav rail.
+  const hideNav = /^\/habits\/[^/]+$/.test(pathname) || /^\/train\/[^/]+\/edit$/.test(pathname)
 
   return (
     <RailTargetProvider target={railEl}>

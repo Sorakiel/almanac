@@ -22,6 +22,7 @@ function makeSet(overrides: Partial<SetLog> = {}): SetLog {
     weight: 50,
     done: false,
     logged_at: '2026-07-01T00:00:00Z',
+    rest_seconds: null,
     ...overrides,
   }
 }

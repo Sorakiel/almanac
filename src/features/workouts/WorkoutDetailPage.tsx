@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, Dumbbell, Loader2, Pencil, Play, Plus, SlidersHorizontal } from 'lucide-react'
+import { ArrowLeft, Check, Dumbbell, Loader2, Pencil, Play, SlidersHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { IconTile } from '@/components/common/IconTile'
 import { Tag } from '@/components/common/Tag'
@@ -9,15 +9,12 @@ import { SectionLabel } from '@/components/common/SectionLabel'
 import { EmptyState } from '@/components/common/EmptyState'
 import { CelebrationModal } from '@/components/common/CelebrationModal'
 import { Rail } from '@/components/common/desktop/rail'
-import { ExerciseBlock } from '@/features/workouts/components/ExerciseBlock'
 import { ExerciseView } from '@/features/workouts/components/ExerciseView'
-import { AddExerciseSheet } from '@/features/workouts/components/AddExerciseSheet'
 import { WorkoutFormSheet } from '@/features/workouts/components/WorkoutFormSheet'
 import { WorkoutSessionRail } from '@/features/workouts/components/desktop/WorkoutSessionRail'
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
 import { useWorkoutSessionStore } from '@/stores/workoutSession'
-import { useExerciseLibrary } from '@/features/workouts/hooks/useExerciseLibrary'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 
@@ -37,12 +34,9 @@ function WorkoutDetailPage() {
   const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
   useBreadcrumbLeaf(workout?.name)
   const mutations = useSessionMutations(id)
-  const { exercises: library } = useExerciseLibrary()
   const startSessionClock = useWorkoutSessionStore((s) => s.start)
   const hasActiveSession = useWorkoutSessionStore((s) => Boolean(s.sessions[id]))
-  const [editing, setEditing] = useState(false)
-  const [detailsOpen, setDetailsOpen] = useState(false)
-  const [addOpen, setAddOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   if (isLoading) {
     return (
@@ -102,93 +96,65 @@ function WorkoutDetailPage() {
               {done ? <Tag tone="teal">done</Tag> : null}
             </p>
           </div>
-          <Button size="sm" variant={editing ? 'primary' : 'surface'} onClick={() => setEditing((v) => !v)}>
-            {editing ? (
-              <>
-                <Check className="h-4 w-4" />
-                Done
-              </>
-            ) : (
-              <>
-                <Pencil className="h-3.5 w-3.5" />
-                Edit
-              </>
-            )}
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Schedule & delete"
+            className="flex h-9 w-9 flex-none items-center justify-center rounded-[11px] border text-muted transition-colors hover:text-foreground"
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <Button size="sm" variant="surface" onClick={() => navigate(`/train/${id}/edit`)}>
+            <Pencil className="h-3.5 w-3.5" />
+            Edit
           </Button>
         </header>
 
         <section className="flex flex-col gap-3">
           <SectionLabel accessory={`${exercises.length} exercises`}>EXERCISES</SectionLabel>
-
           {!hasExercises ? (
             <p className="rounded-card border border-dashed bg-surface/40 px-4 py-8 text-center text-sm text-muted">
-              {editing ? 'No exercises yet — add the first one below.' : 'No exercises planned yet.'}
+              No exercises planned yet — tap Edit to build the session.
             </p>
-          ) : editing ? (
-            exercises.map((ex) => <ExerciseBlock key={ex.id} exercise={ex} mutations={mutations} />)
           ) : (
             exercises.map((ex) => <ExerciseView key={ex.id} exercise={ex} />)
           )}
-
-          {editing ? (
-            <div className="mt-1 flex flex-col gap-2">
-              <Button variant="surface" size="lg" className="border-dashed" onClick={() => setAddOpen(true)}>
-                <Plus className="h-4 w-4" />
-                Add exercise
-              </Button>
-              <Button variant="ghost" size="sm" className="self-start" onClick={() => setDetailsOpen(true)}>
-                <SlidersHorizontal className="h-4 w-4" />
-                Edit name & schedule
-              </Button>
-            </div>
-          ) : null}
         </section>
 
-        {!editing ? (
-          <div className="flex flex-col gap-3 sm:flex-row">
-            {hasExercises ? (
-              <Button
-                size="lg"
-                className="w-full shadow-glow sm:w-auto sm:min-w-[220px]"
-                onClick={startSession}
-              >
-                <Play className="h-4 w-4" />
-                {hasActiveSession ? 'Resume session' : done ? 'Train again' : 'Start session'}
-              </Button>
-            ) : null}
+        <div className="flex flex-col gap-3 sm:flex-row">
+          {hasExercises ? (
             <Button
               size="lg"
-              variant="surface"
-              className="w-full sm:w-auto sm:min-w-[200px]"
-              disabled={mutations.setCompleted.isPending}
-              onClick={toggleComplete}
+              className="w-full shadow-glow sm:w-auto sm:min-w-[220px]"
+              onClick={startSession}
             >
-              <Check className="h-4 w-4" />
-              {done ? 'Completed — tap to reopen' : 'Mark complete'}
+              <Play className="h-4 w-4" />
+              {hasActiveSession ? 'Resume session' : done ? 'Train again' : 'Start session'}
             </Button>
-          </div>
-        ) : null}
+          ) : null}
+          <Button
+            size="lg"
+            variant="surface"
+            className="w-full sm:w-auto sm:min-w-[200px]"
+            disabled={mutations.setCompleted.isPending}
+            onClick={toggleComplete}
+          >
+            <Check className="h-4 w-4" />
+            {done ? 'Completed — tap to reopen' : 'Mark complete'}
+          </Button>
+        </div>
       </div>
 
       <Rail>
         <WorkoutSessionRail workout={workout} exercises={exercises} />
       </Rail>
 
-      {detailsOpen ? (
+      {settingsOpen ? (
         <WorkoutFormSheet
           open
-          onOpenChange={setDetailsOpen}
+          onOpenChange={setSettingsOpen}
           workout={workout}
           onDeleted={() => navigate('/train')}
-        />
-      ) : null}
-      {addOpen ? (
-        <AddExerciseSheet
-          open
-          onOpenChange={setAddOpen}
-          sortOrder={exercises.length}
-          library={library}
-          mutations={mutations}
         />
       ) : null}
 
