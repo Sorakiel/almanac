@@ -145,9 +145,13 @@ function WorkoutDetailPage() {
         </section>
 
         {!editing ? (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             {hasExercises ? (
-              <Button size="lg" className="w-full shadow-glow" onClick={startSession}>
+              <Button
+                size="lg"
+                className="w-full shadow-glow sm:w-auto sm:min-w-[220px]"
+                onClick={startSession}
+              >
                 <Play className="h-4 w-4" />
                 {hasActiveSession ? 'Resume session' : done ? 'Train again' : 'Start session'}
               </Button>
@@ -155,7 +159,7 @@ function WorkoutDetailPage() {
             <Button
               size="lg"
               variant="surface"
-              className="w-full"
+              className="w-full sm:w-auto sm:min-w-[200px]"
               disabled={mutations.setCompleted.isPending}
               onClick={toggleComplete}
             >
