@@ -69,11 +69,11 @@ function spike(p: number): number {
 
 function pathFrom(buffer: number[]): string {
   let d = ''
-  for (let i = 0; i < buffer.length; i += 1) {
+  buffer.forEach((v, i) => {
     const x = (i * STEP - STEP).toFixed(1)
-    const y = (MID - buffer[i] * MID).toFixed(1)
+    const y = (MID - v * MID).toFixed(1)
     d += `${i === 0 ? 'M' : 'L'}${x} ${y}`
-  }
+  })
   return d
 }
 
