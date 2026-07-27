@@ -15,14 +15,21 @@
   --color-foreground: 236 231 216; /* #ECE7D8 */
   --color-muted: 168 165 158; /* #A8A59E */
   --color-muted-strong: 133 129 122; /* #85817A */
+  /* The accent is theme-adaptive: dark reads the bright shade as "the"
+     accent (text, borders, solid fills), coffee reads the deep shade —
+     bright orange washes out against warm paper (measured off the handoff:
+     every accent-colored label, delta, and solid fill is deep on coffee,
+     never bright). --color-accent-bright is a separate, literal, always-
+     bright raw token for the handful of spots that must stay pinned to one
+     shade regardless of theme (the brand-mark gradient's first stop). */
   --color-accent: 239 136 87; /* #EF8857 */
-  --color-accent-deep: 194 86 42; /* #C2562A */
-  --color-on-accent: 14 14 16; /* dark ink for text on the orange accent */
-  /* Solid accent fills (buttons, active toggles/tabs, the FAB) — measured off
-     the handoff: dark reads bright #EF8857 with dark ink; coffee reads deep
-     #C2562A with light ink (bright orange washes out on warm paper). Kept
-     separate from --color-accent/-deep, which stay theme-invariant because
-     the brand-mark gradient and low-opacity tints hardcode that literal pair. */
+  --color-accent-deep: 194 86 42; /* #C2562A — also always-invariant (2nd gradient stop, danger bg) */
+  --color-accent-bright: 239 136 87; /* #EF8857 — invariant */
+  --color-on-accent: 14 14 16; /* ink for a bg-accent fill: dark ink pairs with the bright shade */
+  --color-on-accent-deep: 244 236 221; /* #F4ECDD — ink for a bg-accent-deep fill: light ink pairs with the deep shade, always */
+  /* Solid accent fills (buttons, active toggles/tabs, the FAB) now just
+     mirror --color-accent/-on-accent above; kept as distinct tokens so the
+     hover shade (the *other* member of the pair) can be theme-aware too. */
   --color-accent-solid: 239 136 87; /* #EF8857 */
   --color-on-accent-solid: 14 14 16;
   --color-accent-solid-hover: 194 86 42; /* #C2562A */
@@ -57,9 +64,11 @@
   --color-foreground: 42 32 24; /* #2A2018 espresso */
   --color-muted: 110 95 78; /* #6E5F4E */
   --color-muted-strong: 138 122 102; /* darker mute for AA on light */
-  --color-accent: 239 136 87; /* #EF8857 shared brand accent */
-  --color-accent-deep: 194 86 42; /* #C2562A */
-  --color-on-accent: 14 14 16; /* same dark ink — accent is identical in both themes */
+  --color-accent: 194 86 42; /* #C2562A — deep; bright #EF8857 washes out on warm paper */
+  --color-accent-deep: 194 86 42; /* #C2562A — invariant (2nd gradient stop, danger bg) */
+  --color-accent-bright: 239 136 87; /* #EF8857 — invariant raw bright, for brand-gradient stops */
+  --color-on-accent: 244 236 221; /* #F4ECDD — light ink pairs with the deep shade */
+  --color-on-accent-deep: 244 236 221; /* #F4ECDD — ink for a bg-accent-deep fill, always light */
   /* Solid accent fills flip to the deep shade + light ink on coffee — see the
      dark-theme block above for why this is a separate token from --color-accent. */
   --color-accent-solid: 194 86 42; /* #C2562A */

@@ -36,7 +36,7 @@ export function CelebrationModal({
           />
           {open ? <Confetti /> : null}
           <div className="relative flex flex-col items-center gap-4">
-            <span className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-[20px] bg-gradient-to-br from-accent to-accent-deep text-on-accent shadow-glow motion-safe:animate-pop">
+            <span className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-[20px] bg-gradient-to-br from-accent-bright to-accent-deep text-on-accent-deep shadow-glow motion-safe:animate-pop">
               <Icon className="h-8 w-8" />
               {/* Diagonal gloss sweeping once across the badge. */}
               <span

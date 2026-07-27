@@ -23,7 +23,7 @@ function BrandMark({ className }: { className?: string }) {
     <span
       aria-hidden="true"
       className={cn(
-        'relative block rounded-[9px] bg-gradient-to-br from-accent to-accent-deep',
+        'relative block rounded-[9px] bg-gradient-to-br from-accent-bright to-accent-deep',
         className,
       )}
     >

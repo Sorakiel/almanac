@@ -8,7 +8,7 @@ const TONES: Record<
   { tile: string; wash: string; border: string; chip: string; pip: string; text: string }
 > = {
   accent: {
-    tile: 'from-accent to-accent-deep',
+    tile: 'from-accent-bright to-accent-deep',
     wash: 'from-accent/[0.10]',
     border: 'border-accent/30',
     chip: 'bg-accent-solid text-on-accent-solid',

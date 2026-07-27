@@ -14,7 +14,7 @@ const buttonVariants = cva(
         ghost: 'text-foreground hover:bg-surface',
         outline:
           'border border-accent text-accent hover:bg-accent-solid hover:text-on-accent-solid',
-        danger: 'bg-accent-deep text-foreground hover:opacity-90',
+        danger: 'bg-accent-deep text-on-accent-deep hover:opacity-90',
       },
       size: {
         sm: 'h-9 rounded-xl px-3 text-sm',

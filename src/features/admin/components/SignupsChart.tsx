@@ -15,7 +15,7 @@ export function SignupsChart({ weeks, height = 120 }: SignupsChartProps) {
         {weeks.map((w) => (
           <div
             key={w.label}
-            className="flex-1 rounded-t-md bg-gradient-to-b from-accent to-accent-deep"
+            className="flex-1 rounded-t-md bg-gradient-to-b from-accent-bright to-accent-deep"
             style={{ height: `${Math.max(4, (w.count / max) * 100)}%` }}
             role="img"
             aria-label={`${w.label}: ${w.count} signups`}

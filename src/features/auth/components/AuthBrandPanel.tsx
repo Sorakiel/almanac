@@ -25,7 +25,7 @@ export function AuthBrandPanel() {
 
       <div className="relative flex flex-1 flex-col">
         <div className="flex items-center gap-3">
-          <span className="relative flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-gradient-to-br from-accent to-accent-deep">
+          <span className="relative flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-gradient-to-br from-accent-bright to-accent-deep">
             <span
               aria-hidden="true"
               className="h-[11px] w-[11px] rotate-45 border-[1.8px] border-bg-deep"

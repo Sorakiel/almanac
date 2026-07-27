@@ -99,20 +99,20 @@ almanac/
 
 All user-owned tables carry `user_id` and are protected by RLS. Use `timestamptz` (UTC) everywhere.
 
-| Table               | Key columns                                                                                                                                 |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `profiles`          | id → auth.users, display_name, avatar_url, timezone, role (`user`\|`admin`), created_at                                                     |
-| `habits`            | id, user_id, name, description, icon, color, frequency (`daily`\|`weekly`\|`x_per_week`), target_count, sort_order, archived_at, created_at |
-| `habit_logs`        | id, user_id, habit_id, date (local calendar date), count, note, created_at — **unique(habit_id, date)**                                     |
-| `workouts`          | id, user_id, name, scheduled_date, completed_at, created_at                                                                                 |
-| `exercises`         | id, user_id, name, muscle_group, created_at                                                                                                 |
-| `workout_exercises` | id, workout_id, exercise_id, target_sets, target_reps, target_weight, sort_order                                                            |
-| `set_logs`          | id, workout_exercise_id, set_number, reps, weight, done, logged_at                                                                          |
-| `quotes`            | id, text, author — **global, read-only to users**                                                                                           |
+| Table               | Key columns                                                                                                                                   |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `profiles`          | id → auth.users, display_name, avatar_url, timezone, role (`user`\|`admin`), created_at                                                       |
+| `habits`            | id, user_id, name, description, icon, color, frequency (`daily`\|`weekly`\|`x_per_week`), target_count, sort_order, archived_at, created_at   |
+| `habit_logs`        | id, user_id, habit_id, date (local calendar date), count, note, created_at — **unique(habit_id, date)**                                       |
+| `workouts`          | id, user_id, name, scheduled_date, completed_at, created_at                                                                                   |
+| `exercises`         | id, user_id, name, muscle_group, created_at                                                                                                   |
+| `workout_exercises` | id, workout_id, exercise_id, target_sets, target_reps, target_weight, sort_order                                                              |
+| `set_logs`          | id, workout_exercise_id, set_number, reps, weight, done, logged_at                                                                            |
+| `quotes`            | id, text, author — **global, read-only to users**                                                                                             |
 | `support_methods`   | id, kind (`link`\|`crypto`), label, hint, network, value, enabled, sort_order — **global; users read enabled rows, owner writes** (donations) |
-| `app_settings`      | id (singleton), support_enabled — **global flags; any auth reads, owner writes**                                                             |
-| `reflections`       | id, user_id, date, body, quote_id, created_at                                                                                               |
-| `feedback`          | id, user_id, body, status, created_at                                                                                                       |
+| `app_settings`      | id (singleton), support_enabled — **global flags; any auth reads, owner writes**                                                              |
+| `reflections`       | id, user_id, date, body, quote_id, created_at                                                                                                 |
+| `feedback`          | id, user_id, body, status, created_at                                                                                                         |
 
 **RLS rules**
 
@@ -135,9 +135,17 @@ Mirror the _Almanac_ spec board. All colors are **CSS variables** referenced thr
 
 **Coffee theme (warm light)**
 
-- Canvas `#ECE3D2` · surface `#F4ECDD` · deep panel `#E0D2BC`
+- Canvas `#F4ECDD` · cards/surface `#ECE3D2` (a step darker than canvas — the inverse of dark) · deep panel `#E0D2BC`
 - Text: espresso `#2A2018` · muted `#6E5F4E`
-- Accent: **same** `#EF8857` / `#C2562A` (shared brand accent across both themes)
+- Accent is **theme-adaptive**, not identical: dark reads the bright shade
+  (`#EF8857`) as its accent, coffee reads the deep shade (`#C2562A`) — bright
+  orange has too little contrast against warm paper, so the handoff never
+  uses it as an accent there (text, borders, solid fills all read deep on
+  coffee). The bright shade still exists as an **invariant raw token**
+  (`--color-accent-bright`) for the handful of spots pinned to one literal
+  shade regardless of theme — the brand-mark gradient's first stop, mainly.
+  `--color-accent-deep` (`#C2562A`) is likewise invariant (2nd gradient stop,
+  danger button, "deep" hover shade on dark).
 
 **Shared category colors:** teal `#2A9D8F`, amber `#C79A3A`.
 
