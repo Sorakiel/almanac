@@ -1,16 +1,13 @@
-import { ReflectTimeline } from '@/features/reflect/components/ReflectTimeline'
-import type { Quote } from '@/features/dashboard/api/quotes.api'
+import { ReflectionComposer } from '@/features/reflect/components/ReflectionComposer'
 import type { Reflection } from '@/features/reflect/types'
 
 interface ReflectWorkspaceProps {
   dateKey: string
   today: Reflection | null
-  past: Reflection[]
-  quoteById: Map<string, Quote>
 }
 
-/** Desktop "Reflect" workspace — the daily composer and reflection history. */
-export function ReflectWorkspace({ dateKey, today, past, quoteById }: ReflectWorkspaceProps) {
+/** Desktop "Reflect" workspace — the daily composer; history lives in the rail. */
+export function ReflectWorkspace({ dateKey, today }: ReflectWorkspaceProps) {
   return (
     <div className="mx-auto max-w-[720px]">
       <header className="mb-7">
@@ -21,7 +18,7 @@ export function ReflectWorkspace({ dateKey, today, past, quoteById }: ReflectWor
         </p>
       </header>
 
-      <ReflectTimeline dateKey={dateKey} today={today} past={past} quoteById={quoteById} />
+      <ReflectionComposer dateKey={dateKey} today={today} />
     </div>
   )
 }

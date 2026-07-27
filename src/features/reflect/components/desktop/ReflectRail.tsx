@@ -1,54 +1,53 @@
-import { NotebookPen } from 'lucide-react'
 import { ReflectTicker } from '@/features/reflect/components/ReflectTicker'
-import { journalStreak } from '@/features/reflect/lib/format'
+import { journalStreak, reflectionDateShortLabel } from '@/features/reflect/lib/format'
 import type { Reflection } from '@/features/reflect/types'
 
 interface ReflectRailProps {
   reflections: Reflection[]
+  past: Reflection[]
   /** The user's local date key, for the current-streak calculation. */
   dateKey: string
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3 pt-2.5 text-[13.5px] first:pt-0">
-      <span className="text-muted">{label}</span>
-      <span className="font-mono tabular-nums">{value}</span>
-    </div>
-  )
-}
+const BORDER_TONES = ['border-accent', 'border-teal', 'border-amber'] as const
 
-/** Desktop Reflect context rail: identity + a small journaling snapshot. */
-export function ReflectRail({ reflections, dateKey }: ReflectRailProps) {
-  const month = dateKey.slice(0, 7)
-  const thisMonth = reflections.filter((r) => r.date.startsWith(month)).length
+/** Desktop Reflect context rail: the narrator, past entries, and the streak. */
+export function ReflectRail({ reflections, past, dateKey }: ReflectRailProps) {
   const streak = journalStreak(new Set(reflections.map((r) => r.date)), dateKey)
 
   return (
     <div className="flex flex-col gap-3.5">
-      <div className="flex items-center gap-3">
-        <span
-          aria-hidden="true"
-          className="flex h-[38px] w-[38px] items-center justify-center rounded-xl bg-teal/15 text-teal"
-        >
-          <NotebookPen className="h-[18px] w-[18px]" />
-        </span>
-        <div>
-          <p className="text-[15px] font-semibold">Journal</p>
-          <p className="font-mono text-[10px] text-muted-strong">your reflections</p>
-        </div>
-      </div>
-
-      <div className="rounded-[18px] border bg-surface p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">snapshot</p>
-        <div className="mt-2 flex flex-col">
-          <Row label="entries" value={String(reflections.length)} />
-          <Row label="this month" value={String(thisMonth)} />
-          <Row label="day streak" value={String(streak)} />
-        </div>
-      </div>
-
       <ReflectTicker reflections={reflections} dateKey={dateKey} />
+
+      <p className="label-mono">// past entries</p>
+
+      {past.length > 0 ? (
+        <div className="flex flex-col gap-2.5">
+          {past.map((reflection, index) => (
+            <div
+              key={reflection.id}
+              className={`rounded-r-[14px] border-l-2 bg-surface py-3.5 pl-4 pr-3.5 ${BORDER_TONES[index % BORDER_TONES.length]}`}
+            >
+              <p className="font-mono text-[9.5px] tracking-label text-muted-strong">
+                {reflectionDateShortLabel(reflection.date)}
+              </p>
+              {reflection.body ? (
+                <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-muted">
+                  {reflection.body}
+                </p>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-[13px] text-muted">Your past reflections will collect here.</p>
+      )}
+
+      {streak > 0 ? (
+        <p className="mt-1 text-center font-mono text-[11px] text-muted-strong">
+          ◇ {streak}-day reflection streak
+        </p>
+      ) : null}
     </div>
   )
 }

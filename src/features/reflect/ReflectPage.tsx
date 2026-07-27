@@ -62,9 +62,9 @@ function ReflectPage() {
   if (isDesktop) {
     return (
       <>
-        <ReflectWorkspace dateKey={dateKey} today={today} past={past} quoteById={quoteById} />
+        <ReflectWorkspace dateKey={dateKey} today={today} />
         <Rail>
-          <ReflectRail reflections={reflections} dateKey={dateKey} />
+          <ReflectRail reflections={reflections} past={past} dateKey={dateKey} />
         </Rail>
       </>
     )

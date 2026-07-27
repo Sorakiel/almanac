@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { journalStreak, reflectionDateLabel } from '@/features/reflect/lib/format'
+import {
+  journalStreak,
+  reflectionDateLabel,
+  reflectionDateShortLabel,
+} from '@/features/reflect/lib/format'
 
 describe('reflectionDateLabel', () => {
   // Punctuation between the weekday and day is ICU/locale-dependent (Node omits
@@ -10,6 +14,16 @@ describe('reflectionDateLabel', () => {
 
   it('does not drift across month boundaries', () => {
     expect(reflectionDateLabel('2026-03-01')).toMatch(/^Sunday.* 1 March$/)
+  })
+})
+
+describe('reflectionDateShortLabel', () => {
+  it('formats a key as short weekday · day month, uppercase', () => {
+    expect(reflectionDateShortLabel('2026-07-13')).toBe('MON · 13 JUL')
+  })
+
+  it('does not drift across month boundaries', () => {
+    expect(reflectionDateShortLabel('2026-03-01')).toBe('SUN · 01 MAR')
   })
 })
 
