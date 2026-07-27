@@ -4,9 +4,13 @@ import { useToday } from '@/hooks/useToday'
 import { lastNDateKeys } from '@/lib/date'
 import { fetchHabits, fetchLogsSince } from '@/features/habits/api/habits.api'
 import { computeInsights } from '@/features/insights/lib/computeInsights'
-import type { Insights } from '@/features/insights/types'
+import type { Insights, InsightRange } from '@/features/insights/types'
 
-/** History depth: 60 days for current-vs-previous 30d rates, plus streak headroom. */
+/**
+ * History depth: 60 days for current-vs-previous 30d rates, plus streak
+ * headroom. Also the ceiling for the "all" range — fine for now, this app is
+ * only weeks old, but revisit if "all" needs to reach further back.
+ */
 const FETCH_DAYS = 90
 
 interface UseInsightsResult {
@@ -17,7 +21,7 @@ interface UseInsightsResult {
 }
 
 /** Completion trends, streaks, and per-habit rates derived from habit logs. */
-export function useInsights(): UseInsightsResult {
+export function useInsights(range: InsightRange = '30d'): UseInsightsResult {
   const { user } = useSession()
   const { dateKey } = useToday()
   const userId = user?.id ?? ''
@@ -38,7 +42,7 @@ export function useInsights(): UseInsightsResult {
 
   const insights =
     habitsQuery.data && logsQuery.data
-      ? computeInsights(habitsQuery.data, logsQuery.data, windowKeys)
+      ? computeInsights(habitsQuery.data, logsQuery.data, windowKeys, range)
       : null
 
   return {

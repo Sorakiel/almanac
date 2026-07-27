@@ -1,8 +1,11 @@
 import { weekdayOfKey } from '@/lib/date'
 import type { Habit, HabitLog } from '@/features/habits/types'
-import type { HabitRate, Insights, WeekPoint } from '@/features/insights/types'
+import type { HabitRate, Insights, InsightRange, WeekPoint } from '@/features/insights/types'
 
-const WINDOW_DAYS = 30
+export type { InsightRange }
+
+/** Lookback length in days for the fixed-size ranges ("all" uses the full fetched window). */
+const RANGE_DAYS: Record<'7d' | '30d', number> = { '7d': 7, '30d': 30 }
 const TREND_WEEKS = 6
 const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -67,11 +70,46 @@ function longestStreak(days: Set<string>, keys: string[]): number {
 }
 
 /**
+ * Completion-over-time points for the trend chart. 7d buckets by day;
+ * 30d buckets into TREND_WEEKS weeks (~42 days back, for a fuller chart);
+ * all buckets the entire fetched window into weeks.
+ */
+function trendPoints(
+  habits: Habit[],
+  done: Map<string, Set<string>>,
+  windowKeys: string[],
+  current: string[],
+  range: InsightRange,
+): WeekPoint[] {
+  if (range === '7d') {
+    return current.map((key) => ({
+      label: WEEKDAY_NAMES[weekdayOfKey(key)] ?? key,
+      rate: rateOver(habits, done, [key]),
+    }))
+  }
+
+  const weeks = range === '30d' ? TREND_WEEKS : Math.max(1, Math.ceil(windowKeys.length / 7))
+  const points: WeekPoint[] = []
+  for (let w = weeks - 1; w >= 0; w--) {
+    const end = windowKeys.length - w * 7
+    const weekKeys = windowKeys.slice(Math.max(0, end - 7), end)
+    if (weekKeys.length === 0) continue
+    points.push({ label: `W${weeks - w}`, rate: rateOver(habits, done, weekKeys) })
+  }
+  return points
+}
+
+/**
  * Derive the Insights read-out from active habits and their logs. Pure: all
  * date math is done against `windowKeys` (oldest→newest local date keys).
  * A day counts as "done" for a habit when it has a log with count ≥ 1.
  */
-export function computeInsights(habits: Habit[], logs: HabitLog[], windowKeys: string[]): Insights {
+export function computeInsights(
+  habits: Habit[],
+  logs: HabitLog[],
+  windowKeys: string[],
+  range: InsightRange = '30d',
+): Insights {
   // habit_id → set of date keys the habit was done on.
   const done = new Map<string, Set<string>>()
   for (const log of logs) {
@@ -84,12 +122,15 @@ export function computeInsights(habits: Habit[], logs: HabitLog[], windowKeys: s
     set.add(log.date)
   }
 
-  const current = windowKeys.slice(-WINDOW_DAYS)
-  const previous = windowKeys.slice(-WINDOW_DAYS * 2, -WINDOW_DAYS)
+  const rangeDays = range === 'all' ? windowKeys.length : RANGE_DAYS[range]
+  const current = windowKeys.slice(-rangeDays)
+  const previous = range === 'all' ? [] : windowKeys.slice(-rangeDays * 2, -rangeDays)
 
   const completionRate = rateOver(habits, done, current)
   const completionDelta =
-    previous.length > 0 ? Math.round((completionRate - rateOver(habits, done, previous)) * 100) : 0
+    previous.length > 0
+      ? Math.round((completionRate - rateOver(habits, done, previous)) * 100)
+      : undefined
 
   const totalDone = current.reduce((sum, key) => {
     for (const days of done.values()) if (days.has(key)) sum += 1
@@ -98,17 +139,10 @@ export function computeInsights(habits: Habit[], logs: HabitLog[], windowKeys: s
 
   const bestStreak = habits.reduce((max, habit) => {
     const days = done.get(habit.id)
-    return days ? Math.max(max, longestStreak(days, windowKeys)) : max
+    return days ? Math.max(max, longestStreak(days, current)) : max
   }, 0)
 
-  // Last TREND_WEEKS weeks of completion, oldest→newest.
-  const weekly: WeekPoint[] = []
-  for (let w = TREND_WEEKS - 1; w >= 0; w--) {
-    const end = windowKeys.length - w * 7
-    const weekKeys = windowKeys.slice(Math.max(0, end - 7), end)
-    if (weekKeys.length === 0) continue
-    weekly.push({ label: `W${TREND_WEEKS - w}`, rate: rateOver(habits, done, weekKeys) })
-  }
+  const weekly = trendPoints(habits, done, windowKeys, current, range)
 
   const byHabit: HabitRate[] = habits
     .map((habit) => ({

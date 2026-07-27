@@ -1,13 +1,16 @@
 import { Cascade } from '@/components/common/Cascade'
 import { CompletionTrend } from '@/features/insights/components/CompletionTrend'
 import { InsightStat } from '@/features/insights/components/InsightStat'
+import { RangeToggle } from '@/features/insights/components/RangeToggle'
 import { WorkoutInsightsSection } from '@/features/insights/components/WorkoutInsightsSection'
 import { ReadingInsightsSection } from '@/features/insights/components/ReadingInsightsSection'
 import { ReflectInsightsSection } from '@/features/insights/components/ReflectInsightsSection'
 import { FocusInsightsSection } from '@/features/insights/components/FocusInsightsSection'
+import { insightRangeLabel, insightRangeSuffix } from '@/features/insights/lib/insightRange'
 import type {
   FocusInsights,
   Insights,
+  InsightRange,
   ReadingInsights,
   ReflectInsights,
   WorkoutInsights,
@@ -19,6 +22,8 @@ interface InsightsWorkspaceProps {
   readingInsights: ReadingInsights | null
   reflectInsights: ReflectInsights | null
   focusInsights: FocusInsights | null
+  range: InsightRange
+  onRangeChange: (range: InsightRange) => void
 }
 
 /** Desktop "Insights" workspace — habit KPIs + trend, then training, reading, reflect, focus. */
@@ -28,6 +33,8 @@ export function InsightsWorkspace({
   readingInsights,
   reflectInsights,
   focusInsights,
+  range,
+  onRangeChange,
 }: InsightsWorkspaceProps) {
   const completionPct = Math.round(insights.completionRate * 100)
 
@@ -35,15 +42,13 @@ export function InsightsWorkspace({
     <div className="mx-auto max-w-[900px]">
       <header className="flex items-start justify-between">
         <div>
-          <p className="label-mono">// last 30 days</p>
+          <p className="label-mono">// {insightRangeLabel(range)}</p>
           <h1 className="mt-1.5 text-[44px] leading-none tracking-title">Insights</h1>
           <p className="mt-2 text-[15px] text-muted">
             Where your habits are strong — and where the week slips.
           </p>
         </div>
-        <div className="rounded-[11px] border px-3.5 py-2 font-mono text-[11px] text-muted">
-          30D
-        </div>
+        <RangeToggle value={range} onChange={onRangeChange} />
       </header>
 
       <Cascade>
@@ -59,7 +64,10 @@ export function InsightsWorkspace({
               />
               <InsightStat label="best streak" value={`${insights.bestStreak}d`} accent />
               <InsightStat label="active" value={String(insights.activeHabits)} />
-              <InsightStat label="done · 30d" value={String(insights.totalDone)} />
+              <InsightStat
+                label={`done · ${insightRangeSuffix(range)}`}
+                value={String(insights.totalDone)}
+              />
             </section>
 
             <p className="label-mono mb-3 mt-8">// completion over time</p>

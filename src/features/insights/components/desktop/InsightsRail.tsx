@@ -4,26 +4,17 @@ import type { Insights } from '@/features/insights/types'
 
 interface InsightsRailProps {
   insights: Insights
+  /** Fixed at 30d for the cross-module ticker line, independent of the page's range toggle. */
+  tickerInsights: Insights | null
 }
 
 /** Desktop Insights context rail: per-habit rates + a weekday read-out. */
-export function InsightsRail({ insights }: InsightsRailProps) {
+export function InsightsRail({ insights, tickerInsights }: InsightsRailProps) {
   return (
     <div className="flex flex-col gap-3.5">
-      <InsightsTicker habits={insights} />
+      <InsightsTicker habits={tickerInsights} />
 
-      <div className="flex items-center gap-3">
-        <span
-          aria-hidden="true"
-          className="flex h-[38px] w-[38px] items-center justify-center rounded-xl bg-accent/15 text-[17px] text-accent"
-        >
-          ▧
-        </span>
-        <div>
-          <p className="text-[15px] font-semibold">By habit</p>
-          <p className="font-mono text-[10px] text-muted-strong">last 30 days</p>
-        </div>
-      </div>
+      <p className="label-mono">// by habit</p>
 
       {insights.byHabit.length > 0 ? (
         <HabitRateList habits={insights.byHabit} />

@@ -35,10 +35,14 @@ export function buildInsightsLines({
 
   if (habits?.hasData) {
     const pct = Math.round(habits.completionRate * 100)
+    const delta = habits.completionDelta
     lines.push({
       id: 'habits',
-      text: `Habits at ${pct}% over 30 days (${signed(habits.completionDelta)}% vs prior).`,
-      tone: habits.completionDelta >= 0 ? 'good' : 'info',
+      text:
+        delta === undefined
+          ? `Habits at ${pct}% over 30 days.`
+          : `Habits at ${pct}% over 30 days (${signed(delta)}% vs prior).`,
+      tone: delta === undefined || delta >= 0 ? 'good' : 'info',
     })
     if (habits.bestStreak >= 3) {
       lines.push({

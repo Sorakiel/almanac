@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BarChart3, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -7,6 +8,7 @@ import { Rail } from '@/components/common/desktop/rail'
 import { CompletionTrend } from '@/features/insights/components/CompletionTrend'
 import { HabitRateList } from '@/features/insights/components/HabitRateList'
 import { InsightStat } from '@/features/insights/components/InsightStat'
+import { RangeToggle } from '@/features/insights/components/RangeToggle'
 import { WorkoutInsightsSection } from '@/features/insights/components/WorkoutInsightsSection'
 import { ReadingInsightsSection } from '@/features/insights/components/ReadingInsightsSection'
 import { ReflectInsightsSection } from '@/features/insights/components/ReflectInsightsSection'
@@ -14,6 +16,8 @@ import { FocusInsightsSection } from '@/features/insights/components/FocusInsigh
 import { InsightsTicker } from '@/features/insights/components/InsightsTicker'
 import { InsightsWorkspace } from '@/features/insights/components/desktop/InsightsWorkspace'
 import { InsightsRail } from '@/features/insights/components/desktop/InsightsRail'
+import { insightRangeLabel, insightRangeSuffix } from '@/features/insights/lib/insightRange'
+import type { InsightRange } from '@/features/insights/types'
 import { useInsights } from '@/features/insights/hooks/useInsights'
 import { useWorkoutInsights } from '@/features/insights/hooks/useWorkoutInsights'
 import { useReadingInsights } from '@/features/insights/hooks/useReadingInsights'
@@ -25,7 +29,12 @@ import { useUiStore } from '@/stores/ui'
 function InsightsPage() {
   const navigate = useNavigate()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
-  const { insights, isLoading, isError, refetch } = useInsights()
+  const [range, setRange] = useState<InsightRange>('30d')
+  const { insights, isLoading, isError, refetch } = useInsights(range)
+  // Fixed at 30d regardless of the user's range pick — the cross-module
+  // ticker line always reads "over 30 days"; React Query dedupes the
+  // underlying habits/logs fetch with the call above.
+  const { insights: tickerInsights } = useInsights('30d')
   const { data: workoutInsights, isLoading: woLoading } = useWorkoutInsights()
   const { data: readingInsights, isLoading: rdLoading } = useReadingInsights()
   const { data: reflectInsights, isLoading: rfLoading } = useReflectInsights()
@@ -92,9 +101,11 @@ function InsightsPage() {
           readingInsights={readingInsights}
           reflectInsights={reflectInsights}
           focusInsights={focusInsights}
+          range={range}
+          onRangeChange={setRange}
         />
         <Rail>
-          <InsightsRail insights={insights} />
+          <InsightsRail insights={insights} tickerInsights={tickerInsights} />
         </Rail>
       </>
     )
@@ -104,13 +115,16 @@ function InsightsPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <header>
-        <p className="label-mono">// last 30 days</p>
-        <h1 className="mt-1 text-2xl">Insights</h1>
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <p className="label-mono">// {insightRangeLabel(range)}</p>
+          <h1 className="mt-1 text-2xl">Insights</h1>
+        </div>
+        <RangeToggle value={range} onChange={setRange} className="mt-0.5" />
       </header>
 
       <Cascade>
-        <InsightsTicker habits={insights} />
+        <InsightsTicker habits={tickerInsights} />
 
         {habitHasData ? (
           <div className="flex flex-col gap-5">
@@ -124,7 +138,10 @@ function InsightsPage() {
               />
               <InsightStat label="best streak" value={`${insights.bestStreak}d`} accent />
               <InsightStat label="active" value={String(insights.activeHabits)} />
-              <InsightStat label="done · 30d" value={String(insights.totalDone)} />
+              <InsightStat
+                label={`done · ${insightRangeSuffix(range)}`}
+                value={String(insights.totalDone)}
+              />
             </div>
 
             <div>

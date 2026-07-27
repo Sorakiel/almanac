@@ -12,21 +12,24 @@ export interface WeekPoint {
   rate: number
 }
 
+/** Selectable lookback window for the habit-completion insights. */
+export type InsightRange = '7d' | '30d' | 'all'
+
 /** Everything the Insights screens render, derived from habits + logs. */
 export interface Insights {
-  /** Completion over the last 30 days, 0–1. */
+  /** Completion over the selected range, 0–1. */
   completionRate: number
-  /** Percentage-point change vs the previous 30 days (may be negative). */
-  completionDelta: number
-  /** Longest run of consecutive completed days across all habits. */
+  /** Percentage-point change vs the prior period of equal length; undefined when there's no comparable prior period (e.g. "all"). */
+  completionDelta: number | undefined
+  /** Longest run of consecutive completed days across all habits, within the selected range. */
   bestStreak: number
   /** Number of active habits. */
   activeHabits: number
-  /** Completed habit-days over the last 30 days. */
+  /** Completed habit-days over the selected range. */
   totalDone: number
-  /** Completion rate per week, oldest→newest. */
+  /** Completion rate per bucket over the selected range, oldest→newest. */
   weekly: WeekPoint[]
-  /** Per-habit completion over the last 30 days, strongest first. */
+  /** Per-habit completion over the selected range, strongest first. */
   byHabit: HabitRate[]
   /** Strongest / weakest weekday for daily-scheduled habits (null if unknown). */
   bestWeekday: string | null
