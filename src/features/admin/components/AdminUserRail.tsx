@@ -45,17 +45,6 @@ export function AdminUserRail({ user, todayKey }: AdminUserRailProps) {
         </div>
       </div>
 
-      <div className="rounded-[18px] border bg-surface p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-          last 30 days
-        </p>
-        <div className="mt-2 flex flex-col">
-          <Row label="active days" value={`${user.stats.activeDays30}d`} />
-          <Row label="completion" value={`${user.stats.completionPct}%`} />
-          <Row label="habits" value={String(user.stats.habits)} />
-        </div>
-      </div>
-
       <div className="rounded-[16px] border border-accent/25 bg-gradient-to-br from-accent/10 to-transparent p-[18px]">
         <p className="font-mono text-[10px] uppercase tracking-label text-accent">
           elevated access

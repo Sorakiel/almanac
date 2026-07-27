@@ -29,6 +29,8 @@ export interface MemberRow {
   name: string
   role: UserRole
   joinedAt: string
+  /** Whether this member logged a habit today. */
+  isActiveToday: boolean
 }
 
 /** One habit in a user's detail view (admin/owner cross-user read). */
@@ -59,13 +61,14 @@ export interface AdminUserDetail {
   feedback: FeedbackRow[]
 }
 
-/** A feedback item joined with its author's display name. */
+/** A feedback item joined with its author's display name and role. */
 export interface FeedbackRow {
   id: string
   body: string
   status: FeedbackStatus
   createdAt: string
   authorName: string
+  authorRole: UserRole
 }
 
 /** Everything the admin console renders. */

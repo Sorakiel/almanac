@@ -76,7 +76,7 @@ function AdminPage() {
           currentUserId={currentUserId}
         />
         <Rail>
-          <AdminRail data={data} isOwner={isOwner} />
+          <AdminRail data={data} isOwner={isOwner} todayKey={dateKey} />
         </Rail>
       </>
     )

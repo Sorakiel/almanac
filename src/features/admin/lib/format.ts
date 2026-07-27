@@ -23,10 +23,3 @@ export function joinedLabel(createdAtIso: string, todayKey: string): string {
     new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)),
   )
 }
-
-/** Two-letter initials for an avatar chip. */
-export function initials(name: string): string {
-  const parts = name.trim().split(/\s+/)
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase()
-  return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase()
-}

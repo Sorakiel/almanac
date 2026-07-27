@@ -39,13 +39,16 @@ export function computeAdmin(
   const weekAgo = lastNDateKeys(todayKey, 7)[0]!
   const newThisWeek = profiles.filter((p) => p.created_at.slice(0, 10) >= weekAgo).length
   const admins = profiles.filter((p) => p.role === 'admin').length
+  const activeToday = new Set(activeUserIds)
 
   const nameById = new Map(profiles.map((p) => [p.id, nameOf(p)]))
+  const roleById = new Map(profiles.map((p) => [p.id, p.role]))
   const members: MemberRow[] = profiles.slice(0, RECENT_MEMBERS).map((p) => ({
     id: p.id,
     name: nameOf(p),
     role: p.role,
     joinedAt: p.created_at,
+    isActiveToday: activeToday.has(p.id),
   }))
 
   return {
@@ -65,6 +68,7 @@ export function computeAdmin(
       status: f.status,
       createdAt: f.created_at,
       authorName: nameById.get(f.user_id) ?? `member-${f.user_id.slice(0, 6)}`,
+      authorRole: roleById.get(f.user_id) ?? 'user',
     })),
   }
 }

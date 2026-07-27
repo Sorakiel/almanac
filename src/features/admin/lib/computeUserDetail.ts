@@ -70,6 +70,7 @@ export function computeUserDetail(
       status: f.status,
       createdAt: f.created_at,
       authorName: nameOf(profile),
+      authorRole: profile.role,
     })),
   }
 }

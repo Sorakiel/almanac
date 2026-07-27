@@ -6,13 +6,19 @@ import { Tag } from '@/components/common/Tag'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { useFeedbackManagement } from '@/features/admin/hooks/useFeedbackManagement'
 import { joinedLabel } from '@/features/admin/lib/format'
-import type { FeedbackRow, FeedbackStatus } from '@/features/admin/types'
+import type { FeedbackRow, FeedbackStatus, UserRole } from '@/features/admin/types'
 
 const STATUS_TONE: Record<FeedbackStatus, 'accent' | 'teal' | 'amber' | 'muted'> = {
   open: 'amber',
   planned: 'accent',
   done: 'teal',
   closed: 'muted',
+}
+
+const ROLE_TONE: Record<UserRole, 'accent' | 'muted' | 'teal'> = {
+  owner: 'teal',
+  admin: 'accent',
+  user: 'muted',
 }
 
 /** Bodies longer than this collapse behind a Show more/less toggle. */
@@ -79,9 +85,12 @@ function FeedbackCard({ item, todayKey, hideAuthor }: FeedbackCardProps) {
       <div className="mb-1.5 flex items-center gap-2">
         <Tag tone={STATUS_TONE[item.status]}>{item.status}</Tag>
         {!hideAuthor ? (
-          <span className="min-w-0 truncate font-mono text-[10px] text-muted-strong">
-            {item.authorName}
-          </span>
+          <>
+            <Tag tone={ROLE_TONE[item.authorRole]}>{item.authorRole}</Tag>
+            <span className="min-w-0 truncate font-mono text-[10px] text-muted-strong">
+              {item.authorName}
+            </span>
+          </>
         ) : null}
         <span className="ml-auto flex-none font-mono text-[10px] text-muted-strong">
           {joinedLabel(item.createdAt, todayKey)}

@@ -1,5 +1,6 @@
 import { Crown, ShieldCheck } from 'lucide-react'
 import { Tag } from '@/components/common/Tag'
+import { joinedLabel } from '@/features/admin/lib/format'
 import { cn } from '@/lib/utils'
 import type { AdminData, FeedbackStatus } from '@/features/admin/types'
 
@@ -7,6 +8,7 @@ interface AdminRailProps {
   data: AdminData
   /** The viewer is the owner — unlocks role management, shown in the header. */
   isOwner: boolean
+  todayKey: string
 }
 
 const STATUS_TONE: Record<FeedbackStatus, 'accent' | 'teal' | 'amber' | 'muted'> = {
@@ -26,7 +28,7 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 /** Desktop Admin context rail: workspace counters, feedback, caution note. */
-export function AdminRail({ data, isOwner }: AdminRailProps) {
+export function AdminRail({ data, isOwner, todayKey }: AdminRailProps) {
   const { overview, feedback } = data
   const Icon = isOwner ? Crown : ShieldCheck
   return (
@@ -69,11 +71,16 @@ export function AdminRail({ data, isOwner }: AdminRailProps) {
           <ul className="mt-2.5 flex flex-col gap-3">
             {feedback.slice(0, 4).map((f) => (
               <li key={f.id} className="flex flex-col gap-1">
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
                   <span className="min-w-0 truncate font-mono text-[10px] text-muted-strong">
                     {f.authorName}
                   </span>
-                  <Tag tone={STATUS_TONE[f.status]}>{f.status}</Tag>
+                  <Tag tone={STATUS_TONE[f.status]} className="flex-none">
+                    {f.status}
+                  </Tag>
+                  <span className="ml-auto flex-none font-mono text-[10px] text-muted-strong">
+                    {joinedLabel(f.createdAt, todayKey)}
+                  </span>
                 </div>
                 <p className="line-clamp-2 text-[12.5px] leading-snug text-muted">{f.body}</p>
               </li>

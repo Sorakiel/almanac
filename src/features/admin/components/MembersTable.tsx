@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MoreHorizontal } from 'lucide-react'
+import { Avatar } from '@/components/common/Avatar'
 import { Tag } from '@/components/common/Tag'
 import { MemberActionsSheet } from '@/features/admin/components/MemberActionsSheet'
-import { initials, joinedLabel } from '@/features/admin/lib/format'
+import { joinedLabel } from '@/features/admin/lib/format'
+import { cn } from '@/lib/utils'
 import type { MemberRow, UserRole } from '@/features/admin/types'
 
 interface MembersTableProps {
@@ -28,17 +30,18 @@ export function MembersTable({ members, todayKey, isOwner, currentUserId }: Memb
 
   return (
     <div className="overflow-x-auto rounded-card border bg-surface">
-      <div className="min-w-[420px]">
-        <div className="grid grid-cols-[1.9fr_0.8fr_0.9fr_auto] gap-3 border-b px-4 py-3 font-mono text-[10px] uppercase tracking-label text-muted-strong">
+      <div className="min-w-[520px]">
+        <div className="grid grid-cols-[1.9fr_0.7fr_0.8fr_0.7fr_auto] gap-3 border-b px-4 py-3 font-mono text-[10px] uppercase tracking-label text-muted-strong">
           <span>member</span>
           <span>role</span>
           <span>joined</span>
+          <span>active</span>
           <span className="sr-only">actions</span>
         </div>
         {members.map((m) => (
           <div
             key={m.id}
-            className="relative grid grid-cols-[1.9fr_0.8fr_0.9fr_auto] items-center gap-3 border-b px-4 py-3 text-[13px] transition-colors last:border-b-0 hover:bg-panel/60"
+            className="relative grid grid-cols-[1.9fr_0.7fr_0.8fr_0.7fr_auto] items-center gap-3 border-b px-4 py-3 text-[13px] transition-colors last:border-b-0 hover:bg-panel/60"
           >
             {/* Stretched overlay: the row opens the user's detail. */}
             <button
@@ -48,12 +51,7 @@ export function MembersTable({ members, todayKey, isOwner, currentUserId }: Memb
               className="absolute inset-0 z-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
             />
             <span className="flex min-w-0 items-center gap-2.5">
-              <span
-                aria-hidden="true"
-                className="flex h-6 w-6 flex-none items-center justify-center rounded-md bg-border/20 font-mono text-[9px]"
-              >
-                {initials(m.name)}
-              </span>
+              <Avatar name={m.name} size="sm" className="h-6 w-6 rounded-md text-[9px]" />
               <span className="truncate">{m.name}</span>
               {m.id === currentUserId ? (
                 <span className="font-mono text-[9px] uppercase tracking-label text-muted-strong">
@@ -66,6 +64,16 @@ export function MembersTable({ members, todayKey, isOwner, currentUserId }: Memb
             </span>
             <span className="font-mono text-[11px] text-muted-strong">
               {joinedLabel(m.joinedAt, todayKey)}
+            </span>
+            <span className="flex items-center gap-1.5 font-mono text-[11px] text-muted-strong">
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'h-1.5 w-1.5 rounded-full',
+                  m.isActiveToday ? 'bg-teal' : 'bg-muted-strong',
+                )}
+              />
+              {m.isActiveToday ? 'active' : '—'}
             </span>
             <button
               type="button"
