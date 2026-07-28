@@ -18,6 +18,16 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- Auth email deep link (magic link, signup confirm, password
+                 reset) — Supabase redirects here instead of the website so
+                 the link reopens the app. See src/lib/deepLink.ts. -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.almanac.app" android:host="login-callback" />
+            </intent-filter>
         </activity>
 
         <provider

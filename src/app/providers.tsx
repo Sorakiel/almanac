@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { checkForAndroidUpdate } from '@/lib/androidUpdater'
+import { initDeepLinks } from '@/lib/deepLink'
 import { checkForDesktopUpdate } from '@/lib/desktopUpdater'
 import { applyRunInBackground } from '@/lib/desktop'
 import { queryClient } from '@/lib/queryClient'
@@ -22,6 +23,7 @@ export function Providers({ children }: ProvidersProps) {
   useEffect(() => {
     void checkForDesktopUpdate()
     void checkForAndroidUpdate()
+    void initDeepLinks()
     // Push the saved "run in background" choice into the native shell (tray +
     // autostart) so it matches the toggle after a restart.
     void applyRunInBackground(useDesktopStore.getState().runInBackground)

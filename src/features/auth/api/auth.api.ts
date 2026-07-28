@@ -1,3 +1,4 @@
+import { authRedirectTo } from '@/lib/deepLink'
 import { supabase } from '@/lib/supabase'
 
 interface Credentials {
@@ -31,7 +32,7 @@ export async function signUpWithPassword({
     password,
     options: {
       data: { display_name: displayName },
-      emailRedirectTo: `${window.location.origin}/`,
+      emailRedirectTo: authRedirectTo(),
     },
   })
   if (error) throw error
@@ -42,7 +43,7 @@ export async function signUpWithPassword({
 export async function signInWithMagicLink(email: string): Promise<void> {
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: `${window.location.origin}/` },
+    options: { emailRedirectTo: authRedirectTo() },
   })
   if (error) throw error
 }
@@ -59,7 +60,7 @@ export async function signOut(): Promise<void> {
 /** Email a password-reset link that lands on /auth/reset. */
 export async function requestPasswordReset(email: string): Promise<void> {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/auth/reset`,
+    redirectTo: authRedirectTo('/auth/reset'),
   })
   if (error) throw error
 }
