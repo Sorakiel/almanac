@@ -379,6 +379,44 @@ export type Database = {
           },
         ]
       }
+      habit_subtasks: {
+        Row: {
+          completed_dates: string[]
+          created_at: string
+          habit_id: string
+          id: string
+          sort_order: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          completed_dates?: string[]
+          created_at?: string
+          habit_id: string
+          id?: string
+          sort_order?: number
+          title: string
+          user_id: string
+        }
+        Update: {
+          completed_dates?: string[]
+          created_at?: string
+          habit_id?: string
+          id?: string
+          sort_order?: number
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_subtasks_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       habits: {
         Row: {
           archived_at: string | null

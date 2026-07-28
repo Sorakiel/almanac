@@ -1,6 +1,7 @@
 import { format, parseISO } from 'date-fns'
 import { Check, Snowflake } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { HabitChecklist } from '@/features/habits/components/HabitChecklist'
 import { cn } from '@/lib/utils'
 import type { Habit } from '@/features/habits/types'
 import type { HabitDetailStats } from '@/features/habits/hooks/useHabitDetail'
@@ -49,6 +50,8 @@ export function HabitDetailRail({
           </p>
         </div>
       ) : null}
+
+      <HabitChecklist habitId={habit.id} />
 
       <div>
         <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">recent</p>

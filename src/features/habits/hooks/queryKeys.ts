@@ -6,4 +6,6 @@ export const habitKeys = {
   /** Freeze days across a recent window ending on `date` (protects list streaks). */
   recentFreezes: (userId: string, date: string) =>
     ['habitFreezes', userId, 'recent', date] as const,
+  /** A single habit's checklist. */
+  subtasks: (habitId: string) => ['habitSubtasks', habitId] as const,
 }

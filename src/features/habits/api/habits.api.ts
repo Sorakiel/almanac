@@ -1,5 +1,11 @@
 import { supabase } from '@/lib/supabase'
-import type { Habit, HabitFreeze, HabitInsert, HabitLog } from '@/features/habits/types'
+import type {
+  Habit,
+  HabitFreeze,
+  HabitInsert,
+  HabitLog,
+  HabitSubtask,
+} from '@/features/habits/types'
 
 /** Active (non-archived) habits for a user, ordered for display. */
 export async function fetchHabits(userId: string): Promise<Habit[]> {
@@ -125,6 +131,47 @@ export async function archiveHabit(id: string): Promise<void> {
   const { error } = await supabase
     .from('habits')
     .update({ archived_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) throw error
+}
+
+/** A habit's checklist, in display order. */
+export async function fetchSubtasks(habitId: string): Promise<HabitSubtask[]> {
+  const { data, error } = await supabase
+    .from('habit_subtasks')
+    .select('*')
+    .eq('habit_id', habitId)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return data
+}
+
+export async function createSubtask(
+  userId: string,
+  habitId: string,
+  title: string,
+  sortOrder: number,
+): Promise<HabitSubtask> {
+  const { data, error } = await supabase
+    .from('habit_subtasks')
+    .insert({ user_id: userId, habit_id: habitId, title, sort_order: sortOrder })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function deleteSubtask(id: string): Promise<void> {
+  const { error } = await supabase.from('habit_subtasks').delete().eq('id', id)
+  if (error) throw error
+}
+
+/** Overwrite a subtask's checked-date list (the caller adds/removes today's key). */
+export async function setSubtaskCompletedDates(id: string, dates: string[]): Promise<void> {
+  const { error } = await supabase
+    .from('habit_subtasks')
+    .update({ completed_dates: dates })
     .eq('id', id)
   if (error) throw error
 }

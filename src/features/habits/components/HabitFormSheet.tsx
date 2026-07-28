@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sheet } from '@/components/ui/sheet'
+import { HabitChecklistEditor } from '@/features/habits/components/HabitChecklistEditor'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
 import {
@@ -311,6 +312,8 @@ export function HabitFormSheet() {
             />
           </div>
         </div>
+
+        {editing ? <HabitChecklistEditor habitId={editing.id} /> : null}
 
         <Button type="submit" size="lg" disabled={pending} className="mt-1">
           {pending ? 'Saving…' : editing ? 'Save changes' : 'Create habit'}

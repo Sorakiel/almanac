@@ -11,6 +11,7 @@ import { SectionLabel } from '@/components/common/SectionLabel'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { Rail } from '@/components/common/desktop/rail'
+import { HabitChecklist } from '@/features/habits/components/HabitChecklist'
 import { HabitHeatmap } from '@/features/habits/components/HabitHeatmap'
 import { HabitDetailWorkspace } from '@/features/habits/components/desktop/HabitDetailWorkspace'
 import { HabitDetailRail } from '@/features/habits/components/desktop/HabitDetailRail'
@@ -213,6 +214,8 @@ function HabitDetailPage() {
           </div>
         </div>
       ) : null}
+
+      <HabitChecklist habitId={habit.id} />
 
       <div className="mt-auto flex flex-col gap-2">
         {!stats.todayDone ? (

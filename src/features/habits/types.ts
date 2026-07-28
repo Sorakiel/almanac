@@ -4,6 +4,7 @@ export type Habit = Database['public']['Tables']['habits']['Row']
 export type HabitInsert = Database['public']['Tables']['habits']['Insert']
 export type HabitLog = Database['public']['Tables']['habit_logs']['Row']
 export type HabitFreeze = Database['public']['Tables']['habit_freezes']['Row']
+export type HabitSubtask = Database['public']['Tables']['habit_subtasks']['Row']
 export type HabitFrequency = Database['public']['Enums']['habit_frequency']
 export type HabitTimeOfDay = Database['public']['Enums']['habit_time_of_day']
 
