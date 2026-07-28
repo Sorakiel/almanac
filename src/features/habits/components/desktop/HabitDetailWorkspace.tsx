@@ -1,6 +1,7 @@
 import { Pencil, Trash2 } from 'lucide-react'
 import { IconTile } from '@/components/common/IconTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
+import { HabitChecklist } from '@/features/habits/components/HabitChecklist'
 import { HabitHeatmap } from '@/features/habits/components/HabitHeatmap'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
@@ -74,6 +75,8 @@ export function HabitDetailWorkspace({
         <Stat label="rate" value={`${stats.ratePct}%`} />
         <Stat label="total" value={String(stats.total)} />
       </div>
+
+      <HabitChecklist habit={habit} className="mt-7" />
 
       <div className="mt-7 flex flex-col gap-3">
         <SectionLabel>LAST 12 MONTHS</SectionLabel>

@@ -6,11 +6,15 @@ import { cn } from '@/lib/utils'
 
 interface HabitChecklistProps {
   habit: Habit
+  /** Merged onto the root — lets callers space it without a wrapper div that
+   *  would otherwise linger (with its own margin) when there's nothing to show. */
+  className?: string
 }
 
 /** Today's checklist for a habit. Checking every item marks the habit done
- *  (and unchecking any one un-marks it) — same as any nested-task list. */
-export function HabitChecklist({ habit }: HabitChecklistProps) {
+ *  (and unchecking any one un-marks it) — same as any nested-task list.
+ *  Renders nothing when the habit has no checklist. */
+export function HabitChecklist({ habit, className }: HabitChecklistProps) {
   const { subtasks, isLoading, toggleToday, todayKey } = useHabitSubtasks(habit)
 
   if (isLoading || subtasks.length === 0) return null
@@ -18,7 +22,7 @@ export function HabitChecklist({ habit }: HabitChecklistProps) {
   const done = subtasks.filter((s) => s.completed_dates.includes(todayKey)).length
 
   return (
-    <div>
+    <div className={className}>
       <p className="flex items-baseline justify-between font-mono text-[10px] uppercase tracking-label text-muted-strong">
         checklist
         <span className="tabular-nums">
