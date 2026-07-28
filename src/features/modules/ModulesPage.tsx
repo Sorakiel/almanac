@@ -9,7 +9,6 @@ import { Switch } from '@/components/ui/switch'
 import { Rail } from '@/components/common/desktop/rail'
 import { ModulesRail } from '@/features/modules/components/ModulesRail'
 import { FeedbackSheet } from '@/features/modules/components/FeedbackSheet'
-import { useHabits } from '@/features/habits/hooks/useHabits'
 import { NAV_MODULES, useModulesStore, type ModuleKey } from '@/stores/modules'
 import { cn } from '@/lib/utils'
 
@@ -37,20 +36,9 @@ const SOON: SoonModule[] = [
 
 function ModulesPage() {
   const navigate = useNavigate()
-  const { habits } = useHabits()
   const enabled = useModulesStore((s) => s.enabled)
   const toggle = useModulesStore((s) => s.toggle)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
-
-  const stats: Record<ModuleKey, string> = {
-    habits: `${habits.length} active`,
-    workouts: 'Train',
-    insights: 'Progress',
-    flow: 'Deep work',
-    reflect: 'Journal',
-    reading: 'Library',
-    social: 'Friends',
-  }
 
   return (
     <>
@@ -101,9 +89,7 @@ function ModulesPage() {
                     </div>
                     <div className="mt-3">
                       <p className="font-semibold">{m.label}</p>
-                      <p className="mt-0.5 font-mono text-[10px] text-muted-strong">
-                        {stats[m.key]}
-                      </p>
+                      <p className="mt-0.5 text-[13px] text-muted">{m.description}</p>
                     </div>
                   </div>
                 )

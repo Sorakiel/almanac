@@ -170,8 +170,8 @@ function SettingsPage() {
         ) : null}
 
         <Button
-          variant="surface"
-          className="w-full text-accent"
+          variant="outline"
+          className="w-full lg:hidden"
           onClick={handleSignOut}
           disabled={logOut.isPending}
         >

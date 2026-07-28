@@ -22,6 +22,8 @@ export interface NavModule {
   /** Lucide icon — the single source of truth shared by the nav and modules hub. */
   icon: LucideIcon
   to: string
+  /** One-line blurb shown under the label on the Modules hub card. */
+  description: string
   /**
    * Core modules are permanent primary-nav items: always shown alongside Today,
    * never toggleable. Optional modules live in the "Modules" section and are
@@ -31,13 +33,57 @@ export interface NavModule {
 }
 
 export const NAV_MODULES: NavModule[] = [
-  { key: 'habits', label: 'Habits', icon: ListChecks, to: '/habits', core: true },
-  { key: 'insights', label: 'Insights', icon: BarChart3, to: '/insights', core: true },
-  { key: 'workouts', label: 'Train', icon: Dumbbell, to: '/train' },
-  { key: 'flow', label: 'Flow', icon: Timer, to: '/flow' },
-  { key: 'reflect', label: 'Reflect', icon: NotebookPen, to: '/reflect' },
-  { key: 'reading', label: 'Reading', icon: BookOpen, to: '/reading' },
-  { key: 'social', label: 'Friends', icon: Users, to: '/friends' },
+  {
+    key: 'habits',
+    label: 'Habits',
+    icon: ListChecks,
+    to: '/habits',
+    description: 'Daily tracking, streaks, and schedules.',
+    core: true,
+  },
+  {
+    key: 'insights',
+    label: 'Insights',
+    icon: BarChart3,
+    to: '/insights',
+    description: 'Trends and completion across every habit.',
+    core: true,
+  },
+  {
+    key: 'workouts',
+    label: 'Train',
+    icon: Dumbbell,
+    to: '/train',
+    description: 'Workout plans, sessions, and volume.',
+  },
+  {
+    key: 'flow',
+    label: 'Flow',
+    icon: Timer,
+    to: '/flow',
+    description: 'Deep-work timer for focused sessions.',
+  },
+  {
+    key: 'reflect',
+    label: 'Reflect',
+    icon: NotebookPen,
+    to: '/reflect',
+    description: 'Daily journaling with mood and quotes.',
+  },
+  {
+    key: 'reading',
+    label: 'Reading',
+    icon: BookOpen,
+    to: '/reading',
+    description: 'Track books, pages, and reading streaks.',
+  },
+  {
+    key: 'social',
+    label: 'Friends',
+    icon: Users,
+    to: '/friends',
+    description: "See how friends' streaks are going.",
+  },
 ]
 
 /** Today + these are the fixed primary nav (left panel / bottom nav). */

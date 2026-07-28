@@ -1,6 +1,5 @@
 import { Flame } from 'lucide-react'
 import { CompletionDonut } from '@/features/dashboard/components/CompletionDonut'
-import { Caret } from '@/components/common/Caret'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 
 interface TodaySummaryProps {
@@ -25,10 +24,7 @@ export function TodaySummary({ habits }: TodaySummaryProps) {
       <div className="flex items-center gap-4">
         <CompletionDonut completed={done} total={total} size={104} />
         <div className="min-w-0 flex-1">
-          <p className="label-mono flex items-center">
-            // today
-            <Caret />
-          </p>
+          <p className="label-mono">// today</p>
           <p className="mt-1 font-mono text-lg tabular-nums">
             <span className="text-foreground">{done}</span>
             <span className="text-muted"> / {total} done</span>

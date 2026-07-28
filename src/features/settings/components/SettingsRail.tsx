@@ -1,5 +1,8 @@
 import { format } from 'date-fns'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
 import { useProfile } from '@/features/settings/hooks/useProfile'
+import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useSession } from '@/hooks/useSession'
 import { browserTimezone } from '@/lib/date'
 import { APP_VERSION } from '@/lib/version'
@@ -17,9 +20,18 @@ function Row({ label, value }: { label: string; value: string }) {
 export function SettingsRail() {
   const { user } = useSession()
   const { profile } = useProfile()
+  const { logOut } = useAuthActions()
 
   const joined = user?.created_at ? format(new Date(user.created_at), 'MMM yyyy') : '—'
   const role = profile?.role === 'owner' ? 'Owner' : profile?.role === 'admin' ? 'Admin' : 'Member'
+
+  const handleSignOut = async () => {
+    try {
+      await logOut.mutateAsync()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not sign out')
+    }
+  }
 
   return (
     <div className="flex flex-col gap-3.5">
@@ -48,6 +60,15 @@ export function SettingsRail() {
       <p className="px-1 text-[13px] italic leading-relaxed text-muted">
         Discipline is a practice, not a destination.
       </p>
+
+      <Button
+        variant="outline"
+        className="w-full"
+        onClick={handleSignOut}
+        disabled={logOut.isPending}
+      >
+        Sign out
+      </Button>
     </div>
   )
 }
