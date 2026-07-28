@@ -78,8 +78,11 @@ export function AppLayout() {
           >
             {/* Keyed so the page remounts per route (replays the Cascade). The
                 cross-fade itself is the View Transition (see viewTransition on
-                the nav links + globals.css), so no per-route animation here. */}
-            <div key={pathname}>
+                the nav links + globals.css), so no per-route animation here.
+                hideNav routes stretch to fill main so their own `mt-auto`
+                bottom CTA reaches the true bottom instead of trailing content
+                with dead space below it — main is only flex-col in that case. */}
+            <div key={pathname} className={cn(hideNav && 'flex flex-1 flex-col')}>
               <Outlet />
             </div>
           </main>
