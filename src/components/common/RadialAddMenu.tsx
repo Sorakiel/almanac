@@ -166,7 +166,7 @@ export function RadialAddMenu() {
                       onClick={() => act(item.run)}
                       disabled={!interactive}
                       aria-label={item.label}
-                      className="absolute flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[15px] border border-accent/25 bg-surface text-accent shadow-glow transition-colors hover:bg-accent-solid hover:text-on-accent-solid disabled:pointer-events-none motion-safe:animate-cell-in"
+                      className="absolute flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[15px] border border-accent/25 bg-surface text-accent shadow-glow transition-colors duration-300 ease-out hover:bg-accent-solid hover:text-on-accent-solid disabled:pointer-events-none motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-[0.4]"
                       style={{
                         left: anchor.x + pos.x,
                         top: anchor.y + pos.y,
