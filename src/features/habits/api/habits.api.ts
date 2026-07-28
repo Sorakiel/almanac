@@ -167,6 +167,23 @@ export async function deleteSubtask(id: string): Promise<void> {
   if (error) throw error
 }
 
+/** Create a habit's checklist in one shot — used for a just-created habit. */
+export async function createSubtasksBulk(
+  userId: string,
+  habitId: string,
+  titles: string[],
+): Promise<HabitSubtask[]> {
+  const rows = titles.map((title, sort_order) => ({
+    user_id: userId,
+    habit_id: habitId,
+    title,
+    sort_order,
+  }))
+  const { data, error } = await supabase.from('habit_subtasks').insert(rows).select()
+  if (error) throw error
+  return data
+}
+
 /** Overwrite a subtask's checked-date list (the caller adds/removes today's key). */
 export async function setSubtaskCompletedDates(id: string, dates: string[]): Promise<void> {
   const { error } = await supabase

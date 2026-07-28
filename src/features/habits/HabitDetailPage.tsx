@@ -215,7 +215,7 @@ function HabitDetailPage() {
         </div>
       ) : null}
 
-      <HabitChecklist habitId={habit.id} />
+      <HabitChecklist habit={habit} />
 
       <div className="mt-auto flex flex-col gap-2">
         {!stats.todayDone ? (

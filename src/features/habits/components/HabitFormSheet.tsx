@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -7,7 +7,9 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sheet } from '@/components/ui/sheet'
+import { HabitChecklistDraftEditor } from '@/features/habits/components/HabitChecklistDraftEditor'
 import { HabitChecklistEditor } from '@/features/habits/components/HabitChecklistEditor'
+import { createSubtasksBulk } from '@/features/habits/api/habits.api'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
 import {
@@ -107,6 +109,7 @@ export function HabitFormSheet() {
   })
   const values = useWatch({ control }) as FormValues
   const pending = create.isPending || update.isPending
+  const [draftChecklist, setDraftChecklist] = useState<string[]>([])
 
   const preset = presetOf(values.frequency)
   const unit: CustomUnit = FREQ_UNIT[values.frequency] ?? 'days'
@@ -137,6 +140,7 @@ export function HabitFormSheet() {
           }
         : DEFAULTS,
     )
+    setDraftChecklist([])
   }, [open, editing, reset])
 
   const selectSimplePreset = (next: Exclude<Preset, 'custom'>) => {
@@ -170,7 +174,18 @@ export function HabitFormSheet() {
         await update.mutateAsync({ id: editing.id, input })
         toast.success('Habit updated')
       } else {
-        await create.mutateAsync(input)
+        const created = await create.mutateAsync(input)
+        if (draftChecklist.length > 0) {
+          try {
+            await createSubtasksBulk(created.user_id, created.id, draftChecklist)
+          } catch (error) {
+            toast.error(
+              error instanceof Error
+                ? error.message
+                : "Habit created, but the checklist didn't save",
+            )
+          }
+        }
         toast.success('Habit created')
       }
       closeHabitForm()
@@ -313,7 +328,11 @@ export function HabitFormSheet() {
           </div>
         </div>
 
-        {editing ? <HabitChecklistEditor habitId={editing.id} /> : null}
+        {editing ? (
+          <HabitChecklistEditor habit={editing} />
+        ) : (
+          <HabitChecklistDraftEditor items={draftChecklist} onChange={setDraftChecklist} />
+        )}
 
         <Button type="submit" size="lg" disabled={pending} className="mt-1">
           {pending ? 'Saving…' : editing ? 'Save changes' : 'Create habit'}

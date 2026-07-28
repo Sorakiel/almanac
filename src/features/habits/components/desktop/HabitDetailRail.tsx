@@ -51,7 +51,7 @@ export function HabitDetailRail({
         </div>
       ) : null}
 
-      <HabitChecklist habitId={habit.id} />
+      <HabitChecklist habit={habit} />
 
       <div>
         <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">recent</p>
