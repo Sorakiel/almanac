@@ -49,7 +49,7 @@ export function HabitCard({ habit }: HabitCardProps) {
   }
 
   return (
-    <Card className="relative p-4 transition-colors hover:border-accent/30">
+    <Card className="relative flex h-full flex-col p-4 transition-colors hover:border-accent/30">
       {/* Stretched overlay: the whole card opens the habit, while the toggle
           below sits above it (z-10) and keeps its own click. */}
       <button
@@ -76,7 +76,7 @@ export function HabitCard({ habit }: HabitCardProps) {
         </div>
       </div>
 
-      <div className="mt-3 flex items-end justify-between gap-3">
+      <div className="mt-auto flex items-end justify-between gap-3 pt-3">
         <span className="label-mono normal-case tracking-normal">
           <span className="tabular-nums">{habit.completedRecent}</span> of last {habit.windowDays}
           {' · '}

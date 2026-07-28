@@ -255,7 +255,7 @@ export function HabitFormSheet() {
 
         <div className="flex flex-col gap-3 rounded-2xl bg-surface p-4">
           <span className="label-mono">Repeats</span>
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Repeats">
+          <div className="flex flex-wrap gap-2 lg:flex-nowrap" role="group" aria-label="Repeats">
             {PRESETS.map((option) => {
               const active = preset === option.value
               return (
@@ -269,9 +269,10 @@ export function HabitFormSheet() {
                   className={cn(
                     'rounded-tile border px-4 py-2.5 text-sm font-medium transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                    'lg:flex-1 lg:border-0 lg:py-3 lg:text-center lg:text-[13.5px]',
                     active
-                      ? 'border-transparent bg-accent-solid text-on-accent-solid'
-                      : 'border-border text-muted hover:text-foreground',
+                      ? 'border-transparent bg-accent-solid font-semibold text-on-accent-solid'
+                      : 'border-border text-muted hover:text-foreground lg:bg-bg-deep',
                   )}
                 >
                   {option.label}
