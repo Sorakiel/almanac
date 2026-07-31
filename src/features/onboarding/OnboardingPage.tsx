@@ -9,6 +9,8 @@ import { HABIT_ICONS, type HabitColor, type HabitIcon } from '@/features/habits/
 import { OPTIONAL_MODULES, useModulesStore, type ModuleKey } from '@/stores/modules'
 import { useOnboardingStore } from '@/stores/onboarding'
 import { useUiStore } from '@/stores/ui'
+import { useSession } from '@/hooks/useSession'
+import { browserTimezone } from '@/lib/date'
 import { cn } from '@/lib/utils'
 
 const STEP_COUNT = 4
@@ -92,6 +94,7 @@ function toInput(t: HabitTemplate): HabitFormInput {
 /** First-run welcome flow (spec board 02): welcome → modules → habits → ready. */
 function OnboardingPage() {
   const navigate = useNavigate()
+  const { user } = useSession()
   const dismiss = useOnboardingStore((s) => s.dismiss)
   const openNewHabit = useUiStore((s) => s.openNewHabit)
   const { update } = useUpdateProfile()
@@ -114,8 +117,20 @@ function OnboardingPage() {
       return next
     })
 
+  /** Device-local fast-path, scoped to this account (see stores/onboarding). */
+  const dismissLocally = () => {
+    if (user) dismiss(user.id)
+  }
+
+  // Adopt the device's zone as the profile's. `profiles.timezone` defaults to
+  // 'UTC' and nothing else writes it except the manual picker in Settings, so
+  // without this every new user's "today" is UTC's — someone in UTC+3 would see
+  // yesterday's dashboard until 03:00 and log completions against the wrong
+  // day. Safe to set here and only here: onboarding runs once per account
+  // (gated server-side on `onboarded`), so it can never overwrite a zone the
+  // user deliberately picked later.
   const persistOnboarded = () =>
-    void update({ onboarded: true }).catch((error) => {
+    void update({ onboarded: true, timezone: browserTimezone() }).catch((error) => {
       console.debug('[onboarding] could not persist completion', error)
     })
 
@@ -143,7 +158,7 @@ function OnboardingPage() {
         return
       }
     }
-    dismiss()
+    dismissLocally()
     persistOnboarded()
     navigate(chosen.length > 0 || openForm ? '/habits' : '/')
     if (openForm) openNewHabit()
@@ -151,7 +166,7 @@ function OnboardingPage() {
 
   // Bail out early (top "Skip"): keep defaults, create nothing.
   const skip = () => {
-    dismiss()
+    dismissLocally()
     persistOnboarded()
     navigate('/')
   }
