@@ -128,6 +128,12 @@ export default {
           '0%': { top: '-15%' },
           '100%': { top: '115%' },
         },
+        // Current-set beacon: an expanding, fading ring — a heartbeat-style
+        // "do this next" pulse around the active set cell.
+        beacon: {
+          '0%': { transform: 'scale(1)', opacity: '0.6' },
+          '75%, 100%': { transform: 'scale(1.5)', opacity: '0' },
+        },
       },
       animation: {
         pop: 'pop 0.4s ease-out',
@@ -144,6 +150,7 @@ export default {
         'cell-in': 'cell-in 0.3s ease-out both',
         'radar-sweep': 'radar-sweep 4.5s linear infinite',
         scanline: 'scanline 4.5s linear infinite',
+        beacon: 'beacon 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
     },
   },
