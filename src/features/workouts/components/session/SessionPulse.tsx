@@ -144,9 +144,7 @@ export function SessionPulse({
 
     const sample = (now: number) => {
       const restRatio =
-        restRef.current === null
-          ? 0
-          : Math.min(1, restRef.current / (DEFAULT_REST_SECONDS * 1000))
+        restRef.current === null ? 0 : Math.min(1, restRef.current / (DEFAULT_REST_SECONDS * 1000))
       const base = wave(modeRef.current, now, restRatio)
       const stamped = spike((now - spikeAtRef.current) / SPIKE_MS)
       // The stamp takes the trace over rather than adding to it, so its peak
@@ -211,7 +209,7 @@ export function SessionPulse({
         </p>
         {/* Redundant with the rest chip in the action bar on narrow screens. */}
         {restMs !== null ? (
-          <p className="hidden font-mono text-[10px] uppercase tracking-label tabular-nums text-accent sm:block">
+          <p className="hidden font-mono text-[10px] uppercase tabular-nums tracking-label text-accent sm:block">
             rest {formatClock(restMs)}
           </p>
         ) : null}

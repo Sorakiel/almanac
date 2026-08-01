@@ -74,9 +74,7 @@ describe('computeInsights', () => {
   })
 
   it('scopes stats and the delta to a 7d range', () => {
-    const logs = ['2026-07-07', '2026-07-10', '2026-07-12', '2026-07-13'].map((d) =>
-      log('h1', d),
-    )
+    const logs = ['2026-07-07', '2026-07-10', '2026-07-12', '2026-07-13'].map((d) => log('h1', d))
     const out = computeInsights([dailyHabit()], logs, WINDOW, '7d')
     // Last 7 days of WINDOW (ending 2026-07-13) are 07-07..07-13: all 4 logs fall inside it.
     expect(out.totalDone).toBe(4)

@@ -56,7 +56,7 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
   }
 
   return (
-    <div className="rounded-[22px] border border-accent/28 bg-gradient-to-br from-accent/[0.12] to-surface p-6 lg:p-7">
+    <div className="border-accent/28 rounded-[22px] border bg-gradient-to-br from-accent/[0.12] to-surface p-6 lg:p-7">
       {/* The card body previews the plan; the action button is separate below. */}
       <button
         type="button"
@@ -66,7 +66,9 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-accent">{overline}</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-accent">
+              {overline}
+            </p>
             <h3 className="mt-2 truncate text-[22px] font-semibold tracking-title decoration-accent/40 underline-offset-4 group-hover:underline lg:text-[26px]">
               {workout.name}
             </h3>
@@ -81,21 +83,33 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
           <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5">
             <Meta icon={Layers}>{`${exercises.length} exercises`}</Meta>
             <Meta icon={Timer}>{`~${estimateMinutes(exercises)} min`}</Meta>
-            {volume > 0 ? <Meta icon={TrendingUp}>{`${volume.toLocaleString('en-US')} kg`}</Meta> : null}
+            {volume > 0 ? (
+              <Meta icon={TrendingUp}>{`${volume.toLocaleString('en-US')} kg`}</Meta>
+            ) : null}
           </div>
         ) : (
-          <p className="mt-4 text-sm text-muted">No exercises planned yet — add some to start a session.</p>
+          <p className="mt-4 text-sm text-muted">
+            No exercises planned yet — add some to start a session.
+          </p>
         )}
       </button>
 
       <div className="mt-5">
         {!isToday ? (
-          <Button variant="surface" className="w-full sm:w-auto sm:min-w-[220px]" onClick={openDetail}>
+          <Button
+            variant="surface"
+            className="w-full sm:w-auto sm:min-w-[220px]"
+            onClick={openDetail}
+          >
             <Layers className="h-4 w-4" />
             View plan
           </Button>
         ) : !hasPlan ? (
-          <Button variant="surface" className="w-full sm:w-auto sm:min-w-[220px]" onClick={openDetail}>
+          <Button
+            variant="surface"
+            className="w-full sm:w-auto sm:min-w-[220px]"
+            onClick={openDetail}
+          >
             <Layers className="h-4 w-4" />
             Plan session
           </Button>
@@ -105,7 +119,11 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
             Resume session
           </Button>
         ) : doneToday ? (
-          <Button variant="surface" className="w-full sm:w-auto sm:min-w-[220px]" onClick={startSession}>
+          <Button
+            variant="surface"
+            className="w-full sm:w-auto sm:min-w-[220px]"
+            onClick={startSession}
+          >
             <Check className="h-4 w-4" />
             Done — train again
           </Button>

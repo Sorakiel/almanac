@@ -1,6 +1,11 @@
 import { Plus, X } from 'lucide-react'
 import { Stepper } from '@/features/workouts/components/edit/Stepper'
-import { REST_PRESETS, restLabel, type DraftExercise, type DraftSet } from '@/features/workouts/lib/draft'
+import {
+  REST_PRESETS,
+  restLabel,
+  type DraftExercise,
+  type DraftSet,
+} from '@/features/workouts/lib/draft'
 
 interface SetEditorTableProps {
   exercise: DraftExercise

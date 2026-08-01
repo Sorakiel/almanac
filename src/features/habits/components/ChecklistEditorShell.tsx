@@ -33,17 +33,12 @@ export function ChecklistEditorShell({
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl bg-surface p-4">
-      <span className="label-mono">
-        Checklist{items.length > 0 ? ` · ${items.length}` : ''}
-      </span>
+      <span className="label-mono">Checklist{items.length > 0 ? ` · ${items.length}` : ''}</span>
 
       {items.length > 0 ? (
         <ul className="flex flex-col gap-2">
           {items.map((item) => (
-            <li
-              key={item.id}
-              className="flex items-center gap-2 rounded-tile bg-bg-deep px-3 py-2"
-            >
+            <li key={item.id} className="flex items-center gap-2 rounded-tile bg-bg-deep px-3 py-2">
               <span className="min-w-0 flex-1 truncate text-sm">{item.title}</span>
               <button
                 type="button"
