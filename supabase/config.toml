@@ -3,7 +3,9 @@
 project_id = "almanac"
 
 [db]
-major_version = 15
+# Must match production (currently 17.6) — a local stack on a different major
+# version would validate migrations against the wrong planner and catalog.
+major_version = 17
 
 [auth]
 # Email/password sign-in for the Phase-1 slice.
