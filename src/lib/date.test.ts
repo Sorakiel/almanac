@@ -112,10 +112,9 @@ describe('msUntilDailyTime at midnight', () => {
       for (const iso of instants) {
         const now = new Date(iso)
         const wake = new Date(now.getTime() + msUntilDailyTime(0, 0, zone, now) + 1_000)
-        expect(
-          localDateKey(zone, wake),
-          `${zone} @ ${iso} woke on the same day`,
-        ).not.toBe(localDateKey(zone, now))
+        expect(localDateKey(zone, wake), `${zone} @ ${iso} woke on the same day`).not.toBe(
+          localDateKey(zone, now),
+        )
       }
     }
   })
