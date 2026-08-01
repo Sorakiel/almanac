@@ -35,3 +35,72 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    # The suite shares one staging account and cleans up after itself, so two
+    # runs at once would trip over each other. Queue them instead of cancelling:
+    # a cancelled run can leave the account mid-test.
+    concurrency:
+      group: e2e-staging
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      # Secrets are not exposed to pull requests from forks, so the suite has to
+      # be able to stand down. It says so loudly rather than reporting a green
+      # check for a run that tested nothing.
+      - name: Check E2E configuration
+        id: config
+        env:
+          E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+        run: |
+          if [ -n "$E2E_SUPABASE_URL" ] && [ -n "$E2E_EMAIL" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=E2E skipped::E2E_SUPABASE_URL / E2E_EMAIL are not set, so no browser test ran."
+            echo "### E2E skipped — secrets not available to this run" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # `.env.e2e.local` beats `.env.local` in Vite's precedence, so `--mode e2e`
+      # pins the dev server to the staging project. Production must never be the
+      # target: these specs write real rows.
+      - name: Write E2E environment
+        if: steps.config.outputs.configured == 'true'
+        run: |
+          {
+            echo "VITE_SUPABASE_URL=${{ secrets.E2E_SUPABASE_URL }}"
+            echo "VITE_SUPABASE_ANON_KEY=${{ secrets.E2E_SUPABASE_ANON_KEY }}"
+          } > .env.e2e.local
+
+      - name: Install Playwright browser
+        if: steps.config.outputs.configured == 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E tests
+        if: steps.config.outputs.configured == 'true'
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+        run: npm run test:e2e
+
+      - name: Upload traces
+        if: failure() && steps.config.outputs.configured == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7

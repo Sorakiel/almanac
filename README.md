@@ -110,6 +110,25 @@ Almanac connects to a Supabase project for its data and sign-in. Copy
 `.env.example` to `.env.local` and add your own Supabase credentials — the setup
 steps are documented there and in the `supabase/` folder.
 
+### End-to-end tests
+
+`npm run test:e2e` drives a real browser against a real Supabase project, so it
+needs a **throwaway** one — never production; the specs create and delete rows.
+Point it at a staging project and a pre-seeded, already-confirmed account:
+
+```bash
+cat > .env.e2e.local <<'EOF'
+VITE_SUPABASE_URL=https://<staging-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<staging anon key>
+EOF
+
+E2E_EMAIL=<account> E2E_PASSWORD=<password> npm run test:e2e
+```
+
+CI runs the same suite from the `E2E_SUPABASE_URL`, `E2E_SUPABASE_ANON_KEY`,
+`E2E_EMAIL` and `E2E_PASSWORD` repository secrets, and skips with a warning when
+they are absent (pull requests from forks never see secrets).
+
 ## Roadmap
 
 Shipped so far: habits + the daily dashboard, workouts, reading, a reflection
