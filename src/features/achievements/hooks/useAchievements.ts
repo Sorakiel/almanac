@@ -26,8 +26,8 @@ export function useAchievements(): UseAchievementsResult {
   const userId = user?.id ?? ''
 
   const query = useQuery({
-    queryKey: ['achievements', userId],
-    queryFn: () => fetchAchievementData(userId),
+    queryKey: ['achievements', userId, dateKey],
+    queryFn: () => fetchAchievementData(userId, dateKey),
     enabled: Boolean(userId),
   })
 
@@ -41,7 +41,7 @@ export function useAchievements(): UseAchievementsResult {
 
   const achievements = query.data
     ? evaluateAll(
-        computeAchievementStats({ ...query.data, betaUser, todayKey: dateKey }),
+        computeAchievementStats({ ...query.data, betaUser }),
         new Set(grantsQuery.data ?? []),
       )
     : []

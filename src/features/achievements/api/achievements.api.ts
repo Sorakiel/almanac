@@ -1,7 +1,9 @@
 import { supabase } from '@/lib/supabase'
 
 export interface RawAchievementData {
-  completionDates: string[]
+  totalCompletions: number
+  currentStreak: number
+  bestStreak: number
   habitsCount: number
   workoutsCompleted: number
   booksFinished: number
@@ -10,10 +12,20 @@ export interface RawAchievementData {
   reflections: number
 }
 
-/** One-shot pull of the aggregates achievements are scored from (own-rows RLS). */
-export async function fetchAchievementData(userId: string): Promise<RawAchievementData> {
-  const [logs, habits, workouts, books, notes, reflections] = await Promise.all([
-    supabase.from('habit_logs').select('date, count').eq('user_id', userId),
+/**
+ * One-shot pull of the aggregates achievements are scored from (own-rows RLS).
+ *
+ * Everything here is O(1) over the wire: the habit-log side is folded in the
+ * database by `achievement_stats` (all-time check-offs plus best/current
+ * streak), the rest are head counts. `todayKey` is the user's local calendar
+ * date — only the client knows it, so the streak anchor travels as an argument.
+ */
+export async function fetchAchievementData(
+  userId: string,
+  todayKey: string,
+): Promise<RawAchievementData> {
+  const [streaks, habits, workouts, books, notes, reflections] = await Promise.all([
+    supabase.rpc('achievement_stats', { p_today: todayKey }).single(),
     supabase.from('habits').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     supabase
       .from('workouts')
@@ -25,14 +37,15 @@ export async function fetchAchievementData(userId: string): Promise<RawAchieveme
     supabase.from('reflections').select('*', { count: 'exact', head: true }).eq('user_id', userId),
   ])
 
-  if (logs.error) throw logs.error
+  if (streaks.error) throw streaks.error
   if (books.error) throw books.error
 
-  const completionDates = (logs.data ?? []).filter((row) => row.count >= 1).map((row) => row.date)
   const bookRows = books.data ?? []
 
   return {
-    completionDates,
+    totalCompletions: streaks.data.total_completions,
+    currentStreak: streaks.data.current_streak,
+    bestStreak: streaks.data.best_streak,
     habitsCount: habits.count ?? 0,
     workoutsCompleted: workouts.count ?? 0,
     booksFinished: bookRows.filter((b) => b.status === 'finished').length,
