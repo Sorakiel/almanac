@@ -11,51 +11,47 @@
 -- actually moves the needle.
 
 -- ---------------------------------------------------------------------------
--- 1. pg_net
+-- 1. pg_net — deliberately NOT touched
 -- ---------------------------------------------------------------------------
--- The extension is registered against the `public` schema, but its functions
--- live in `net`, which PostgREST does not publish — so this is defence in
--- depth, not an open door. Still, `anon` has no business holding EXECUTE on an
--- HTTP client: if `net` were ever added to the exposed schemas the grant would
--- turn into an SSRF primitive. Nothing in this app calls pg_net; Supabase's own
--- webhooks invoke it as a privileged role and are unaffected.
+-- Supabase's advisor flags pg_net as an extension in `public`, and anon does
+-- hold EXECUTE on its HTTP functions. An earlier draft of this migration
+-- revoked those grants. Two reasons it isn't here:
 --
--- Done dynamically: the object list belongs to the extension and shifts
--- between versions, so enumerating it by hand would rot.
-do $$
-declare r record;
-begin
-  for r in
-    select p.oid::regprocedure as sig
-    from pg_proc p
-    join pg_depend d on d.objid = p.oid and d.deptype = 'e'
-    join pg_extension e on e.oid = d.refobjid and e.extname = 'pg_net'
-  loop
-    execute format('revoke all on function %s from public, anon, authenticated', r.sig);
-  end loop;
-
-  for r in
-    select c.oid::regclass as rel
-    from pg_class c
-    join pg_depend d on d.objid = c.oid and d.deptype = 'e'
-    join pg_extension e on e.oid = d.refobjid and e.extname = 'pg_net'
-    where c.relkind in ('r', 'v', 'm', 'S', 'p')
-  loop
-    execute format('revoke all on %s from public, anon, authenticated', r.rel);
-  end loop;
-end
-$$;
-
+--   * It would not have worked. The functions are owned by `supabase_admin`
+--     and migrations run as `postgres`; a REVOKE by a non-owner raises a
+--     WARNING and changes nothing. The migration would have reported success
+--     while doing nothing at all — worse than leaving it alone, because the
+--     next reader would believe it was handled.
+--
+--   * It would have been harmful if it had worked. pg_net is load-bearing:
+--     the hourly `almanac-daily-reminder` pg_cron job calls net.http_post to
+--     invoke the daily-reminder edge function. Dropping the PUBLIC grant could
+--     have stopped every reminder email.
+--
+-- The exposure is also smaller than the advisor implies: the functions live in
+-- schema `net`, which PostgREST does not publish, so they are not reachable
+-- over the REST API regardless of the grant.
+--
 -- ---------------------------------------------------------------------------
--- 2. Orphaned trigger function
+-- 2. The undocumented role-lock trigger
 -- ---------------------------------------------------------------------------
--- `prevent_role_change` exists in production but in no migration and no source
--- file — a leftover from an earlier take on the role lock that was renamed to
--- `prevent_role_escalation` (migration 0006) without dropping the original. It
--- has been sitting on the REST surface as a SECURITY DEFINER function ever
--- since. Found by diffing production's advisors against a staging project
--- rebuilt from these migrations.
-drop function if exists public.prevent_role_change();
+-- `prevent_role_change` appears in no migration and no source file, so it read
+-- as orphaned — but it is not. A live trigger, `profiles_no_self_role_change`
+-- on public.profiles, depends on it. Production refused the DROP, which is the
+-- only reason this surfaced: staging, rebuilt from these migrations, contains
+-- neither the function nor the trigger, so it could not have caught this.
+--
+-- On inspection it is the earlier, weaker sibling of prevent_role_escalation
+-- (0007): it lets any admin change a role, where the newer one demands the
+-- owner and forbids touching the `owner` role at all. Both fire BEFORE UPDATE
+-- on profiles and both must pass, so the stricter one already governs every
+-- case this would permit — it is redundant rather than load-bearing.
+--
+-- Redundant is not the same as safe to delete, and removing a security guard
+-- deserves its own deliberate change rather than riding along with a lint fix.
+-- So this migration only takes it off the REST surface; the trigger keeps
+-- working exactly as before.
+revoke all on function public.prevent_role_change() from public, anon, authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 3. Trigger functions are never called directly
