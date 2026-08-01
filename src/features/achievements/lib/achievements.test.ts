@@ -1,31 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { completionStreaks, computeAchievementStats } from '@/features/achievements/lib/stats'
+import { computeAchievementStats } from '@/features/achievements/lib/stats'
 import { evaluate } from '@/features/achievements/lib/evaluate'
 import type { AchievementDef, AchievementStats } from '@/features/achievements/types'
 import { Flame } from 'lucide-react'
 
-describe('completionStreaks', () => {
-  it('counts the best consecutive run', () => {
-    const days = new Set(['2026-07-01', '2026-07-02', '2026-07-03', '2026-07-06'])
-    expect(completionStreaks(days, '2026-07-10').best).toBe(3)
-  })
-
-  it('counts the current run ending today or yesterday', () => {
-    const days = new Set(['2026-07-11', '2026-07-12', '2026-07-13'])
-    expect(completionStreaks(days, '2026-07-13').current).toBe(3)
-    // today blank → still counts through yesterday
-    expect(completionStreaks(new Set(['2026-07-11', '2026-07-12']), '2026-07-13').current).toBe(2)
-  })
-
-  it('is zero when the last day is too old', () => {
-    expect(completionStreaks(new Set(['2026-07-01']), '2026-07-13').current).toBe(0)
-  })
-})
-
 describe('computeAchievementStats', () => {
-  it('derives totals, streaks, and active modules', () => {
+  // Streaks and the all-time total now arrive folded from `achievement_stats`
+  // (see migration 0026); what is left to fold here is the module tally.
+  it('passes through totals and derives active modules', () => {
     const stats = computeAchievementStats({
-      completionDates: ['2026-07-12', '2026-07-12', '2026-07-13'], // 2 habits share a day
+      totalCompletions: 3,
+      currentStreak: 2,
+      bestStreak: 2,
       habitsCount: 2,
       workoutsCompleted: 4,
       booksFinished: 1,
@@ -33,12 +19,27 @@ describe('computeAchievementStats', () => {
       notesWritten: 4,
       reflections: 0,
       betaUser: true,
-      todayKey: '2026-07-13',
     })
-    expect(stats.totalCompletions).toBe(3) // repeats kept
-    expect(stats.bestStreak).toBe(2) // distinct 12→13
+    expect(stats.totalCompletions).toBe(3)
+    expect(stats.bestStreak).toBe(2)
     expect(stats.activeModules).toBe(3) // habits, workouts, reading (not reflect)
     expect(stats.betaUser).toBe(true)
+  })
+
+  it('counts reading as active from pages alone', () => {
+    const stats = computeAchievementStats({
+      totalCompletions: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+      habitsCount: 0,
+      workoutsCompleted: 0,
+      booksFinished: 0,
+      pagesRead: 42,
+      notesWritten: 0,
+      reflections: 1,
+      betaUser: false,
+    })
+    expect(stats.activeModules).toBe(2)
   })
 })
 
