@@ -11,6 +11,7 @@ import { RailTargetProvider } from '@/components/common/desktop/rail'
 import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
 import { useCelebrationWatchers } from '@/hooks/useCelebrationWatchers'
 import { useDailyReminder } from '@/hooks/useDailyReminder'
+import { useSession } from '@/hooks/useSession'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useOnboardingStore } from '@/stores/onboarding'
 import { cn } from '@/lib/utils'
@@ -27,7 +28,10 @@ export function AppLayout() {
   const { pathname } = useLocation()
   const [railEl, setRailEl] = useState<HTMLDivElement | null>(null)
   const { profile } = useProfile()
-  const locallyOnboarded = useOnboardingStore((s) => s.dismissed)
+  const { user } = useSession()
+  const dismissedFor = useOnboardingStore((s) => s.dismissedFor)
+  // Only trust the device-local fast-path for the account that actually set it.
+  const locallyOnboarded = Boolean(user && dismissedFor === user.id)
 
   // Drive the native/foreground daily habit reminder from the saved preference.
   useDailyReminder()
