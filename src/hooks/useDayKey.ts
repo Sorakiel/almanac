@@ -29,10 +29,13 @@ function notify(): void {
 /** Wake one second past the next local midnight — never a hair before it. */
 function arm(): void {
   if (timer !== undefined) clearTimeout(timer)
-  timer = setTimeout(() => {
-    notify()
-    arm()
-  }, msUntilDailyTime(0, 0, timezone) + 1_000)
+  timer = setTimeout(
+    () => {
+      notify()
+      arm()
+    },
+    msUntilDailyTime(0, 0, timezone) + 1_000,
+  )
 }
 
 /**
