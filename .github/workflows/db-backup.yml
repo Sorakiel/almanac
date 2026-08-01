@@ -1,0 +1,115 @@
+name: Supabase nightly backup
+
+# Supabase's free tier takes no backups of its own, so a bad migration or a
+# deleted row is unrecoverable. This dumps the whole database once a day and
+# keeps 90 days of history.
+#
+# IMPORTANT — why the dump is encrypted: this repository is PUBLIC, and
+# workflow artifacts of a public repository can be downloaded by anyone who can
+# see the repo. A plain dump would publish every user's habits, journal entries
+# and email address. The artifact is therefore an AES-256 blob that is useless
+# without BACKUP_PASSPHRASE.
+#
+# Requires three repository secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL     Postgres connection string, SESSION POOLER form.
+#                       Dashboard → Project Settings → Database → Connection
+#                       string → Session pooler. The direct `db.<ref>...` host
+#                       is IPv6-only and GitHub's runners are IPv4, so the
+#                       direct string will simply time out here.
+#   BACKUP_PASSPHRASE   Long random string. Generate one with:
+#                         openssl rand -base64 48
+#                       STORE IT SOMEWHERE OUTSIDE THIS REPO. Lose it and every
+#                       backup is permanently unreadable.
+#
+# To restore (locally, with the passphrase to hand):
+#   gpg --decrypt --batch --passphrase "$BACKUP_PASSPHRASE" \
+#       almanac-YYYY-MM-DD.dump.gpg > almanac.dump
+#   pg_restore --clean --if-exists --no-owner --no-acl \
+#       --dbname "$TARGET_DB_URL" almanac.dump
+# Restore into a scratch project first and check the row counts before ever
+# pointing it at production.
+
+on:
+  schedule:
+    # 03:41 UTC daily — off the hour (scheduled runs at :00 are the most
+    # congested) and well clear of the 06:17 keep-alive ping.
+    - cron: '41 3 * * *'
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install PostgreSQL 17 client
+        run: |
+          # The project runs Postgres 17; pg_dump refuses to dump a server
+          # newer than itself, and Ubuntu's default client is older. Pull the
+          # matching client from the official PGDG apt repository.
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] \
+            https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+          # Call the versioned binary directly rather than the pg_wrapper
+          # shim on PATH, which resolves to whichever cluster it feels is
+          # default and could quietly hand us the older client.
+          /usr/lib/postgresql/17/bin/pg_dump --version
+
+      - name: Dump and encrypt
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::Missing SUPABASE_DB_URL or BACKUP_PASSPHRASE repository secret."
+            exit 1
+          fi
+
+          stamp=$(date -u +%Y-%m-%d)
+          echo "BACKUP_NAME=almanac-$stamp" >> "$GITHUB_ENV"
+
+          # --format=custom is compressed and lets pg_restore pick out single
+          # tables later. --no-owner/--no-acl keep the dump restorable into a
+          # fresh project, where Supabase's internal roles differ; RLS policies
+          # themselves are part of the table definitions and are preserved.
+          /usr/lib/postgresql/17/bin/pg_dump \
+            --format=custom \
+            --no-owner \
+            --no-acl \
+            --file="almanac-$stamp.dump" \
+            "$SUPABASE_DB_URL"
+
+          # Symmetric AES-256. --batch + --passphrase-fd keeps the passphrase
+          # off the process list, where any other step could have read it.
+          printf '%s' "$BACKUP_PASSPHRASE" | gpg \
+            --batch --yes --quiet \
+            --symmetric --cipher-algo AES256 \
+            --passphrase-fd 0 \
+            --output "almanac-$stamp.dump.gpg" \
+            "almanac-$stamp.dump"
+
+          # Never let the cleartext dump reach the artifact upload.
+          rm -f "almanac-$stamp.dump"
+
+          size=$(du -h "almanac-$stamp.dump.gpg" | cut -f1)
+          echo "Encrypted backup: almanac-$stamp.dump.gpg ($size)"
+
+          # A dump that is suspiciously small usually means the connection
+          # succeeded but the role could not read the data — worth failing on,
+          # because a silently empty backup is worse than none at all.
+          bytes=$(stat -c%s "almanac-$stamp.dump.gpg")
+          if [ "$bytes" -lt 10240 ]; then
+            echo "::error::Backup is only $bytes bytes — assuming the dump failed."
+            exit 1
+          fi
+
+      - name: Upload encrypted backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BACKUP_NAME }}
+          path: ${{ env.BACKUP_NAME }}.dump.gpg
+          retention-days: 90
+          if-no-files-found: error
