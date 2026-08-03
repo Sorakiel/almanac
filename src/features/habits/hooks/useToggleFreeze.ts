@@ -28,7 +28,7 @@ export function useToggleFreeze() {
       return freeze ? addFreeze(userId, habitId, day) : removeFreeze(habitId, day)
     },
     onSuccess: (_data, { habitId }) => {
-      void queryClient.invalidateQueries({ queryKey: habitKeys.recentFreezes(userId, dateKey) })
+      void queryClient.invalidateQueries({ queryKey: habitKeys.freezesRoot(userId) })
       void queryClient.invalidateQueries({ queryKey: ['habitFreezes', habitId] })
     },
   })

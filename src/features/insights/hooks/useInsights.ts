@@ -3,6 +3,7 @@ import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { lastNDateKeys } from '@/lib/date'
 import { fetchHabits, fetchLogsSince } from '@/features/habits/api/habits.api'
+import { habitKeys } from '@/features/habits/hooks/queryKeys'
 import { computeInsights } from '@/features/insights/lib/computeInsights'
 import type { Insights, InsightRange } from '@/features/insights/types'
 
@@ -28,15 +29,22 @@ export function useInsights(range: InsightRange = '30d'): UseInsightsResult {
   const enabled = Boolean(userId)
   const windowKeys = lastNDateKeys(dateKey, FETCH_DAYS)
 
+  const from = windowKeys[0]!
+
+  // Same call, same key as the habit list: the app shell keeps `useHabits`
+  // mounted, so this used to refetch a list already sitting in the cache.
   const habitsQuery = useQuery({
-    queryKey: ['insights', 'habits', userId],
+    queryKey: habitKeys.all(userId),
     queryFn: () => fetchHabits(userId),
     enabled,
   })
 
+  // The logs, by contrast, stay a separate entry on purpose. Insights needs 90
+  // days, the dashboard 64; sharing would mean making the screen people open
+  // every day carry a month of history it never renders.
   const logsQuery = useQuery({
-    queryKey: ['insights', 'logs', userId, dateKey],
-    queryFn: () => fetchLogsSince(userId, windowKeys[0]!),
+    queryKey: habitKeys.logsSince(userId, from),
+    queryFn: () => fetchLogsSince(userId, from),
     enabled,
   })
 
