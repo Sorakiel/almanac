@@ -11,12 +11,19 @@ interface ThemeState {
   toggleTheme: () => void
 }
 
+/** Canvas colour per theme, mirroring `--color-bg` in the token layer. */
+const CHROME_COLOR: Record<Theme, string> = { dark: '#1B1B1D', coffee: '#F4ECDD' }
+
 /**
- * Reflect the theme onto <html data-theme> so the CSS token layer swaps, and
- * keep the native Android status/navigation bars in sync (no-op on web).
+ * Reflect the theme onto <html data-theme> so the CSS token layer swaps, keep
+ * the native Android status/navigation bars in sync (no-op on web), and match
+ * the browser chrome. The last one only shows up once Almanac is installed to a
+ * home screen, where the chrome is the only frame around the app — a dark strip
+ * above the coffee canvas reads as a rendering bug.
  */
 function applyTheme(theme: Theme): void {
   document.documentElement.setAttribute('data-theme', theme)
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', CHROME_COLOR[theme])
   void applyNativeStatusBar(theme)
 }
 
