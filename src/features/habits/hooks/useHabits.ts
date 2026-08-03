@@ -19,6 +19,15 @@ const WINDOW_DAYS = 7
  *  cadence the form allows (every 8 weeks = 56 days), plus a small buffer. */
 const FETCH_DAYS = 64
 
+/**
+ * First date of the habit list's log window. Exported so a mutation can patch
+ * the exact cache entry the list reads — guessing it separately is how the two
+ * drift apart.
+ */
+export function habitsWindowStart(dateKey: string): string {
+  return lastNDateKeys(dateKey, FETCH_DAYS)[0]!
+}
+
 function join(
   habits: Habit[],
   logs: HabitLog[],
@@ -123,15 +132,17 @@ export function useHabits(): UseHabitsResult {
     enabled,
   })
 
+  const from = windowKeys[0]!
+
   const logsQuery = useQuery({
-    queryKey: habitKeys.recentLogs(userId, dateKey),
-    queryFn: () => fetchLogsSince(userId, windowKeys[0]!),
+    queryKey: habitKeys.logsSince(userId, from),
+    queryFn: () => fetchLogsSince(userId, from),
     enabled,
   })
 
   const freezesQuery = useQuery({
-    queryKey: habitKeys.recentFreezes(userId, dateKey),
-    queryFn: () => fetchFreezesSince(userId, windowKeys[0]!),
+    queryKey: habitKeys.freezesSince(userId, from),
+    queryFn: () => fetchFreezesSince(userId, from),
     enabled,
   })
 

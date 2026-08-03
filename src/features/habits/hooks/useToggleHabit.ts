@@ -3,6 +3,7 @@ import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { setHabitCount } from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
+import { habitsWindowStart } from '@/features/habits/hooks/useHabits'
 import { dailyTarget } from '@/features/habits/lib/frequency'
 import { emitActivity } from '@/features/social/api/social.api'
 import { isStreakMilestone } from '@/features/social/lib/milestones'
@@ -22,7 +23,8 @@ export function useToggleHabit() {
   const { user } = useSession()
   const { dateKey } = useToday()
   const userId = user?.id ?? ''
-  const logsKey = habitKeys.recentLogs(userId, dateKey)
+  // The optimistic patch has to land on the exact window the habit list reads.
+  const logsKey = habitKeys.logsSince(userId, habitsWindowStart(dateKey))
 
   return useMutation({
     mutationFn: ({ habit }: ToggleArgs) => {
@@ -76,7 +78,9 @@ export function useToggleHabit() {
       if (context?.previous) queryClient.setQueryData(logsKey, context.previous)
     },
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: logsKey })
+      // Every log window, not just the one the list reads — insights keeps a
+      // deeper one, and it used to sit stale after a completion.
+      void queryClient.invalidateQueries({ queryKey: habitKeys.logsRoot(userId) })
     },
   })
 }
