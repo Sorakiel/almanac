@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
+import { trackEvent } from '@/lib/analytics'
 import { setHabitCount } from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
 import { habitsWindowStart } from '@/features/habits/hooks/useHabits'
@@ -64,6 +65,9 @@ export function useToggleHabit() {
       // idempotent (deduped in the DB); a miss never affects the completion.
       const completing = !habit.isComplete && habit.todayCount + 1 >= dailyTarget(habit)
       const newStreak = habit.streak + 1
+      // Only the closing tap counts — a habit with target 3 shouldn't read as
+      // three completions, and clearing one isn't a completion at all.
+      if (completing) trackEvent('habit_completed', { streak: newStreak })
       if (completing && isStreakMilestone(newStreak)) {
         void emitActivity({
           user_id: userId,

@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
   AlarmClock,
+  BarChart3,
   Bell,
   ChevronRight,
   Clock,
@@ -32,6 +33,7 @@ import { reminderTimeLabel } from '@/features/settings/lib/reminder'
 import { isDesktopApp } from '@/lib/desktop'
 import { APP_VERSION } from '@/lib/version'
 import { useDesktopStore } from '@/stores/desktop'
+import { setAnalyticsEnabled } from '@/lib/analytics'
 import { usePrefsStore } from '@/stores/prefs'
 import { useSession } from '@/hooks/useSession'
 import { useTheme } from '@/hooks/useTheme'
@@ -47,6 +49,8 @@ function SettingsPage() {
   const { theme, setTheme } = useTheme()
   const sound = usePrefsStore((s) => s.sound)
   const setSound = usePrefsStore((s) => s.setSound)
+  const analytics = usePrefsStore((s) => s.analytics)
+  const setAnalytics = usePrefsStore((s) => s.setAnalytics)
   const { logOut } = useAuthActions()
   const { profile } = useProfile()
   const { config: supportConfig } = useSupportConfig()
@@ -75,6 +79,11 @@ function SettingsPage() {
   const reminderEnabled = profile?.reminder_enabled ?? false
   const reminderHour = profile?.reminder_hour ?? 8
   const reminderMinute = profile?.reminder_minute ?? 0
+
+  const handleAnalyticsChange = (on: boolean) => {
+    setAnalytics(on)
+    setAnalyticsEnabled(on)
+  }
 
   const handleSignOut = async () => {
     try {
@@ -116,6 +125,29 @@ function SettingsPage() {
               <span className="text-[15px]">Sound effects</span>
             </span>
             <Switch checked={sound} onCheckedChange={setSound} aria-label="Sound effects" />
+          </label>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <SectionLabel>PRIVACY</SectionLabel>
+          <label className="flex items-center justify-between gap-4 rounded-tile border bg-surface px-4 py-3">
+            <span className="flex items-start gap-3">
+              <BarChart3
+                className="mt-0.5 h-[18px] w-[18px] flex-none text-muted-strong"
+                aria-hidden="true"
+              />
+              <span className="flex flex-col">
+                <span className="text-[15px]">Usage analytics</span>
+                <span className="text-xs text-muted">
+                  Which screens get opened, and counts. Never habit names, notes, or entries.
+                </span>
+              </span>
+            </span>
+            <Switch
+              checked={analytics}
+              onCheckedChange={handleAnalyticsChange}
+              aria-label="Usage analytics"
+            />
           </label>
         </section>
 

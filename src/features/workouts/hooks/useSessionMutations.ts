@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
+import { trackEvent } from '@/lib/analytics'
 import { updateWorkout } from '@/features/workouts/api/workouts.api'
 import {
   addSet,
@@ -51,9 +52,10 @@ export function useSessionMutations(workoutId: string) {
   const setCompleted = useMutation({
     mutationFn: (done: boolean) =>
       updateWorkout(workoutId, { completed_at: done ? new Date().toISOString() : null }),
-    onSuccess: () => {
+    onSuccess: (_data, done) => {
       void queryClient.invalidateQueries({ queryKey: ['workout', workoutId] })
       void queryClient.invalidateQueries({ queryKey: ['workouts', userId] })
+      if (done) trackEvent('workout_finished')
     },
   })
 

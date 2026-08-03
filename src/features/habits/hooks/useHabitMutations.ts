@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
+import { trackEvent } from '@/lib/analytics'
 import {
   archiveHabit,
   createHabit,
@@ -33,7 +34,10 @@ export function useHabitMutations() {
 
   const create = useMutation({
     mutationFn: (input: HabitFormInput) => createHabit({ ...input, user_id: userId }),
-    onSuccess: invalidate,
+    onSuccess: (habit) => {
+      invalidate()
+      trackEvent('habit_created', { frequency: habit.frequency })
+    },
   })
 
   const update = useMutation({

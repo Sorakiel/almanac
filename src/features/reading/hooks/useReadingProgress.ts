@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
+import { trackEvent } from '@/lib/analytics'
 import { useToday } from '@/hooks/useToday'
 import { updateBook, type BookPatch } from '@/features/reading/api/books.api'
 import { createReadingSession } from '@/features/reading/api/sessions.api'
@@ -63,6 +64,7 @@ export function useReadingProgress() {
       }
     },
     onSuccess: (_data, { book }) => {
+      trackEvent('reading_progress_logged', { mode: book.progress_mode })
       void queryClient.invalidateQueries({ queryKey: ['books', userId] })
       void queryClient.invalidateQueries({ queryKey: ['book', book.id] })
       void queryClient.invalidateQueries({ queryKey: ['readingSessions', book.id] })

@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
+import { identifyUser, resetAnalytics } from '@/lib/analytics'
 import { checkForAndroidUpdate } from '@/lib/androidUpdater'
 import { initDeepLinks } from '@/lib/deepLink'
 import { checkForDesktopUpdate } from '@/lib/desktopUpdater'
@@ -34,7 +35,14 @@ export function Providers({ children }: ProvidersProps) {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => setSession(session))
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      // Identify by Supabase user id only. Resetting on sign-out matters on a
+      // shared device: without it the next person inherits the previous
+      // person's distinct id.
+      if (session?.user.id !== undefined) identifyUser(session.user.id)
+      else resetAnalytics()
+    })
 
     // Resolve the initial session. If it rejects (e.g. an invalid/expired
     // refresh token 400s, or the network is unreachable), fall back to
