@@ -5,6 +5,15 @@ import { e2eClient, e2eUserId, E2E_EMAIL, E2E_PASSWORD } from './helpers/supabas
 const HOME_TIMEZONE = 'Europe/Moscow'
 
 /**
+ * Pin the browser's zone so the assertion is about what onboarding *wrote*, not
+ * about where the test happens to run. CI runners are UTC, which is also the
+ * column default — on a UTC machine "the timezone was adopted" and "nothing was
+ * written" look identical.
+ */
+const DEVICE_TIMEZONE = 'Asia/Tokyo'
+test.use({ timezoneId: DEVICE_TIMEZONE })
+
+/**
  * Restore in afterEach, not in a `finally` inside the test: when Playwright
  * times a test out it aborts the body, so a finally block is not guaranteed to
  * run — and leaving `onboarded = false` behind breaks every later spec.
@@ -60,7 +69,7 @@ test('walks the welcome flow and adopts the device timezone', async ({ page }) =
       },
       { timeout: 15_000 },
     )
-    .toMatch(/^true:(?!UTC$).+/)
+    .toBe(`true:${DEVICE_TIMEZONE}`)
 
   expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
 })
