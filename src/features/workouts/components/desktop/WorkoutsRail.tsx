@@ -46,7 +46,9 @@ export function WorkoutsRail({ overview }: WorkoutsRailProps) {
       </div>
 
       <div className="rounded-[18px] border bg-surface p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-strong">recent</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-strong">
+          recent
+        </p>
         <div className="mt-2">
           <RecentSessions workouts={overview.recent} />
         </div>

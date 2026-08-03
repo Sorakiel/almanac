@@ -4,7 +4,11 @@ import { toast } from 'sonner'
 import { Sheet } from '@/components/ui/sheet'
 import { Tag } from '@/components/common/Tag'
 import { useSupportConfig } from '@/features/settings/hooks/useSupportConfig'
-import { SUPPORT_KIND_ICON, isMethodLive, type SupportMethod } from '@/features/settings/lib/support'
+import {
+  SUPPORT_KIND_ICON,
+  isMethodLive,
+  type SupportMethod,
+} from '@/features/settings/lib/support'
 
 interface SupportSheetProps {
   open: boolean
@@ -78,7 +82,9 @@ function MethodRow({ method }: { method: SupportMethod }) {
         <Icon className="h-[18px] w-[18px] text-muted-strong" aria-hidden="true" />
         <span className="min-w-0 flex-1">
           <span className="block text-[15px] font-medium">{method.label}</span>
-          {method.hint ? <span className="block truncate text-xs text-muted">{method.hint}</span> : null}
+          {method.hint ? (
+            <span className="block truncate text-xs text-muted">{method.hint}</span>
+          ) : null}
         </span>
         <Tag tone="muted">soon</Tag>
       </div>
@@ -96,7 +102,9 @@ function MethodRow({ method }: { method: SupportMethod }) {
         <Icon className="h-[18px] w-[18px] text-accent" aria-hidden="true" />
         <span className="min-w-0 flex-1">
           <span className="block text-[15px] font-medium">{method.label}</span>
-          {method.hint ? <span className="block truncate text-xs text-muted">{method.hint}</span> : null}
+          {method.hint ? (
+            <span className="block truncate text-xs text-muted">{method.hint}</span>
+          ) : null}
         </span>
         <ExternalLink className="h-4 w-4 text-muted-strong" aria-hidden="true" />
       </a>

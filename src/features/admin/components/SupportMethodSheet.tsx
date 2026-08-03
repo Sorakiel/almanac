@@ -117,7 +117,9 @@ export function SupportMethodSheet({ open, onOpenChange, method }: SupportMethod
           <label className="flex flex-col gap-1.5">
             <span className="label-mono">Name</span>
             <Input placeholder="e.g. Boosty" autoFocus {...register('label')} />
-            {errors.label ? <span className="text-xs text-accent">{errors.label.message}</span> : null}
+            {errors.label ? (
+              <span className="text-xs text-accent">{errors.label.message}</span>
+            ) : null}
           </label>
 
           <label className="flex flex-col gap-1.5">
@@ -141,9 +143,7 @@ export function SupportMethodSheet({ open, onOpenChange, method }: SupportMethod
             {errors.value ? (
               <span className="text-xs text-accent">{errors.value.message}</span>
             ) : (
-              <span className="text-xs text-muted">
-                Leave blank to show it as “coming soon”.
-              </span>
+              <span className="text-xs text-muted">Leave blank to show it as “coming soon”.</span>
             )}
           </label>
 
@@ -178,7 +178,9 @@ export function SupportMethodSheet({ open, onOpenChange, method }: SupportMethod
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
         title="Remove this method?"
-        description={method ? `"${method.label}" will no longer appear in Support Almanac.` : undefined}
+        description={
+          method ? `"${method.label}" will no longer appear in Support Almanac.` : undefined
+        }
         confirmLabel={isMutating ? 'Removing…' : 'Remove method'}
         pending={isMutating}
         onConfirm={onDelete}

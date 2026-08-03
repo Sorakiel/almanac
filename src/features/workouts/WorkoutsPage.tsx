@@ -104,7 +104,9 @@ function WorkoutsPage() {
           />
 
           <div className="flex flex-col gap-2">
-            <SectionLabel>{selectedKey === overview.todayKey ? 'TODAY' : selectedDayLabel}</SectionLabel>
+            <SectionLabel>
+              {selectedKey === overview.todayKey ? 'TODAY' : selectedDayLabel}
+            </SectionLabel>
             {selectedDay ? (
               <TodaySessionCard
                 workout={selectedDay.workout}

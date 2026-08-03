@@ -6,7 +6,11 @@ import { Switch } from '@/components/ui/switch'
 import { Tag } from '@/components/common/Tag'
 import { SupportMethodSheet } from '@/features/admin/components/SupportMethodSheet'
 import { useSupportAdmin } from '@/features/admin/hooks/useSupportAdmin'
-import { SUPPORT_KIND_ICON, isMethodLive, type SupportMethod } from '@/features/settings/lib/support'
+import {
+  SUPPORT_KIND_ICON,
+  isMethodLive,
+  type SupportMethod,
+} from '@/features/settings/lib/support'
 
 /**
  * Owner-only console block: flip whether users see the Support section at all,
@@ -74,11 +78,7 @@ export function SupportManager() {
 
       {creating ? <SupportMethodSheet open onOpenChange={setCreating} /> : null}
       {editing ? (
-        <SupportMethodSheet
-          open
-          onOpenChange={(o) => !o && setEditing(null)}
-          method={editing}
-        />
+        <SupportMethodSheet open onOpenChange={(o) => !o && setEditing(null)} method={editing} />
       ) : null}
     </div>
   )
@@ -104,7 +104,11 @@ function MethodRow({ method, onEdit }: MethodRowProps) {
 
   return (
     <div className="flex items-center gap-3 rounded-card border bg-surface px-4 py-3">
-      <button type="button" onClick={onEdit} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+      <button
+        type="button"
+        onClick={onEdit}
+        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+      >
         <Icon className="h-[18px] w-[18px] shrink-0 text-muted-strong" aria-hidden="true" />
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2">

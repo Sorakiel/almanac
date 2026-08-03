@@ -46,7 +46,9 @@ function defaultSets(makeId: () => string): DraftSet[] {
 function reducer(state: State, action: Action): State {
   let tmp = state.nextTmp
   const id = () => `tmp-${tmp++}`
-  const mapExercises = (fn: (ex: State['draft']['exercises'][number]) => State['draft']['exercises'][number]) => ({
+  const mapExercises = (
+    fn: (ex: State['draft']['exercises'][number]) => State['draft']['exercises'][number],
+  ) => ({
     ...state.draft,
     exercises: state.draft.exercises.map(fn),
   })
@@ -132,9 +134,7 @@ function reducer(state: State, action: Action): State {
           ex.id === action.exId
             ? {
                 ...ex,
-                sets: ex.sets.map((s) =>
-                  s.id === action.setId ? { ...s, ...action.patch } : s,
-                ),
+                sets: ex.sets.map((s) => (s.id === action.setId ? { ...s, ...action.patch } : s)),
               }
             : ex,
         ),
@@ -208,5 +208,12 @@ export function useWorkoutDraft(workoutId: string, name: string, exercises: Sess
     [save],
   )
 
-  return { draft: state.draft, isDirty, actions, saveDraft, isSaving: save.isPending, saveError: save.error }
+  return {
+    draft: state.draft,
+    isDirty,
+    actions,
+    saveDraft,
+    isSaving: save.isPending,
+    saveError: save.error,
+  }
 }

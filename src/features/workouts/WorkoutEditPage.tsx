@@ -43,7 +43,11 @@ function DraftEditor({
 }) {
   const navigate = useNavigate()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
-  const { draft, isDirty, actions, saveDraft, isSaving } = useWorkoutDraft(workoutId, name, exercises)
+  const { draft, isDirty, actions, saveDraft, isSaving } = useWorkoutDraft(
+    workoutId,
+    name,
+    exercises,
+  )
   const [expandedId, setExpandedId] = useState<string | null>(exercises[0]?.id ?? null)
   const [swappingId, setSwappingId] = useState<string | null>(null)
   const [libraryOpen, setLibraryOpen] = useState(false)
@@ -62,7 +66,9 @@ function DraftEditor({
     if (from >= 0 && to >= 0) actions.reorder(from, to)
   }
 
-  const swapName = swappingId ? (draft.exercises.find((e) => e.id === swappingId)?.name ?? null) : null
+  const swapName = swappingId
+    ? (draft.exercises.find((e) => e.id === swappingId)?.name ?? null)
+    : null
 
   const handlePick = (pick: LibraryPick) => {
     if (swappingId) {
@@ -147,7 +153,7 @@ function DraftEditor({
         <div className="mx-auto w-full max-w-[900px]">
           <p className="label-mono">// train / edit template</p>
           <div className="mt-2 flex items-start justify-between gap-4">
-            <div className="min-w-0 flex-1 max-w-[520px]">{nameField}</div>
+            <div className="min-w-0 max-w-[520px] flex-1">{nameField}</div>
             <div className="flex flex-none gap-2">
               <Button variant="surface" onClick={cancel}>
                 Cancel
@@ -240,7 +246,12 @@ function DraftEditor({
         Add exercise
       </Button>
 
-      <Sheet open={libraryOpen} onOpenChange={setLibraryOpen} title={swapName ? 'Swap exercise' : 'Add exercise'} mono>
+      <Sheet
+        open={libraryOpen}
+        onOpenChange={setLibraryOpen}
+        title={swapName ? 'Swap exercise' : 'Add exercise'}
+        mono
+      >
         <div className="max-h-[70vh]">
           <ExerciseLibraryRail
             draft={draft}
