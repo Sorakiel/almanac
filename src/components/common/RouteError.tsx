@@ -1,6 +1,8 @@
+import { useEffect } from 'react'
 import { useRouteError } from 'react-router-dom'
 import { RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { trackError } from '@/lib/analytics'
 
 /**
  * Route-level error screen. The common cause is a stale lazy chunk after a
@@ -10,6 +12,10 @@ import { Button } from '@/components/ui/button'
 export function RouteError() {
   const error = useRouteError()
   const message = error instanceof Error ? error.message : 'Something went wrong.'
+
+  useEffect(() => {
+    trackError(error, 'route-error')
+  }, [error])
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center">

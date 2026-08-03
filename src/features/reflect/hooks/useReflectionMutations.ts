@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
+import { trackEvent } from '@/lib/analytics'
 import {
   createReflection,
   deleteReflection,
@@ -38,7 +39,10 @@ export function useReflectionMutations() {
             energy,
             day_rating: dayRating,
           }),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate()
+      trackEvent('reflection_saved')
+    },
   })
 
   const remove = useMutation({
