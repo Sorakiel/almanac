@@ -16,6 +16,7 @@ export type AnalyticsEvent =
   | 'reading_progress_logged'
   | 'reflection_saved'
   | 'focus_session_finished'
+  | 'data_exported'
 
 /**
  * Properties are ids, counts and enums only — never names, titles or bodies.

@@ -29,6 +29,7 @@ import { TimezoneSheet } from '@/features/settings/components/TimezoneSheet'
 import { ReminderSheet } from '@/features/settings/components/ReminderSheet'
 import { BackgroundSheet } from '@/features/settings/components/BackgroundSheet'
 import { SupportSheet } from '@/features/settings/components/SupportSheet'
+import { ExportSheet } from '@/features/settings/components/ExportSheet'
 import { reminderTimeLabel } from '@/features/settings/lib/reminder'
 import { isDesktopApp } from '@/lib/desktop'
 import { APP_VERSION } from '@/lib/version'
@@ -59,6 +60,7 @@ function SettingsPage() {
   const [reminderOpen, setReminderOpen] = useState(false)
   const [backgroundOpen, setBackgroundOpen] = useState(false)
   const [supportOpen, setSupportOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
   const runInBackground = useDesktopStore((s) => s.runInBackground)
   const showDesktop = isDesktopApp()
 
@@ -74,7 +76,6 @@ function SettingsPage() {
         ),
       )
     : 0
-  const soon = () => toast('This setting is coming soon.')
   const supportVisible = Boolean(supportConfig?.enabled && supportConfig.methods.length > 0)
   const reminderEnabled = profile?.reminder_enabled ?? false
   const reminderHour = profile?.reminder_hour ?? 8
@@ -176,7 +177,7 @@ function SettingsPage() {
               value={reminderEnabled ? reminderTimeLabel(reminderHour, reminderMinute) : 'Off'}
               onClick={() => setReminderOpen(true)}
             />
-            <Row icon={Download} label="Export data" onClick={soon} />
+            <Row icon={Download} label="Export data" onClick={() => setExportOpen(true)} />
           </div>
         </section>
 
@@ -233,6 +234,7 @@ function SettingsPage() {
       ) : null}
       {backgroundOpen ? <BackgroundSheet open onOpenChange={setBackgroundOpen} /> : null}
       {supportOpen ? <SupportSheet open onOpenChange={setSupportOpen} /> : null}
+      {exportOpen ? <ExportSheet open onOpenChange={setExportOpen} /> : null}
     </>
   )
 }
