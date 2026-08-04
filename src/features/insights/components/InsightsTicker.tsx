@@ -6,6 +6,8 @@ import { useReflectInsights } from '@/features/insights/hooks/useReflectInsights
 import { useWorkoutInsights } from '@/features/insights/hooks/useWorkoutInsights'
 import { buildInsightsLines } from '@/features/insights/lib/insightLines'
 import type { Insights } from '@/features/insights/types'
+import { useT } from '@/hooks/useT'
+import { intlLocale } from '@/lib/dateLocale'
 
 interface InsightsTickerProps {
   habits: Insights | null
@@ -17,13 +19,14 @@ interface InsightsTickerProps {
  * ticker.
  */
 export function InsightsTicker({ habits }: InsightsTickerProps): ReactElement | null {
+  const { t, locale } = useT()
   const { data: workouts } = useWorkoutInsights()
   const { data: reading } = useReadingInsights()
   const { data: reflect } = useReflectInsights()
   const { data: focus } = useFocusInsights()
   const lines = useMemo(
-    () => buildInsightsLines({ habits, workouts, reading, reflect, focus }),
-    [habits, workouts, reading, reflect, focus],
+    () => buildInsightsLines({ habits, workouts, reading, reflect, focus }, t, intlLocale(locale)),
+    [habits, workouts, reading, reflect, focus, t, locale],
   )
-  return <InsightTicker title="the almanac // reading everything" lines={lines} />
+  return <InsightTicker title={t('insights.tickerTitle')} lines={lines} />
 }

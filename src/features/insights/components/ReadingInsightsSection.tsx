@@ -3,6 +3,7 @@ import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { IconTile } from '@/components/common/IconTile'
 import { InsightStat } from '@/features/insights/components/InsightStat'
 import type { ReadingInsights } from '@/features/insights/types'
+import { useT } from '@/hooks/useT'
 
 interface ReadingInsightsSectionProps {
   data: ReadingInsights
@@ -10,21 +11,22 @@ interface ReadingInsightsSectionProps {
 
 /** Reading stats block: book/page/time KPIs and the currently-reading list. */
 export function ReadingInsightsSection({ data }: ReadingInsightsSectionProps) {
+  const { t } = useT()
   return (
     <div className="flex flex-col gap-5">
       <p className="label-mono">// reading · last 30 days</p>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <InsightStat label="reading" value={String(data.booksReading)} accent />
-        <InsightStat label="finished" value={String(data.booksFinished)} />
-        <InsightStat label="pages · 30d" value={String(data.pages30d)} />
-        <InsightStat label="time · 30d" value={String(data.minutes30d)} unit="min" />
+        <InsightStat label={t('insights.reading')} value={String(data.booksReading)} accent />
+        <InsightStat label={t('insights.finished')} value={String(data.booksFinished)} />
+        <InsightStat label={t('insights.pages30d')} value={String(data.pages30d)} />
+        <InsightStat label={t('insights.time30d')} value={String(data.minutes30d)} unit="min" />
       </div>
 
       <div className="rounded-card border bg-surface p-4">
         <p className="label-mono mb-3">currently reading</p>
         {data.currentlyReading.length === 0 ? (
-          <p className="text-sm text-muted">No books in progress right now.</p>
+          <p className="text-sm text-muted">{t('insights.noBooksInProgress')}</p>
         ) : (
           <ul className="flex flex-col gap-3.5">
             {data.currentlyReading.map((book) => (

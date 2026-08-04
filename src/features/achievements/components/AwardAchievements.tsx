@@ -5,6 +5,7 @@ import { SectionLabel } from '@/components/common/SectionLabel'
 import { MANUAL_ACHIEVEMENTS } from '@/features/achievements/lib/catalog'
 import { useUserGrants } from '@/features/achievements/hooks/useUserGrants'
 import type { AchievementTone } from '@/features/achievements/types'
+import { useT } from '@/hooks/useT'
 
 const TONE: Record<AchievementTone, string> = {
   accent: 'bg-accent/15 text-accent',
@@ -14,6 +15,7 @@ const TONE: Record<AchievementTone, string> = {
 
 /** Owner-only panel to award or revoke manual achievements for a user. */
 export function AwardAchievements({ userId, userName }: { userId: string; userName: string }) {
+  const { t } = useT()
   const { granted, toggle } = useUserGrants(userId, true)
 
   const onToggle = (achievementId: string, title: string, on: boolean) =>
@@ -22,13 +24,13 @@ export function AwardAchievements({ userId, userName }: { userId: string; userNa
       {
         onSuccess: () => toast.success(on ? `Awarded “${title}”` : `Revoked “${title}”`),
         onError: (error) =>
-          toast.error(error instanceof Error ? error.message : 'Could not update the award'),
+          toast.error(error instanceof Error ? error.message : t('achievements.awardFailed')),
       },
     )
 
   return (
     <section className="flex flex-col gap-3">
-      <SectionLabel accessory="owner">AWARDS</SectionLabel>
+      <SectionLabel accessory={t('achievements.owner')}>{t('achievements.awards')}</SectionLabel>
       <div className="divide-y overflow-hidden rounded-card border bg-surface">
         {MANUAL_ACHIEVEMENTS.map((def) => {
           const on = granted.has(def.id)

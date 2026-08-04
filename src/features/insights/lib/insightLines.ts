@@ -5,6 +5,7 @@ import type {
   ReflectInsights,
   WorkoutInsights,
 } from '@/features/insights/types'
+import type { TFunction } from '@/hooks/useT'
 import type { InsightLine } from '@/lib/insight'
 
 interface CrossModuleData {
@@ -24,13 +25,11 @@ function signed(n: number): string {
  * ordered habits → training → reading → reflect → focus. Feeds the shared
  * InsightTicker on the Insights rail / page.
  */
-export function buildInsightsLines({
-  habits,
-  workouts,
-  reading,
-  reflect,
-  focus,
-}: CrossModuleData): InsightLine[] {
+export function buildInsightsLines(
+  { habits, workouts, reading, reflect, focus }: CrossModuleData,
+  t: TFunction,
+  locale: string,
+): InsightLine[] {
   const lines: InsightLine[] = []
 
   if (habits?.hasData) {
@@ -40,14 +39,14 @@ export function buildInsightsLines({
       id: 'habits',
       text:
         delta === undefined
-          ? `Habits at ${pct}% over 30 days.`
-          : `Habits at ${pct}% over 30 days (${signed(delta)}% vs prior).`,
+          ? t('insights.lines.habits', { pct })
+          : t('insights.lines.habitsDelta', { pct, delta: signed(delta) }),
       tone: delta === undefined || delta >= 0 ? 'good' : 'info',
     })
     if (habits.bestStreak >= 3) {
       lines.push({
         id: 'best-streak',
-        text: `Best run across habits: ${habits.bestStreak} days.`,
+        text: t('insights.lines.bestStreak', { count: habits.bestStreak }),
         tone: 'info',
       })
     }
@@ -56,7 +55,7 @@ export function buildInsightsLines({
   if (workouts?.hasData && workouts.completed30d > 0) {
     lines.push({
       id: 'workouts',
-      text: `${workouts.completed30d} training session${workouts.completed30d > 1 ? 's' : ''} logged this month.`,
+      text: t('insights.lines.workouts', { count: workouts.completed30d }),
       tone: 'good',
     })
   }
@@ -65,13 +64,16 @@ export function buildInsightsLines({
     if (reading.pages30d > 0) {
       lines.push({
         id: 'reading',
-        text: `${reading.pages30d.toLocaleString('en-US')} pages read in the last 30 days.`,
+        text: t('insights.lines.pages', { count: reading.pages30d }).replace(
+          String(reading.pages30d),
+          reading.pages30d.toLocaleString(locale),
+        ),
         tone: 'good',
       })
     } else if (reading.booksReading > 0) {
       lines.push({
         id: 'reading',
-        text: `${reading.booksReading} book${reading.booksReading > 1 ? 's' : ''} in progress.`,
+        text: t('insights.lines.booksReading', { count: reading.booksReading }),
         tone: 'info',
       })
     }
@@ -81,13 +83,13 @@ export function buildInsightsLines({
     if (reflect.currentStreak >= 2) {
       lines.push({
         id: 'reflect',
-        text: `${reflect.currentStreak}-day journaling streak going.`,
+        text: t('insights.lines.journalStreak', { count: reflect.currentStreak }),
         tone: 'good',
       })
     } else if (reflect.daysJournaled30d > 0) {
       lines.push({
         id: 'reflect',
-        text: `Journaled ${reflect.daysJournaled30d} day${reflect.daysJournaled30d > 1 ? 's' : ''} this month.`,
+        text: t('insights.lines.journaled', { count: reflect.daysJournaled30d }),
         tone: 'info',
       })
     }
@@ -96,7 +98,7 @@ export function buildInsightsLines({
   if (focus?.hasData && focus.hoursTotal > 0) {
     lines.push({
       id: 'focus',
-      text: `${focus.hoursTotal}h of deep work logged all-time.`,
+      text: t('insights.lines.focusHours', { hours: focus.hoursTotal }),
       tone: 'info',
     })
   }

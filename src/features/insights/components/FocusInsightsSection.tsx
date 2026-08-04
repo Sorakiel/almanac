@@ -1,6 +1,7 @@
 import { InsightStat } from '@/features/insights/components/InsightStat'
 import { FocusHeatmap } from '@/features/insights/components/FocusHeatmap'
 import type { FocusInsights } from '@/features/insights/types'
+import { useT } from '@/hooks/useT'
 
 interface FocusInsightsSectionProps {
   data: FocusInsights
@@ -17,15 +18,20 @@ function focusTimeLabel(minutes: number): string {
 
 /** Deep Work stats block: focus KPIs and a minutes-shaded focus heatmap. */
 export function FocusInsightsSection({ data }: FocusInsightsSectionProps) {
+  const { t } = useT()
   return (
     <div className="flex flex-col gap-5">
       <p className="label-mono">// deep work</p>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <InsightStat label="focus · 30d" value={focusTimeLabel(data.minutes30d)} accent />
-        <InsightStat label="sessions · 30d" value={String(data.sessions30d)} />
-        <InsightStat label="streak" value={`${data.currentStreak}d`} />
-        <InsightStat label="total" value={`${data.hoursTotal}`} unit="h" />
+        <InsightStat
+          label={t('insights.focus30d')}
+          value={focusTimeLabel(data.minutes30d)}
+          accent
+        />
+        <InsightStat label={t('insights.sessions30d')} value={String(data.sessions30d)} />
+        <InsightStat label={t('insights.streak')} value={`${data.currentStreak}d`} />
+        <InsightStat label={t('insights.total')} value={`${data.hoursTotal}`} unit="h" />
       </div>
 
       <div>

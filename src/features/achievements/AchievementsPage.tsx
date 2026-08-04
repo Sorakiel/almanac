@@ -7,6 +7,7 @@ import { AchievementCard } from '@/features/achievements/components/AchievementC
 import { useAchievements } from '@/features/achievements/hooks/useAchievements'
 import { riseStagger } from '@/lib/motion'
 import { levelsEarned, unlockedCount } from '@/features/achievements/lib/evaluate'
+import { useT } from '@/hooks/useT'
 
 function Stat({ value, label }: { value: number; label: string }) {
   return (
@@ -20,13 +21,14 @@ function Stat({ value, label }: { value: number; label: string }) {
 }
 
 function AchievementsPage() {
+  const { t } = useT()
   const { achievements, isLoading, isError, refetch } = useAchievements()
 
   if (isLoading) {
     return (
       <div className="flex justify-center py-24" role="status" aria-live="polite">
         <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading achievements…</span>
+        <span className="sr-only">{t('achievements.loading')}</span>
       </div>
     )
   }
@@ -35,11 +37,11 @@ function AchievementsPage() {
     return (
       <EmptyState
         icon={RefreshCw}
-        title="Couldn't load achievements"
-        description="Something went wrong reaching the server."
+        title={t('achievements.loadFailed')}
+        description={t('achievements.loadFailedHint')}
         action={
           <Button size="sm" variant="surface" onClick={refetch}>
-            Try again
+            {t('achievements.tryAgain')}
           </Button>
         }
       />
@@ -57,20 +59,23 @@ function AchievementsPage() {
           className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-foreground lg:hidden"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Settings
+          {t('achievements.settings')}
         </Link>
 
         <header className="mt-3 flex items-end justify-between gap-4">
           <div>
-            <p className="label-mono">// your trophies</p>
+            <p className="label-mono">// {t('achievements.eyebrow')}</p>
             <h1 className="mt-1 flex items-center gap-2 text-2xl lg:text-[32px] lg:tracking-title">
               <Trophy className="h-6 w-6 text-accent" aria-hidden="true" />
-              Achievements
+              {t('achievements.title')}
             </h1>
           </div>
           <div className="flex gap-6">
-            <Stat value={unlocked} label={`of ${achievements.length}`} />
-            <Stat value={levelsEarned(achievements)} label="levels" />
+            <Stat
+              value={unlocked}
+              label={t('achievements.ofTotal', { total: achievements.length })}
+            />
+            <Stat value={levelsEarned(achievements)} label={t('achievements.levels')} />
           </div>
         </header>
       </div>

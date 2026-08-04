@@ -1,6 +1,7 @@
 import { INSIGHT_RANGE_OPTIONS } from '@/features/insights/lib/insightRange'
 import type { InsightRange } from '@/features/insights/types'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface RangeToggleProps {
   value: InsightRange
@@ -10,10 +11,11 @@ interface RangeToggleProps {
 
 /** Compact 7D/30D/ALL segmented control for the insights lookback window. */
 export function RangeToggle({ value, onChange, className }: RangeToggleProps) {
+  const { t } = useT()
   return (
     <div
       role="tablist"
-      aria-label="Insights range"
+      aria-label={t('insights.rangeLabel')}
       className={cn(
         'inline-flex shrink-0 rounded-[11px] border p-0.5 font-mono text-[11px] text-muted',
         className,
