@@ -224,6 +224,14 @@ replays the pre-change state.
 
 **What a browser sandbox cannot verify.** Notification permission is denied there, so Web Push delivery has never been proven end to end from a dev machine, and there is no Android emulator. Verify every link you can, then say plainly which one you could not.
 
+**Interface language.** English is the source dictionary (`src/i18n/en.ts`); `ru.ts` is
+typed against it, so a missing translation is a build error rather than a blank label.
+Plurals go through `Intl.PluralRules` — Russian needs one/few/many and 11–14 take "many",
+which is where hand-rolled `n % 10` always breaks. Pure functions take `t` as a parameter
+instead of reaching for a hook, and nothing resolves a label at module scope, or it stops
+updating when the language changes. Russian is landing screen by screen: the default stays
+English and untranslated screens fall back to it, so a stage never regresses a screen.
+
 **Native shells are not interchangeable.** Desktop is **Tauri**, Android is **Capacitor**. `isTauri()` is false in the Android app. Gating a native feature on the wrong one silently disables a whole platform — that is exactly how Android lost its reminders for weeks. Prefer a capability check (`isNativeScheduler()`) over a platform check.
 
 ## 10. Git & commit style
