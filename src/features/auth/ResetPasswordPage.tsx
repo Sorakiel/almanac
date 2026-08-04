@@ -8,15 +8,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useSession } from '@/hooks/useSession'
+import { useT } from '@/hooks/useT'
 
 const schema = z.object({
-  password: z.string().min(6, 'At least 6 characters'),
+  password: z.string().min(6, 'auth.passwordTooShort'),
 })
 
 type FormValues = z.infer<typeof schema>
 
 /** Landing page for the password-reset email link (recovery session). */
 function ResetPasswordPage() {
+  const { t } = useT()
   const navigate = useNavigate()
   const { status } = useSession()
   const { setPassword } = useAuthActions()
@@ -30,10 +32,10 @@ function ResetPasswordPage() {
   const onSubmit = handleSubmit(async (values) => {
     try {
       await setPassword.mutateAsync(values.password)
-      toast.success('Password updated — you are signed in.')
+      toast.success(t('auth.reset.updated'))
       navigate('/', { replace: true })
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not update the password')
+      toast.error(error instanceof Error ? error.message : t('auth.reset.failed'))
     }
   })
 
@@ -41,22 +43,20 @@ function ResetPasswordPage() {
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 px-6 py-12">
       <div>
         <p className="label-mono">// almanac</p>
-        <h1 className="mt-1 text-3xl">Set a new password</h1>
+        <h1 className="mt-1 text-3xl">{t('auth.reset.title')}</h1>
         <p className="mt-1 text-sm text-muted">
-          {status === 'authenticated'
-            ? 'Pick something you will remember this time.'
-            : 'This reset link has expired or was already used.'}
+          {status === 'authenticated' ? t('auth.reset.hint') : t('auth.reset.expired')}
         </p>
       </div>
 
       {status === 'authenticated' ? (
         <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
           <label className="flex flex-col gap-1.5">
-            <span className="label-mono">New password</span>
+            <span className="label-mono">{t('auth.reset.newPassword')}</span>
             <div className="relative">
               <Input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="••••••••"
+                placeholder={t('auth.passwordPlaceholder')}
                 autoComplete="new-password"
                 autoFocus
                 className="pr-14"
@@ -76,12 +76,12 @@ function ResetPasswordPage() {
           </label>
 
           <Button type="submit" size="lg" disabled={setPassword.isPending} className="shadow-glow">
-            {setPassword.isPending ? 'One moment…' : 'Save new password →'}
+            {setPassword.isPending ? t('auth.working') : t('auth.reset.submit')}
           </Button>
         </form>
       ) : (
         <Button asChild size="lg" variant="surface">
-          <Link to="/auth">Back to sign in</Link>
+          <Link to="/auth">{t('auth.reset.back')}</Link>
         </Button>
       )}
     </main>

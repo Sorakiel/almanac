@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils'
 import { scorePassword, type StrengthLevel } from '../passwordStrength'
 import { VaultStageTile } from './VaultStageTile'
+import { useT } from '@/hooks/useT'
 
 interface PasswordStrengthMeterProps {
   password: string
@@ -28,11 +29,24 @@ const SEGMENTS = [0, 1, 2, 3]
  * meter, the crack-time and the entropy — and recomputes on each keystroke.
  */
 export function PasswordStrengthMeter({ password }: PasswordStrengthMeterProps) {
-  const { level, bits, title, crackTime, fill } = scorePassword(password)
+  const { t, locale } = useT()
+  const { level, bits, tier, crackTime, fill } = scorePassword(password)
+  const tierLabel = t(`auth.strength.${tier}`)
+  const entropy = t('auth.crack.entropy', { count: bits })
+  // The wordings carry no count; the units do, and Russian needs a form per unit.
+  const time =
+    crackTime.unit === 'never' || crackTime.unit === 'instant' || crackTime.unit === 'forever'
+      ? t(`auth.crack.${crackTime.unit}`)
+      : // Grouped digits after pluralising: "1 234 567 years" reads, "1234567 years"
+        // does not — but Intl.PluralRules must see the raw number to pick a form.
+        t(`auth.crack.${crackTime.unit}`, { count: crackTime.value }).replace(
+          String(crackTime.value),
+          crackTime.value.toLocaleString(locale),
+        )
 
   return (
     <section
-      aria-label="Password strength"
+      aria-label={t('auth.strengthLabel')}
       className="flex items-center gap-3 overflow-hidden rounded-card border bg-surface/60 p-3"
     >
       <VaultStageTile level={level} />
@@ -63,16 +77,16 @@ export function PasswordStrengthMeter({ password }: PasswordStrengthMeterProps) 
               TITLE_CLASS[level],
             )}
           >
-            {title}
+            {tierLabel}
           </p>
-          <p className="truncate text-sm text-muted">{crackTime} to crack</p>
-          <p className="label-mono mt-0.5 truncate text-muted-strong">≈ {bits} bits of entropy</p>
+          <p className="truncate text-sm text-muted">{t('auth.crack.toCrack', { time })}</p>
+          <p className="label-mono mt-0.5 truncate text-muted-strong">{entropy}</p>
         </div>
       </div>
 
       {/* Concise, throttled announcement for screen readers. */}
       <p className="sr-only" aria-live="polite">
-        Password strength: {title}, {bits} bits of entropy, {crackTime} to crack.
+        {t('auth.crack.announce', { tier: tierLabel, entropy, time })}
       </p>
     </section>
   )
