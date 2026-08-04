@@ -18,16 +18,18 @@ import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useDayCompletionBeacon } from '@/features/social/hooks/useDayCompletionBeacon'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useSession } from '@/hooks/useSession'
+import { useT, type TFunction } from '@/hooks/useT'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
 
-function greeting(hour: number): string {
-  if (hour < 12) return 'Good morning'
-  if (hour < 18) return 'Good afternoon'
-  return 'Good evening'
+function greeting(hour: number, t: TFunction): string {
+  if (hour < 12) return t('dashboard.goodMorning')
+  if (hour < 18) return t('dashboard.goodAfternoon')
+  return t('dashboard.goodEvening')
 }
 
 function DashboardPage() {
+  const { t } = useT()
   const { user } = useSession()
   const { longDate, dateKey } = useToday()
   const { habits, isLoading, isError, refetch } = useHabits()
@@ -47,11 +49,11 @@ function DashboardPage() {
   if (isError) {
     return (
       <EmptyState
-        title="Couldn't load your day"
-        description="Something went wrong reaching the server."
+        title={t('dashboard.loadFailed')}
+        description={t('dashboard.loadFailedHint')}
         action={
           <Button size="sm" variant="surface" onClick={refetch}>
-            Try again
+            {t('dashboard.tryAgain')}
           </Button>
         }
       />
@@ -62,7 +64,7 @@ function DashboardPage() {
     return (
       <div className="flex justify-center py-16" role="status" aria-live="polite">
         <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading…</span>
+        <span className="sr-only">{t('dashboard.loading')}</span>
       </div>
     )
   }
@@ -72,7 +74,7 @@ function DashboardPage() {
       <>
         <DashboardWorkspace
           habits={habits}
-          greeting={greeting(new Date().getHours())}
+          greeting={greeting(new Date().getHours(), t)}
           firstName={firstName}
         />
         <Rail>
@@ -88,10 +90,10 @@ function DashboardPage() {
         <div>
           <p className="label-mono">// {dateLabel}</p>
           <h1 className="mt-1 text-2xl">
-            {greeting(new Date().getHours())}, {firstName}
+            {greeting(new Date().getHours(), t)}, {firstName}
           </h1>
         </div>
-        <Link to="/settings" aria-label="Profile and settings" className="rounded-tile">
+        <Link to="/settings" aria-label={t('nav.profileAndSettings')} className="rounded-tile">
           <Avatar name={name} size="sm" />
         </Link>
       </header>
@@ -105,19 +107,23 @@ function DashboardPage() {
 
         <section className="flex flex-col gap-2">
           <SectionLabel
-            accessory={habits.length > 0 ? `${completed} / ${dueHabits.length} done` : undefined}
+            accessory={
+              habits.length > 0
+                ? t('dashboard.doneOf', { done: completed, total: dueHabits.length })
+                : undefined
+            }
           >
-            TODAY · HABITS
+            {t('dashboard.todayHabits')}
           </SectionLabel>
 
           {habits.length === 0 ? (
             <EmptyState
-              title="Start your first habit"
-              description="One small daily action, tracked."
+              title={t('dashboard.startFirstHabit')}
+              description={t('dashboard.startFirstHabitHint')}
               action={
                 <Button size="sm" onClick={openNewHabit}>
                   <Plus className="h-4 w-4" />
-                  Add habit
+                  {t('dashboard.addHabit')}
                 </Button>
               }
             />

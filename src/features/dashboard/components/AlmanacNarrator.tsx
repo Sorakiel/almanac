@@ -1,6 +1,7 @@
 import { useMemo, type ReactElement } from 'react'
 import { InsightTicker } from '@/components/common/InsightTicker'
 import { buildNarratorLines } from '@/features/dashboard/lib/narrator'
+import { useT } from '@/hooks/useT'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 
 interface AlmanacNarratorProps {
@@ -13,6 +14,7 @@ interface AlmanacNarratorProps {
  * derived; see lib/narrator for the rule-based line generator.
  */
 export function AlmanacNarrator({ habits }: AlmanacNarratorProps): ReactElement | null {
-  const lines = useMemo(() => buildNarratorLines(habits), [habits])
-  return <InsightTicker title="the almanac // reading your day" lines={lines} />
+  const { t } = useT()
+  const lines = useMemo(() => buildNarratorLines(habits, t), [habits, t])
+  return <InsightTicker title={t('dashboard.readingYourDay')} lines={lines} />
 }

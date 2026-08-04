@@ -12,6 +12,7 @@ import { useFocusStore } from '@/stores/focus'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
 import type { HabitWithTodayLog } from '@/features/habits/types'
+import { useT } from '@/hooks/useT'
 
 interface DashboardWorkspaceProps {
   habits: HabitWithTodayLog[]
@@ -46,6 +47,7 @@ function StatTile({
 
 /** Desktop "Today" workspace — the spec board's centre column, wired to data. */
 export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWorkspaceProps) {
+  const { t } = useT()
   const { longDate } = useToday()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
   const focusRunning = useFocusStore((s) => s.endsAt !== null && s.durationMin !== null)
@@ -68,13 +70,15 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
             {greeting}, {firstName}
           </h1>
           <p className="mt-2 text-[15px] text-muted">
-            {datePart} · {completed} of {due.length} habits
-            {focusRunning ? ' · 1 focus block running' : ''}
+            {datePart} · {t('dashboard.ofHabits', { done: completed, total: due.length })}
+            {focusRunning ? t('dashboard.focusBlockRunning') : ''}
           </p>
         </div>
         <div className="ml-auto flex items-center gap-5">
           <div className="text-right">
-            <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">load</p>
+            <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
+              {t('dashboard.load')}
+            </p>
             <div className="mt-1.5 flex items-center gap-2.5">
               <ProgressBlocks
                 value={completed}
@@ -82,7 +86,7 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
                 blocks={12}
                 size="lg"
                 animated
-                aria-label={`${pct}% of today done`}
+                aria-label={t('dashboard.percentOfTodayDone', { pct })}
               />
               <span className="font-mono text-lg font-semibold tabular-nums">
                 <CountUp value={pct} />%
@@ -91,7 +95,7 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
           </div>
           <Button onClick={openNewHabit} className="rounded-[13px] shadow-glow">
             <Plus className="h-4 w-4" />
-            Capture
+            {t('dashboard.capture')}
           </Button>
         </div>
       </header>
@@ -99,26 +103,26 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
       <Cascade>
         {focusRunning ? (
           <section className="mt-8">
-            <p className="label-mono mb-3 text-accent">▶ now · focus block</p>
+            <p className="label-mono mb-3 text-accent">{t('dashboard.nowFocusBlock')}</p>
             <NowBlock habits={habits} />
           </section>
         ) : null}
 
         <section className="mt-8">
           <div className="mb-3 flex items-baseline justify-between">
-            <span className="label-mono">today · habits</span>
+            <span className="label-mono">{t('dashboard.todayHabitsMono')}</span>
             <span className="font-mono text-[11px] text-muted-strong">
-              {completed} / {due.length} done
+              {t('dashboard.doneOf', { done: completed, total: due.length })}
             </span>
           </div>
           {habits.length === 0 ? (
             <EmptyState
-              title="Start your first habit"
-              description="One small daily action, tracked."
+              title={t('dashboard.startFirstHabit')}
+              description={t('dashboard.startFirstHabitHint')}
               action={
                 <Button size="sm" onClick={openNewHabit}>
                   <Plus className="h-4 w-4" />
-                  Add habit
+                  {t('dashboard.addHabit')}
                 </Button>
               }
             />
@@ -136,9 +140,13 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
         </div>
 
         <section className="mt-6 flex gap-3">
-          <StatTile label="today" value={String(pct)} unit="%" />
-          <StatTile label="this week" value={String(weekRate)} unit="%" accent />
-          <StatTile label="active" value={String(habits.length)} unit=" habits" />
+          <StatTile label={t('dashboard.today')} value={String(pct)} unit="%" />
+          <StatTile label={t('dashboard.thisWeek')} value={String(weekRate)} unit="%" accent />
+          <StatTile
+            label={t('dashboard.active')}
+            value={String(habits.length)}
+            unit={t('dashboard.habitsUnit')}
+          />
         </section>
 
         <StatusLine habitCount={habits.length} className="mt-6" />
