@@ -1,9 +1,11 @@
 import { useLandingStats } from '@/features/auth/hooks/useLandingStats'
+import { useT } from '@/hooks/useT'
 
 /** Desktop auth brand panel (spec board 03): warm-corner gradient, story, stats. */
 export function AuthBrandPanel() {
+  const { t, locale } = useT()
   const { stats } = useLandingStats()
-  const members = stats ? stats.members.toLocaleString('en-US') : '—'
+  const members = stats ? stats.members.toLocaleString(locale) : '—'
   const longestStreak = stats ? `${stats.longestStreak}d` : '—'
   const avgCompletion = stats ? `${stats.avgCompletion}%` : '—'
 
@@ -37,27 +39,29 @@ export function AuthBrandPanel() {
         <div className="flex-1" />
 
         <h2 className="max-w-[440px] text-[40px] leading-tight tracking-title">
-          Your life, on the record.
+          {t('auth.brandTagline')}
         </h2>
         <p className="mt-4 max-w-[420px] text-base leading-relaxed text-muted">
-          Habits, workouts, and daily discipline in one calm, quietly relentless command center.
+          {t('auth.brandBlurb')} quietly relentless command center.
         </p>
 
         <dl className="mt-10 flex gap-9 font-mono">
           <div>
             <dd className="text-[26px] font-semibold text-accent">{members}</dd>
-            <dt className="mt-1 text-[10px] uppercase tracking-label text-muted-strong">members</dt>
+            <dt className="mt-1 text-[10px] uppercase tracking-label text-muted-strong">
+              {t('auth.members')}
+            </dt>
           </div>
           <div>
             <dd className="text-[26px] font-semibold">{longestStreak}</dd>
             <dt className="mt-1 text-[10px] uppercase tracking-label text-muted-strong">
-              longest streak
+              {t('auth.longestStreak')}
             </dt>
           </div>
           <div>
             <dd className="text-[26px] font-semibold">{avgCompletion}</dd>
             <dt className="mt-1 text-[10px] uppercase tracking-label text-muted-strong">
-              avg completion
+              {t('auth.avgCompletion')}
             </dt>
           </div>
         </dl>

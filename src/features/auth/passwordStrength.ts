@@ -19,16 +19,42 @@ export interface PasswordStrength {
   bits: number
   /** 0 = weakest (red) … 3 = strongest (green). */
   level: StrengthLevel
-  /** Vault-door name for this tier. */
-  title: string
+  /** Dictionary key suffix for the current tier (`auth.strength.<tier>`). */
+  tier: (typeof TIERS)[number]
   /** Live, humanised time to crack — changes with every keystroke. */
-  crackTime: string
+  /**
+   * How long a guess would take, as data rather than a sentence: Russian needs
+   * a plural form per unit, so the wording belongs in the dictionary and only
+   * the unit + magnitude belong here.
+   */
+  crackTime: CrackTime
   /** 0–1 fill for the segmented meter, easing to a boundary at each tier. */
   fill: number
 }
 
-// Ordered weak → strong. Vault-door metaphor with a Skynet-cold-storage finish.
-const TIERS = ['Door left open', 'Front-door deadbolt', 'Bank vault', 'Skynet cold vault'] as const
+/** Unit of the crack-time estimate; `never`/`instant`/`forever` are wordings, not counts. */
+export type CrackUnit =
+  | 'never'
+  | 'instant'
+  | 'seconds'
+  | 'minutes'
+  | 'hours'
+  | 'days'
+  | 'months'
+  | 'years'
+  | 'millionYears'
+  | 'billionYears'
+  | 'trillionYears'
+  | 'forever'
+
+export interface CrackTime {
+  unit: CrackUnit
+  /** Magnitude in `unit`; 0 for the wordings that carry no count. */
+  value: number
+}
+
+/** Ordered weak → strong. Vault-door metaphor with a Skynet-cold-storage finish. */
+export const TIERS = ['open', 'deadbolt', 'vault', 'skynet'] as const
 
 // Bit thresholds between tiers (upper-exclusive for the tier below).
 const BIT_BREAKS = [35, 53, 71] as const
@@ -80,11 +106,11 @@ function fillForBits(bits: number): number {
   return 1
 }
 
-function humaniseCrackTime(bits: number): string {
-  if (bits <= 0) return 'No password yet'
+function humaniseCrackTime(bits: number): CrackTime {
+  if (bits <= 0) return { unit: 'never', value: 0 }
   // Average guesses to hit the key is half the space.
   const seconds = Math.pow(2, bits - 1) / GUESSES_PER_SECOND
-  if (seconds < 1) return 'Less than a second'
+  if (seconds < 1) return { unit: 'instant', value: 0 }
 
   const MINUTE = 60
   const HOUR = 3600
@@ -92,18 +118,18 @@ function humaniseCrackTime(bits: number): string {
   const MONTH = 2_629_800
   const YEAR = 31_557_600
 
-  if (seconds < MINUTE) return `${Math.round(seconds)} seconds`
-  if (seconds < HOUR) return `${Math.round(seconds / MINUTE)} minutes`
-  if (seconds < DAY) return `${Math.round(seconds / HOUR)} hours`
-  if (seconds < MONTH) return `${Math.round(seconds / DAY)} days`
-  if (seconds < YEAR) return `${Math.round(seconds / MONTH)} months`
+  if (seconds < MINUTE) return { unit: 'seconds', value: Math.round(seconds) }
+  if (seconds < HOUR) return { unit: 'minutes', value: Math.round(seconds / MINUTE) }
+  if (seconds < DAY) return { unit: 'hours', value: Math.round(seconds / HOUR) }
+  if (seconds < MONTH) return { unit: 'days', value: Math.round(seconds / DAY) }
+  if (seconds < YEAR) return { unit: 'months', value: Math.round(seconds / MONTH) }
 
   const years = seconds / YEAR
-  if (years < 1e6) return `${Math.round(years).toLocaleString('en-US')} years`
-  if (years < 1e9) return `${Math.round(years / 1e6).toLocaleString('en-US')} million years`
-  if (years < 1e12) return `${Math.round(years / 1e9).toLocaleString('en-US')} billion years`
-  if (years < 1e15) return `${Math.round(years / 1e12).toLocaleString('en-US')} trillion years`
-  return 'Trillions of years'
+  if (years < 1e6) return { unit: 'years', value: Math.round(years) }
+  if (years < 1e9) return { unit: 'millionYears', value: Math.round(years / 1e6) }
+  if (years < 1e12) return { unit: 'billionYears', value: Math.round(years / 1e9) }
+  if (years < 1e15) return { unit: 'trillionYears', value: Math.round(years / 1e12) }
+  return { unit: 'forever', value: 0 }
 }
 
 export function scorePassword(password: string): PasswordStrength {
@@ -112,7 +138,7 @@ export function scorePassword(password: string): PasswordStrength {
   return {
     bits,
     level,
-    title: TIERS[level],
+    tier: TIERS[level],
     crackTime: humaniseCrackTime(bits),
     fill: fillForBits(bits),
   }

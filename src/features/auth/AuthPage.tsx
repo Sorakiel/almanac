@@ -13,20 +13,23 @@ import { MIN_ACCEPTED_LEVEL, scorePassword } from '@/features/auth/passwordStren
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useSession } from '@/hooks/useSession'
 import { setRememberMe } from '@/lib/supabase'
+import { useT } from '@/hooks/useT'
+import type { TranslationKey } from '@/i18n/types'
 
 const schema = z.object({
   // Optional in both modes: signup falls back to the email prefix when blank.
   // No min-length — a stale/autofilled empty value on the hidden signin field
   // must never silently block submit (the input isn't even rendered there).
   displayName: z.string().trim().optional(),
-  email: z.string().email('Enter a valid email'),
-  password: z.string().min(6, 'At least 6 characters'),
+  email: z.string().email('auth.emailInvalid'),
+  password: z.string().min(6, 'auth.passwordTooShort'),
 })
 
 type FormValues = z.infer<typeof schema>
 type Mode = 'signin' | 'signup'
 
 function AuthPage() {
+  const { t } = useT()
   const [mode, setMode] = useState<Mode>('signin')
   const [forgot, setForgot] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -53,15 +56,15 @@ function AuthPage() {
   const onMagicLink = async () => {
     const email = getValues('email').trim()
     if (!email || !z.string().email().safeParse(email).success) {
-      toast.error('Enter your email above first, then tap the magic link.')
+      toast.error(t('auth.magicLinkNeedsEmail'))
       return
     }
     try {
       setRememberMe(remember)
       await magicLink.mutateAsync(email)
-      toast.success('Magic link sent — check your inbox to sign in.')
+      toast.success(t('auth.magicLinkToast'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not send the magic link')
+      toast.error(error instanceof Error ? error.message : t('auth.magicLinkFailed'))
     }
   }
 
@@ -75,31 +78,31 @@ function AuthPage() {
           displayName: values.displayName?.trim() || values.email.split('@')[0]!,
         })
         if (needsConfirmation) {
-          toast.success('Almost there — check your email to confirm your account.')
+          toast.success(t('auth.confirmEmail'))
           setMode('signin')
         } else {
-          toast.success('Account created — welcome to Almanac.')
+          toast.success(t('auth.accountCreated'))
         }
       } else {
         await signIn.mutateAsync({ email: values.email, password: values.password })
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Something went wrong')
+      toast.error(error instanceof Error ? error.message : t('auth.genericError'))
     }
   })
 
   const onForgot = async () => {
     const email = getValues('email').trim()
     if (!email || !z.string().email().safeParse(email).success) {
-      toast.error('Enter your email above first, then tap Forgot again.')
+      toast.error(t('auth.resetNeedsEmail'))
       return
     }
     try {
       await resetRequest.mutateAsync(email)
       setForgot(true)
-      toast.success('Reset link sent — check your inbox.')
+      toast.success(t('auth.resetSent'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not send the reset link')
+      toast.error(error instanceof Error ? error.message : t('auth.resetFailed'))
     }
   }
 
@@ -115,57 +118,63 @@ function AuthPage() {
               <span aria-hidden="true" className="h-3.5 w-3.5 rotate-45 border-[1.8px] border-bg" />
             </span>
             <div>
-              <h1 className="text-3xl">{mode === 'signin' ? 'Welcome back' : 'Get started'}</h1>
+              <h1 className="text-3xl">
+                {mode === 'signin' ? t('auth.welcomeBack') : t('auth.getStarted')}
+              </h1>
               <p className="mt-1 text-sm text-muted">
-                {mode === 'signin' ? 'Pick up where you left off.' : 'Build your command center.'}
+                {mode === 'signin' ? t('auth.welcomeBackHint') : t('auth.getStartedHint')}
               </p>
             </div>
           </div>
 
           <Segmented
-            aria-label="Authentication mode"
+            aria-label={t('auth.modeLabel')}
             value={mode}
             onChange={setMode}
             options={[
-              { value: 'signin', label: 'Sign in' },
-              { value: 'signup', label: 'Create account' },
+              { value: 'signin', label: t('auth.tabSignIn') },
+              { value: 'signup', label: t('auth.tabCreate') },
             ]}
           />
 
           <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
             {mode === 'signup' && (
               <label className="flex flex-col gap-1.5">
-                <span className="label-mono">Name</span>
+                <span className="label-mono">{t('auth.name')}</span>
                 <Input
-                  placeholder="Ada Lovelace"
+                  placeholder={t('auth.namePlaceholder')}
                   autoComplete="name"
                   {...register('displayName')}
                 />
                 {errors.displayName ? (
-                  <span className="text-xs text-accent">{errors.displayName.message}</span>
+                  <span className="text-xs text-accent">
+                    {t(errors.displayName.message as TranslationKey)}
+                  </span>
                 ) : null}
               </label>
             )}
 
             <label className="flex flex-col gap-1.5">
-              <span className="label-mono">Email</span>
+              <span className="label-mono">{t('auth.email')}</span>
               <Input
                 type="email"
-                placeholder="you@almanac.app"
+                placeholder={t('auth.emailPlaceholder')}
                 autoComplete="email"
                 {...register('email')}
               />
               {errors.email ? (
-                <span className="text-xs text-accent">{errors.email.message}</span>
+                <span className="text-xs text-accent">
+                  {t(errors.email.message as TranslationKey)}
+                </span>
               ) : null}
             </label>
 
             <label className="flex flex-col gap-1.5">
-              <span className="label-mono">Password</span>
+              <span className="label-mono">{t('auth.password')}</span>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
+                  placeholder={t('auth.passwordPlaceholder')}
                   autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                   className="pr-14"
                   {...register('password')}
@@ -175,11 +184,13 @@ function AuthPage() {
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute inset-y-0 right-3 my-auto h-fit font-mono text-[10px] uppercase tracking-label text-muted hover:text-foreground"
                 >
-                  {showPassword ? 'hide' : 'show'}
+                  {showPassword ? t('auth.hide') : t('auth.show')}
                 </button>
               </div>
               {errors.password ? (
-                <span className="text-xs text-accent">{errors.password.message}</span>
+                <span className="text-xs text-accent">
+                  {t(errors.password.message as TranslationKey)}
+                </span>
               ) : null}
             </label>
 
@@ -197,7 +208,7 @@ function AuthPage() {
                   onChange={(e) => setRemember(e.target.checked)}
                   className="h-4 w-4 rounded accent-accent"
                 />
-                Remember me
+                {t('auth.rememberMe')}
               </label>
               {mode === 'signin' ? (
                 <button
@@ -206,7 +217,7 @@ function AuthPage() {
                   disabled={resetRequest.isPending}
                   className="font-mono text-[11px] tracking-label text-accent hover:text-accent-deep"
                 >
-                  {forgot ? 'Link sent ✓' : 'Forgot?'}
+                  {forgot ? t('auth.magicLinkSent') : t('auth.forgot')}
                 </button>
               ) : null}
             </div>
@@ -218,18 +229,18 @@ function AuthPage() {
               className="shadow-glow transition-opacity"
             >
               {pending
-                ? 'One moment…'
+                ? t('auth.working')
                 : mode === 'signup' && !passwordStrongEnough
-                  ? 'Strengthen your password'
+                  ? t('auth.passwordWeak')
                   : mode === 'signin'
-                    ? 'Sign in →'
-                    : 'Create account →'}
+                    ? t('auth.submitSignIn')
+                    : t('auth.submitCreate')}
             </Button>
           </form>
 
           <div className="flex items-center gap-3">
             <span className="h-px flex-1 bg-border" />
-            <span className="label-mono">or</span>
+            <span className="label-mono">{t('auth.or')}</span>
             <span className="h-px flex-1 bg-border" />
           </div>
 
@@ -239,7 +250,7 @@ function AuthPage() {
             onClick={onMagicLink}
             disabled={magicLink.isPending}
           >
-            {magicLink.isPending ? 'Sending…' : '✦ Email me a magic link'}
+            {magicLink.isPending ? t('auth.magicLinkSending') : t('auth.magicLink')}
           </Button>
         </div>
       </main>
