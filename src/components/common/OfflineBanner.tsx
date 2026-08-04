@@ -1,5 +1,6 @@
 import { CloudOff } from 'lucide-react'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { useT } from '@/hooks/useT'
 
 /**
  * Say so when the network is gone.
@@ -12,6 +13,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
  * believe they kept.
  */
 export function OfflineBanner() {
+  const { t } = useT()
   const online = useOnlineStatus()
   if (online) return null
 
@@ -23,11 +25,8 @@ export function OfflineBanner() {
     >
       <CloudOff className="h-4 w-4 shrink-0 text-amber" aria-hidden="true" />
       <p className="min-w-0 flex-1 text-[13px] leading-snug">
-        <span className="font-semibold">Offline.</span>{' '}
-        <span className="text-muted">
-          Your saved data is here to read. Anything you change now won’t be saved — log it again
-          once you’re back.
-        </span>
+        <span className="font-semibold">{t('offline.title')}</span>{' '}
+        <span className="text-muted">{t('offline.body')}</span>
       </p>
     </div>
   )

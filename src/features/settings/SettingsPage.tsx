@@ -9,6 +9,7 @@ import {
   Clock,
   Coffee,
   Download,
+  Languages,
   Heart,
   Laptop,
   Moon,
@@ -29,14 +30,17 @@ import { TimezoneSheet } from '@/features/settings/components/TimezoneSheet'
 import { ReminderSheet } from '@/features/settings/components/ReminderSheet'
 import { BackgroundSheet } from '@/features/settings/components/BackgroundSheet'
 import { SupportSheet } from '@/features/settings/components/SupportSheet'
+import { LanguageSheet } from '@/features/settings/components/LanguageSheet'
 import { ExportSheet } from '@/features/settings/components/ExportSheet'
 import { reminderTimeLabel } from '@/features/settings/lib/reminder'
 import { isDesktopApp } from '@/lib/desktop'
 import { APP_VERSION } from '@/lib/version'
+import { LOCALES } from '@/i18n'
 import { useDesktopStore } from '@/stores/desktop'
 import { setAnalyticsEnabled } from '@/lib/analytics'
 import { usePrefsStore } from '@/stores/prefs'
 import { useSession } from '@/hooks/useSession'
+import { useT } from '@/hooks/useT'
 import { useTheme } from '@/hooks/useTheme'
 import { useToday } from '@/hooks/useToday'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
@@ -48,6 +52,7 @@ function SettingsPage() {
   const navigate = useNavigate()
   const { user, status } = useSession()
   const { theme, setTheme } = useTheme()
+  const { t, locale } = useT()
   const sound = usePrefsStore((s) => s.sound)
   const setSound = usePrefsStore((s) => s.setSound)
   const analytics = usePrefsStore((s) => s.analytics)
@@ -61,6 +66,7 @@ function SettingsPage() {
   const [backgroundOpen, setBackgroundOpen] = useState(false)
   const [supportOpen, setSupportOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
+  const [languageOpen, setLanguageOpen] = useState(false)
   const runInBackground = useDesktopStore((s) => s.runInBackground)
   const showDesktop = isDesktopApp()
 
@@ -90,7 +96,7 @@ function SettingsPage() {
     try {
       await logOut.mutateAsync()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not sign out')
+      toast.error(error instanceof Error ? error.message : t('errors.signOut'))
     }
   }
 
@@ -103,34 +109,38 @@ function SettingsPage() {
             <h1 className="truncate text-xl">{name}</h1>
             <p className="truncate text-sm text-muted">{email}</p>
             <Tag tone="accent" className="mt-1.5">
-              ◇ {profile?.role && profile.role !== 'user' ? profile.role : 'member'} · {joinedDays}
-              -day
+              ◇ {profile?.role && profile.role !== 'user' ? profile.role : t('settings.member')} ·{' '}
+              {t('settings.joined', { count: joinedDays })}
             </Tag>
           </div>
         </header>
 
         <section className="flex flex-col gap-3">
-          <SectionLabel>APPEARANCE</SectionLabel>
+          <SectionLabel>{t('settings.appearance')}</SectionLabel>
           <Segmented
-            aria-label="Theme"
+            aria-label={t('settings.theme')}
             value={theme}
             onChange={setTheme}
             options={[
-              { value: 'dark', label: 'Dark', icon: Moon },
-              { value: 'coffee', label: 'Coffee', icon: Coffee },
+              { value: 'dark', label: t('settings.dark'), icon: Moon },
+              { value: 'coffee', label: t('settings.coffee'), icon: Coffee },
             ]}
           />
           <label className="flex items-center justify-between rounded-tile border bg-surface px-4 py-3">
             <span className="flex items-center gap-3">
               <Volume2 className="h-[18px] w-[18px] text-muted-strong" aria-hidden="true" />
-              <span className="text-[15px]">Sound effects</span>
+              <span className="text-[15px]">{t('settings.soundEffects')}</span>
             </span>
-            <Switch checked={sound} onCheckedChange={setSound} aria-label="Sound effects" />
+            <Switch
+              checked={sound}
+              onCheckedChange={setSound}
+              aria-label={t('settings.soundEffects')}
+            />
           </label>
         </section>
 
         <section className="flex flex-col gap-3">
-          <SectionLabel>PRIVACY</SectionLabel>
+          <SectionLabel>{t('settings.privacy')}</SectionLabel>
           <label className="flex items-center justify-between gap-4 rounded-tile border bg-surface px-4 py-3">
             <span className="flex items-start gap-3">
               <BarChart3
@@ -138,57 +148,77 @@ function SettingsPage() {
                 aria-hidden="true"
               />
               <span className="flex flex-col">
-                <span className="text-[15px]">Usage analytics</span>
-                <span className="text-xs text-muted">
-                  Which screens get opened, and counts. Never habit names, notes, or entries.
-                </span>
+                <span className="text-[15px]">{t('settings.usageAnalytics')}</span>
+                <span className="text-xs text-muted">{t('settings.usageAnalyticsHint')}</span>
               </span>
             </span>
             <Switch
               checked={analytics}
               onCheckedChange={handleAnalyticsChange}
-              aria-label="Usage analytics"
+              aria-label={t('settings.usageAnalytics')}
             />
           </label>
         </section>
 
         <section className="flex flex-col gap-2">
-          <SectionLabel>YOU</SectionLabel>
+          <SectionLabel>{t('settings.you')}</SectionLabel>
           <div className="flex flex-col">
-            <Row icon={Trophy} label="Achievements" onClick={() => navigate('/achievements')} />
+            <Row
+              icon={Trophy}
+              label={t('settings.achievements')}
+              onClick={() => navigate('/achievements')}
+            />
             {supportVisible ? (
-              <Row icon={Heart} label="Support Almanac" onClick={() => setSupportOpen(true)} />
+              <Row
+                icon={Heart}
+                label={t('settings.support')}
+                onClick={() => setSupportOpen(true)}
+              />
             ) : null}
           </div>
         </section>
 
         <section className="flex flex-col gap-2">
-          <SectionLabel>ACCOUNT</SectionLabel>
+          <SectionLabel>{t('settings.account')}</SectionLabel>
           <div className="flex flex-col">
             <Row
               icon={Clock}
-              label="Timezone"
+              label={t('settings.timezone')}
               value={(profile?.timezone ?? browserTimezone()).replace(/_/g, ' ')}
               onClick={() => setTimezoneOpen(true)}
             />
             <Row
               icon={reminderEnabled ? AlarmClock : Bell}
-              label="Daily reminder"
-              value={reminderEnabled ? reminderTimeLabel(reminderHour, reminderMinute) : 'Off'}
+              label={t('settings.dailyReminder')}
+              value={
+                reminderEnabled
+                  ? reminderTimeLabel(reminderHour, reminderMinute)
+                  : t('settings.off')
+              }
               onClick={() => setReminderOpen(true)}
             />
-            <Row icon={Download} label="Export data" onClick={() => setExportOpen(true)} />
+            <Row
+              icon={Languages}
+              label={t('settings.language')}
+              value={LOCALES.find((l) => l.value === locale)?.label}
+              onClick={() => setLanguageOpen(true)}
+            />
+            <Row
+              icon={Download}
+              label={t('settings.exportData')}
+              onClick={() => setExportOpen(true)}
+            />
           </div>
         </section>
 
         {showDesktop ? (
           <section className="flex flex-col gap-2">
-            <SectionLabel>DESKTOP</SectionLabel>
+            <SectionLabel>{t('settings.desktop')}</SectionLabel>
             <div className="flex flex-col">
               <Row
                 icon={Laptop}
-                label="Run in background"
-                value={runInBackground ? 'On' : 'Off'}
+                label={t('settings.runInBackground')}
+                value={runInBackground ? t('settings.on') : t('settings.off')}
                 onClick={() => setBackgroundOpen(true)}
               />
             </div>
@@ -197,8 +227,12 @@ function SettingsPage() {
 
         {profile?.role === 'admin' || profile?.role === 'owner' ? (
           <section className="flex flex-col gap-1">
-            <SectionLabel className="mb-2">ADMIN</SectionLabel>
-            <Row icon={ShieldCheck} label="Admin console" onClick={() => navigate('/admin')} />
+            <SectionLabel className="mb-2">{t('settings.admin')}</SectionLabel>
+            <Row
+              icon={ShieldCheck}
+              label={t('settings.adminConsole')}
+              onClick={() => navigate('/admin')}
+            />
           </section>
         ) : null}
 
@@ -208,7 +242,7 @@ function SettingsPage() {
           onClick={handleSignOut}
           disabled={logOut.isPending}
         >
-          Sign out
+          {t('settings.signOut')}
         </Button>
 
         <p className="label-mono text-center">ALMANAC v{APP_VERSION} · ◇</p>
@@ -235,6 +269,7 @@ function SettingsPage() {
       {backgroundOpen ? <BackgroundSheet open onOpenChange={setBackgroundOpen} /> : null}
       {supportOpen ? <SupportSheet open onOpenChange={setSupportOpen} /> : null}
       {exportOpen ? <ExportSheet open onOpenChange={setExportOpen} /> : null}
+      {languageOpen ? <LanguageSheet open onOpenChange={setLanguageOpen} /> : null}
     </>
   )
 }

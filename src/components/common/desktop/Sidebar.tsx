@@ -5,11 +5,13 @@ import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSession } from '@/hooks/useSession'
 import { CORE_MODULES, OPTIONAL_MODULES, useModulesStore } from '@/stores/modules'
+import { useT } from '@/hooks/useT'
+import type { TranslationKey } from '@/i18n/types'
 import { cn } from '@/lib/utils'
 
 interface NavEntry {
   to: string
-  label: string
+  labelKey: TranslationKey
   /** Lucide icon — shared with the modules hub so nav and "More" stay in sync. */
   icon: LucideIcon
   end?: boolean
@@ -33,6 +35,7 @@ function BrandMark({ className }: { className?: string }) {
 }
 
 function NavRow({ entry }: { entry: NavEntry }) {
+  const { t } = useT()
   const Icon = entry.icon
   return (
     <NavLink
@@ -55,7 +58,7 @@ function NavRow({ entry }: { entry: NavEntry }) {
             className={cn('h-[18px] w-[18px]', !isActive && 'text-muted-strong')}
             strokeWidth={1.75}
           />
-          <span className="flex-1">{entry.label}</span>
+          <span className="flex-1">{t(entry.labelKey)}</span>
           {entry.count !== undefined && entry.count > 0 ? (
             <span
               className={cn(
@@ -74,6 +77,7 @@ function NavRow({ entry }: { entry: NavEntry }) {
 
 /** Desktop nav rail (spec board): brand, primary nav, modules, profile card. */
 export function Sidebar() {
+  const { t } = useT()
   const { user } = useSession()
   const { profile } = useProfile()
   const { habits } = useHabits()
@@ -82,15 +86,19 @@ export function Sidebar() {
   const dueCount = habits.filter((h) => (h.dueToday || h.isComplete) && !h.isComplete).length
   const name = (user?.user_metadata.display_name as string | undefined) ?? 'You'
   const roleLabel =
-    profile?.role === 'owner' ? 'Owner' : profile?.role === 'admin' ? 'Admin' : 'Member'
+    profile?.role === 'owner'
+      ? t('rail.owner')
+      : profile?.role === 'admin'
+        ? t('rail.admin')
+        : t('rail.member')
 
   // Fixed primary nav: Today + the core modules (Habits, Insights). Always
   // present, never toggled — the three buttons the app always answers with.
   const primary: NavEntry[] = [
-    { to: '/', label: 'Today', icon: Home, end: true, count: dueCount },
-    ...CORE_MODULES.map((m) => ({
+    { to: '/', labelKey: 'nav.today', icon: Home, end: true, count: dueCount },
+    ...CORE_MODULES.map((m): NavEntry => ({
       to: m.to,
-      label: m.label,
+      labelKey: `modules.${m.key}.label`,
       icon: m.icon,
       count: m.key === 'habits' ? habits.length : undefined,
     })),
@@ -99,7 +107,7 @@ export function Sidebar() {
   // Optional modules the user has switched on in the hub live under "Modules".
   const modules: NavEntry[] = OPTIONAL_MODULES.filter((m) => enabled[m.key]).map((m) => ({
     to: m.to,
-    label: m.label,
+    labelKey: `modules.${m.key}.label`,
     icon: m.icon,
   }))
 
@@ -114,17 +122,17 @@ export function Sidebar() {
         <span className="font-mono text-[17px] font-bold tracking-[0.06em]">ALMANAC</span>
       </Link>
 
-      <nav aria-label="Primary" className="flex flex-col gap-0.5">
+      <nav aria-label={t('nav.primary')} className="flex flex-col gap-0.5">
         {primary.map((entry) => (
           <NavRow key={entry.to} entry={entry} />
         ))}
       </nav>
 
       <p className="px-3.5 pb-2.5 pt-[22px] font-mono text-[9.5px] uppercase tracking-label text-muted-strong/80">
-        modules
+        {t('nav.modules')}
       </p>
       {modules.length > 0 ? (
-        <nav aria-label="Modules" className="mb-1 flex flex-col gap-0.5">
+        <nav aria-label={t('nav.modules')} className="mb-1 flex flex-col gap-0.5">
           {modules.map((entry) => (
             <NavRow key={entry.to} entry={entry} />
           ))}
@@ -141,8 +149,8 @@ export function Sidebar() {
         }
       >
         <span aria-hidden="true" className="h-[9px] w-[9px] rounded-[3px] bg-muted-strong/50" />
-        <span className="flex-1">More</span>
-        <span className="font-mono text-[9px] text-muted-strong/70">hub</span>
+        <span className="flex-1">{t('nav.more')}</span>
+        <span className="font-mono text-[9px] text-muted-strong/70">{t('nav.hub')}</span>
       </NavLink>
 
       <div className="flex-1" />

@@ -2,20 +2,23 @@ import { NavLink } from 'react-router-dom'
 import { Home, LayoutGrid, type LucideIcon } from 'lucide-react'
 import { RadialAddMenu } from '@/components/common/RadialAddMenu'
 import { CORE_MODULES } from '@/stores/modules'
+import { useT } from '@/hooks/useT'
+import type { TranslationKey } from '@/i18n/types'
 import { cn } from '@/lib/utils'
 
 interface NavItem {
   to: string
-  label: string
+  labelKey: TranslationKey
   /** Lucide icon — matches the modules hub so the nav and "More" stay in sync. */
   icon: LucideIcon
   end?: boolean
 }
 
-const TODAY: NavItem = { to: '/', label: 'Today', icon: Home, end: true }
-const MORE: NavItem = { to: '/more', label: 'More', icon: LayoutGrid }
+const TODAY: NavItem = { to: '/', labelKey: 'nav.today', icon: Home, end: true }
+const MORE: NavItem = { to: '/more', labelKey: 'nav.more', icon: LayoutGrid }
 
 function NavButton({ item }: { item: NavItem }) {
+  const { t } = useT()
   const Icon = item.icon
   return (
     <NavLink
@@ -37,7 +40,7 @@ function NavButton({ item }: { item: NavItem }) {
             className={cn('h-[18px] w-[18px]', isActive && 'motion-safe:animate-pop')}
             strokeWidth={1.75}
           />
-          <span className="font-mono text-[8px] uppercase tracking-label">{item.label}</span>
+          <span className="font-mono text-[8px] uppercase tracking-label">{t(item.labelKey)}</span>
           <span
             aria-hidden="true"
             className={cn(
@@ -56,13 +59,18 @@ export function BottomNav() {
   // A fixed, uncluttered mobile nav: Today, the core modules (Habits, Insights),
   // then More. Optional modules stay one tap away inside the More hub — the small
   // bottom bar never has to grow or reshuffle as the user toggles modules.
-  const core: NavItem[] = CORE_MODULES.map((m) => ({ to: m.to, label: m.label, icon: m.icon }))
+  const { t } = useT()
+  const core: NavItem[] = CORE_MODULES.map((m) => ({
+    to: m.to,
+    labelKey: `modules.${m.key}.label`,
+    icon: m.icon,
+  }))
   const left: NavItem[] = [TODAY, ...core.slice(0, 1)]
   const right: NavItem[] = [...core.slice(1), MORE]
 
   return (
     <nav
-      aria-label="Primary"
+      aria-label={t('nav.primary')}
       className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
     >
       <div className="flex h-[60px] w-full max-w-md items-center rounded-[24px] border bg-surface/75 px-3 shadow-soft backdrop-blur-nav">
