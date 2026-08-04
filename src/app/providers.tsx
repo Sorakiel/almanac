@@ -1,12 +1,12 @@
 import { useEffect, type ReactNode } from 'react'
-import { QueryClientProvider } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { Toaster } from 'sonner'
 import { identifyUser, resetAnalytics } from '@/lib/analytics'
 import { checkForAndroidUpdate } from '@/lib/androidUpdater'
 import { initDeepLinks } from '@/lib/deepLink'
 import { checkForDesktopUpdate } from '@/lib/desktopUpdater'
 import { applyRunInBackground } from '@/lib/desktop'
-import { queryClient } from '@/lib/queryClient'
+import { clearQueryCache, persistOptions, queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
 import { useDesktopStore } from '@/stores/desktop'
 import { useSessionStore } from '@/stores/session'
@@ -35,8 +35,12 @@ export function Providers({ children }: ProvidersProps) {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session)
+      // The persisted query cache outlives the session, so it has to be dropped
+      // explicitly — otherwise the next person on this device sees the previous
+      // person's data before their own arrives.
+      if (event === 'SIGNED_OUT') void clearQueryCache()
       // Identify by Supabase user id only. Resetting on sign-out matters on a
       // shared device: without it the next person inherits the previous
       // person's distinct id.
@@ -64,9 +68,18 @@ export function Providers({ children }: ProvidersProps) {
   }, [setSession])
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={persistOptions}
+      // Restored data is shown immediately but never trusted: the snapshot on
+      // disk is throttled, so a reload seconds after a change would otherwise
+      // render the pre-change state and — being inside `staleTime` — refuse to
+      // refetch it. Invalidating on restore makes this stale-while-revalidate.
+      // Offline the refetch simply fails and the cached screen stays put.
+      onSuccess={() => queryClient.invalidateQueries()}
+    >
       {children}
       <Toaster theme={theme === 'coffee' ? 'light' : 'dark'} position="top-center" richColors />
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   )
 }

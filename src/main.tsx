@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from '@/app/App.tsx'
 import { router } from '@/app/router'
 import { initAnalytics, trackError, trackPageView } from '@/lib/analytics'
+import { registerServiceWorker } from '@/lib/serviceWorker'
 import { initPointerTracking } from '@/lib/viewTransition'
 import '@fontsource/inter/400.css'
 import '@fontsource/inter/500.css'
@@ -10,6 +11,10 @@ import '@fontsource/inter/600.css'
 import '@fontsource/jetbrains-mono/400.css'
 import '@fontsource/jetbrains-mono/500.css'
 import '@/styles/globals.css'
+
+// Cache the app shell so a cold start works with no network. No-op in dev and
+// in the native shells, which serve their own copy of these files.
+registerServiceWorker()
 
 // Track pointer position so the theme wipe can radiate from where you tapped.
 initPointerTracking()

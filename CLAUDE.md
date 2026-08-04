@@ -215,6 +215,13 @@ The specs share **one pre-seeded staging account** and clean up their own rows t
 - Cleanup belongs in `afterEach`, **not** a `finally` inside the test: Playwright aborts the body on timeout and the `finally` may never run.
 - Pin anything environment-dependent. A spec that asserted "the timezone is not UTC" passed locally and failed on UTC runners, where "adopted the zone" and "wrote nothing" are the same string.
 
+**Offline is reads only.** The service worker precaches the app shell and React Query's
+cache is persisted, so a cold start with no network opens on real data. Writes are not
+covered: a mutation paused while offline does not resume in this version, and persisted
+mutations come back without a `mutationFn`. Restored data is invalidated on restore rather
+than trusted — the snapshot is throttled, and without that a reload right after a change
+replays the pre-change state.
+
 **What a browser sandbox cannot verify.** Notification permission is denied there, so Web Push delivery has never been proven end to end from a dev machine, and there is no Android emulator. Verify every link you can, then say plainly which one you could not.
 
 **Native shells are not interchangeable.** Desktop is **Tauri**, Android is **Capacitor**. `isTauri()` is false in the Android app. Gating a native feature on the wrong one silently disables a whole platform — that is exactly how Android lost its reminders for weeks. Prefer a capability check (`isNativeScheduler()`) over a platform check.
