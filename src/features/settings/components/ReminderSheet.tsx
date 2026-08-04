@@ -6,6 +6,9 @@ import { Switch } from '@/components/ui/switch'
 import { useUpdateProfile } from '@/features/settings/hooks/useUpdateProfile'
 import { REMINDER_PRESETS, reminderTimeLabel } from '@/features/settings/lib/reminder'
 import { clearScheduledReminders, requestNotifyPermission } from '@/lib/notify'
+import { disablePush, enablePush, pushSupported } from '@/lib/push'
+import { isTauri } from '@/lib/notify'
+import { useSession } from '@/hooks/useSession'
 import { cn } from '@/lib/utils'
 
 interface ReminderSheetProps {
@@ -24,6 +27,7 @@ interface ReminderSheetProps {
  */
 export function ReminderSheet({ open, onOpenChange, enabled, hour, minute }: ReminderSheetProps) {
   const { update, isPending } = useUpdateProfile()
+  const { user } = useSession()
   const [on, setOn] = useState(enabled)
   const [selectedHour, setSelectedHour] = useState(hour)
   const [selectedMinute, setSelectedMinute] = useState(minute)
@@ -49,8 +53,19 @@ export function ReminderSheet({ open, onOpenChange, enabled, hour, minute }: Rem
         if (!granted) {
           toast.error('Allow notifications for Almanac in your system settings to get reminders.')
         }
+        // On the web the server can only reach this device through a Web Push
+        // subscription — the native shell schedules its own local notification
+        // instead, so it needs neither.
+        if (!isTauri() && pushSupported() && user) {
+          try {
+            await enablePush(user.id)
+          } catch {
+            toast.error('Reminder saved, but this browser could not be subscribed.')
+          }
+        }
       } else {
         await clearScheduledReminders()
+        if (!isTauri() && pushSupported()) await disablePush().catch(() => undefined)
       }
       await update({
         reminder_enabled: on,
