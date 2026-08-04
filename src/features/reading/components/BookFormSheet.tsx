@@ -12,9 +12,11 @@ import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { useBookMutations } from '@/features/reading/hooks/useBookMutations'
 import { unitNounPlural } from '@/features/reading/lib/progress'
 import type { Book, BookProgressMode } from '@/features/reading/types'
+import { useT } from '@/hooks/useT'
+import type { TranslationKey } from '@/i18n/types'
 
 const schema = z.object({
-  title: z.string().trim().min(1, 'Give the book a title').max(160),
+  title: z.string().trim().min(1, 'reading.form.titleRequired').max(160),
   author: z.string().trim().max(160).optional(),
   total: z.string().trim().optional(),
   dailyGoal: z.string().trim().optional(),
@@ -32,6 +34,7 @@ interface BookFormSheetProps {
 
 /** Add or edit a book — title, author, how progress is tracked, and length. */
 export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormSheetProps) {
+  const { t } = useT()
   const { create, update, remove } = useBookMutations()
   const [mode, setMode] = useState<BookProgressMode>(book?.progress_mode ?? 'pages')
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -67,14 +70,14 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
     try {
       if (book) {
         await update.mutateAsync({ id: book.id, patch: fields })
-        toast.success('Book updated')
+        toast.success(t('reading.form.updated'))
       } else {
         await create.mutateAsync(fields)
-        toast.success('Book added')
+        toast.success(t('reading.form.added'))
       }
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not save the book')
+      toast.error(error instanceof Error ? error.message : t('reading.form.saveFailed'))
     }
   })
 
@@ -82,12 +85,12 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
     if (!book) return
     try {
       await remove.mutateAsync(book.id)
-      toast.success('Book removed')
+      toast.success(t('reading.form.removed'))
       setConfirmDelete(false)
       onOpenChange(false)
       onDeleted?.()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not remove the book')
+      toast.error(error instanceof Error ? error.message : t('reading.form.removeFailed'))
     }
   }
 
@@ -98,60 +101,72 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
       <Sheet
         open={open}
         onOpenChange={onOpenChange}
-        title={isEdit ? 'Edit book' : 'Add a book'}
-        description={isEdit ? undefined : 'Start your shelf — track progress by pages or chapters.'}
+        title={isEdit ? t('reading.form.editTitle') : t('reading.form.addTitle')}
+        description={isEdit ? undefined : t('reading.form.addDescription')}
       >
         <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
           <label className="flex flex-col gap-1.5">
-            <span className="label-mono">Title</span>
-            <Input placeholder="e.g. Deep Work" autoFocus {...register('title')} />
+            <span className="label-mono">{t('reading.form.titleLabel')}</span>
+            <Input
+              placeholder={t('reading.form.titlePlaceholder')}
+              autoFocus
+              {...register('title')}
+            />
             {errors.title ? (
-              <span className="text-xs text-accent">{errors.title.message}</span>
+              <span className="text-xs text-accent">
+                {t(errors.title.message as TranslationKey)}
+              </span>
             ) : null}
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="label-mono">Author (optional)</span>
-            <Input placeholder="e.g. Cal Newport" {...register('author')} />
+            <span className="label-mono">{t('reading.form.author')}</span>
+            <Input placeholder={t('reading.form.authorPlaceholder')} {...register('author')} />
           </label>
 
           <div className="flex flex-col gap-1.5">
-            <span className="label-mono">Track progress by</span>
+            <span className="label-mono">{t('reading.form.trackBy')}</span>
             <Segmented
-              aria-label="Progress mode"
+              aria-label={t('reading.form.modeLabel')}
               value={mode}
               onChange={setMode}
               options={[
-                { value: 'pages', label: 'Pages' },
-                { value: 'chapters', label: 'Chapters' },
+                { value: 'pages', label: t('reading.form.pages') },
+                { value: 'chapters', label: t('reading.form.chapters') },
               ]}
             />
           </div>
 
           <label className="flex flex-col gap-1.5">
-            <span className="label-mono">Total {unitNounPlural(mode)} (optional)</span>
+            <span className="label-mono">Total {unitNounPlural(mode, t)} (optional)</span>
             <Input
               type="number"
               inputMode="numeric"
               min={1}
-              placeholder="e.g. 320"
+              placeholder={t('reading.form.totalPlaceholder')}
               {...register('total')}
             />
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="label-mono">Daily goal · {unitNounPlural(mode)} / day (optional)</span>
+            <span className="label-mono">
+              Daily goal · {unitNounPlural(mode, t)} / day (optional)
+            </span>
             <Input
               type="number"
               inputMode="numeric"
               min={1}
-              placeholder="e.g. 20"
+              placeholder={t('reading.form.dailyGoalPlaceholder')}
               {...register('dailyGoal')}
             />
           </label>
 
           <Button type="submit" size="lg" disabled={pending}>
-            {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Add book'}
+            {pending
+              ? t('reading.form.saving')
+              : isEdit
+                ? t('reading.form.save')
+                : t('reading.form.create')}
           </Button>
 
           {isEdit ? (
@@ -163,7 +178,7 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
               onClick={() => setConfirmDelete(true)}
             >
               <Trash2 className="h-4 w-4" />
-              Remove book
+              {t('reading.form.remove')}
             </Button>
           ) : null}
         </form>
@@ -172,9 +187,9 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
       <ConfirmSheet
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Remove this book?"
-        description={book ? `"${book.title}", its notes, and sessions will be removed.` : undefined}
-        confirmLabel={remove.isPending ? 'Removing…' : 'Remove book'}
+        title={t('reading.form.removeConfirm')}
+        description={book ? t('reading.removeBookDescription', { title: book.title }) : undefined}
+        confirmLabel={remove.isPending ? t('reading.form.removing') : t('reading.form.remove')}
         pending={remove.isPending}
         onConfirm={onDelete}
       />

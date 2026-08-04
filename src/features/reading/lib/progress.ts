@@ -1,4 +1,5 @@
 import type { Book, BookProgressMode, BookStatus } from '@/features/reading/types'
+import type { TFunction } from '@/hooks/useT'
 
 /** Completion fraction 0–1 for a book, or null when its length is unknown. */
 export function progressFraction(book: Pick<Book, 'current_unit' | 'total_units'>): number | null {
@@ -19,12 +20,17 @@ export function dailyGoalPct(readToday: number, goal: number): number {
 }
 
 /** Singular unit noun for the tracking mode ("page" / "chapter"). */
-export function unitNoun(mode: BookProgressMode): string {
+export function unitNoun(mode: BookProgressMode, t?: TFunction): string {
+  if (t)
+    return mode === 'chapters'
+      ? t('reading.unitSingular.chapters')
+      : t('reading.unitSingular.pages')
   return mode === 'chapters' ? 'chapter' : 'page'
 }
 
 /** Plural unit noun for the tracking mode ("pages" / "chapters"). */
-export function unitNounPlural(mode: BookProgressMode): string {
+export function unitNounPlural(mode: BookProgressMode, t?: TFunction): string {
+  if (t) return mode === 'chapters' ? t('reading.form.chapters') : t('reading.form.pages')
   return mode === 'chapters' ? 'chapters' : 'pages'
 }
 
@@ -34,8 +40,12 @@ const STATUS_LABELS: Record<BookStatus, string> = {
   finished: 'Finished',
 }
 
-export function statusLabel(status: BookStatus): string {
-  return STATUS_LABELS[status]
+/**
+ * Shelf-status label. `t` is optional so non-React callers keep the English
+ * literals; anything a member reads passes it.
+ */
+export function statusLabel(status: BookStatus, t?: TFunction): string {
+  return t ? t(`reading.statuses.${status}`) : STATUS_LABELS[status]
 }
 
 /**

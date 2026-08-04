@@ -9,13 +9,15 @@ import { SectionLabel } from '@/components/common/SectionLabel'
 import { useNoteMutations } from '@/features/reading/hooks/useNoteMutations'
 import { unitNoun } from '@/features/reading/lib/progress'
 import type { Book, BookNote } from '@/features/reading/types'
+import { useT } from '@/hooks/useT'
 
 /** Book notes: a composer (body + optional page) and the note history. */
 export function NotesSection({ book, notes }: { book: Book; notes: BookNote[] }) {
+  const { t } = useT()
   const { add, remove } = useNoteMutations(book.id)
   const [body, setBody] = useState('')
   const [page, setPage] = useState('')
-  const noun = unitNoun(book.progress_mode)
+  const noun = unitNoun(book.progress_mode, t)
 
   const onAdd = () => {
     const trimmed = body.trim()
@@ -29,7 +31,7 @@ export function NotesSection({ book, notes }: { book: Book; notes: BookNote[] })
           setPage('')
         },
         onError: (error) =>
-          toast.error(error instanceof Error ? error.message : 'Could not add the note'),
+          toast.error(error instanceof Error ? error.message : t('reading.noteAddFailed')),
       },
     )
   }
@@ -37,22 +39,22 @@ export function NotesSection({ book, notes }: { book: Book; notes: BookNote[] })
   const onDelete = (id: string) => {
     remove.mutate(id, {
       onError: (error) =>
-        toast.error(error instanceof Error ? error.message : 'Could not delete the note'),
+        toast.error(error instanceof Error ? error.message : t('reading.noteDeleteFailed')),
     })
   }
 
   return (
     <section className="flex flex-col gap-3">
       <SectionLabel accessory={notes.length > 0 ? `${notes.length}` : undefined}>
-        NOTES
+        {t('reading.notes')}
       </SectionLabel>
 
       <Card className="flex flex-col gap-3 p-4">
         <Textarea
           value={body}
           onChange={(event) => setBody(event.target.value)}
-          placeholder="A quote, an idea, a reaction…"
-          aria-label="New note"
+          placeholder={t('reading.notePlaceholder')}
+          aria-label={t('reading.newNote')}
           rows={3}
         />
         <div className="flex items-end gap-2">
@@ -67,7 +69,7 @@ export function NotesSection({ book, notes }: { book: Book; notes: BookNote[] })
             />
           </label>
           <Button className="ml-auto" onClick={onAdd} disabled={add.isPending || !body.trim()}>
-            Add note
+            {t('reading.addNote')}
           </Button>
         </div>
       </Card>
@@ -83,7 +85,7 @@ export function NotesSection({ book, notes }: { book: Book; notes: BookNote[] })
                   type="button"
                   onClick={() => onDelete(note.id)}
                   disabled={remove.isPending}
-                  aria-label="Delete note"
+                  aria-label={t('reading.deleteNote')}
                   className="flex-none text-muted-strong transition-colors hover:text-foreground disabled:opacity-50"
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />

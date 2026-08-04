@@ -3,6 +3,7 @@ import { BookCard } from '@/features/reading/components/BookCard'
 import { groupBooks } from '@/features/reading/lib/library'
 import { riseStagger } from '@/lib/motion'
 import type { Book } from '@/features/reading/types'
+import { useT } from '@/hooks/useT'
 
 function Shelf({ title, books }: { title: string; books: Book[] }) {
   if (books.length === 0) return null
@@ -26,12 +27,13 @@ function Shelf({ title, books }: { title: string; books: Book[] }) {
 
 /** The library, grouped: currently reading, up next, then finished. */
 export function BookShelf({ books }: { books: Book[] }) {
+  const { t } = useT()
   const grouped = groupBooks(books)
   return (
     <div className="flex flex-col gap-5">
-      <Shelf title="READING NOW" books={grouped.reading} />
-      <Shelf title="UP NEXT" books={grouped.to_read} />
-      <Shelf title="FINISHED" books={grouped.finished} />
+      <Shelf title={t('reading.readingNow')} books={grouped.reading} />
+      <Shelf title={t('reading.upNext')} books={grouped.to_read} />
+      <Shelf title={t('reading.finishedSection')} books={grouped.finished} />
     </div>
   )
 }

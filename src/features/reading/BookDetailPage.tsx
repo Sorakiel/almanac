@@ -14,6 +14,7 @@ import { statusLabel, unitNounPlural } from '@/features/reading/lib/progress'
 import { useFocusStore } from '@/stores/focus'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import type { BookStatus } from '@/features/reading/types'
+import { useT } from '@/hooks/useT'
 
 const STATUS_TONE: Record<BookStatus, 'muted' | 'accent' | 'teal'> = {
   to_read: 'muted',
@@ -24,6 +25,7 @@ const STATUS_TONE: Record<BookStatus, 'muted' | 'accent' | 'teal'> = {
 const READING_SESSION_MIN = 25
 
 function BookDetailPage() {
+  const { t } = useT()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const startFocus = useFocusStore((s) => s.start)
@@ -35,7 +37,7 @@ function BookDetailPage() {
     return (
       <div className="flex justify-center py-24" role="status" aria-live="polite">
         <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading book…</span>
+        <span className="sr-only">{t('reading.loadingBook')}</span>
       </div>
     )
   }
@@ -43,11 +45,11 @@ function BookDetailPage() {
   if (isError || !book) {
     return (
       <EmptyState
-        title="Book not found"
-        description="It may have been removed."
+        title={t('reading.notFound')}
+        description="{t('reading.notFoundHint')}"
         action={
           <Button size="sm" variant="surface" onClick={() => navigate('/reading')}>
-            Back to library
+            {t('reading.backToLibrary')}
           </Button>
         }
       />
@@ -67,15 +69,15 @@ function BookDetailPage() {
           className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Library
+          {t('reading.library')}
         </Link>
 
         <div className="mt-3 flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-2xl tracking-title lg:text-[32px]">{book.title}</h1>
-            <p className="mt-1 text-muted">{book.author ?? 'Unknown author'}</p>
+            <p className="mt-1 text-muted">{book.author ?? t('reading.unknownAuthor')}</p>
             <div className="mt-2 flex items-center gap-2">
-              <Tag tone={STATUS_TONE[book.status]}>{statusLabel(book.status)}</Tag>
+              <Tag tone={STATUS_TONE[book.status]}>{statusLabel(book.status, t)}</Tag>
               <span className="label-mono text-muted-strong">
                 by {book.progress_mode === 'chapters' ? 'chapter' : 'page'}
               </span>
@@ -83,7 +85,7 @@ function BookDetailPage() {
           </div>
           <Button variant="surface" size="sm" onClick={() => setEditOpen(true)}>
             <Pencil className="h-4 w-4" />
-            Edit
+            {t('reading.edit')}
           </Button>
         </div>
       </div>
@@ -99,7 +101,7 @@ function BookDetailPage() {
 
       {sessions.length > 0 ? (
         <section className="flex flex-col gap-3">
-          <SectionLabel accessory={`${sessions.length}`}>SESSIONS</SectionLabel>
+          <SectionLabel accessory={`${sessions.length}`}>{t('reading.sessions')}</SectionLabel>
           <div className="rounded-card border bg-surface">
             {sessions.slice(0, 8).map((session) => (
               <div
@@ -110,7 +112,7 @@ function BookDetailPage() {
                 <span className="text-muted">
                   {session.minutes > 0 ? `${session.minutes} min` : '—'}
                   {session.units_read > 0
-                    ? ` · ${session.units_read} ${unitNounPlural(book.progress_mode)}`
+                    ? ` · ${session.units_read} ${unitNounPlural(book.progress_mode, t)}`
                     : ''}
                 </span>
               </div>
