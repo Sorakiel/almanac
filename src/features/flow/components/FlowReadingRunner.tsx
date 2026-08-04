@@ -57,13 +57,16 @@ export function FlowReadingRunner({ bookId, minutes, onFinish }: FlowReadingRunn
           <p className="truncate font-semibold">{book.title}</p>
           <p className="font-mono text-[10px] text-muted-strong">
             at {book.current_unit}
-            {book.total_units ? ` / ${book.total_units}` : ''} {unitNounPlural(book.progress_mode)}
+            {book.total_units ? ` / ${book.total_units}` : ''}{' '}
+            {unitNounPlural(book.progress_mode, t)}
           </p>
         </div>
       </div>
 
       <label className="flex flex-col gap-1.5">
-        <span className="label-mono">Which {unitNoun(book.progress_mode)} did you reach?</span>
+        <span className="label-mono">
+          {t('flow.whichUnitReached', { unit: unitNoun(book.progress_mode, t) })}
+        </span>
         <Input
           type="number"
           inputMode="numeric"

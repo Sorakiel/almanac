@@ -5,6 +5,7 @@ import { RatingBars } from '@/components/common/RatingBars'
 import { Tag } from '@/components/common/Tag'
 import { progressPct, statusLabel, unitNounPlural } from '@/features/reading/lib/progress'
 import type { Book, BookStatus } from '@/features/reading/types'
+import { useT } from '@/hooks/useT'
 
 const STATUS_TONE: Record<BookStatus, 'muted' | 'accent' | 'teal'> = {
   to_read: 'muted',
@@ -14,6 +15,7 @@ const STATUS_TONE: Record<BookStatus, 'muted' | 'accent' | 'teal'> = {
 
 /** Library list item: title, author, status, and progress. Links to detail. */
 export function BookCard({ book }: { book: Book }) {
+  const { t } = useT()
   const pct = progressPct(book)
 
   return (
@@ -25,11 +27,11 @@ export function BookCard({ book }: { book: Book }) {
             {book.author ? (
               <p className="truncate text-[13px] text-muted">{book.author}</p>
             ) : (
-              <p className="text-[13px] text-muted-strong">Unknown author</p>
+              <p className="text-[13px] text-muted-strong">{t('reading.unknownAuthor')}</p>
             )}
           </div>
           <div className="flex flex-none flex-col items-end gap-1">
-            <Tag tone={STATUS_TONE[book.status]}>{statusLabel(book.status)}</Tag>
+            <Tag tone={STATUS_TONE[book.status]}>{statusLabel(book.status, t)}</Tag>
             {book.rating ? (
               <RatingBars value={book.rating} aria-label={`Rated ${book.rating} of 5`} />
             ) : null}
@@ -45,7 +47,7 @@ export function BookCard({ book }: { book: Book }) {
           </div>
         ) : book.current_unit > 0 ? (
           <p className="font-mono text-[11px] text-muted-strong">
-            {book.current_unit} {unitNounPlural(book.progress_mode)} in
+            {book.current_unit} {unitNounPlural(book.progress_mode, t)} in
           </p>
         ) : null}
       </Card>

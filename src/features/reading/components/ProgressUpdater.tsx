@@ -15,6 +15,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useToday } from '@/hooks/useToday'
 import type { Book, ReadingSession } from '@/features/reading/types'
+import { useT } from '@/hooks/useT'
 
 interface ProgressUpdaterProps {
   book: Book
@@ -28,14 +29,15 @@ interface ProgressUpdaterProps {
  * repeatably. A second field sets the current page/chapter absolutely.
  */
 export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
+  const { t } = useT()
   const logProgress = useReadingProgress()
   const { dateKey } = useToday()
   const [addValue, setAddValue] = useState('')
   const [currentValue, setCurrentValue] = useState('')
 
   const pct = progressPct(book)
-  const noun = unitNoun(book.progress_mode)
-  const nounPlural = unitNounPlural(book.progress_mode)
+  const noun = unitNoun(book.progress_mode, t)
+  const nounPlural = unitNounPlural(book.progress_mode, t)
   const readToday = sessions
     .filter((s) => s.date === dateKey)
     .reduce((sum, s) => sum + s.units_read, 0)
@@ -49,7 +51,7 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
       {
         onSuccess: () => onDone?.(),
         onError: (error) =>
-          toast.error(error instanceof Error ? error.message : 'Could not update progress'),
+          toast.error(error instanceof Error ? error.message : t('reading.progressFailed')),
       },
     )
   }
@@ -66,7 +68,7 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
   const onSetCurrent = () => {
     const next = Number.parseInt(currentValue, 10)
     if (!Number.isFinite(next) || next < 0) {
-      toast.error('Enter a valid number')
+      toast.error(t('reading.invalidNumber'))
       return
     }
     commit(next, () => setCurrentValue(''))
@@ -74,7 +76,9 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
 
   return (
     <section className="flex flex-col gap-3">
-      <SectionLabel accessory={pct !== null ? `${pct}%` : undefined}>PROGRESS</SectionLabel>
+      <SectionLabel accessory={pct !== null ? `${pct}%` : undefined}>
+        {t('reading.progress')}
+      </SectionLabel>
 
       <div className="rounded-card border bg-surface p-4">
         <div className="flex items-end justify-between gap-3">
@@ -83,7 +87,10 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
             {book.total_units ? ` / ${book.total_units}` : ''} {nounPlural}
           </p>
           <p className="label-mono text-accent">
-            read today · {readToday} {readToday === 1 ? noun : nounPlural}
+            {t('reading.readTodayCount', {
+              count: readToday,
+              unit: readToday === 1 ? noun : nounPlural,
+            })}
           </p>
         </div>
 
@@ -108,7 +115,10 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
           >
             <div className="flex items-center justify-between gap-3">
               <span className="label-mono normal-case">
-                daily goal · {goal} {goal === 1 ? noun : nounPlural}/day
+                {t('reading.dailyGoalLine', {
+                  count: goal,
+                  unit: goal === 1 ? noun : nounPlural,
+                })}
               </span>
               <span
                 className={cn(
@@ -127,7 +137,7 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
                 blocks={20}
                 size="md"
                 animated
-                aria-label={`${goalPct}% of today's reading goal`}
+                aria-label={t('reading.goalPctAria', { pct: goalPct ?? 0 })}
               />
             </div>
           </div>
@@ -135,25 +145,25 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
 
         <div className="mt-4 flex items-end gap-2">
           <label className="flex flex-1 flex-col gap-1.5">
-            <span className="label-mono">{nounPlural} read just now</span>
+            <span className="label-mono">{t('reading.readJustNow', { unit: nounPlural })}</span>
             <Input
               type="number"
               inputMode="numeric"
               min={1}
-              placeholder="e.g. 12"
+              placeholder={t('reading.progressPlaceholder')}
               value={addValue}
               onChange={(event) => setAddValue(event.target.value)}
             />
           </label>
           <Button onClick={onAdd} disabled={logProgress.isPending}>
             <Plus className="h-4 w-4" />
-            Add
+            {t('reading.add')}
           </Button>
         </div>
 
         <div className="mt-3 flex items-end gap-2">
           <label className="flex flex-1 flex-col gap-1.5">
-            <span className="label-mono">or set current {noun}</span>
+            <span className="label-mono">{t('reading.orSetCurrent', { unit: noun })}</span>
             <Input
               type="number"
               inputMode="numeric"
@@ -164,7 +174,7 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
             />
           </label>
           <Button variant="surface" onClick={onSetCurrent} disabled={logProgress.isPending}>
-            Set
+            {t('reading.setProgress')}
           </Button>
         </div>
       </div>

@@ -10,8 +10,10 @@ import { BooksWorkspace } from '@/features/reading/components/desktop/BooksWorks
 import { BooksRail } from '@/features/reading/components/desktop/BooksRail'
 import { useBooks } from '@/features/reading/hooks/useBooks'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useT } from '@/hooks/useT'
 
 function BooksPage() {
+  const { t } = useT()
   const { books, isLoading, isError, refetch } = useBooks()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [formOpen, setFormOpen] = useState(false)
@@ -42,35 +44,35 @@ function BooksPage() {
       <header className="flex items-end justify-between">
         <div>
           <p className="label-mono">// your shelf</p>
-          <h1 className="mt-1 text-2xl">Reading</h1>
+          <h1 className="mt-1 text-2xl">{t('reading.title')}</h1>
         </div>
       </header>
 
       {isLoading ? (
         <div className="flex justify-center py-16" role="status" aria-live="polite">
           <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-          <span className="sr-only">Loading your library…</span>
+          <span className="sr-only">{t('reading.loading')}</span>
         </div>
       ) : isError ? (
         <EmptyState
           icon={RefreshCw}
-          title="Couldn't load your library"
-          description="Something went wrong reaching the server."
+          title={t('reading.loadFailed')}
+          description={t('reading.loadFailedHint')}
           action={
             <Button size="sm" variant="surface" onClick={refetch}>
-              Try again
+              {t('reading.tryAgain')}
             </Button>
           }
         />
       ) : books.length === 0 ? (
         <EmptyState
           icon={BookOpen}
-          title="Your shelf is empty"
-          description="Add the book you're reading to start tracking progress and notes."
+          title={t('reading.emptyTitle')}
+          description={t('reading.emptyHint')}
           action={
             <Button size="sm" onClick={openNew}>
               <Plus className="h-4 w-4" />
-              Add your first book
+              {t('reading.addFirstBook')}
             </Button>
           }
         />
@@ -80,7 +82,7 @@ function BooksPage() {
           <BookShelf books={books} />
           <Button size="lg" onClick={openNew} className="w-full shadow-glow">
             <Plus className="h-4 w-4" />
-            Add book
+            {t('reading.addBook')}
           </Button>
         </>
       )}
