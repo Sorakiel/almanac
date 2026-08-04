@@ -23,9 +23,13 @@ import {
 import type { HabitFrequency, HabitTimeOfDay } from '@/features/habits/types'
 import { useUiStore } from '@/stores/ui'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
+import type { TranslationKey } from '@/i18n/types'
 
 const schema = z.object({
-  name: z.string().trim().min(1, 'Give it a name').max(60),
+  // The message is a translation key: zod runs outside React, so the sheet
+  // resolves it when it renders the error.
+  name: z.string().trim().min(1, 'habits.form.nameRequired').max(60),
   description: z.string().trim().max(160).optional(),
   icon: z.enum(HABIT_ICON_OPTIONS as [HabitIcon, ...HabitIcon[]]),
   color: z.enum(HABIT_COLOR_OPTIONS as [HabitColor, ...HabitColor[]]),
@@ -51,11 +55,11 @@ const DEFAULTS: FormValues = {
 type Preset = 'daily' | 'weekdays' | 'weekly' | 'custom'
 type CustomUnit = 'days' | 'weeks' | 'per_week'
 
-const PRESETS: { value: Preset; label: string }[] = [
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekdays', label: 'Weekdays' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'custom', label: 'Custom' },
+const PRESETS: { value: Preset }[] = [
+  { value: 'daily' },
+  { value: 'weekdays' },
+  { value: 'weekly' },
+  { value: 'custom' },
 ]
 
 const UNIT_FREQ: Record<CustomUnit, HabitFrequency> = {
@@ -73,17 +77,8 @@ const UNIT_RANGE: Record<CustomUnit, { min: number; max: number }> = {
   weeks: { min: 2, max: 8 },
   per_week: { min: 2, max: 7 },
 }
-const UNIT_OPTIONS: { value: CustomUnit; label: string }[] = [
-  { value: 'days', label: 'days' },
-  { value: 'weeks', label: 'weeks' },
-  { value: 'per_week', label: '× / week' },
-]
-const TIME_OPTIONS: { value: HabitTimeOfDay; label: string }[] = [
-  { value: 'anytime', label: 'anytime' },
-  { value: 'morning', label: 'morning' },
-  { value: 'afternoon', label: 'afternoon' },
-  { value: 'evening', label: 'evening' },
-]
+const UNIT_VALUES: CustomUnit[] = ['days', 'weeks', 'per_week']
+const TIME_VALUES: HabitTimeOfDay[] = ['anytime', 'morning', 'afternoon', 'evening']
 
 function presetOf(frequency: HabitFrequency): Preset {
   if (frequency === 'daily' || frequency === 'weekdays' || frequency === 'weekly') return frequency
@@ -95,6 +90,7 @@ function clamp(value: number, min: number, max: number): number {
 
 /** Create/edit bottom sheet with icon, color, repeats, and time-of-day pickers. */
 export function HabitFormSheet() {
+  const { t } = useT()
   const habitForm = useUiStore((s) => s.habitForm)
   const closeHabitForm = useUiStore((s) => s.closeHabitForm)
   const { habits } = useHabits()
@@ -172,25 +168,21 @@ export function HabitFormSheet() {
     try {
       if (editing) {
         await update.mutateAsync({ id: editing.id, input })
-        toast.success('Habit updated')
+        toast.success(t('habits.updated'))
       } else {
         const created = await create.mutateAsync(input)
         if (draftChecklist.length > 0) {
           try {
             await createSubtasksBulk(created.user_id, created.id, draftChecklist)
           } catch (error) {
-            toast.error(
-              error instanceof Error
-                ? error.message
-                : "Habit created, but the checklist didn't save",
-            )
+            toast.error(error instanceof Error ? error.message : t('habits.createdChecklistFailed'))
           }
         }
-        toast.success('Habit created')
+        toast.success(t('habits.created'))
       }
       closeHabitForm()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not save habit')
+      toast.error(error instanceof Error ? error.message : t('habits.saveFailed'))
     }
   })
 
@@ -198,27 +190,32 @@ export function HabitFormSheet() {
     <Sheet
       open={open}
       onOpenChange={(next) => !next && closeHabitForm()}
-      title={editing ? 'Edit habit' : 'New habit'}
+      title={editing ? t('habits.editHabit') : t('habits.newHabit')}
       mono
       preventInitialFocus
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <label className="flex flex-col gap-1.5">
-          <span className="label-mono">Name</span>
-          <Input placeholder="Cold shower" {...register('name')} />
+          <span className="label-mono">{t('habits.form.name')}</span>
+          <Input placeholder={t('habits.form.namePlaceholder')} {...register('name')} />
           {formState.errors.name ? (
-            <span className="text-xs text-accent">{formState.errors.name.message}</span>
+            <span className="text-xs text-accent">
+              {t(formState.errors.name.message as TranslationKey)}
+            </span>
           ) : null}
         </label>
 
         <label className="flex flex-col gap-1.5">
-          <span className="label-mono">Description</span>
-          <Input placeholder="Optional" {...register('description')} />
+          <span className="label-mono">{t('habits.form.description')}</span>
+          <Input
+            placeholder={t('habits.form.descriptionPlaceholder')}
+            {...register('description')}
+          />
         </label>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1.5">
-            <span className="label-mono">Icon</span>
+            <span className="label-mono">{t('habits.form.icon')}</span>
             <div className="flex flex-wrap gap-2">
               {HABIT_ICON_OPTIONS.map((key) => {
                 const Icon = HABIT_ICONS[key]
@@ -245,7 +242,7 @@ export function HabitFormSheet() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="label-mono">Color</span>
+            <span className="label-mono">{t('habits.form.color')}</span>
             <div className="flex gap-2">
               {HABIT_COLOR_OPTIONS.map((key) => {
                 const active = values.color === key
@@ -270,8 +267,12 @@ export function HabitFormSheet() {
         </div>
 
         <div className="flex flex-col gap-3 rounded-2xl bg-surface p-4">
-          <span className="label-mono">Repeats</span>
-          <div className="flex flex-wrap gap-2 lg:flex-nowrap" role="group" aria-label="Repeats">
+          <span className="label-mono">{t('habits.form.repeats')}</span>
+          <div
+            className="flex flex-wrap gap-2 lg:flex-nowrap"
+            role="group"
+            aria-label={t('habits.form.repeats')}
+          >
             {PRESETS.map((option) => {
               const active = preset === option.value
               return (
@@ -291,7 +292,7 @@ export function HabitFormSheet() {
                       : 'border-border text-muted hover:text-foreground lg:bg-bg-deep',
                   )}
                 >
-                  {option.label}
+                  {t(`habits.form.${option.value}`)}
                 </button>
               )
             })}
@@ -299,7 +300,9 @@ export function HabitFormSheet() {
 
           {preset === 'custom' && (
             <div className="mt-1 flex items-center gap-3 rounded-2xl border border-accent/25 bg-bg-deep px-4 py-3">
-              {unit !== 'per_week' ? <span className="text-sm font-medium">Every</span> : null}
+              {unit !== 'per_week' ? (
+                <span className="text-sm font-medium">{t('habits.form.every')}</span>
+              ) : null}
               <Stepper
                 value={values.target_count}
                 onChange={(n) => setValue('target_count', n)}
@@ -308,22 +311,28 @@ export function HabitFormSheet() {
               />
               <div className="ml-auto">
                 <Dropdown
-                  ariaLabel="Interval unit"
+                  ariaLabel={t('habits.form.intervalUnit')}
                   value={unit}
                   onChange={selectUnit}
-                  options={UNIT_OPTIONS}
+                  options={UNIT_VALUES.map((value) => ({
+                    value,
+                    label: t(`habits.form.units.${value}`),
+                  }))}
                 />
               </div>
             </div>
           )}
 
           <div className="flex items-center justify-between border-t border-border/60 pt-4">
-            <span className="label-mono normal-case">time of day</span>
+            <span className="label-mono normal-case">{t('habits.form.timeOfDay')}</span>
             <Dropdown
-              ariaLabel="Time of day"
+              ariaLabel={t('habits.form.timeOfDay')}
               value={values.time_of_day}
               onChange={(next) => setValue('time_of_day', next)}
-              options={TIME_OPTIONS}
+              options={TIME_VALUES.map((value) => ({
+                value,
+                label: t(`habits.form.times.${value}`),
+              }))}
             />
           </div>
         </div>
@@ -335,7 +344,11 @@ export function HabitFormSheet() {
         )}
 
         <Button type="submit" size="lg" disabled={pending} className="mt-1">
-          {pending ? 'Saving…' : editing ? 'Save changes' : 'Create habit'}
+          {pending
+            ? t('habits.form.saving')
+            : editing
+              ? t('habits.form.save')
+              : t('habits.form.create')}
         </Button>
 
         {editing ? (
@@ -347,14 +360,14 @@ export function HabitFormSheet() {
             onClick={async () => {
               try {
                 await archive.mutateAsync(editing.id)
-                toast.success('Habit archived')
+                toast.success(t('habits.archived'))
                 closeHabitForm()
               } catch (error) {
-                toast.error(error instanceof Error ? error.message : 'Could not archive')
+                toast.error(error instanceof Error ? error.message : t('habits.archiveFailed'))
               }
             }}
           >
-            Archive habit
+            {t('habits.archiveHabit')}
           </Button>
         ) : null}
       </form>
@@ -370,11 +383,12 @@ interface StepperProps {
 }
 
 function Stepper({ value, onChange, min, max }: StepperProps) {
+  const { t } = useT()
   return (
     <div className="flex items-center gap-1 rounded-xl bg-surface px-1.5 py-1">
       <button
         type="button"
-        aria-label="Decrease"
+        aria-label={t('habits.form.decrease')}
         onClick={() => onChange(Math.max(min, value - 1))}
         className="flex h-7 w-7 items-center justify-center rounded-lg text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
@@ -383,7 +397,7 @@ function Stepper({ value, onChange, min, max }: StepperProps) {
       <span className="w-7 text-center font-mono tabular-nums">{value}</span>
       <button
         type="button"
-        aria-label="Increase"
+        aria-label={t('habits.form.increase')}
         onClick={() => onChange(Math.min(max, value + 1))}
         className="flex h-7 w-7 items-center justify-center rounded-lg text-accent transition-colors hover:text-accent-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >

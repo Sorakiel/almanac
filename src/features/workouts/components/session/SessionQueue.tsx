@@ -11,7 +11,9 @@ interface SessionQueueProps {
 
 function Eyebrow({ children }: { children: string }) {
   return (
-    <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-strong">{children}</p>
+    <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-strong">
+      {children}
+    </p>
   )
 }
 

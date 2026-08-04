@@ -3,6 +3,7 @@ import { CompletionToggle } from '@/components/common/CompletionToggle'
 import { useHabitSubtasks } from '@/features/habits/hooks/useHabitSubtasks'
 import type { Habit } from '@/features/habits/types'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface HabitChecklistProps {
   habit: Habit
@@ -15,6 +16,7 @@ interface HabitChecklistProps {
  *  (and unchecking any one un-marks it) — same as any nested-task list.
  *  Renders nothing when the habit has no checklist. */
 export function HabitChecklist({ habit, className }: HabitChecklistProps) {
+  const { t } = useT()
   const { subtasks, isLoading, toggleToday, todayKey } = useHabitSubtasks(habit)
 
   if (isLoading || subtasks.length === 0) return null
@@ -37,7 +39,9 @@ export function HabitChecklist({ habit, className }: HabitChecklistProps) {
               { subtask, checked: !checked },
               {
                 onError: (error) =>
-                  toast.error(error instanceof Error ? error.message : 'Could not update item'),
+                  toast.error(
+                    error instanceof Error ? error.message : t('habits.itemUpdateFailed'),
+                  ),
               },
             )
           return (

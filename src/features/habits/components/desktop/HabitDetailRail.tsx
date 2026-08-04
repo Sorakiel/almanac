@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import type { Habit } from '@/features/habits/types'
 import type { HabitDetailStats } from '@/features/habits/hooks/useHabitDetail'
 import type { DayStatus } from '@/features/habits/lib/schedule'
+import { useT } from '@/hooks/useT'
 
 /** Label + glyph + tone for each history-row status. Rest days read neutral,
  *  never as a miss — key for interval/weekday cadences. */
@@ -34,6 +35,7 @@ export function HabitDetailRail({
   onToggleFreeze,
   freezePending,
 }: HabitDetailRailProps) {
+  const { t } = useT()
   // Newest-first, last five days of the window.
   const recent = [...stats.heatmap].slice(-5).reverse()
 
@@ -88,7 +90,7 @@ export function HabitDetailRail({
             onClick={() => onToggleFreeze(!stats.todayFrozen)}
           >
             <Snowflake className="h-4 w-4" />
-            {stats.todayFrozen ? 'Frozen today · undo' : 'Freeze today'}
+            {stats.todayFrozen ? t('habits.frozenToday') : t('habits.freezeToday')}
           </Button>
         ) : null}
 
@@ -100,7 +102,7 @@ export function HabitDetailRail({
           onClick={() => onMarkDone(!stats.todayDone)}
         >
           <Check className="h-4 w-4" />
-          {stats.todayDone ? 'Completed today' : 'Mark done for today'}
+          {stats.todayDone ? t('habits.completedToday') : t('habits.markDone')}
         </Button>
       </div>
     </div>

@@ -37,11 +37,7 @@ function addDays(dateKey: string, days: number): string {
  * The Monday-anchored 7-day strip containing `todayKey`, each day carrying how
  * many workouts are due and how many were completed — the training week header.
  */
-export function buildWeek(
-  todayKey: string,
-  workouts: WorkoutView[],
-  timezone: string,
-): WeekView {
+export function buildWeek(todayKey: string, workouts: WorkoutView[], timezone: string): WeekView {
   // weekdayOfKey is 0=Sun … 6=Sat; step back to this week's Monday.
   const mondayOffset = (weekdayOfKey(todayKey) + 6) % 7
   const monday = addDays(todayKey, -mondayOffset)

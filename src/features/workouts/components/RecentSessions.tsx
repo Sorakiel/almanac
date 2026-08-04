@@ -9,9 +9,11 @@ interface RecentSessionsProps {
 
 /** Short "day · time" label from a completed_at instant, UTC-safe enough here. */
 function completedLabel(iso: string): string {
-  return new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }).format(
-    new Date(iso),
-  )
+  return new Intl.DateTimeFormat('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  }).format(new Date(iso))
 }
 
 /** Compact list of recently completed sessions; each row opens its detail page. */

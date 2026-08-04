@@ -25,9 +25,11 @@ interface WorkoutsWorkspaceProps {
 /** Friendly "Monday, 6 July" from a `YYYY-MM-DD` key, UTC-safe. */
 function dayLabel(dateKey: string): string {
   const [y, m, d] = dateKey.split('-').map(Number)
-  return new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).format(
-    new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)),
-  )
+  return new Intl.DateTimeFormat('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)))
 }
 
 /** Desktop training workspace: week strip, the selected day's session, sessions. */

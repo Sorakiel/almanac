@@ -44,7 +44,7 @@ export function Stepper({ value, onChange, onStep, step = 1, ariaLabel, classNam
         value={value ?? ''}
         aria-label={ariaLabel}
         onChange={(e) => onChange(parseNum(e.target.value))}
-        className="w-full min-w-0 bg-transparent text-center text-sm font-semibold tabular-nums focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        className="w-full min-w-0 bg-transparent text-center text-sm font-semibold tabular-nums [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
       />
       <button
         type="button"

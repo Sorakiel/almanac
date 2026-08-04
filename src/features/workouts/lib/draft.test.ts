@@ -76,8 +76,15 @@ describe('draftSignature', () => {
 
 describe('summaries', () => {
   const draft = buildDraft('A', [
-    makeExercise({ muscleGroup: 'chest', sets: [makeSet({ reps: 8, weight: 60 }), makeSet({ reps: 8, weight: 60 })] }),
-    makeExercise({ id: 'we2', muscleGroup: 'shoulders', sets: [makeSet({ reps: 10, weight: 20 })] }),
+    makeExercise({
+      muscleGroup: 'chest',
+      sets: [makeSet({ reps: 8, weight: 60 }), makeSet({ reps: 8, weight: 60 })],
+    }),
+    makeExercise({
+      id: 'we2',
+      muscleGroup: 'shoulders',
+      sets: [makeSet({ reps: 10, weight: 20 })],
+    }),
   ])
 
   it('draftSummary counts exercises, sets, and volume', () => {

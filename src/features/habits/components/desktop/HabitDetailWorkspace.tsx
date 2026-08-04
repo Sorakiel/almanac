@@ -7,6 +7,7 @@ import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habit
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
 import type { Habit } from '@/features/habits/types'
 import type { HabitDetailStats } from '@/features/habits/hooks/useHabitDetail'
+import { useT } from '@/hooks/useT'
 
 interface HabitDetailWorkspaceProps {
   habit: Habit
@@ -35,9 +36,14 @@ export function HabitDetailWorkspace({
   onEdit,
   onDelete,
 }: HabitDetailWorkspaceProps) {
+  const { t } = useT()
   const color = resolveHabitColor(habit.color)
   const Icon = resolveHabitIcon(habit.icon)
-  const subtitle = [frequencyLabel(habit), habit.description, timeOfDayLabel(habit.time_of_day)]
+  const subtitle = [
+    frequencyLabel(habit, t),
+    habit.description,
+    timeOfDayLabel(habit.time_of_day, t),
+  ]
     .filter(Boolean)
     .join(' · ')
 
@@ -57,12 +63,12 @@ export function HabitDetailWorkspace({
           className="rounded-[11px] border px-3.5 py-[9px] font-mono text-xs text-muted transition-colors hover:text-foreground"
         >
           <Pencil className="mr-1.5 inline h-3.5 w-3.5" aria-hidden="true" />
-          Edit
+          {t('habits.edit')}
         </button>
         <button
           type="button"
           onClick={onDelete}
-          aria-label="Delete habit"
+          aria-label={t('habits.deleteHabit')}
           className="rounded-[11px] border p-[11px] text-muted-strong transition-colors hover:border-accent/40 hover:text-accent"
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -70,16 +76,16 @@ export function HabitDetailWorkspace({
       </header>
 
       <div className="mt-6 flex gap-3.5">
-        <Stat label="streak" value={`◆ ${stats.streak}d`} accent />
-        <Stat label="best" value={`${stats.best}d`} />
-        <Stat label="rate" value={`${stats.ratePct}%`} />
-        <Stat label="total" value={String(stats.total)} />
+        <Stat label={t('habits.streak')} value={`◆ ${stats.streak}d`} accent />
+        <Stat label={t('habits.best')} value={`${stats.best}d`} />
+        <Stat label={t('habits.rate')} value={`${stats.ratePct}%`} />
+        <Stat label={t('habits.total')} value={String(stats.total)} />
       </div>
 
       <HabitChecklist habit={habit} className="mt-7" />
 
       <div className="mt-7 flex flex-col gap-3">
-        <SectionLabel>LAST 12 MONTHS</SectionLabel>
+        <SectionLabel>{t('habits.lastTwelveMonths')}</SectionLabel>
         <HabitHeatmap days={stats.heatmap} createdKey={stats.createdKey} fill />
       </div>
     </div>

@@ -27,8 +27,10 @@ import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 function HabitDetailPage() {
+  const { t } = useT()
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -46,10 +48,10 @@ function HabitDetailPage() {
   const handleDelete = async () => {
     try {
       await archive.mutateAsync(id)
-      toast.success('Habit deleted')
+      toast.success(t('habits.deleted'))
       navigate('/habits')
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not delete habit')
+      toast.error(error instanceof Error ? error.message : t('habits.deleteFailed'))
     }
   }
 
@@ -66,14 +68,14 @@ function HabitDetailPage() {
       void queryClient.invalidateQueries({ queryKey: ['habitLogs'] })
     },
     onError: (error) =>
-      toast.error(error instanceof Error ? error.message : 'Could not update habit'),
+      toast.error(error instanceof Error ? error.message : t('habits.updateFailed')),
   })
 
   if (isLoading) {
     return (
       <div className="flex justify-center py-24" role="status" aria-live="polite">
         <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading…</span>
+        <span className="sr-only">{t('habits.loadingOne')}</span>
       </div>
     )
   }
@@ -81,10 +83,10 @@ function HabitDetailPage() {
   if (isError || !habit || !stats) {
     return (
       <EmptyState
-        title="Couldn't load this habit"
+        title={t('habits.loadOneFailed')}
         action={
           <Button size="sm" variant="surface" onClick={() => navigate('/habits')}>
-            Back to habits
+            {t('habits.backToHabits')}
           </Button>
         }
       />
@@ -93,8 +95,8 @@ function HabitDetailPage() {
 
   const color = resolveHabitColor(habit.color)
   const Icon = resolveHabitIcon(habit.icon)
-  const timeLabel = timeOfDayLabel(habit.time_of_day)
-  const subtitle = [frequencyLabel(habit), timeLabel].filter(Boolean).join(' · ')
+  const timeLabel = timeOfDayLabel(habit.time_of_day, t)
+  const subtitle = [frequencyLabel(habit, t), timeLabel].filter(Boolean).join(' · ')
 
   const overlays = (
     <>
@@ -109,7 +111,7 @@ function HabitDetailPage() {
             className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium hover:bg-surface"
           >
             <Pencil className="h-4 w-4 text-muted" aria-hidden="true" />
-            Edit habit
+            {t('habits.editHabit')}
           </button>
           <button
             type="button"
@@ -120,7 +122,7 @@ function HabitDetailPage() {
             className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-accent hover:bg-surface"
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
-            Delete habit
+            {t('habits.deleteHabit')}
           </button>
         </div>
       </Sheet>
@@ -128,9 +130,9 @@ function HabitDetailPage() {
       <ConfirmSheet
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Delete this habit?"
+        title={t('habits.confirmDeleteTitle')}
         description={`"${habit.name}" and its streak will disappear from your lists. Its history is kept.`}
-        confirmLabel="Delete habit"
+        confirmLabel={t('habits.deleteHabit')}
         pending={archive.isPending}
         onConfirm={handleDelete}
       />
@@ -157,7 +159,7 @@ function HabitDetailPage() {
                 { habitId: id, freeze },
                 {
                   onError: (error) =>
-                    toast.error(error instanceof Error ? error.message : 'Could not update freeze'),
+                    toast.error(error instanceof Error ? error.message : t('habits.freezeFailed')),
                 },
               )
             }
@@ -175,7 +177,7 @@ function HabitDetailPage() {
         <button
           type="button"
           onClick={() => navigate('/habits')}
-          aria-label="Back"
+          aria-label={t('habits.back')}
           className="rounded-full p-1 text-muted hover:text-foreground"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
@@ -188,7 +190,7 @@ function HabitDetailPage() {
         <button
           type="button"
           onClick={() => setMenuOpen(true)}
-          aria-label="Habit options"
+          aria-label={t('habits.habitOptions')}
           className="rounded-full p-2 text-muted hover:bg-surface hover:text-foreground"
         >
           <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
@@ -196,19 +198,19 @@ function HabitDetailPage() {
       </header>
 
       <div className="grid grid-cols-3 gap-3">
-        <StatTile label="Streak" value={`${stats.streak}d`} accent />
-        <StatTile label="Best" value={`${stats.best}d`} />
-        <StatTile label="Rate" value={`${stats.ratePct}%`} />
+        <StatTile label={t('habits.streak')} value={`${stats.streak}d`} accent />
+        <StatTile label={t('habits.best')} value={`${stats.best}d`} />
+        <StatTile label={t('habits.rate')} value={`${stats.ratePct}%`} />
       </div>
 
       <div className="flex flex-col gap-3">
-        <SectionLabel>LAST 12 MONTHS</SectionLabel>
+        <SectionLabel>{t('habits.lastTwelveMonths')}</SectionLabel>
         <HabitHeatmap days={stats.heatmap} createdKey={stats.createdKey} />
       </div>
 
       {habit.description ? (
         <div className="flex flex-col gap-3">
-          <SectionLabel>NOTES</SectionLabel>
+          <SectionLabel>{t('habits.notes')}</SectionLabel>
           <div className="rounded-r-card border-l-2 border-accent bg-surface px-4 py-3 text-sm leading-relaxed">
             {habit.description}
           </div>
@@ -229,13 +231,13 @@ function HabitDetailPage() {
                 { habitId: id, freeze: !stats.todayFrozen },
                 {
                   onError: (error) =>
-                    toast.error(error instanceof Error ? error.message : 'Could not update freeze'),
+                    toast.error(error instanceof Error ? error.message : t('habits.freezeFailed')),
                 },
               )
             }
           >
             <Snowflake className="h-4 w-4" />
-            {stats.todayFrozen ? 'Frozen today · undo' : 'Freeze today'}
+            {stats.todayFrozen ? t('habits.frozenToday') : t('habits.freezeToday')}
           </Button>
         ) : null}
         <Button
@@ -246,7 +248,7 @@ function HabitDetailPage() {
           onClick={() => markDone.mutate(!stats.todayDone)}
         >
           <Check className="h-4 w-4" />
-          {stats.todayDone ? 'Completed today' : 'Mark done for today'}
+          {stats.todayDone ? t('habits.completedToday') : t('habits.markDone')}
         </Button>
       </div>
 

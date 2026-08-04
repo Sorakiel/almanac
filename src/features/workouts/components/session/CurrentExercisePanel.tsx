@@ -36,7 +36,7 @@ function SetCell({ set, isCurrent }: { set: SetLog; isCurrent: boolean }) {
         {set.done ? (
           <Check className="h-5 w-5 text-accent" aria-hidden="true" />
         ) : isCurrent ? (
-          <span className="font-mono text-[20px] font-semibold leading-none tabular-nums">
+          <span className="font-mono text-[20px] font-semibold tabular-nums leading-none">
             {set.reps ?? '—'}
           </span>
         ) : (
@@ -86,7 +86,9 @@ export function CurrentExercisePanel({ exercise, currentSet }: CurrentExercisePa
               ))}
             </div>
           ) : (
-            <p className="mt-5 text-sm text-muted">No sets planned — add sets on the workout page.</p>
+            <p className="mt-5 text-sm text-muted">
+              No sets planned — add sets on the workout page.
+            </p>
           )}
         </div>
       </div>

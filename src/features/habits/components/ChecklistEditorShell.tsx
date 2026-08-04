@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { useT } from '@/hooks/useT'
 
 export interface ChecklistRow {
   id: string
@@ -22,6 +23,7 @@ export function ChecklistEditorShell({
   onRemove,
   addPending,
 }: ChecklistEditorShellProps) {
+  const { t } = useT()
   const [title, setTitle] = useState('')
 
   const handleAdd = () => {
@@ -34,16 +36,14 @@ export function ChecklistEditorShell({
   return (
     <div className="flex flex-col gap-3 rounded-2xl bg-surface p-4">
       <span className="label-mono">
-        Checklist{items.length > 0 ? ` · ${items.length}` : ''}
+        {t('habits.form.checklist')}
+        {items.length > 0 ? ` · ${items.length}` : ''}
       </span>
 
       {items.length > 0 ? (
         <ul className="flex flex-col gap-2">
           {items.map((item) => (
-            <li
-              key={item.id}
-              className="flex items-center gap-2 rounded-tile bg-bg-deep px-3 py-2"
-            >
+            <li key={item.id} className="flex items-center gap-2 rounded-tile bg-bg-deep px-3 py-2">
               <span className="min-w-0 flex-1 truncate text-sm">{item.title}</span>
               <button
                 type="button"
@@ -68,14 +68,14 @@ export function ChecklistEditorShell({
               handleAdd()
             }
           }}
-          placeholder="Add a checklist item"
-          aria-label="New checklist item"
+          placeholder={t('habits.form.checklistPlaceholder')}
+          aria-label={t('habits.form.newItem')}
         />
         <button
           type="button"
           onClick={handleAdd}
           disabled={!title.trim() || addPending}
-          aria-label="Add item"
+          aria-label={t('habits.form.addItem')}
           className="flex h-10 w-10 flex-none items-center justify-center rounded-tile bg-accent/15 text-accent transition-colors hover:bg-accent hover:text-on-accent disabled:opacity-50"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />

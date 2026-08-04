@@ -1,7 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Ban, Check, ChevronLeft, EllipsisVertical, Flag, Loader2, Pause, Play, Timer } from 'lucide-react'
+import {
+  Ban,
+  Check,
+  ChevronLeft,
+  EllipsisVertical,
+  Flag,
+  Loader2,
+  Pause,
+  Play,
+  Timer,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { EmptyState } from '@/components/common/EmptyState'
@@ -125,7 +135,7 @@ function WorkoutSessionPage() {
           <span className="truncate font-mono text-xs font-semibold">{workout.name}</span>
           <span
             className={cn(
-              'flex flex-none items-center gap-1.5 font-mono text-[11px] uppercase tracking-label tabular-nums',
+              'flex flex-none items-center gap-1.5 font-mono text-[11px] uppercase tabular-nums tracking-label',
               running ? 'text-accent' : 'text-muted-strong',
             )}
           >
@@ -254,11 +264,7 @@ function WorkoutSessionPage() {
 
       <Sheet open={menuOpen} onOpenChange={setMenuOpen} title="Session" mono>
         <div className="flex flex-col gap-3">
-          <Button
-            size="lg"
-            disabled={mutations.setCompleted.isPending}
-            onClick={finishWorkout}
-          >
+          <Button size="lg" disabled={mutations.setCompleted.isPending} onClick={finishWorkout}>
             <Flag className="h-4 w-4" />
             Finish workout
           </Button>

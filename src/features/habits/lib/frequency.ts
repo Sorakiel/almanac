@@ -1,24 +1,32 @@
 import { isWeekendKey } from '@/lib/date'
+import type { TFunction } from '@/hooks/useT'
 import type { Habit, HabitTimeOfDay } from '@/features/habits/types'
 
 type FreqHabit = Pick<Habit, 'frequency' | 'target_count'>
 
-/** Human label for a habit's cadence, e.g. "daily" or "every 3 days". */
-export function frequencyLabel(habit: FreqHabit): string {
+/**
+ * Human label for a habit's cadence, e.g. "daily" or "every 3 days".
+ *
+ * `t` is optional so the non-React callers (the admin console's pure
+ * computeUserDetail) keep working in English. Anything rendered to a member
+ * passes it.
+ */
+export function frequencyLabel(habit: FreqHabit, t?: TFunction): string {
+  const n = habit.target_count
   switch (habit.frequency) {
     case 'weekly':
-      return 'weekly'
+      return t ? t('habits.freq.weekly') : 'weekly'
     case 'weekdays':
-      return 'weekdays'
+      return t ? t('habits.freq.weekdays') : 'weekdays'
     case 'x_per_week':
-      return `${habit.target_count}× / wk`
+      return t ? t('habits.freq.xPerWeek', { count: n }) : `${n}× / wk`
     case 'every_n_days':
-      return `every ${habit.target_count} days`
+      return t ? t('habits.freq.everyNDays', { count: n }) : `every ${n} days`
     case 'every_n_weeks':
-      return `every ${habit.target_count} weeks`
+      return t ? t('habits.freq.everyNWeeks', { count: n }) : `every ${n} weeks`
     case 'daily':
     default:
-      return 'daily'
+      return t ? t('habits.freq.daily') : 'daily'
   }
 }
 
@@ -30,8 +38,9 @@ const TIME_OF_DAY_LABELS: Record<HabitTimeOfDay, string> = {
 }
 
 /** Human label for a time-of-day preference; null for the neutral "anytime". */
-export function timeOfDayLabel(value: HabitTimeOfDay): string | null {
-  return value === 'anytime' ? null : TIME_OF_DAY_LABELS[value]
+export function timeOfDayLabel(value: HabitTimeOfDay, t?: TFunction): string | null {
+  if (value === 'anytime') return null
+  return t ? t(`habits.form.times.${value}`) : TIME_OF_DAY_LABELS[value]
 }
 
 /**
