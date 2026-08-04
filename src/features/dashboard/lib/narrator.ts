@@ -1,5 +1,6 @@
 import { STREAK_MILESTONES } from '@/features/habits/lib/milestones'
 import type { HabitWithTodayLog } from '@/features/habits/types'
+import type { TFunction } from '@/hooks/useT'
 import type { InsightLine } from '@/lib/insight'
 
 function nextMilestone(streak: number): number | undefined {
@@ -11,10 +12,14 @@ function nextMilestone(streak: number): number | undefined {
  * habit data already on screen — no network, no LLM. Returned most-actionable
  * first so the narrator can lead with what matters (an at-risk streak) and rotate
  * through the rest.
+ *
+ * `t` is passed in rather than pulled from a hook: this stays a pure function of
+ * (data, language), which is what makes it testable and what lets the caller
+ * re-render it when the language changes.
  */
-export function buildNarratorLines(habits: HabitWithTodayLog[]): InsightLine[] {
+export function buildNarratorLines(habits: HabitWithTodayLog[], t: TFunction): InsightLine[] {
   if (habits.length === 0) {
-    return [{ id: 'empty', text: 'No habits tracked yet — add the first to begin.', tone: 'info' }]
+    return [{ id: 'empty', text: t('narrator.empty'), tone: 'info' }]
   }
 
   const lines: InsightLine[] = []
@@ -30,18 +35,18 @@ export function buildNarratorLines(habits: HabitWithTodayLog[]): InsightLine[] {
   if (atRisk) {
     lines.push({
       id: `risk-${atRisk.id}`,
-      text: `${atRisk.streak}-day run on "${atRisk.name}" is at risk — close it today.`,
+      text: t('narrator.atRisk', { count: atRisk.streak, name: atRisk.name }),
       tone: 'urgent',
     })
   }
 
   // Close to a perfect day, or already there.
   if (due.length > 0 && left === 0) {
-    lines.push({ id: 'perfect', text: 'Every habit closed today. Momentum kept.', tone: 'good' })
+    lines.push({ id: 'perfect', text: t('narrator.perfect'), tone: 'good' })
   } else if (completed > 0 && left > 0 && left <= 2) {
     lines.push({
       id: 'almost',
-      text: `${left} habit${left > 1 ? 's' : ''} from a perfect day.`,
+      text: t('narrator.almost', { count: left }),
       tone: 'good',
     })
   }
@@ -55,7 +60,7 @@ export function buildNarratorLines(habits: HabitWithTodayLog[]): InsightLine[] {
     const days = climbing.next! - climbing.h.streak
     lines.push({
       id: `climb-${climbing.h.id}`,
-      text: `"${climbing.h.name}" is ${days} day${days > 1 ? 's' : ''} from a ${climbing.next}-day streak.`,
+      text: t('narrator.climbing', { count: days, name: climbing.h.name, target: climbing.next! }),
       tone: 'good',
     })
   }
@@ -65,7 +70,7 @@ export function buildNarratorLines(habits: HabitWithTodayLog[]): InsightLine[] {
   if (topStreak && topStreak.streak >= 3) {
     lines.push({
       id: 'top-streak',
-      text: `Longest run going: ${topStreak.streak} days on "${topStreak.name}".`,
+      text: t('narrator.topStreak', { count: topStreak.streak, name: topStreak.name }),
       tone: 'info',
     })
   }
@@ -73,7 +78,7 @@ export function buildNarratorLines(habits: HabitWithTodayLog[]): InsightLine[] {
   // Weekly momentum.
   lines.push({
     id: 'week',
-    text: `Consistency this week is running at ${weekRate}%.`,
+    text: t('narrator.week', { rate: weekRate }),
     tone: weekRate >= 70 ? 'good' : 'info',
   })
 
@@ -84,14 +89,17 @@ export function buildNarratorLines(habits: HabitWithTodayLog[]): InsightLine[] {
   if (strongest && strongest.rate >= 0.6) {
     lines.push({
       id: 'strong',
-      text: `Strongest habit: "${strongest.name}" at ${Math.round(strongest.rate * 100)}%.`,
+      text: t('narrator.strongest', {
+        name: strongest.name,
+        rate: Math.round(strongest.rate * 100),
+      }),
       tone: 'info',
     })
   }
   if (weakest && weakest !== strongest && weakest.rate < 0.4) {
     lines.push({
       id: 'weak',
-      text: `"${weakest.name}" is slipping — ${Math.round(weakest.rate * 100)}% lately.`,
+      text: t('narrator.weakest', { name: weakest.name, rate: Math.round(weakest.rate * 100) }),
       tone: 'info',
     })
   }

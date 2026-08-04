@@ -1,9 +1,11 @@
 import { Card } from '@/components/ui/card'
 import { useDailyQuote } from '@/features/dashboard/hooks/useDailyQuote'
 import { useToday } from '@/hooks/useToday'
+import { useT } from '@/hooks/useT'
 
 /** Rotating daily quote. Renders nothing until a quote is available. */
 export function QuoteCard() {
+  const { t } = useT()
   const { quote, isLoading } = useDailyQuote()
   const { dateKey } = useToday()
 
@@ -22,7 +24,7 @@ export function QuoteCard() {
       <div className="flex flex-col gap-2">
         <blockquote className="text-[15px] italic leading-relaxed">“{quote.text}”</blockquote>
         <p className="label-mono text-muted-strong">
-          — {quote.author ?? 'Unknown'} · {month}.{day}
+          — {quote.author ?? t('dashboard.unknownAuthor')} · {month}.{day}
         </p>
       </div>
     </Card>

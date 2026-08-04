@@ -2,6 +2,7 @@ import { AlmanacNarrator } from '@/features/dashboard/components/AlmanacNarrator
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
 import { TodaySummary } from '@/features/dashboard/components/TodaySummary'
 import type { HabitWithTodayLog } from '@/features/habits/types'
+import { useT } from '@/hooks/useT'
 
 interface DashboardRailProps {
   habits: HabitWithTodayLog[]
@@ -22,6 +23,7 @@ function Row({ label, value, accent }: { label: string; value: string; accent?: 
 
 /** "The Almanac watches your day" — the desktop context rail for Today. */
 export function DashboardRail({ habits }: DashboardRailProps) {
+  const { t } = useT()
   const due = habits.filter((h) => h.dueToday || h.isComplete)
   const completed = due.filter((h) => h.isComplete).length
   const todayPct = due.length ? Math.round((completed / due.length) * 100) : 0
@@ -40,13 +42,13 @@ export function DashboardRail({ habits }: DashboardRailProps) {
 
       <div className="rounded-[18px] border bg-surface p-[18px]">
         <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-          this week
+          {t('dashboard.thisWeek')}
         </p>
         <div className="mt-2 flex flex-col">
-          <Row label="on track" value={`${weekRate}%`} accent />
-          <Row label="today" value={`${todayPct}%`} />
-          <Row label="active habits" value={String(habits.length)} />
-          {strongest ? <Row label="strongest" value={strongest.name} /> : null}
+          <Row label={t('dashboard.onTrack')} value={`${weekRate}%`} accent />
+          <Row label={t('dashboard.today')} value={`${todayPct}%`} />
+          <Row label={t('dashboard.activeHabits')} value={String(habits.length)} />
+          {strongest ? <Row label={t('dashboard.strongest')} value={strongest.name} /> : null}
         </div>
       </div>
     </div>

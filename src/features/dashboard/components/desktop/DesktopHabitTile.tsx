@@ -6,6 +6,7 @@ import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
 import { frequencyLabel } from '@/features/habits/lib/frequency'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
+import { useT } from '@/hooks/useT'
 
 type Tone = 'accent' | 'teal' | 'amber' | 'muted'
 const TONES: Tone[] = ['accent', 'teal', 'amber', 'muted']
@@ -16,6 +17,7 @@ function toneFor(color: string | null): Tone {
 
 /** Desktop dashboard habit tile: bordered panel, one-tap check, category tag. */
 export function DesktopHabitTile({ habit }: { habit: HabitWithTodayLog }) {
+  const { t } = useT()
   const toggle = useToggleHabit()
 
   const handleToggle = () => {
@@ -23,7 +25,7 @@ export function DesktopHabitTile({ habit }: { habit: HabitWithTodayLog }) {
       { habit },
       {
         onError: (error) =>
-          toast.error(error instanceof Error ? error.message : 'Could not update habit'),
+          toast.error(error instanceof Error ? error.message : t('dashboard.habitUpdateFailed')),
       },
     )
   }

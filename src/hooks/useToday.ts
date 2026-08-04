@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { browserTimezone, formatLongDate } from '@/lib/date'
 import { setDayClockTimezone, useDayKey } from '@/hooks/useDayKey'
 import { useProfile } from '@/features/settings/hooks/useProfile'
+import { useLocaleStore } from '@/stores/locale'
 
 interface Today {
   /** IANA timezone used to derive the local day. */
@@ -26,6 +27,7 @@ export function useToday(): Today {
   const { profile } = useProfile()
   const timezone = profile?.timezone ?? browserTimezone()
   const dateKey = useDayKey(timezone)
+  const locale = useLocaleStore((s) => s.locale)
 
   // Keep the shared clock's midnight alarm on the user's real zone, not the
   // device's — they differ whenever someone travels or overrides it in settings.
@@ -37,8 +39,8 @@ export function useToday(): Today {
     () => ({
       timezone,
       dateKey,
-      longDate: formatLongDate(timezone),
+      longDate: formatLongDate(timezone, new Date(), locale === 'ru' ? 'ru-RU' : 'en-GB'),
     }),
-    [timezone, dateKey],
+    [timezone, dateKey, locale],
   )
 }

@@ -4,6 +4,7 @@ import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { TodaySummary } from '@/features/dashboard/components/TodaySummary'
 import { useFocusStore } from '@/stores/focus'
 import type { HabitWithTodayLog } from '@/features/habits/types'
+import { useT } from '@/hooks/useT'
 
 interface NowBlockProps {
   habits: HabitWithTodayLog[]
@@ -15,6 +16,7 @@ interface NowBlockProps {
  * reading) land they can surface here too.
  */
 export function NowBlock({ habits }: NowBlockProps) {
+  const { t } = useT()
   const { endsAt, durationMin, label } = useFocusStore()
   const running = endsAt !== null && durationMin !== null
   const [now, setNow] = useState(() => Date.now())
@@ -49,7 +51,9 @@ export function NowBlock({ habits }: NowBlockProps) {
             {minLeft} min left
           </span>
         </div>
-        <p className="truncate text-lg font-semibold tracking-title">{label ?? 'Focus session'}</p>
+        <p className="truncate text-lg font-semibold tracking-title">
+          {label ?? t('dashboard.focusSession')}
+        </p>
         <ProgressBlocks
           value={Math.round(elapsedMin * 10)}
           total={durationMin * 10}

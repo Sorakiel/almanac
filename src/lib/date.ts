@@ -83,8 +83,14 @@ export function msUntilDailyTime(
 }
 
 /** Human-friendly long date, e.g. "Monday, 8 July". */
-export function formatLongDate(timezone: string, instant: Date = new Date()): string {
-  return new Intl.DateTimeFormat('en-GB', {
+export function formatLongDate(
+  timezone: string,
+  instant: Date = new Date(),
+  // 'en-GB' rather than 'en': day-before-month is the layout the header is
+  // designed around, and it is what Russian does too.
+  locale: string = 'en-GB',
+): string {
+  return new Intl.DateTimeFormat(locale, {
     timeZone: timezone,
     weekday: 'long',
     day: 'numeric',

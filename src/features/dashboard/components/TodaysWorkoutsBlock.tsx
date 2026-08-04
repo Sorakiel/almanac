@@ -11,18 +11,20 @@ import { useWorkoutMutations } from '@/features/workouts/hooks/useWorkoutMutatio
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import { useModulesStore } from '@/stores/modules'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 function Row({ item }: { item: DueWorkout }) {
   const { toggleComplete } = useWorkoutMutations()
+  const { t } = useT()
   const { workout, doneToday } = item
-  const label = recurrenceLabel(workout) ?? 'Scheduled today'
+  const label = recurrenceLabel(workout) ?? t('dashboard.scheduledToday')
 
   const toggle = () =>
     toggleComplete.mutate(
       { id: workout.id, done: !doneToday },
       {
         onError: (error) =>
-          toast.error(error instanceof Error ? error.message : 'Could not update the workout'),
+          toast.error(error instanceof Error ? error.message : t('dashboard.workoutUpdateFailed')),
       },
     )
 
@@ -33,7 +35,11 @@ function Row({ item }: { item: DueWorkout }) {
         onToggle={toggle}
         tone="teal"
         size="md"
-        aria-label={doneToday ? `Mark ${workout.name} not done` : `Mark ${workout.name} done`}
+        aria-label={
+          doneToday
+            ? t('dashboard.markWorkoutNotDone', { name: workout.name })
+            : t('dashboard.markWorkoutDone', { name: workout.name })
+        }
       />
       <IconTile icon={Dumbbell} tone="bg-teal/15 text-teal" />
       <Link to={`/train/${workout.id}`} className="min-w-0 flex-1">
@@ -42,13 +48,14 @@ function Row({ item }: { item: DueWorkout }) {
         </p>
         <p className="truncate text-sm text-muted">{label}</p>
       </Link>
-      {doneToday ? <Tag tone="teal">done</Tag> : null}
+      {doneToday ? <Tag tone="teal">{t('dashboard.done')}</Tag> : null}
     </Card>
   )
 }
 
 /** Dashboard block: workouts scheduled for today. Hidden when nothing's due. */
 export function TodaysWorkoutsBlock() {
+  const { t } = useT()
   const workoutsEnabled = useModulesStore((s) => s.enabled.workouts)
   const { due } = useTodaysWorkouts()
   // Don't leak training onto the dashboard when the module is switched off.
@@ -58,7 +65,9 @@ export function TodaysWorkoutsBlock() {
 
   return (
     <section className="flex flex-col gap-2">
-      <SectionLabel accessory={`${doneCount} / ${due.length} done`}>TODAY · TRAINING</SectionLabel>
+      <SectionLabel accessory={t('dashboard.doneOf', { done: doneCount, total: due.length })}>
+        {t('dashboard.todayTraining')}
+      </SectionLabel>
       <div className="flex flex-col gap-3">
         {due.map((item) => (
           <Row key={item.workout.id} item={item} />
