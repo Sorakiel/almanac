@@ -68,7 +68,16 @@ export function Providers({ children }: ProvidersProps) {
   }, [setSession])
 
   return (
-    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={persistOptions}
+      // Restored data is shown immediately but never trusted: the snapshot on
+      // disk is throttled, so a reload seconds after a change would otherwise
+      // render the pre-change state and — being inside `staleTime` — refuse to
+      // refetch it. Invalidating on restore makes this stale-while-revalidate.
+      // Offline the refetch simply fails and the cached screen stays put.
+      onSuccess={() => queryClient.invalidateQueries()}
+    >
       {children}
       <Toaster theme={theme === 'coffee' ? 'light' : 'dark'} position="top-center" richColors />
     </PersistQueryClientProvider>
