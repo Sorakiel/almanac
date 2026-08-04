@@ -472,6 +472,7 @@ export type Database = {
           reminder_enabled: boolean
           reminder_hour: number
           reminder_minute: number
+          reminder_sent_on: string | null
           role: Database["public"]["Enums"]["user_role"]
           timezone: string
         }
@@ -484,6 +485,7 @@ export type Database = {
           reminder_enabled?: boolean
           reminder_hour?: number
           reminder_minute?: number
+          reminder_sent_on?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           timezone?: string
         }
@@ -496,6 +498,7 @@ export type Database = {
           reminder_enabled?: boolean
           reminder_hour?: number
           reminder_minute?: number
+          reminder_sent_on?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           timezone?: string
         }

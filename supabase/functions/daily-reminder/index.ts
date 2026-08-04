@@ -1,8 +1,14 @@
 // Almanac daily reminder — Web Push.
 //
-// Invoke this hourly (see README.md for the pg_cron schedule). On each run it
-// finds users whose local hour now equals their chosen reminder_hour, still
-// have daily habits left to finish today, and pushes them a nudge.
+// Invoke this every five minutes (see README.md for the pg_cron schedule). On
+// each run it finds users whose local time has just passed the reminder time
+// they chose, still have daily habits left to finish today, and pushes them a
+// nudge.
+//
+// It used to run hourly and compare only the hour, which quietly discarded the
+// minute the user picked in Settings: 13:25 fired at 13:00. Matching a window
+// means a user can qualify on more than one tick, so `profiles.reminder_sent_on`
+// caps it at one nudge per local day.
 //
 // This used to send email through Resend. Resend will only deliver from a
 // verified domain, there is no domain, and buying one isn't on the table — so
@@ -26,7 +32,12 @@ interface ReminderProfile {
   id: string
   timezone: string
   reminder_hour: number
+  reminder_minute: number
+  reminder_sent_on: string | null
 }
+
+/** How wide a window a single cron tick covers, in minutes. */
+const TICK_MINUTES = 5
 
 interface StoredSubscription {
   id: string
@@ -35,15 +46,28 @@ interface StoredSubscription {
   auth: string
 }
 
-/** The hour (0–23) it is right now in the given IANA timezone. */
-function localHour(timezone: string): number {
+/** Minutes since local midnight in the given IANA timezone. */
+function localMinutes(timezone: string): number {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: timezone,
     hour: 'numeric',
+    minute: 'numeric',
     hour12: false,
   }).formatToParts(new Date())
-  const hour = parts.find((p) => p.type === 'hour')?.value ?? '0'
-  return Number(hour) % 24
+  const hour = Number(parts.find((p) => p.type === 'hour')?.value ?? '0') % 24
+  const minute = Number(parts.find((p) => p.type === 'minute')?.value ?? '0')
+  return hour * 60 + minute
+}
+
+/**
+ * Whether `now` has just passed the chosen time, within one cron tick.
+ *
+ * Deliberately "at or just after", never "just before": a reminder that arrives
+ * early is a reminder for a time the user did not pick.
+ */
+function isDue(nowMinutes: number, target: number): boolean {
+  const delta = nowMinutes - target
+  return delta >= 0 && delta < TICK_MINUTES
 }
 
 /** Today's calendar date (YYYY-MM-DD) in the given timezone. */
@@ -79,7 +103,7 @@ Deno.serve(async () => {
 
   const { data: profiles, error } = await supabase
     .from('profiles')
-    .select('id, timezone, reminder_hour')
+    .select('id, timezone, reminder_hour, reminder_minute, reminder_sent_on')
     .eq('reminder_enabled', true)
   if (error) {
     console.error('profiles query failed', error)
@@ -91,7 +115,10 @@ Deno.serve(async () => {
 
   for (const profile of (profiles ?? []) as ReminderProfile[]) {
     const timezone = profile.timezone || 'UTC'
-    if (localHour(timezone) !== profile.reminder_hour) continue
+    const today = localDateKey(timezone)
+    if (profile.reminder_sent_on === today) continue
+    const target = profile.reminder_hour * 60 + (profile.reminder_minute ?? 0)
+    if (!isDue(localMinutes(timezone), target)) continue
 
     // Count active daily habits vs. those already logged today. We limit the
     // "due" check to daily habits to keep the cadence logic simple — a nudge,
@@ -105,7 +132,6 @@ Deno.serve(async () => {
     const habitIds = (habits ?? []).map((h) => h.id)
     if (habitIds.length === 0) continue
 
-    const today = localDateKey(timezone)
     const { data: logs } = await supabase
       .from('habit_logs')
       .select('habit_id')
@@ -130,6 +156,10 @@ Deno.serve(async () => {
       url: appUrl,
       tag: 'almanac-daily-reminder',
     })
+
+    // Stamp before sending: a push that fails is not worth retrying every five
+    // minutes for the rest of the day.
+    await supabase.from('profiles').update({ reminder_sent_on: today }).eq('id', profile.id)
 
     for (const sub of subscriptions as StoredSubscription[]) {
       try {
