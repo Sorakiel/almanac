@@ -11,6 +11,7 @@ import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habit
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
+import { useT } from '@/hooks/useT'
 
 interface HabitCardProps {
   habit: HabitWithTodayLog
@@ -18,11 +19,12 @@ interface HabitCardProps {
 
 /** Rich habits-list card: icon, history stat, sparkline, one-tap check. */
 export function HabitCard({ habit }: HabitCardProps) {
+  const { t } = useT()
   const navigate = useNavigate()
   const toggle = useToggleHabit()
   const color = resolveHabitColor(habit.color)
   const Icon = resolveHabitIcon(habit.icon)
-  const timeLabel = timeOfDayLabel(habit.time_of_day)
+  const timeLabel = timeOfDayLabel(habit.time_of_day, t)
   // Resting = an interval/weekday habit that isn't due today and isn't done —
   // it's locked and struck through until its next due date.
   const resting = !habit.isComplete && !habit.dueToday
@@ -32,7 +34,7 @@ export function HabitCard({ habit }: HabitCardProps) {
       ? habit.dueInDays > 0
         ? `resting · in ${habit.dueInDays}d`
         : 'resting'
-      : frequencyLabel(habit),
+      : frequencyLabel(habit, t),
     timeLabel,
   ]
     .filter(Boolean)
@@ -43,7 +45,7 @@ export function HabitCard({ habit }: HabitCardProps) {
       { habit },
       {
         onError: (error) =>
-          toast.error(error instanceof Error ? error.message : 'Could not update habit'),
+          toast.error(error instanceof Error ? error.message : t('habits.updateFailed')),
       },
     )
   }
@@ -78,14 +80,15 @@ export function HabitCard({ habit }: HabitCardProps) {
 
       <div className="mt-auto flex items-end justify-between gap-3 pt-3">
         <span className="label-mono normal-case tracking-normal">
-          <span className="tabular-nums">{habit.completedRecent}</span> of last {habit.windowDays}
+          <span className="tabular-nums">{habit.completedRecent}</span>{' '}
+          {t('habits.ofLastDays', { count: habit.windowDays })}
           {' · '}
           <span className="text-accent">{Math.round(habit.rate * 100)}%</span>
           {habit.streak > 0 ? <StreakBadge streak={habit.streak} atRisk={habit.atRisk} /> : null}
           {habit.frozenToday && !habit.isComplete ? (
             <span
               className="ml-1 inline-flex items-center gap-0.5 align-middle text-teal"
-              title="Today is frozen — your streak is safe"
+              title={t('habits.frozenSafe')}
             >
               <span aria-hidden="true">· </span>
               <Snowflake className="h-3 w-3" aria-hidden="true" />
@@ -106,13 +109,14 @@ interface StreakBadgeProps {
 
 /** Inline flame + day count. Glows on the accent when the streak is at risk. */
 export function StreakBadge({ streak, atRisk }: StreakBadgeProps) {
+  const { t } = useT()
   return (
     <span
       className={cn(
         'ml-1 inline-flex items-center gap-0.5 align-middle tabular-nums',
         atRisk ? 'text-accent' : 'text-muted-strong',
       )}
-      title={atRisk ? 'Streak at risk — finish today to keep it' : `${streak}-day streak`}
+      title={atRisk ? t('habits.streakAtRisk') : t('habits.streakDays', { count: streak })}
     >
       <span aria-hidden="true">· </span>
       <StreakFlame streak={streak} atRisk={atRisk} />

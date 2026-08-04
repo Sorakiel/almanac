@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import type { DayStatus } from '@/features/habits/lib/schedule'
+import { useT } from '@/hooks/useT'
 
 interface HeatmapDay {
   date: string
@@ -70,6 +71,7 @@ const WAVE_MAX = 520
  * so the grid scrolls horizontally, pinned to the newest week.
  */
 export function HabitHeatmap({ days, createdKey, fill = false }: HabitHeatmapProps) {
+  const { t } = useT()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState<HeatmapDay | null>(null)
 
@@ -132,10 +134,10 @@ export function HabitHeatmap({ days, createdKey, fill = false }: HabitHeatmapPro
         </p>
       ) : (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-          <LegendKey className="bg-accent" label="done" />
-          <LegendKey className="bg-teal/20" label="rest" />
-          <LegendKey className="bg-foreground/15" label="missed" />
-          {hasFrozen ? <LegendKey className="bg-teal/70" label="frozen" /> : null}
+          <LegendKey className="bg-accent" label={t('habits.legendDone')} />
+          <LegendKey className="bg-teal/20" label={t('habits.legendRest')} />
+          <LegendKey className="bg-foreground/15" label={t('habits.legendMissed')} />
+          {hasFrozen ? <LegendKey className="bg-teal/70" label={t('habits.legendFrozen')} /> : null}
         </div>
       )}
     </div>

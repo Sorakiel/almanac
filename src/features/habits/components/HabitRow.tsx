@@ -6,6 +6,7 @@ import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
 import { frequencyLabel } from '@/features/habits/lib/frequency'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
+import { useT } from '@/hooks/useT'
 
 interface HabitRowProps {
   habit: HabitWithTodayLog
@@ -13,6 +14,7 @@ interface HabitRowProps {
 
 /** Compact one-tap row used in the dashboard's "today's habits" list. */
 export function HabitRow({ habit }: HabitRowProps) {
+  const { t } = useT()
   const toggle = useToggleHabit()
 
   const handleToggle = () => {
@@ -20,7 +22,7 @@ export function HabitRow({ habit }: HabitRowProps) {
       { habit },
       {
         onError: (error) =>
-          toast.error(error instanceof Error ? error.message : 'Could not update habit'),
+          toast.error(error instanceof Error ? error.message : t('habits.updateFailed')),
       },
     )
   }
@@ -42,7 +44,7 @@ export function HabitRow({ habit }: HabitRowProps) {
       {resting ? (
         <Tag tone="muted">{habit.dueInDays > 0 ? `in ${habit.dueInDays}d` : 'rest'}</Tag>
       ) : (
-        <Tag>{frequencyLabel(habit)}</Tag>
+        <Tag>{frequencyLabel(habit, t)}</Tag>
       )}
     </div>
   )

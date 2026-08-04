@@ -13,24 +13,28 @@ import { riseStagger } from '@/lib/motion'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useUiStore } from '@/stores/ui'
 import type { HabitFrequency } from '@/features/habits/types'
+import { useT } from '@/hooks/useT'
 
-const FILTERS: { value: HabitFrequency | 'all'; label: string }[] = [
-  { value: 'all', label: 'all' },
-  { value: 'daily', label: 'daily' },
-  { value: 'weekdays', label: 'weekdays' },
-  { value: 'weekly', label: 'weekly' },
-  { value: 'x_per_week', label: 'n× / wk' },
-  { value: 'every_n_days', label: 'every n days' },
-  { value: 'every_n_weeks', label: 'every n weeks' },
+/** Frequency filters, in cycle order. Labels come from `habits.filters.*`. */
+const FILTERS: { value: HabitFrequency | 'all' }[] = [
+  { value: 'all' },
+  { value: 'daily' },
+  { value: 'weekdays' },
+  { value: 'weekly' },
+  { value: 'x_per_week' },
+  { value: 'every_n_days' },
+  { value: 'every_n_weeks' },
 ]
 
 function HabitsPage() {
+  const { t } = useT()
   const { habits, isLoading, isError, refetch } = useHabits()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
   const [filterIndex, setFilterIndex] = useState(0)
   const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   const filter = FILTERS[filterIndex]!
+  const filterLabel = t(`habits.filters.${filter.value}`)
   const visible =
     filter.value === 'all' ? habits : habits.filter((h) => h.frequency === filter.value)
   const stagger = riseStagger()
@@ -59,17 +63,17 @@ function HabitsPage() {
     <section className="flex flex-col gap-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="label-mono">// {habits.length} active</p>
-          <h1 className="mt-1 text-2xl">Habits</h1>
+          <p className="label-mono">// {t('habits.activeCount', { count: habits.length })}</p>
+          <h1 className="mt-1 text-2xl">{t('habits.title')}</h1>
         </div>
         {habits.length > 0 ? (
           <button
             type="button"
             onClick={() => setFilterIndex((i) => (i + 1) % FILTERS.length)}
-            aria-label={`Filter by frequency: ${filter.label}. Tap for next filter.`}
+            aria-label={t('habits.filterAria', { name: filterLabel })}
             className="rounded-pill border px-3 py-2 font-mono text-[10px] tracking-label text-muted transition-colors hover:text-foreground"
           >
-            ◇ {filter.label} ‹›
+            ◇ {filterLabel} ‹›
           </button>
         ) : null}
       </header>
@@ -77,28 +81,28 @@ function HabitsPage() {
       {isLoading ? (
         <div className="flex justify-center py-16" role="status" aria-live="polite">
           <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-          <span className="sr-only">Loading habits…</span>
+          <span className="sr-only">{t('habits.loading')}</span>
         </div>
       ) : isError ? (
         <EmptyState
           icon={RefreshCw}
-          title="Couldn't load your habits"
-          description="Something went wrong reaching the server."
+          title={t('habits.loadFailed')}
+          description={t('habits.loadFailedHint')}
           action={
             <Button size="sm" variant="surface" onClick={refetch}>
-              Try again
+              {t('habits.tryAgain')}
             </Button>
           }
         />
       ) : habits.length === 0 ? (
         <EmptyState
           icon={ListChecks}
-          title="No habits yet"
-          description="Create your first habit to start a streak."
+          title={t('habits.emptyTitle')}
+          description={t('habits.emptyHint')}
           action={
             <Button size="sm" onClick={openNewHabit}>
               <Plus className="h-4 w-4" />
-              Add habit
+              {t('habits.addHabit')}
             </Button>
           }
         />
@@ -108,8 +112,8 @@ function HabitsPage() {
           <TodayProgress habits={habits} />
           {visible.length === 0 ? (
             <EmptyState
-              title={`Nothing matches "${filter.label}"`}
-              description="Tap the filter pill to cycle to another frequency."
+              title={t('habits.noneMatch', { name: filterLabel })}
+              description={t('habits.filterHintMobile')}
             />
           ) : (
             <ul className="flex flex-col gap-3">
@@ -125,7 +129,7 @@ function HabitsPage() {
           )}
           <Button size="lg" onClick={openNewHabit} className="w-full shadow-glow">
             <Plus className="h-4 w-4" />
-            New habit
+            {t('habits.newHabit')}
           </Button>
         </>
       )}

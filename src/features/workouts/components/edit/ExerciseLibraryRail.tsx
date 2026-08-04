@@ -103,7 +103,9 @@ export function ExerciseLibraryRail({
                 onClick={() => setMuscle(active ? null : m)}
                 className={cn(
                   'rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-label transition-colors',
-                  active ? 'border-accent bg-accent text-on-accent' : 'text-muted hover:text-foreground',
+                  active
+                    ? 'border-accent bg-accent text-on-accent'
+                    : 'text-muted hover:text-foreground',
                 )}
               >
                 {m}
@@ -120,10 +122,7 @@ export function ExerciseLibraryRail({
           </p>
         ) : (
           filtered.map((e) => (
-            <div
-              key={e.id}
-              className="flex items-center gap-3 rounded-2xl border bg-surface p-3"
-            >
+            <div key={e.id} className="flex items-center gap-3 rounded-2xl border bg-surface p-3">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[14px] font-semibold">{e.name}</p>
                 {e.muscle_group ? (

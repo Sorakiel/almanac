@@ -42,10 +42,7 @@ export function WeekStrip({ days, selectedKey, onSelect }: WeekStripProps) {
               )}
             >
               <span
-                className={cn(
-                  'text-base font-semibold tabular-nums',
-                  selected && 'text-accent',
-                )}
+                className={cn('text-base font-semibold tabular-nums', selected && 'text-accent')}
               >
                 {day.dayOfMonth}
               </span>

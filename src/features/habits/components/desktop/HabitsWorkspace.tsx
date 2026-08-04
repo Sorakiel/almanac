@@ -5,13 +5,14 @@ import { HabitCard } from '@/features/habits/components/HabitCard'
 import { riseStagger } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 import type { HabitFrequency, HabitWithTodayLog } from '@/features/habits/types'
+import { useT } from '@/hooks/useT'
 
 interface HabitsWorkspaceProps {
   habits: HabitWithTodayLog[]
   isLoading: boolean
   isError: boolean
   refetch: () => void
-  filters: { value: HabitFrequency | 'all'; label: string }[]
+  filters: { value: HabitFrequency | 'all' }[]
   filterIndex: number
   onFilter: (index: number) => void
   onNew: () => void
@@ -28,7 +29,9 @@ export function HabitsWorkspace({
   onFilter,
   onNew,
 }: HabitsWorkspaceProps) {
+  const { t } = useT()
   const filter = filters[filterIndex]!
+  const filterLabel = t(`habits.filters.${filter.value}`)
   const visible =
     filter.value === 'all' ? habits : habits.filter((h) => h.frequency === filter.value)
   const stagger = riseStagger()
@@ -37,12 +40,12 @@ export function HabitsWorkspace({
     <div className="mx-auto max-w-[900px]">
       <header className="flex items-start justify-between">
         <div>
-          <p className="label-mono">// {habits.length} active</p>
-          <h1 className="mt-1.5 text-[40px] leading-none tracking-title">Habits</h1>
+          <p className="label-mono">// {t('habits.activeCount', { count: habits.length })}</p>
+          <h1 className="mt-1.5 text-[40px] leading-none tracking-title">{t('habits.title')}</h1>
         </div>
         <Button onClick={onNew} className="rounded-[13px] shadow-glow">
           <Plus className="h-4 w-4" />
-          New habit
+          {t('habits.newHabit')}
         </Button>
       </header>
 
@@ -61,7 +64,7 @@ export function HabitsWorkspace({
                   : 'border text-muted hover:text-foreground',
               )}
             >
-              {f.label}
+              {t(`habits.filters.${f.value}`)}
             </button>
           ))}
         </div>
@@ -70,17 +73,17 @@ export function HabitsWorkspace({
       {isLoading ? (
         <div className="flex justify-center py-24" role="status" aria-live="polite">
           <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-          <span className="sr-only">Loading habits…</span>
+          <span className="sr-only">{t('habits.loading')}</span>
         </div>
       ) : isError ? (
         <div className="mt-6">
           <EmptyState
             icon={RefreshCw}
-            title="Couldn't load your habits"
-            description="Something went wrong reaching the server."
+            title={t('habits.loadFailed')}
+            description={t('habits.loadFailedHint')}
             action={
               <Button size="sm" variant="surface" onClick={refetch}>
-                Try again
+                {t('habits.tryAgain')}
               </Button>
             }
           />
@@ -89,12 +92,12 @@ export function HabitsWorkspace({
         <div className="mt-6">
           <EmptyState
             icon={ListChecks}
-            title="No habits yet"
-            description="Create your first habit to start a streak."
+            title={t('habits.emptyTitle')}
+            description={t('habits.emptyHint')}
             action={
               <Button size="sm" onClick={onNew}>
                 <Plus className="h-4 w-4" />
-                Add habit
+                {t('habits.addHabit')}
               </Button>
             }
           />
@@ -102,8 +105,8 @@ export function HabitsWorkspace({
       ) : visible.length === 0 ? (
         <div className="mt-6">
           <EmptyState
-            title={`Nothing matches "${filter.label}"`}
-            description="Pick another frequency above."
+            title={t('habits.noneMatch', { name: filterLabel })}
+            description={t('habits.filterHintDesktop')}
           />
         </div>
       ) : (
