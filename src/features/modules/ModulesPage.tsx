@@ -11,6 +11,7 @@ import { ModulesRail } from '@/features/modules/components/ModulesRail'
 import { FeedbackSheet } from '@/features/modules/components/FeedbackSheet'
 import { NAV_MODULES, useModulesStore, type ModuleKey } from '@/stores/modules'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface SoonModule {
   title: string
@@ -35,6 +36,7 @@ const SOON: SoonModule[] = [
 ]
 
 function ModulesPage() {
+  const { t } = useT()
   const navigate = useNavigate()
   const enabled = useModulesStore((s) => s.enabled)
   const toggle = useModulesStore((s) => s.toggle)
@@ -69,7 +71,7 @@ function ModulesPage() {
                     <button
                       type="button"
                       onClick={() => navigate(m.to)}
-                      aria-label={`Open ${m.label}`}
+                      aria-label={t('nav.openModule', { name: t(`modules.${m.key}.label`) })}
                       className="absolute inset-0 z-0 rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
                     />
                     <div className="flex items-start justify-between">
@@ -82,14 +84,16 @@ function ModulesPage() {
                           <Switch
                             checked={on}
                             onCheckedChange={() => toggle(m.key)}
-                            aria-label={`Show ${m.label} in navigation`}
+                            aria-label={t('nav.showInNav', { name: t(`modules.${m.key}.label`) })}
                           />
                         )}
                       </div>
                     </div>
                     <div className="mt-3">
-                      <p className="font-semibold">{m.label}</p>
-                      <p className="mt-0.5 text-[13px] text-muted">{m.description}</p>
+                      <p className="font-semibold">{t(`modules.${m.key}.label`)}</p>
+                      <p className="mt-0.5 text-[13px] text-muted">
+                        {t(`modules.${m.key}.description`)}
+                      </p>
                     </div>
                   </div>
                 )

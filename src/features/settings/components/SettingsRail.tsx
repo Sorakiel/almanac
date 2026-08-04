@@ -1,9 +1,9 @@
-import { format } from 'date-fns'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useSession } from '@/hooks/useSession'
+import { useT } from '@/hooks/useT'
 import { browserTimezone } from '@/lib/date'
 import { APP_VERSION } from '@/lib/version'
 
@@ -18,18 +18,29 @@ function Row({ label, value }: { label: string; value: string }) {
 
 /** Desktop Settings context rail: Almanac identity + account meta. */
 export function SettingsRail() {
+  const { t, locale } = useT()
   const { user } = useSession()
   const { profile } = useProfile()
   const { logOut } = useAuthActions()
 
-  const joined = user?.created_at ? format(new Date(user.created_at), 'MMM yyyy') : '—'
-  const role = profile?.role === 'owner' ? 'Owner' : profile?.role === 'admin' ? 'Admin' : 'Member'
+  // Month names have to follow the interface language, not the build locale.
+  const joined = user?.created_at
+    ? new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' }).format(
+        new Date(user.created_at),
+      )
+    : '—'
+  const role =
+    profile?.role === 'owner'
+      ? t('rail.owner')
+      : profile?.role === 'admin'
+        ? t('rail.admin')
+        : t('rail.member')
 
   const handleSignOut = async () => {
     try {
       await logOut.mutateAsync()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not sign out')
+      toast.error(error instanceof Error ? error.message : t('errors.signOut'))
     }
   }
 
@@ -44,22 +55,24 @@ export function SettingsRail() {
         </span>
         <div>
           <p className="text-[15px] font-semibold">The Almanac</p>
-          <p className="font-mono text-[10px] text-muted-strong">v{APP_VERSION} · command center</p>
+          <p className="font-mono text-[10px] text-muted-strong">
+            v{APP_VERSION} · {t('rail.commandCenter')}
+          </p>
         </div>
       </div>
 
       <div className="rounded-[18px] border bg-surface p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">account</p>
+        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
+          {t('rail.account')}
+        </p>
         <div className="mt-2 flex flex-col">
-          <Row label="role" value={role} />
-          <Row label="joined" value={joined} />
-          <Row label="timezone" value={browserTimezone()} />
+          <Row label={t('rail.role')} value={role} />
+          <Row label={t('rail.joined')} value={joined} />
+          <Row label={t('rail.timezone')} value={browserTimezone()} />
         </div>
       </div>
 
-      <p className="px-1 text-[13px] italic leading-relaxed text-muted">
-        Discipline is a practice, not a destination.
-      </p>
+      <p className="px-1 text-[13px] italic leading-relaxed text-muted">{t('rail.motto')}</p>
 
       <Button
         variant="outline"
@@ -67,7 +80,7 @@ export function SettingsRail() {
         onClick={handleSignOut}
         disabled={logOut.isPending}
       >
-        Sign out
+        {t('settings.signOut')}
       </Button>
     </div>
   )

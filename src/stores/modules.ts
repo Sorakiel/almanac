@@ -18,6 +18,11 @@ export type ModuleKey =
 /** Nav metadata, in display order. The nav renders enabled entries. */
 export interface NavModule {
   key: ModuleKey
+  /**
+   * English label, kept so a non-React caller can still name a module. The nav
+   * and the hub render `t(\`modules.\${key}.label\`)` instead — the dictionary is
+   * the display source, this is the fallback identity.
+   */
   label: string
   /** Lucide icon — the single source of truth shared by the nav and modules hub. */
   icon: LucideIcon

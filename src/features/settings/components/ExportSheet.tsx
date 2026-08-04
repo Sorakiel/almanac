@@ -2,6 +2,7 @@ import { FileJson, FileSpreadsheet, Loader2 } from 'lucide-react'
 import { Sheet } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { useExportData, type ExportFormat } from '@/features/settings/hooks/useExportData'
+import { useT } from '@/hooks/useT'
 
 interface ExportSheetProps {
   open: boolean
@@ -14,6 +15,7 @@ interface ExportSheetProps {
  * put it in a spreadsheet".
  */
 export function ExportSheet({ open, onOpenChange }: ExportSheetProps) {
+  const { t } = useT()
   const exportData = useExportData()
   const pending = exportData.isPending
   const running = pending ? exportData.variables : undefined
@@ -26,30 +28,27 @@ export function ExportSheet({ open, onOpenChange }: ExportSheetProps) {
     <Sheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Export data"
-      description="Your data is yours. Download a copy at any time."
+      title={t('export.title')}
+      description={t('export.description')}
     >
       <div className="flex flex-col gap-3">
         <Option
           icon={running === 'json' ? Loader2 : FileJson}
           spinning={running === 'json'}
-          title="Full archive · JSON"
-          hint="Every habit, log, workout, book, note and reflection on this account."
+          title={t('export.jsonTitle')}
+          hint={t('export.jsonHint')}
           disabled={pending}
           onClick={() => run('json')}
         />
         <Option
           icon={running === 'csv' ? Loader2 : FileSpreadsheet}
           spinning={running === 'csv'}
-          title="Habit log · CSV"
-          hint="One row per check-off — date, habit, count, note. Opens in any spreadsheet."
+          title={t('export.csvTitle')}
+          hint={t('export.csvHint')}
           disabled={pending}
           onClick={() => run('csv')}
         />
-        <p className="text-xs text-muted">
-          The file is built in your browser and never leaves the device unless you send it
-          somewhere.
-        </p>
+        <p className="text-xs text-muted">{t('export.localNote')}</p>
       </div>
     </Sheet>
   )
