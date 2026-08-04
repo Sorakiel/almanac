@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // Single source of truth for the app version: the Tauri bundle config, which is
 // also what the updater compares against. Baked into the SPA at build time so
@@ -12,7 +13,24 @@ const appVersion: string = JSON.parse(
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      // injectManifest, not generateSW: the worker already existed for Web Push
+      // and hand-writing it keeps those handlers under review rather than
+      // regenerating them. `sw.js` at the root is the path push.ts registers.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      registerType: 'autoUpdate',
+      injectRegister: null, // push.ts registers it — one registration, not two
+      manifest: false, // public/manifest.webmanifest is hand-written (RET-2)
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+      },
+      devOptions: { enabled: false },
+    }),
+  ],
   define: {
     __APP_VERSION__: JSON.stringify(appVersion),
   },
