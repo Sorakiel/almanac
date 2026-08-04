@@ -1,7 +1,7 @@
 # daily-reminder edge function
 
 Pushes users a nudge when they still have daily habits left to complete, at the
-local hour they chose in **Settings → Daily reminder**.
+local time they chose in **Settings → Daily reminder** — hour _and_ minute.
 
 It runs with the service-role key (bypasses RLS) and delivers over **Web Push**.
 
@@ -63,8 +63,9 @@ Deployed on **staging** and verified as far as the environment allows:
    supabase functions deploy daily-reminder
    ```
 
-5. **Schedule it hourly** so each user's chosen hour is checked. Run once in the
-   Supabase SQL editor, replacing `<PROJECT_REF>` and `<ANON_OR_SERVICE_KEY>`:
+5. **Schedule it every five minutes** so each user's chosen time is checked.
+   Hourly would silently round everyone's reminder down to `:00`. Run once in
+   the Supabase SQL editor, replacing `<PROJECT_REF>` and `<ANON_OR_SERVICE_KEY>`:
 
    ```sql
    create extension if not exists pg_cron;
@@ -72,7 +73,7 @@ Deployed on **staging** and verified as far as the environment allows:
 
    select cron.schedule(
      'almanac-daily-reminder',
-     '0 * * * *',  -- top of every hour (UTC)
+     '*/5 * * * *',  -- every five minutes
      $$
      select net.http_post(
        url     := 'https://<PROJECT_REF>.functions.supabase.co/daily-reminder',
@@ -82,8 +83,10 @@ Deployed on **staging** and verified as far as the environment allows:
    );
    ```
 
-   The function decides who to notify from each profile's timezone +
-   `reminder_hour`, so an hourly tick is all it needs.
+   The function decides who to notify from each profile's timezone and reminder
+   time, firing when local time has just passed it (never before). Because a
+   user can qualify on more than one tick, `profiles.reminder_sent_on` caps it at
+   one nudge per local day.
 
 ## Test it
 
