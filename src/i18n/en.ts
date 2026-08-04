@@ -770,6 +770,8 @@ export const en = {
     exportData: 'Export data',
     runInBackground: 'Run in background',
     adminConsole: 'Admin console',
+    signOutConfirm: 'Sign out of Almanac?',
+    signOutConfirmHint: 'Your data stays safe — you’ll just need your password to get back in.',
     signOut: 'Sign out',
     member: 'member',
     joined: '{count}-day',
