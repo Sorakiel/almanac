@@ -8,6 +8,9 @@ import {
   pushNotification,
   scheduleDailyReminder,
 } from '@/lib/notify'
+import { isCapacitor, isTauri } from '@/lib/notify'
+import { enablePush, pushSupported } from '@/lib/push'
+import { useSession } from '@/hooks/useSession'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import type { HabitWithTodayLog } from '@/features/habits/types'
@@ -39,6 +42,7 @@ async function fireForegroundNudge(habits: HabitWithTodayLog[]): Promise<void> {
 export function useDailyReminder(): void {
   const { profile } = useProfile()
   const { habits } = useHabits()
+  const { user } = useSession()
 
   const enabled = profile?.reminder_enabled ?? false
   const hour = profile?.reminder_hour ?? 8
@@ -55,6 +59,21 @@ export function useDailyReminder(): void {
   useEffect(() => {
     void setBadgeCount(remainingCount(habits))
   }, [habits])
+
+  // Back-fill a Web Push subscription for reminders switched on before push
+  // existed — or on a browser that has simply never subscribed. Without this the
+  // server has no endpoint to push to and the reminder silently does nothing,
+  // which is exactly how it shipped broken: the toggle only ever subscribed at
+  // the moment it was saved, so every already-enabled reminder stayed dead.
+  //
+  // Only when permission is already granted. Prompting on app load is how apps
+  // get notifications blocked forever.
+  useEffect(() => {
+    if (!enabled || !user) return
+    if (isTauri() || isCapacitor() || !pushSupported()) return
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return
+    void enablePush(user.id).catch(() => undefined)
+  }, [enabled, user])
 
   // Native mobile schedule: survives the app being closed.
   useEffect(() => {
