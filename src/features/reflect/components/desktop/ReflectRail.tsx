@@ -1,6 +1,8 @@
 import { ReflectTicker } from '@/features/reflect/components/ReflectTicker'
 import { journalStreak, reflectionDateShortLabel } from '@/features/reflect/lib/format'
 import type { Reflection } from '@/features/reflect/types'
+import { useT } from '@/hooks/useT'
+import { intlLocale } from '@/lib/dateLocale'
 
 interface ReflectRailProps {
   reflections: Reflection[]
@@ -13,6 +15,8 @@ const BORDER_TONES = ['border-accent', 'border-teal', 'border-amber'] as const
 
 /** Desktop Reflect context rail: the narrator, past entries, and the streak. */
 export function ReflectRail({ reflections, past, dateKey }: ReflectRailProps) {
+  const { t, locale } = useT()
+  const dateLocale = intlLocale(locale)
   const streak = journalStreak(new Set(reflections.map((r) => r.date)), dateKey)
 
   return (
@@ -29,7 +33,7 @@ export function ReflectRail({ reflections, past, dateKey }: ReflectRailProps) {
               className={`rounded-r-[14px] border-l-2 bg-surface py-3.5 pl-4 pr-3.5 ${BORDER_TONES[index % BORDER_TONES.length]}`}
             >
               <p className="font-mono text-[9.5px] tracking-label text-muted-strong">
-                {reflectionDateShortLabel(reflection.date)}
+                {reflectionDateShortLabel(reflection.date, dateLocale)}
               </p>
               {reflection.body ? (
                 <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-muted">
@@ -40,7 +44,7 @@ export function ReflectRail({ reflections, past, dateKey }: ReflectRailProps) {
           ))}
         </div>
       ) : (
-        <p className="text-[13px] text-muted">Your past reflections will collect here.</p>
+        <p className="text-[13px] text-muted">{t('reflect.pastEmptyShort')}</p>
       )}
 
       {streak > 0 ? (

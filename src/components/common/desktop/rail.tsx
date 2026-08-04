@@ -2,7 +2,7 @@ import { createContext, useContext, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 /**
- * The desktop context rail ("The Almanac watches your day") is shell-level
+ * The desktop context rail ("{t('common.almanacWatches')}") is shell-level
  * chrome flush to the right edge, but its contents are page-specific. Pages
  * render `<Rail>…</Rail>` and it portals into the shell's rail column.
  *

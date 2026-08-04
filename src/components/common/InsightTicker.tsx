@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { InsightLine, InsightTone } from '@/lib/insight'
+import { useT } from '@/hooks/useT'
 
 interface InsightTickerProps {
   /** Mono micro-label above the readout, e.g. "the almanac // reading your day". */
@@ -27,6 +28,7 @@ const TONE: Record<InsightTone, { glyph: string; className: string }> = {
  * Purely presentational — each module feeds it its own line generator.
  */
 export function InsightTicker({ title, lines }: InsightTickerProps): ReactElement | null {
+  const { t } = useT()
   const [i, setI] = useState(0)
   const [paused, setPaused] = useState(false)
   const resumeRef = useRef<number | undefined>(undefined)
@@ -93,7 +95,7 @@ export function InsightTicker({ title, lines }: InsightTickerProps): ReactElemen
         <div className="mt-2 flex items-center gap-2">
           <button
             type="button"
-            aria-label="Previous observation"
+            aria-label={t('common.prevObservation')}
             onClick={(e) => {
               e.stopPropagation()
               step(-1)
@@ -108,7 +110,7 @@ export function InsightTicker({ title, lines }: InsightTickerProps): ReactElemen
               <button
                 key={l.id}
                 type="button"
-                aria-label={`Observation ${idx + 1} of ${count}`}
+                aria-label={t('common.observationOf', { index: idx + 1, total: count })}
                 aria-current={idx === active}
                 onClick={(e) => {
                   e.stopPropagation()
@@ -128,7 +130,7 @@ export function InsightTicker({ title, lines }: InsightTickerProps): ReactElemen
 
           <button
             type="button"
-            aria-label="Next observation"
+            aria-label={t('common.nextObservation')}
             onClick={(e) => {
               e.stopPropagation()
               step(1)

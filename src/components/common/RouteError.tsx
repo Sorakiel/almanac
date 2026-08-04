@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useRouteError } from 'react-router-dom'
 import { RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useT } from '@/hooks/useT'
 import { trackError } from '@/lib/analytics'
 
 /**
@@ -10,8 +11,9 @@ import { trackError } from '@/lib/analytics'
  * and its new chunk names, so "Reload" is the primary action.
  */
 export function RouteError() {
+  const { t } = useT()
   const error = useRouteError()
-  const message = error instanceof Error ? error.message : 'Something went wrong.'
+  const message = error instanceof Error ? error.message : t('common.routeErrorGeneric')
 
   useEffect(() => {
     trackError(error, 'route-error')
@@ -23,12 +25,10 @@ export function RouteError() {
         <RefreshCw className="h-6 w-6 text-accent" aria-hidden="true" />
       </div>
       <div className="flex flex-col gap-1">
-        <p className="text-lg font-semibold">Something needs a refresh</p>
-        <p className="max-w-sm text-sm text-muted">
-          The app updated in the background. Reload to get the latest version.
-        </p>
+        <p className="text-lg font-semibold">{t('common.routeErrorTitle')}</p>
+        <p className="max-w-sm text-sm text-muted">{t('common.routeErrorStale')}</p>
       </div>
-      <Button onClick={() => window.location.reload()}>Reload</Button>
+      <Button onClick={() => window.location.reload()}>{t('common.reload')}</Button>
       <p className="max-w-md break-words font-mono text-[11px] text-muted-strong">{message}</p>
     </div>
   )

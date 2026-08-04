@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
+import { useT } from '@/hooks/useT'
 
 interface ConfirmSheetProps {
   open: boolean
@@ -22,6 +23,7 @@ export function ConfirmSheet({
   pending = false,
   onConfirm,
 }: ConfirmSheetProps) {
+  const { t } = useT()
   return (
     <Sheet open={open} onOpenChange={onOpenChange} title={title} description={description}>
       <div className="flex flex-col gap-3">
@@ -29,7 +31,7 @@ export function ConfirmSheet({
           {confirmLabel}
         </Button>
         <Button variant="ghost" size="lg" onClick={() => onOpenChange(false)}>
-          Cancel
+          {t('common.cancel')}
         </Button>
       </div>
     </Sheet>

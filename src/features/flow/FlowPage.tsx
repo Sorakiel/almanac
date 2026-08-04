@@ -20,6 +20,7 @@ import { useToday } from '@/hooks/useToday'
 import { useFocusStore } from '@/stores/focus'
 import { useModulesStore } from '@/stores/modules'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 const DURATIONS_MIN = [15, 25, 45]
 type Mode = 'habit' | 'book' | 'custom'
@@ -30,6 +31,7 @@ type Mode = 'habit' | 'book' | 'custom'
  * timer. Workouts run their own live session under Train, not here.
  */
 function FlowPage() {
+  const { t } = useT()
   const { habits } = useHabits()
   const { books } = useBooks()
   const readingEnabled = useModulesStore((s) => s.enabled.reading)
@@ -78,12 +80,12 @@ function FlowPage() {
         void queryClient.invalidateQueries({ queryKey: ['habits'] })
         void queryClient.invalidateQueries({ queryKey: ['habitLogs'] })
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Could not complete habit')
+        toast.error(error instanceof Error ? error.message : t('flow.completeFailed'))
         return
       }
     }
     stop()
-    toast.success('Nice — flow complete.')
+    toast.success(t('flow.doneShort'))
   }
 
   // 1 Hz tick while a session runs; also catches sessions that expired offline.
@@ -98,9 +100,9 @@ function FlowPage() {
       // Ran the full block to completion — log the whole planned duration.
       logFocus(durationMin, label)
       stop()
-      toast.success('Flow session complete — nice work.')
+      toast.success(t('flow.done'))
     }
-  }, [running, endsAt, now, durationMin, label, logFocus, stop])
+  }, [running, endsAt, now, durationMin, label, logFocus, stop, t])
 
   if (running) {
     const msLeft = Math.max(endsAt - now, 0)
@@ -116,11 +118,11 @@ function FlowPage() {
       <div className="flex flex-col gap-5 lg:mx-auto lg:max-w-xl">
         <header>
           <p className="label-mono text-accent">// in session</p>
-          <h1 className="mt-1 text-2xl">Flow</h1>
+          <h1 className="mt-1 text-2xl">{t('flow.title')}</h1>
         </header>
 
         <FocusConsole
-          label={label ?? 'Focus session'}
+          label={label ?? t('flow.focusSession')}
           msLeft={msLeft}
           durationMin={durationMin}
           elapsedMin={elapsedMin}
@@ -140,27 +142,27 @@ function FlowPage() {
   return (
     <div className="flex flex-col gap-5 lg:mx-auto lg:max-w-xl">
       <header>
-        <p className="label-mono">// deep work, one block at a time</p>
-        <h1 className="mt-1 text-2xl">Flow</h1>
+        <p className="label-mono">// {t('flow.deepWork')}</p>
+        <h1 className="mt-1 text-2xl">{t('flow.title')}</h1>
       </header>
 
       <Segmented
-        aria-label="Flow target"
+        aria-label={t('flow.flowTarget')}
         value={mode}
         onChange={setMode}
         options={[
-          { value: 'habit' as const, label: 'Habit' },
-          ...(readingEnabled ? [{ value: 'book' as const, label: 'Read' }] : []),
-          { value: 'custom' as const, label: 'Describe' },
+          { value: 'habit' as const, label: t('flow.modeHabit') },
+          ...(readingEnabled ? [{ value: 'book' as const, label: t('flow.modeRead') }] : []),
+          { value: 'custom' as const, label: t('flow.describe') },
         ]}
       />
 
       {mode === 'habit' ? (
         <div className="flex flex-col gap-3">
-          <SectionLabel>DUE TODAY</SectionLabel>
+          <SectionLabel>{t('flow.dueToday')}</SectionLabel>
           {dueHabits.length === 0 ? (
             <p className="rounded-card border border-dashed p-4 text-sm text-muted">
-              Nothing due right now — switch to “Describe” to focus on anything.
+              {t('flow.nothingDue')}
             </p>
           ) : (
             <ul className="flex flex-col gap-2">
@@ -190,10 +192,10 @@ function FlowPage() {
         </div>
       ) : mode === 'book' ? (
         <div className="flex flex-col gap-3">
-          <SectionLabel>PICK A BOOK</SectionLabel>
+          <SectionLabel>{t('flow.pickBook')}</SectionLabel>
           {openBooks.length === 0 ? (
             <p className="rounded-card border border-dashed p-4 text-sm text-muted">
-              No books on the go — add one under Reading first.
+              {t('flow.noBooks')}
             </p>
           ) : (
             <ul className="flex flex-col gap-2">
@@ -228,9 +230,9 @@ function FlowPage() {
         </div>
       ) : (
         <label className="flex flex-col gap-1.5">
-          <span className="label-mono">What are you focusing on?</span>
+          <span className="label-mono">{t('flow.focusPrompt')}</span>
           <Input
-            placeholder="Write the report intro"
+            placeholder={t('flow.focusPlaceholder')}
             value={customLabel}
             onChange={(event) => setCustomLabel(event.target.value)}
           />
@@ -238,8 +240,8 @@ function FlowPage() {
       )}
 
       <div className="flex flex-col gap-2">
-        <SectionLabel>LENGTH</SectionLabel>
-        <div className="flex gap-2" role="radiogroup" aria-label="Session length">
+        <SectionLabel>{t('flow.length')}</SectionLabel>
+        <div className="flex gap-2" role="radiogroup" aria-label={t('flow.sessionLength')}>
           {DURATIONS_MIN.map((min) => (
             <button
               key={min}
@@ -274,7 +276,7 @@ function FlowPage() {
         }
       >
         <Timer className="h-4 w-4" />
-        Start flow
+        {t('flow.start')}
       </Button>
     </div>
   )

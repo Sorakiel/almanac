@@ -21,7 +21,7 @@ function Row({ label, value, accent }: { label: string; value: string; accent?: 
   )
 }
 
-/** "The Almanac watches your day" — the desktop context rail for Today. */
+/** "{t('dashboard.almanacWatches')}" — the desktop context rail for Today. */
 export function DashboardRail({ habits }: DashboardRailProps) {
   const { t } = useT()
   const due = habits.filter((h) => h.dueToday || h.isComplete)

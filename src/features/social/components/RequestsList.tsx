@@ -3,6 +3,7 @@ import { Avatar } from '@/components/common/Avatar'
 import { Button } from '@/components/ui/button'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import type { FriendRequest } from '@/features/social/types'
+import { useT } from '@/hooks/useT'
 
 interface RequestsListProps {
   incoming: FriendRequest[]
@@ -14,6 +15,7 @@ interface RequestsListProps {
 
 /** Pending friend requests — incoming (accept/decline) and outgoing (cancel). */
 export function RequestsList({ incoming, outgoing, onAccept, onRemove, busy }: RequestsListProps) {
+  const { t } = useT()
   if (incoming.length === 0 && outgoing.length === 0) return null
 
   return (
@@ -34,7 +36,7 @@ export function RequestsList({ incoming, outgoing, onAccept, onRemove, busy }: R
                 size="icon"
                 variant="primary"
                 className="h-9 w-9"
-                aria-label="Accept"
+                aria-label={t('social.accept')}
                 disabled={busy}
                 onClick={() => onAccept(req.friendshipId)}
               >
@@ -44,7 +46,7 @@ export function RequestsList({ incoming, outgoing, onAccept, onRemove, busy }: R
                 size="icon"
                 variant="surface"
                 className="h-9 w-9"
-                aria-label="Decline"
+                aria-label={t('social.decline')}
                 disabled={busy}
                 onClick={() => onRemove(req.friendshipId)}
               >
@@ -68,7 +70,7 @@ export function RequestsList({ incoming, outgoing, onAccept, onRemove, busy }: R
                 {req.profile.displayName}
               </span>
               <span className="label-mono flex items-center gap-1 text-[10px]">
-                <Clock className="h-3.5 w-3.5" aria-hidden="true" /> Pending
+                <Clock className="h-3.5 w-3.5" aria-hidden="true" /> {t('social.pending')}
               </span>
               <Button
                 size="sm"
@@ -76,7 +78,7 @@ export function RequestsList({ incoming, outgoing, onAccept, onRemove, busy }: R
                 disabled={busy}
                 onClick={() => onRemove(req.friendshipId)}
               >
-                Cancel
+                {t('social.cancel')}
               </Button>
             </div>
           ))}

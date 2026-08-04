@@ -16,8 +16,10 @@ import { useFriendMutations } from '@/features/social/hooks/useFriendMutations'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
+import { useT } from '@/hooks/useT'
 
 function SocialPage() {
+  const { t } = useT()
   const { user } = useSession()
   const selfId = user?.id ?? ''
   const { dateKey } = useToday()
@@ -41,7 +43,7 @@ function SocialPage() {
     return (
       <div className="flex justify-center py-24" role="status" aria-live="polite">
         <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading your friends…</span>
+        <span className="sr-only">{t('social.loading')}</span>
       </div>
     )
   }
@@ -50,11 +52,11 @@ function SocialPage() {
     return (
       <EmptyState
         icon={RefreshCw}
-        title="Couldn't load your friends"
-        description="Something went wrong reaching the server."
+        title={t('social.loadFailed')}
+        description={t('social.loadFailedHint')}
         action={
           <Button size="sm" variant="surface" onClick={refetch}>
-            Try again
+            {t('social.tryAgain')}
           </Button>
         }
       />
@@ -88,8 +90,8 @@ function SocialPage() {
   return (
     <section className="flex flex-col gap-6">
       <header>
-        <p className="label-mono">// your circle</p>
-        <h1 className="mt-1 text-2xl">Friends</h1>
+        <p className="label-mono">// {t('social.yourCircleLower')}</p>
+        <h1 className="mt-1 text-2xl">{t('social.title')}</h1>
       </header>
 
       <Cascade>
@@ -109,7 +111,7 @@ function SocialPage() {
         />
 
         <section className="flex flex-col gap-3">
-          <p className="label-mono">// activity</p>
+          <p className="label-mono">// {t('social.activity')}</p>
           <ActivityFeed feed={feed} todayKey={dateKey} hasFriends={data.friends.length > 0} />
         </section>
 

@@ -7,6 +7,7 @@ import { StarRating } from '@/components/common/StarRating'
 import { useDailyQuote } from '@/features/dashboard/hooks/useDailyQuote'
 import { useReflectionMutations } from '@/features/reflect/hooks/useReflectionMutations'
 import type { Reflection } from '@/features/reflect/types'
+import { useT } from '@/hooks/useT'
 
 interface ReflectionComposerProps {
   /** The user's local date key — the day this entry belongs to. */
@@ -15,14 +16,12 @@ interface ReflectionComposerProps {
   today: Reflection | null
 }
 
-const RATINGS = [
-  { key: 'mood', label: 'Mood' },
-  { key: 'energy', label: 'Energy' },
-  { key: 'day_rating', label: 'Day' },
-] as const
+/** Rating axes; labels come from `reflect.ratings.*` at render. */
+const RATINGS = [{ key: 'mood' }, { key: 'energy' }, { key: 'day_rating' }] as const
 
 /** Today's entry: quote of the day, mood/energy/day ratings, and a reflection. */
 export function ReflectionComposer({ dateKey, today }: ReflectionComposerProps) {
+  const { t } = useT()
   const { quote } = useDailyQuote()
   const { save } = useReflectionMutations()
   const [body, setBody] = useState(today?.body ?? '')
@@ -54,7 +53,7 @@ export function ReflectionComposer({ dateKey, today }: ReflectionComposerProps) 
       },
       {
         onError: (error) =>
-          toast.error(error instanceof Error ? error.message : 'Could not save your reflection'),
+          toast.error(error instanceof Error ? error.message : t('reflect.saveFailed')),
       },
     )
   }
@@ -68,20 +67,22 @@ export function ReflectionComposer({ dateKey, today }: ReflectionComposerProps) 
           </span>
           <div>
             <blockquote className="text-[14px] italic leading-relaxed">“{quote.text}”</blockquote>
-            <p className="label-mono mt-1 text-muted-strong">— {quote.author ?? 'Unknown'}</p>
+            <p className="label-mono mt-1 text-muted-strong">
+              — {quote.author ?? t('reflect.unknownAuthor')}
+            </p>
           </div>
         </div>
       ) : null}
 
       <div className="flex flex-col gap-2.5">
-        {RATINGS.map(({ key, label }) => (
+        {RATINGS.map(({ key }) => (
           <div key={key} className="flex items-center justify-between gap-3">
-            <span className="label-mono text-muted-strong">{label}</span>
+            <span className="label-mono text-muted-strong">{t(`reflect.ratings.${key}`)}</span>
             <StarRating
               value={values[key]}
               onChange={setters[key]}
               size="md"
-              aria-label={`${label} rating`}
+              aria-label={t('reflect.ratingAria', { name: t(`reflect.ratings.${key}`) })}
             />
           </div>
         ))}
@@ -90,15 +91,17 @@ export function ReflectionComposer({ dateKey, today }: ReflectionComposerProps) 
       <Textarea
         value={body}
         onChange={(event) => setBody(event.target.value)}
-        placeholder="What stood out today? A win, a lesson, a feeling…"
-        aria-label="Today's reflection"
+        placeholder={t('reflect.placeholder')}
+        aria-label={t('reflect.today')}
         rows={4}
       />
 
       <div className="flex items-center justify-between">
-        <span className="label-mono text-muted-strong">{today ? 'saved today' : 'today'}</span>
+        <span className="label-mono text-muted-strong">
+          {today ? t('reflect.savedToday') : t('reflect.todayShort')}
+        </span>
         <Button size="sm" onClick={handleSave} disabled={!hasContent || !changed || save.isPending}>
-          {today ? 'Update' : 'Save'}
+          {today ? t('reflect.update') : t('reflect.save')}
         </Button>
       </div>
     </Card>

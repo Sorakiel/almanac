@@ -12,8 +12,10 @@ import { ReflectRail } from '@/features/reflect/components/desktop/ReflectRail'
 import { useReflections } from '@/features/reflect/hooks/useReflections'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useToday } from '@/hooks/useToday'
+import { useT } from '@/hooks/useT'
 
 function ReflectPage() {
+  const { t } = useT()
   const { reflections, isLoading, isError, refetch } = useReflections()
   const { dateKey } = useToday()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
@@ -39,7 +41,7 @@ function ReflectPage() {
     return (
       <div className="flex justify-center py-24" role="status" aria-live="polite">
         <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading your journal…</span>
+        <span className="sr-only">{t('reflect.loading')}</span>
       </div>
     )
   }
@@ -48,11 +50,11 @@ function ReflectPage() {
     return (
       <EmptyState
         icon={RefreshCw}
-        title="Couldn't load your journal"
-        description="Something went wrong reaching the server."
+        title={t('reflect.loadFailed')}
+        description={t('reflect.loadFailedHint')}
         action={
           <Button size="sm" variant="surface" onClick={refetch}>
-            Try again
+            {t('reflect.tryAgain')}
           </Button>
         }
       />
@@ -73,8 +75,8 @@ function ReflectPage() {
   return (
     <section className="flex flex-col gap-5">
       <header>
-        <p className="label-mono">// daily journal</p>
-        <h1 className="mt-1 text-2xl">Reflect</h1>
+        <p className="label-mono">// {t('reflect.eyebrow')}</p>
+        <h1 className="mt-1 text-2xl">{t('reflect.title')}</h1>
       </header>
 
       <ReflectTicker reflections={reflections} dateKey={dateKey} />
