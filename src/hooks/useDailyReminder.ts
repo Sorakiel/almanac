@@ -3,7 +3,7 @@ import { browserTimezone, msUntilDailyTime } from '@/lib/date'
 import { setBadgeCount } from '@/lib/desktop'
 import {
   clearScheduledReminders,
-  isMobilePlatform,
+  isNativeScheduler,
   isNotifyGranted,
   pushNotification,
   scheduleDailyReminder,
@@ -62,9 +62,11 @@ export function useDailyReminder(): void {
     else void clearScheduledReminders()
   }, [enabled, hour, minute])
 
-  // Foreground scheduler for desktop/web (mobile is covered by the OS schedule).
+  // Foreground scheduler for everywhere the OS can't hold a schedule for us.
+  // Gated on the scheduler, not on "is mobile": a phone running the web build
+  // has no native schedule either, and used to fall through both branches.
   useEffect(() => {
-    if (!enabled || isMobilePlatform()) return
+    if (!enabled || isNativeScheduler()) return
 
     let timer: number
     const arm = () => {
