@@ -1,5 +1,9 @@
 import { supabase } from '@/lib/supabase'
-import { mapSupportMethod, type SupportKind, type SupportMethod } from '@/features/settings/lib/support'
+import {
+  mapSupportMethod,
+  type SupportKind,
+  type SupportMethod,
+} from '@/features/settings/lib/support'
 
 /** Master toggle + the methods a given caller may see (RLS scopes the rows). */
 export interface SupportConfig {

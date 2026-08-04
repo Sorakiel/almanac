@@ -35,9 +35,9 @@ export function useExportData(): UseMutationResult<void, Error, ExportFormat> {
       }
 
       const names = new Map(
-        payload.data.habits.map((h) => [h.id as string, (h.name as string) ?? '']),
+        (payload.data.habits ?? []).map((h) => [h.id as string, (h.name as string) ?? '']),
       )
-      const rows = [...payload.data.habit_logs]
+      const rows = [...(payload.data.habit_logs ?? [])]
         .map((log) => ({
           date: log.date,
           habit: names.get(log.habit_id as string) ?? '',

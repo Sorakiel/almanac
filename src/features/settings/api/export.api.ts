@@ -1,7 +1,10 @@
 import { supabase } from '@/lib/supabase'
+import type { Database } from '@/types/database.generated'
 
 /** One exported table: whatever RLS lets the signed-in user read of their own rows. */
 type Rows = Record<string, unknown>[]
+
+type TableName = keyof Database['public']['Tables']
 
 export interface ExportPayload {
   exportedAt: string
@@ -31,15 +34,15 @@ const OWNED_TABLES = [
   'feedback',
   'achievement_grants',
   'activity_events',
-] as const
+] as const satisfies readonly TableName[]
 
-async function selectAll(table: string, column: string, value: string): Promise<Rows> {
+async function selectAll(table: TableName, column: string, value: string): Promise<Rows> {
   const { data, error } = await supabase.from(table).select('*').eq(column, value)
   if (error) throw error
   return (data ?? []) as Rows
 }
 
-async function selectIn(table: string, column: string, values: string[]): Promise<Rows> {
+async function selectIn(table: TableName, column: string, values: string[]): Promise<Rows> {
   if (values.length === 0) return []
   const { data, error } = await supabase.from(table).select('*').in(column, values)
   if (error) throw error
@@ -63,17 +66,20 @@ export async function fetchExport(
 ): Promise<ExportPayload> {
   const data: Record<string, Rows> = {}
 
-  const profile = await selectAll('profiles', 'id', userId)
-  data.profile = profile
+  data.profile = await selectAll('profiles', 'id', userId)
 
   const owned = await Promise.all(OWNED_TABLES.map((t) => selectAll(t, 'user_id', userId)))
   OWNED_TABLES.forEach((table, i) => {
-    data[table] = owned[i]
+    data[table] = owned[i] ?? []
   })
 
   // Workout children hang off the workout, not the user — RLS reaches them through
   // an EXISTS on the parent, so they have to be fetched by parent id.
-  const workoutExercises = await selectIn('workout_exercises', 'workout_id', ids(data.workouts))
+  const workoutExercises = await selectIn(
+    'workout_exercises',
+    'workout_id',
+    ids(data.workouts ?? []),
+  )
   data.workout_exercises = workoutExercises
   data.set_logs = await selectIn('set_logs', 'workout_exercise_id', ids(workoutExercises))
 
