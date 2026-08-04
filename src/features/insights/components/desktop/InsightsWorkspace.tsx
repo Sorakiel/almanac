@@ -7,6 +7,7 @@ import { ReadingInsightsSection } from '@/features/insights/components/ReadingIn
 import { ReflectInsightsSection } from '@/features/insights/components/ReflectInsightsSection'
 import { FocusInsightsSection } from '@/features/insights/components/FocusInsightsSection'
 import { insightRangeLabel, insightRangeSuffix } from '@/features/insights/lib/insightRange'
+import { useT } from '@/hooks/useT'
 import type {
   FocusInsights,
   Insights,
@@ -36,6 +37,7 @@ export function InsightsWorkspace({
   range,
   onRangeChange,
 }: InsightsWorkspaceProps) {
+  const { t } = useT()
   const completionPct = Math.round(insights.completionRate * 100)
 
   return (
@@ -43,10 +45,8 @@ export function InsightsWorkspace({
       <header className="flex items-start justify-between">
         <div>
           <p className="label-mono">// {insightRangeLabel(range)}</p>
-          <h1 className="mt-1.5 text-[44px] leading-none tracking-title">Insights</h1>
-          <p className="mt-2 text-[15px] text-muted">
-            Where your habits are strong — and where the week slips.
-          </p>
+          <h1 className="mt-1.5 text-[44px] leading-none tracking-title">{t('insights.title')}</h1>
+          <p className="mt-2 text-[15px] text-muted">{t('insights.subtitle')}</p>
         </div>
         <RangeToggle value={range} onChange={onRangeChange} />
       </header>
@@ -56,14 +56,18 @@ export function InsightsWorkspace({
           <>
             <section className="mt-7 flex gap-3.5">
               <InsightStat
-                label="completion"
+                label={t('insights.completion')}
                 value={String(completionPct)}
                 unit="%"
                 delta={insights.completionDelta}
                 deltaSuffix="% vs prev"
               />
-              <InsightStat label="best streak" value={`${insights.bestStreak}d`} accent />
-              <InsightStat label="active" value={String(insights.activeHabits)} />
+              <InsightStat
+                label={t('insights.bestStreak')}
+                value={`${insights.bestStreak}d`}
+                accent
+              />
+              <InsightStat label={t('insights.active')} value={String(insights.activeHabits)} />
               <InsightStat
                 label={`done · ${insightRangeSuffix(range)}`}
                 value={String(insights.totalDone)}

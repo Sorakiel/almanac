@@ -25,8 +25,10 @@ import { useReflectInsights } from '@/features/insights/hooks/useReflectInsights
 import { useFocusInsights } from '@/features/insights/hooks/useFocusInsights'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useUiStore } from '@/stores/ui'
+import { useT } from '@/hooks/useT'
 
 function InsightsPage() {
+  const { t } = useT()
   const navigate = useNavigate()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
   const [range, setRange] = useState<InsightRange>('30d')
@@ -45,7 +47,7 @@ function InsightsPage() {
     return (
       <div className="flex justify-center py-24" role="status" aria-live="polite">
         <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading insights…</span>
+        <span className="sr-only">{t('insights.loading')}</span>
       </div>
     )
   }
@@ -54,11 +56,11 @@ function InsightsPage() {
     return (
       <EmptyState
         icon={RefreshCw}
-        title="Couldn't load insights"
-        description="Something went wrong reaching the server."
+        title={t('insights.loadFailed')}
+        description={t('insights.loadFailedHint')}
         action={
           <Button size="sm" variant="surface" onClick={refetch}>
-            Try again
+            {t('insights.tryAgain')}
           </Button>
         }
       />
@@ -80,12 +82,12 @@ function InsightsPage() {
     return (
       <EmptyState
         icon={BarChart3}
-        title="No insights yet"
-        description="Add your first habit and start checking it off — your trends will build up here."
+        title={t('insights.emptyTitle')}
+        description={t('insights.emptyHint')}
         action={
           <Button size="sm" onClick={startHabit}>
             <Plus className="h-4 w-4" />
-            Add your first habit
+            {t('insights.addFirstHabit')}
           </Button>
         }
       />
@@ -118,7 +120,7 @@ function InsightsPage() {
       <header className="flex items-start justify-between gap-3">
         <div>
           <p className="label-mono">// {insightRangeLabel(range)}</p>
-          <h1 className="mt-1 text-2xl">Insights</h1>
+          <h1 className="mt-1 text-2xl">{t('insights.title')}</h1>
         </div>
         <RangeToggle value={range} onChange={setRange} className="mt-0.5" />
       </header>
@@ -130,14 +132,18 @@ function InsightsPage() {
           <div className="flex flex-col gap-5">
             <div className="grid grid-cols-2 gap-3">
               <InsightStat
-                label="completion"
+                label={t('insights.completion')}
                 value={String(completionPct)}
                 unit="%"
                 delta={insights.completionDelta}
                 deltaSuffix="% vs prev"
               />
-              <InsightStat label="best streak" value={`${insights.bestStreak}d`} accent />
-              <InsightStat label="active" value={String(insights.activeHabits)} />
+              <InsightStat
+                label={t('insights.bestStreak')}
+                value={`${insights.bestStreak}d`}
+                accent
+              />
+              <InsightStat label={t('insights.active')} value={String(insights.activeHabits)} />
               <InsightStat
                 label={`done · ${insightRangeSuffix(range)}`}
                 value={String(insights.totalDone)}

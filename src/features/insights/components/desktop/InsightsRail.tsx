@@ -1,6 +1,7 @@
 import { HabitRateList } from '@/features/insights/components/HabitRateList'
 import { InsightsTicker } from '@/features/insights/components/InsightsTicker'
 import type { Insights } from '@/features/insights/types'
+import { useT } from '@/hooks/useT'
 
 interface InsightsRailProps {
   insights: Insights
@@ -10,6 +11,7 @@ interface InsightsRailProps {
 
 /** Desktop Insights context rail: per-habit rates + a weekday read-out. */
 export function InsightsRail({ insights, tickerInsights }: InsightsRailProps) {
+  const { t } = useT()
   return (
     <div className="flex flex-col gap-3.5">
       <InsightsTicker habits={tickerInsights} />
@@ -19,7 +21,7 @@ export function InsightsRail({ insights, tickerInsights }: InsightsRailProps) {
       {insights.byHabit.length > 0 ? (
         <HabitRateList habits={insights.byHabit} />
       ) : (
-        <p className="text-[13px] text-muted">No habits to compare yet.</p>
+        <p className="text-[13px] text-muted">{t('insights.nothingToCompare')}</p>
       )}
 
       {insights.bestWeekday ? (

@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import type { WeekPoint } from '@/features/insights/types'
+import { useT } from '@/hooks/useT'
 
 interface CompletionTrendProps {
   weekly: WeekPoint[]
@@ -12,6 +13,7 @@ const PAD_Y = 14
 
 /** Completion-over-time area chart — inline SVG, stretched to container width. */
 export function CompletionTrend({ weekly, height = 170 }: CompletionTrendProps) {
+  const { t } = useT()
   const gradientId = useId()
 
   if (weekly.length < 2) {
@@ -20,7 +22,7 @@ export function CompletionTrend({ weekly, height = 170 }: CompletionTrendProps) 
         className="flex items-center justify-center rounded-card bg-panel text-sm text-muted"
         style={{ height }}
       >
-        Not enough history yet
+        {t('insights.notEnoughHistory')}
       </div>
     )
   }
@@ -42,7 +44,7 @@ export function CompletionTrend({ weekly, height = 170 }: CompletionTrendProps) 
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
         preserveAspectRatio="none"
         role="img"
-        aria-label="Completion over the last weeks"
+        aria-label="{t('insights.trendTitle')}"
       >
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">

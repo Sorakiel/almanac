@@ -46,7 +46,7 @@ export function SettingsRail() {
   }
 
   return (
-    <div className="flex flex-col gap-3.5">
+    <div className="flex flex-1 flex-col gap-3.5">
       <div className="flex items-center gap-3">
         <span
           aria-hidden="true"
@@ -77,7 +77,7 @@ export function SettingsRail() {
 
       <Button
         variant="outline"
-        className="w-full"
+        className="mt-auto w-full"
         onClick={handleSignOut}
         disabled={logOut.isPending}
       >

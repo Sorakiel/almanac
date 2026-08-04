@@ -1,6 +1,7 @@
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { InsightStat } from '@/features/insights/components/InsightStat'
 import type { ReflectInsights } from '@/features/insights/types'
+import { useT } from '@/hooks/useT'
 
 interface ReflectInsightsSectionProps {
   data: ReflectInsights
@@ -8,6 +9,7 @@ interface ReflectInsightsSectionProps {
 
 /** Journaling stats block: entry/streak/rating KPIs and a 30-day consistency bar. */
 export function ReflectInsightsSection({ data }: ReflectInsightsSectionProps) {
+  const { t } = useT()
   const consistencyPct = Math.round(data.consistency30d * 100)
 
   return (
@@ -15,11 +17,11 @@ export function ReflectInsightsSection({ data }: ReflectInsightsSectionProps) {
       <p className="label-mono">// reflect · last 30 days</p>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <InsightStat label="entries · 30d" value={String(data.entries30d)} accent />
-        <InsightStat label="streak" value={`${data.currentStreak}d`} />
-        <InsightStat label="days · 30d" value={String(data.daysJournaled30d)} />
+        <InsightStat label={t('insights.entries30d')} value={String(data.entries30d)} accent />
+        <InsightStat label={t('insights.streak')} value={`${data.currentStreak}d`} />
+        <InsightStat label={t('insights.days30d')} value={String(data.daysJournaled30d)} />
         <InsightStat
-          label="avg day"
+          label={t('insights.avgDay')}
           value={data.avgDayRating30d !== null ? data.avgDayRating30d.toFixed(1) : '—'}
         />
       </div>
