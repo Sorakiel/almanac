@@ -8,9 +8,10 @@ import { Sheet } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
 import { submitFeedback } from '@/features/modules/api/feedback.api'
 import { useSession } from '@/hooks/useSession'
+import { useT } from '@/hooks/useT'
 
 const schema = z.object({
-  body: z.string().trim().min(4, 'Tell us a little more').max(1000),
+  body: z.string().trim().min(4, 'modulesPage.feedback.tooShort').max(1000),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -22,6 +23,7 @@ interface FeedbackSheetProps {
 
 /** Free-text feedback box — ideas, bugs, module requests. Writes to `feedback`. */
 export function FeedbackSheet({ open, onOpenChange }: FeedbackSheetProps) {
+  const { t } = useT()
   const { user } = useSession()
   const {
     register,
@@ -33,12 +35,12 @@ export function FeedbackSheet({ open, onOpenChange }: FeedbackSheetProps) {
   const send = useMutation({
     mutationFn: (body: string) => submitFeedback(user?.id ?? '', body),
     onSuccess: () => {
-      toast.success('Feedback sent — thank you!')
+      toast.success(t('modulesPage.feedback.sent'))
       reset()
       onOpenChange(false)
     },
     onError: (error) =>
-      toast.error(error instanceof Error ? error.message : 'Could not send your feedback'),
+      toast.error(error instanceof Error ? error.message : t('modulesPage.feedback.failed')),
   })
 
   const onSubmit = handleSubmit((values) => send.mutate(values.body))
@@ -47,21 +49,21 @@ export function FeedbackSheet({ open, onOpenChange }: FeedbackSheetProps) {
     <Sheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Feedback"
-      description="An idea, a bug, or a module you'd love — tell us."
+      title={t('modulesPage.feedback.title')}
+      description={t('modulesPage.feedback.description')}
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <label className="flex flex-col gap-1.5">
-          <span className="label-mono">Your feedback</span>
+          <span className="label-mono">{t('modulesPage.feedback.label')}</span>
           <Textarea
-            placeholder="e.g. A mood tracker with a weekly chart, or a bug you hit…"
+            placeholder={t('modulesPage.feedback.placeholder')}
             autoFocus
             {...register('body')}
           />
           {errors.body ? <span className="text-xs text-accent">{errors.body.message}</span> : null}
         </label>
         <Button type="submit" size="lg" disabled={send.isPending}>
-          {send.isPending ? 'Sending…' : 'Send feedback'}
+          {send.isPending ? t('modulesPage.feedback.sending') : t('modulesPage.feedback.submit')}
         </Button>
       </form>
     </Sheet>

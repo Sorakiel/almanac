@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { browserTimezone, formatLongDate } from '@/lib/date'
 import { setDayClockTimezone, useDayKey } from '@/hooks/useDayKey'
 import { useProfile } from '@/features/settings/hooks/useProfile'
+import { intlLocale } from '@/lib/dateLocale'
 import { useLocaleStore } from '@/stores/locale'
 
 interface Today {
@@ -39,7 +40,7 @@ export function useToday(): Today {
     () => ({
       timezone,
       dateKey,
-      longDate: formatLongDate(timezone, new Date(), locale === 'ru' ? 'ru-RU' : 'en-GB'),
+      longDate: formatLongDate(timezone, new Date(), intlLocale(locale)),
     }),
     [timezone, dateKey, locale],
   )

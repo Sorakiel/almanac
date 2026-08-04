@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import { IconTile } from '@/components/common/IconTile'
 import { Rail } from '@/components/common/desktop/rail'
+import { useT } from '@/hooks/useT'
 
 interface ComingSoonProps {
   eyebrow: string
@@ -12,6 +13,7 @@ interface ComingSoonProps {
 
 /** Placeholder for modules that arrive in a later phase — keeps nav complete. */
 export function ComingSoon({ eyebrow, title, icon, description, phase }: ComingSoonProps) {
+  const { t } = useT()
   return (
     <>
       <div className="flex flex-col gap-5 lg:max-w-[760px]">
@@ -23,7 +25,7 @@ export function ComingSoon({ eyebrow, title, icon, description, phase }: ComingS
         <div className="flex flex-col items-center gap-4 rounded-card border border-dashed px-6 py-16 text-center lg:py-24">
           <IconTile icon={icon} size="lg" tone="bg-accent/15 text-accent" />
           <div className="flex flex-col gap-1">
-            <p className="text-base font-semibold">In the works</p>
+            <p className="text-base font-semibold">{t('modulesPage.inTheWorks')}</p>
             <p className="max-w-xs text-sm text-muted">{description}</p>
           </div>
           <span className="label-mono rounded-pill border px-3 py-1">{phase}</span>

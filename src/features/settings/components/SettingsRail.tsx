@@ -4,6 +4,7 @@ import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
+import { intlLocale } from '@/lib/dateLocale'
 import { browserTimezone } from '@/lib/date'
 import { APP_VERSION } from '@/lib/version'
 
@@ -25,7 +26,7 @@ export function SettingsRail() {
 
   // Month names have to follow the interface language, not the build locale.
   const joined = user?.created_at
-    ? new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' }).format(
+    ? new Intl.DateTimeFormat(intlLocale(locale), { month: 'short', year: 'numeric' }).format(
         new Date(user.created_at),
       )
     : '—'

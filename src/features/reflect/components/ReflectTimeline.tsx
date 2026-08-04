@@ -4,6 +4,7 @@ import { ReflectionCard } from '@/features/reflect/components/ReflectionCard'
 import { ReflectionComposer } from '@/features/reflect/components/ReflectionComposer'
 import type { Quote } from '@/features/dashboard/api/quotes.api'
 import type { Reflection } from '@/features/reflect/types'
+import { useT } from '@/hooks/useT'
 
 interface ReflectTimelineProps {
   dateKey: string
@@ -15,6 +16,7 @@ interface ReflectTimelineProps {
 
 /** Today's composer followed by the reverse-chronological reflection history. */
 export function ReflectTimeline({ dateKey, today, past, quoteById }: ReflectTimelineProps) {
+  const { t } = useT()
   return (
     <div className="flex flex-col gap-5">
       <Cascade>
@@ -22,7 +24,7 @@ export function ReflectTimeline({ dateKey, today, past, quoteById }: ReflectTime
 
         <div className="flex flex-col gap-3">
           <SectionLabel accessory={past.length > 0 ? `${past.length}` : undefined}>
-            PAST
+            {t('reflect.past')}
           </SectionLabel>
           {past.length > 0 ? (
             past.map((reflection) => (
@@ -34,7 +36,7 @@ export function ReflectTimeline({ dateKey, today, past, quoteById }: ReflectTime
             ))
           ) : (
             <p className="rounded-card border border-dashed px-4 py-6 text-center text-sm text-muted">
-              Your past reflections will collect here, one day at a time.
+              {t('reflect.pastEmpty')}
             </p>
           )}
         </div>

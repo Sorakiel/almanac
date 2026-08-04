@@ -5,6 +5,7 @@ import { ListChecks, Plus, RotateCw, X, type LucideIcon } from 'lucide-react'
 import { OPTIONAL_MODULES, useModulesStore } from '@/stores/modules'
 import { useUiStore } from '@/stores/ui'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface FanItem {
   key: string
@@ -46,6 +47,7 @@ function offFromUp(angle: number): number {
  * backdrop-blur containing block, and anchored to the measured button position.
  */
 export function RadialAddMenu() {
+  const { t } = useT()
   const [open, setOpen] = useState(false)
   const [anchor, setAnchor] = useState<{ x: number; y: number } | null>(null)
   const [rotation, setRotation] = useState(0)
@@ -66,7 +68,7 @@ export function RadialAddMenu() {
   const mid = Math.floor(moduleItems.length / 2)
   const habitItem: FanItem = {
     key: 'habit',
-    label: 'New habit',
+    label: t('common.newHabit'),
     icon: ListChecks,
     run: openNewHabit,
   }
@@ -124,7 +126,7 @@ export function RadialAddMenu() {
         ref={btnRef}
         type="button"
         onClick={() => (open ? close() : openMenu())}
-        aria-label={open ? 'Close quick add' : 'Quick add'}
+        aria-label={open ? t('common.closeQuickAdd') : t('common.quickAdd')}
         aria-expanded={open}
         className={cn(
           'flex h-[52px] w-[52px] items-center justify-center rounded-[17px] border-[3px] border-bg bg-accent-solid text-2xl leading-none text-on-accent-solid shadow-glow transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-90',
@@ -141,7 +143,7 @@ export function RadialAddMenu() {
               <div
                 role="button"
                 tabIndex={0}
-                aria-label="Close menu"
+                aria-label={t('common.closeQuickAdd')}
                 onPointerDown={onScrimDown}
                 onPointerMove={onScrimMove}
                 onPointerUp={onScrimUp}
@@ -200,7 +202,7 @@ export function RadialAddMenu() {
               <button
                 type="button"
                 onClick={close}
-                aria-label="Close quick add"
+                aria-label={t('common.closeQuickAdd')}
                 className="absolute flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[17px] border-[3px] border-bg bg-accent-solid text-on-accent-solid shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-90"
                 style={{ left: anchor.x, top: anchor.y }}
               >

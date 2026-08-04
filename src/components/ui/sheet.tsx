@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 const CLOSE_MS = 260
 
@@ -32,6 +33,7 @@ export function Sheet({
   preventInitialFocus,
   children,
 }: SheetProps) {
+  const { t } = useT()
   const contentRef = useRef<HTMLDivElement>(null)
   const startY = useRef(0)
   // Refs drive the gesture (synchronous, no stale closures); state only mirrors
@@ -135,7 +137,7 @@ export function Sheet({
               {mono ? `// ${title}` : title}
             </Dialog.Title>
             <Dialog.Close
-              aria-label="Close"
+              aria-label={t('common.close')}
               className="hidden text-[15px] leading-none text-muted-strong transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent lg:block"
             >
               <span aria-hidden="true">✕</span>

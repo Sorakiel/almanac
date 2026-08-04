@@ -2,10 +2,10 @@
  * Friendly label for a `YYYY-MM-DD` key, e.g. "Monday, 8 July". Parsed as UTC so
  * the label never drifts by a day across timezones (the key is already local).
  */
-export function reflectionDateLabel(dateKey: string): string {
+export function reflectionDateLabel(dateKey: string, locale: string = 'en-GB'): string {
   const [y, m, d] = dateKey.split('-').map(Number)
   const date = new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1))
-  return new Intl.DateTimeFormat('en-GB', {
+  return new Intl.DateTimeFormat(locale, {
     timeZone: 'UTC',
     weekday: 'long',
     day: 'numeric',
@@ -17,13 +17,13 @@ export function reflectionDateLabel(dateKey: string): string {
  * Compact label for a `YYYY-MM-DD` key, e.g. "MON · 07 JUL" — used in tight rail
  * cards where the full weekday/month name would wrap.
  */
-export function reflectionDateShortLabel(dateKey: string): string {
+export function reflectionDateShortLabel(dateKey: string, locale: string = 'en-GB'): string {
   const [y, m, d] = dateKey.split('-').map(Number)
   const date = new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1))
-  const weekday = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', weekday: 'short' }).format(
+  const weekday = new Intl.DateTimeFormat(locale, { timeZone: 'UTC', weekday: 'short' }).format(
     date,
   )
-  const dayMonth = new Intl.DateTimeFormat('en-GB', {
+  const dayMonth = new Intl.DateTimeFormat(locale, {
     timeZone: 'UTC',
     day: '2-digit',
     month: 'short',

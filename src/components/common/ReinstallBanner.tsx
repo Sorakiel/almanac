@@ -1,5 +1,6 @@
 import { Download, X } from 'lucide-react'
 import { useUpdateStore } from '@/stores/update'
+import { useT } from '@/hooks/useT'
 
 /**
  * Android-only prompt shown when an update ships native changes the over-the-air
@@ -7,6 +8,7 @@ import { useUpdateStore } from '@/stores/update'
  * the shell; dismissible for the session (re-checks on next launch).
  */
 export function ReinstallBanner() {
+  const { t } = useT()
   const reinstall = useUpdateStore((s) => s.reinstall)
   const setReinstall = useUpdateStore((s) => s.setReinstall)
   if (!reinstall) return null
@@ -18,8 +20,10 @@ export function ReinstallBanner() {
     >
       <Download className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
       <p className="min-w-0 flex-1 text-[13px] leading-snug">
-        <span className="font-semibold">Update {reinstall.version} is ready.</span>{' '}
-        <span className="text-muted">It needs a fresh install — download the new APK.</span>
+        <span className="font-semibold">
+          {t('common.updateReady', { version: reinstall.version })}
+        </span>{' '}
+        <span className="text-muted">{t('common.apkHint')}</span>
       </p>
       <a
         href={reinstall.apkUrl}
@@ -27,12 +31,12 @@ export function ReinstallBanner() {
         rel="noreferrer"
         className="shrink-0 rounded-[10px] bg-accent-solid px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-label text-on-accent-solid transition-colors hover:bg-accent-solid-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
-        Get APK
+        {t('common.getApk')}
       </a>
       <button
         type="button"
         onClick={() => setReinstall(null)}
-        aria-label="Dismiss"
+        aria-label={t('common.dismiss')}
         className="shrink-0 rounded p-1 text-muted-strong transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <X className="h-4 w-4" aria-hidden="true" />

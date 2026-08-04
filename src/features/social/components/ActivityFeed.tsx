@@ -3,6 +3,7 @@ import { Avatar } from '@/components/common/Avatar'
 import { EmptyState } from '@/components/common/EmptyState'
 import { activitySummary, feedDayLabel } from '@/features/social/lib/format'
 import type { ActivityKind, FeedItem } from '@/features/social/types'
+import { useT } from '@/hooks/useT'
 
 /** Icon + tint per event kind. */
 const KIND_ICON: Record<ActivityKind, { icon: LucideIcon; tone: string }> = {
@@ -19,16 +20,13 @@ interface ActivityFeedProps {
 
 /** The friends activity feed — recent completions, newest first. */
 export function ActivityFeed({ feed, todayKey, hasFriends }: ActivityFeedProps) {
+  const { t } = useT()
   if (feed.length === 0) {
     return (
       <EmptyState
         icon={Users}
-        title={hasFriends ? 'No activity yet' : 'Add a friend to see their activity'}
-        description={
-          hasFriends
-            ? 'When your friends complete habits, it shows up here.'
-            : 'Search for a friend by name and send a request to get started.'
-        }
+        title={hasFriends ? t('social.noActivity') : t('social.addToSeeActivity')}
+        description={hasFriends ? t('social.noActivityHint') : t('social.addToSeeActivityHint')}
       />
     )
   }

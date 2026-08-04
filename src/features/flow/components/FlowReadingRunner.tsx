@@ -7,6 +7,7 @@ import { IconTile } from '@/components/common/IconTile'
 import { useBook } from '@/features/reading/hooks/useBook'
 import { useReadingProgress } from '@/features/reading/hooks/useReadingProgress'
 import { unitNoun, unitNounPlural } from '@/features/reading/lib/progress'
+import { useT } from '@/hooks/useT'
 
 interface FlowReadingRunnerProps {
   bookId: string
@@ -17,6 +18,7 @@ interface FlowReadingRunnerProps {
 
 /** In-session reading panel: log where you stopped, save progress + time, end. */
 export function FlowReadingRunner({ bookId, minutes, onFinish }: FlowReadingRunnerProps) {
+  const { t } = useT()
   const { book, isLoading } = useBook(bookId)
   const logProgress = useReadingProgress()
   const [value, setValue] = useState('')
@@ -38,11 +40,11 @@ export function FlowReadingRunner({ bookId, minutes, onFinish }: FlowReadingRunn
       { book, nextUnit, minutes },
       {
         onSuccess: () => {
-          toast.success('Reading logged — nice session.')
+          toast.success(t('flow.readingLogged'))
           onFinish()
         },
         onError: (error) =>
-          toast.error(error instanceof Error ? error.message : 'Could not log your reading'),
+          toast.error(error instanceof Error ? error.message : t('flow.readingFailed')),
       },
     )
   }
@@ -73,7 +75,7 @@ export function FlowReadingRunner({ bookId, minutes, onFinish }: FlowReadingRunn
 
       <Button onClick={finish} disabled={logProgress.isPending}>
         <Check className="h-4 w-4" />
-        Log & finish
+        {t('flow.logAndFinish')}
       </Button>
     </div>
   )

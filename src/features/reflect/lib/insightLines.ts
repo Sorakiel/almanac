@@ -1,5 +1,6 @@
 import type { ReflectInsights } from '@/features/insights/types'
 import type { Reflection } from '@/features/reflect/types'
+import type { TFunction } from '@/hooks/useT'
 import type { InsightLine } from '@/lib/insight'
 
 /** Whole days from `fromKey` to `toKey` (both `YYYY-MM-DD`), parsed as UTC. */
@@ -20,6 +21,7 @@ export function buildReflectLines(
   reflections: Reflection[],
   insights: ReflectInsights | null,
   dateKey: string,
+  t: TFunction,
 ): InsightLine[] {
   if (reflections.length === 0) return []
 
@@ -31,15 +33,12 @@ export function buildReflectLines(
     .at(-1)
 
   if (wroteToday) {
-    lines.push({ id: 'today', text: 'You journaled today. The day is captured.', tone: 'good' })
+    lines.push({ id: 'today', text: t('reflect.journaledToday'), tone: 'good' })
   } else if (lastEntry) {
     const days = daysBetween(lastEntry, dateKey)
     lines.push({
       id: 'gap',
-      text:
-        days <= 1
-          ? 'No entry yet today — take a minute to reflect.'
-          : `${days} days since your last entry — pick the thread back up.`,
+      text: days <= 1 ? t('reflect.noEntryToday') : t('reflect.lines.gap', { count: days }),
       tone: days >= 3 ? 'urgent' : 'info',
     })
   }
@@ -47,7 +46,7 @@ export function buildReflectLines(
   if (insights?.currentStreak && insights.currentStreak >= 2) {
     lines.push({
       id: 'streak',
-      text: `${insights.currentStreak}-day journaling streak going.`,
+      text: t('reflect.lines.streak', { count: insights.currentStreak }),
       tone: 'good',
     })
   }
@@ -56,21 +55,21 @@ export function buildReflectLines(
     if (insights.daysJournaled30d > 0) {
       lines.push({
         id: 'days-30d',
-        text: `Journaled ${insights.daysJournaled30d} day${insights.daysJournaled30d > 1 ? 's' : ''} in the last 30.`,
+        text: t('reflect.lines.days30', { count: insights.daysJournaled30d }),
         tone: 'info',
       })
     }
     if (insights.avgDayRating30d !== null) {
       lines.push({
         id: 'rating',
-        text: `Your days rate ${insights.avgDayRating30d.toFixed(1)}/5 on average lately.`,
+        text: t('reflect.lines.rating', { rating: insights.avgDayRating30d.toFixed(1) }),
         tone: insights.avgDayRating30d >= 3.5 ? 'good' : 'info',
       })
     }
     if (insights.consistency30d > 0) {
       lines.push({
         id: 'consistency',
-        text: `Reflecting on ${Math.round(insights.consistency30d * 100)}% of your days this month.`,
+        text: t('reflect.lines.consistency', { pct: Math.round(insights.consistency30d * 100) }),
         tone: 'info',
       })
     }

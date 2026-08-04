@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useUserSearch } from '@/features/social/hooks/useUserSearch'
 import type { FriendProfile } from '@/features/social/types'
+import { useT } from '@/hooks/useT'
 
 interface AddFriendProps {
   /** Ids already connected (friend or pending) — hidden from results. */
@@ -16,6 +17,7 @@ interface AddFriendProps {
 
 /** Search people by name and send a friend request. */
 export function AddFriend({ connectedIds, selfId, onAdd, isAdding }: AddFriendProps) {
+  const { t } = useT()
   const [query, setQuery] = useState('')
   const { results, isSearching } = useUserSearch(query)
   const shown = results.filter((r) => r.id !== selfId && !connectedIds.has(r.id))
@@ -24,7 +26,7 @@ export function AddFriend({ connectedIds, selfId, onAdd, isAdding }: AddFriendPr
   return (
     <div className="flex flex-col gap-3 rounded-card border bg-surface p-4">
       <label htmlFor="friend-search" className="label-mono">
-        // add a friend
+        // {t('social.addAFriend')}
       </label>
       <div className="relative">
         <Search
@@ -35,7 +37,7 @@ export function AddFriend({ connectedIds, selfId, onAdd, isAdding }: AddFriendPr
           id="friend-search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by name…"
+          placeholder={t('social.searchPlaceholder')}
           className="pl-10"
           autoComplete="off"
         />
@@ -45,10 +47,11 @@ export function AddFriend({ connectedIds, selfId, onAdd, isAdding }: AddFriendPr
         <div className="flex flex-col gap-1.5">
           {isSearching && shown.length === 0 ? (
             <p className="flex items-center gap-2 py-2 text-sm text-muted">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Searching…
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />{' '}
+              {t('social.searching')}
             </p>
           ) : shown.length === 0 ? (
-            <p className="py-2 text-sm text-muted">No one found by that name.</p>
+            <p className="py-2 text-sm text-muted">{t('social.noneFound')}</p>
           ) : (
             shown.map((person: FriendProfile) => (
               <div key={person.id} className="flex items-center gap-3 rounded-xl px-1 py-1.5">
@@ -63,7 +66,7 @@ export function AddFriend({ connectedIds, selfId, onAdd, isAdding }: AddFriendPr
                   onClick={() => onAdd(person.id)}
                 >
                   <UserPlus className="h-4 w-4" aria-hidden="true" />
-                  Add
+                  {t('social.add')}
                 </Button>
               </div>
             ))

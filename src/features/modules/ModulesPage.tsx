@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CircleDollarSign, Moon, Plus, Target, type LucideIcon } from 'lucide-react'
+import { CircleDollarSign, Moon, Plus, Target } from 'lucide-react'
 import { Cascade } from '@/components/common/Cascade'
 import { IconTile } from '@/components/common/IconTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
@@ -13,11 +13,6 @@ import { NAV_MODULES, useModulesStore, type ModuleKey } from '@/stores/modules'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
 
-interface SoonModule {
-  title: string
-  icon: LucideIcon
-}
-
 /** Per-module icon tint, keyed to the shared NAV_MODULES list. */
 const MODULE_TONE: Record<ModuleKey, string> = {
   habits: 'bg-accent/15 text-accent',
@@ -29,11 +24,12 @@ const MODULE_TONE: Record<ModuleKey, string> = {
   social: 'bg-accent/15 text-accent',
 }
 
-const SOON: SoonModule[] = [
-  { title: 'Finances', icon: CircleDollarSign },
-  { title: 'Goals', icon: Target },
-  { title: 'Sleep', icon: Moon },
-]
+/** Not-yet-built modules. `key` resolves to `modulesPage.soonModules.*` at render. */
+const SOON = [
+  { key: 'finances', icon: CircleDollarSign },
+  { key: 'goals', icon: Target },
+  { key: 'sleep', icon: Moon },
+] as const
 
 function ModulesPage() {
   const { t } = useT()
@@ -46,13 +42,17 @@ function ModulesPage() {
     <>
       <div className="flex flex-col gap-5 lg:max-w-[760px]">
         <header>
-          <p className="label-mono">// your command center</p>
-          <h1 className="mt-1 text-2xl lg:mt-1.5 lg:text-[32px] lg:tracking-title">Modules</h1>
+          <p className="label-mono">// {t('modulesPage.commandCenter')}</p>
+          <h1 className="mt-1 text-2xl lg:mt-1.5 lg:text-[32px] lg:tracking-title">
+            {t('modulesPage.title')}
+          </h1>
         </header>
 
         <Cascade>
           <section className="flex flex-col gap-3">
-            <SectionLabel accessory="switch = show in nav">MODULES</SectionLabel>
+            <SectionLabel accessory={t('modulesPage.switchHint')}>
+              {t('modulesPage.eyebrow')}
+            </SectionLabel>
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
               {NAV_MODULES.map((m) => {
                 const on = enabled[m.key]
@@ -79,7 +79,7 @@ function ModulesPage() {
                       <div className="relative z-10">
                         {m.core ? (
                           // Core modules are permanent — locked on, no toggle.
-                          <Tag tone="muted">Pinned</Tag>
+                          <Tag tone="muted">{t('modulesPage.pinned')}</Tag>
                         ) : (
                           <Switch
                             checked={on}
@@ -102,16 +102,18 @@ function ModulesPage() {
           </section>
 
           <section className="flex flex-col gap-3">
-            <SectionLabel>COMING SOON</SectionLabel>
+            <SectionLabel>{t('modulesPage.comingSoon')}</SectionLabel>
             <div className="grid grid-cols-3 gap-3">
               {SOON.map((m) => (
                 <div
-                  key={m.title}
+                  key={m.key}
                   className="flex flex-col items-center gap-2 rounded-[18px] border border-dashed px-3 py-4 text-center opacity-80"
                 >
                   <IconTile icon={m.icon} tone="bg-border/10 text-muted" size="sm" />
-                  <p className="text-[13px] font-medium text-muted">{m.title}</p>
-                  <Tag tone="muted">Soon</Tag>
+                  <p className="text-[13px] font-medium text-muted">
+                    {t(`modulesPage.soonModules.${m.key}`)}
+                  </p>
+                  <Tag tone="muted">{t('modulesPage.soon')}</Tag>
                 </div>
               ))}
             </div>
@@ -123,7 +125,7 @@ function ModulesPage() {
             className="flex items-center gap-3 rounded-card border border-accent/25 bg-gradient-to-br from-accent/[0.06] to-transparent px-4 py-4 text-left text-sm text-muted transition-colors hover:text-foreground"
           >
             <Plus className="h-4 w-4 text-accent" aria-hidden="true" />
-            Send feedback — help shape Almanac.
+            {t('modulesPage.feedbackCta')}
           </button>
         </Cascade>
 

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { Check, X } from 'lucide-react'
+import { useT } from '@/hooks/useT'
 
 interface FocusConsoleProps {
   label: string
@@ -45,6 +46,7 @@ export function FocusConsole({
   onComplete,
   completeLabel = 'Done',
 }: FocusConsoleProps) {
+  const { t } = useT()
   const ticks = useMemo(
     () =>
       Array.from({ length: TICKS }, (_, i) => {
@@ -163,7 +165,7 @@ export function FocusConsole({
             className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-[11px] border bg-surface py-2.5 font-mono text-[11px] font-bold uppercase tracking-label text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <X className="h-3.5 w-3.5" aria-hidden="true" />
-            End
+            {t('flow.end')}
           </button>
           {onComplete ? (
             <button

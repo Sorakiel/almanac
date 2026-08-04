@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import type { Friend } from '@/features/social/types'
+import { useT } from '@/hooks/useT'
 
 interface FriendsListProps {
   friends: Friend[]
@@ -14,14 +15,15 @@ interface FriendsListProps {
 
 /** Accepted friends, each removable with a confirmation step. */
 export function FriendsList({ friends, onRemove, busy }: FriendsListProps) {
+  const { t } = useT()
   const [pending, setPending] = useState<Friend | null>(null)
 
   return (
     <section className="flex flex-col gap-2">
-      <SectionLabel accessory={String(friends.length)}>Friends</SectionLabel>
+      <SectionLabel accessory={String(friends.length)}>{t('social.title')}</SectionLabel>
       {friends.length === 0 ? (
         <p className="rounded-card border border-dashed px-4 py-6 text-center text-sm text-muted">
-          No friends yet — search above to add one.
+          {t('social.noFriendsYet')}
         </p>
       ) : (
         friends.map((friend) => (
@@ -37,7 +39,7 @@ export function FriendsList({ friends, onRemove, busy }: FriendsListProps) {
               size="icon"
               variant="ghost"
               className="h-9 w-9 text-muted hover:text-foreground"
-              aria-label={`Remove ${friend.displayName}`}
+              aria-label={t('social.removeName', { name: friend.displayName })}
               onClick={() => setPending(friend)}
             >
               <UserMinus className="h-4 w-4" aria-hidden="true" />
@@ -49,9 +51,9 @@ export function FriendsList({ friends, onRemove, busy }: FriendsListProps) {
       <ConfirmSheet
         open={pending !== null}
         onOpenChange={(open) => !open && setPending(null)}
-        title={pending ? `Remove ${pending.displayName}?` : ''}
-        description="You'll stop seeing each other's activity. You can add them again later."
-        confirmLabel="Remove friend"
+        title={pending ? t('social.removeNameConfirm', { name: pending.displayName }) : ''}
+        description={t('social.removeFriendHint')}
+        confirmLabel={t('social.removeFriend')}
         pending={busy}
         onConfirm={() => {
           if (pending) onRemove(pending.friendshipId)
