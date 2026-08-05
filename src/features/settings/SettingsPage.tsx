@@ -12,6 +12,7 @@ import {
   Heart,
   Laptop,
   Moon,
+  Newspaper,
   ShieldCheck,
   Trophy,
   Volume2,
@@ -26,6 +27,7 @@ import { Rail } from '@/components/common/desktop/rail'
 import { SettingsRail } from '@/features/settings/components/SettingsRail'
 import { TimezoneSheet } from '@/features/settings/components/TimezoneSheet'
 import { ReminderSheet } from '@/features/settings/components/ReminderSheet'
+import { DigestSheet } from '@/features/settings/components/DigestSheet'
 import { BackgroundSheet } from '@/features/settings/components/BackgroundSheet'
 import { SupportSheet } from '@/features/settings/components/SupportSheet'
 import { LanguageSheet } from '@/features/settings/components/LanguageSheet'
@@ -60,6 +62,7 @@ function SettingsPage() {
   const { dateKey } = useToday()
   const [timezoneOpen, setTimezoneOpen] = useState(false)
   const [reminderOpen, setReminderOpen] = useState(false)
+  const [digestOpen, setDigestOpen] = useState(false)
   const [backgroundOpen, setBackgroundOpen] = useState(false)
   const [supportOpen, setSupportOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
@@ -83,6 +86,10 @@ function SettingsPage() {
   const reminderEnabled = profile?.reminder_enabled ?? false
   const reminderHour = profile?.reminder_hour ?? 8
   const reminderMinute = profile?.reminder_minute ?? 0
+  const digestEnabled = profile?.digest_enabled ?? false
+  const digestDay = profile?.digest_day ?? 0
+  const digestHour = profile?.digest_hour ?? 18
+  const digestMinute = profile?.digest_minute ?? 0
 
   const handleAnalyticsChange = (on: boolean) => {
     setAnalytics(on)
@@ -187,6 +194,14 @@ function SettingsPage() {
               onClick={() => setReminderOpen(true)}
             />
             <Row
+              icon={Newspaper}
+              label={t('settings.weeklyDigest')}
+              value={
+                digestEnabled ? reminderTimeLabel(digestHour, digestMinute) : t('settings.off')
+              }
+              onClick={() => setDigestOpen(true)}
+            />
+            <Row
               icon={Languages}
               label={t('settings.language')}
               value={LOCALES.find((l) => l.value === locale)?.label}
@@ -246,6 +261,18 @@ function SettingsPage() {
           enabled={reminderEnabled}
           hour={reminderHour}
           minute={reminderMinute}
+          digestEnabled={digestEnabled}
+        />
+      ) : null}
+      {digestOpen ? (
+        <DigestSheet
+          open
+          onOpenChange={setDigestOpen}
+          enabled={digestEnabled}
+          day={digestDay}
+          hour={digestHour}
+          minute={digestMinute}
+          reminderEnabled={reminderEnabled}
         />
       ) : null}
       {backgroundOpen ? <BackgroundSheet open onOpenChange={setBackgroundOpen} /> : null}
