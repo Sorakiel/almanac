@@ -1,6 +1,7 @@
 import { QueryClient } from '@tanstack/react-query'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import type { PersistQueryClientOptions } from '@tanstack/react-query-persist-client'
+import { OFFLINE_MUTATION_ROOT, registerOfflineMutations } from '@/lib/offlineMutations'
 import { APP_VERSION } from '@/lib/version'
 
 /** How long a cached screen may be replayed offline before it is discarded. */
@@ -20,11 +21,27 @@ export const queryClient = new QueryClient({
   },
 })
 
+// Must run before the persisted cache restores below — a resumed mutation is
+// rebuilt from just its mutationKey and dehydrated state, so mutationFn has
+// to already be registered by the time hydrate() runs.
+registerOfflineMutations(queryClient)
+
 const persister = createSyncStoragePersister({
   storage: typeof window === 'undefined' ? undefined : window.localStorage,
   key: 'almanac-query-cache',
   throttleTime: 2000,
 })
+
+// A paused mutation does not continue on its own when the browser comes back
+// online (see the note on shouldDehydrateMutation below) — it needs this
+// explicit nudge. The equivalent nudge right after the persisted-cache
+// restore lives in providers.tsx, for a mutation that was already paused
+// *before* this app session started.
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    void queryClient.resumePausedMutations()
+  })
+}
 
 /**
  * Restore the last-seen data on load so the app opens to real content offline
@@ -43,19 +60,22 @@ export const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
     // Only settled data is worth replaying: a pending or errored query restored
     // as-is renders a spinner or an error that never resolves.
     shouldDehydrateQuery: (query) => query.state.status === 'success',
-    // Mutations must NOT be persisted. React Query dehydrates paused ones by
-    // default, but a restored mutation carries only its variables — the
-    // function is gone, so it resumes straight into "No mutationFn found":
-    // the tap is lost *and* the user is shown a failure.
+    // Persist a paused mutation only if it is one we registered a default for
+    // in offlineMutations.ts (mutationKey namespaced under 'offline'). A
+    // restored mutation carries only its variables — the function is gone —
+    // so anything else resumes straight into "No mutationFn found": the tap
+    // is lost *and* the user is shown a failure. Migrating a write path to
+    // survive offline means adding it to offlineMutations.ts first.
     //
-    // Offline writes are out of scope here, and measured rather than assumed:
-    // a mutation paused while offline does not resume on reconnect in this
-    // version — not on the onlineManager transition, and not on an explicit
-    // `resumePausedMutations()`, which never settles. So an offline tap is
-    // local only, which is what OfflineBanner tells the user. Making writes
-    // survive needs `setMutationDefaults` with serialisable variables for
-    // every write path plus persisted mutations; that is its own piece of work.
-    shouldDehydrateMutation: () => false,
+    // The resume mechanism itself was measured, not assumed: a live paused
+    // mutation does NOT continue on its own from the onlineManager 'online'
+    // transition (confirmed broken in 5.101.4). It does resume correctly —
+    // both live and after a dehydrate/hydrate round trip — from an explicit
+    // `queryClient.resumePausedMutations()` call, which is wired to the
+    // browser's 'online' event and to the persisted-cache restore in
+    // providers.tsx.
+    shouldDehydrateMutation: (mutation) =>
+      mutation.state.isPaused && mutation.options.mutationKey?.[0] === OFFLINE_MUTATION_ROOT,
   },
 }
 
