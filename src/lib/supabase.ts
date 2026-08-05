@@ -47,5 +47,9 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     detectSessionInUrl: true,
     storage: authStorage,
+    // Passkeys (RET-8) are an experimental supabase-js API — opt-in required.
+    // The methods themselves no-op with a `passkey_disabled` error until the
+    // project's Relying Party is configured in the Supabase dashboard.
+    experimental: { passkey: true },
   },
 })

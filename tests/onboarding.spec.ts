@@ -44,7 +44,12 @@ test('walks the welcome flow and adopts the device timezone', async ({ page }) =
   await page.goto('/auth')
   await page.getByLabel('Email').fill(E2E_EMAIL)
   await page.getByLabel('Password').fill(E2E_PASSWORD)
-  await page.getByRole('button', { name: /sign in/i }).click()
+  // Scoped to the form — the page also has a "Sign in with a passkey" button
+  // (RET-8) outside it, which /sign in/i alone also matches.
+  await page
+    .locator('form')
+    .getByRole('button', { name: /sign in/i })
+    .click()
 
   await expect(page).toHaveURL(/\/welcome$/, { timeout: 20_000 })
   await expect(page.getByText(/welcome to/i)).toBeVisible()

@@ -1,12 +1,20 @@
 import { expect, type Page } from '@playwright/test'
 import { E2E_EMAIL, E2E_PASSWORD } from './supabase'
 
-/** Sign in through the real auth form and wait for the app shell. */
+/**
+ * Sign in through the real auth form and wait for the app shell.
+ *
+ * Scoped to the `<form>` — the page also has a "Sign in with a passkey"
+ * button outside it (RET-8), and `/sign in/i` alone now matches both.
+ */
 export async function signIn(page: Page): Promise<void> {
   await page.goto('/auth')
   await page.getByLabel('Email').fill(E2E_EMAIL)
   await page.getByLabel('Password').fill(E2E_PASSWORD)
-  await page.getByRole('button', { name: /sign in/i }).click()
+  await page
+    .locator('form')
+    .getByRole('button', { name: /sign in/i })
+    .click()
   await expect(page).toHaveURL(/\/$/, { timeout: 20_000 })
 }
 
