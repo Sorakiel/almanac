@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, onlineManager, dehydrate, hydrate } from '@tanstack/react-query'
 import { addFreeze, createHabit, setHabitCount } from '@/features/habits/api/habits.api'
+import { updateWorkout } from '@/features/workouts/api/workouts.api'
 import { OFFLINE_MUTATION_KEYS, registerOfflineMutations } from '@/lib/offlineMutations'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 
@@ -18,6 +19,11 @@ vi.mock('@/features/habits/api/habits.api', () => ({
 }))
 vi.mock('@/features/workouts/api/session.api', () => ({
   updateSet: vi.fn(async () => undefined),
+}))
+vi.mock('@/features/workouts/api/workouts.api', () => ({
+  createWorkout: vi.fn(async () => ({ id: 'new-workout' })),
+  updateWorkout: vi.fn(async () => ({ id: 'w1', completed_at: null })),
+  deleteWorkout: vi.fn(async () => undefined),
 }))
 
 const habit = { id: 'h1', isComplete: false, todayCount: 0 } as HabitWithTodayLog
@@ -137,6 +143,25 @@ describe('offline mutation resume', () => {
       expect.objectContaining({ name: 'Read', user_id: 'u1' }),
     )
     expect(result).toEqual({ id: 'new-habit', frequency: 'daily' })
+  })
+
+  it('resumes a shared toggleWorkoutComplete write from either call site', async () => {
+    onlineManager.setOnline(false)
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    const mutation = client
+      .getMutationCache()
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.toggleWorkoutComplete })
+    const pending = mutation.execute({ id: 'w1', userId: 'u1', done: true })
+    await new Promise((r) => setTimeout(r, 10))
+
+    onlineManager.setOnline(true)
+    await client.resumePausedMutations()
+    await pending
+
+    expect(updateWorkout).toHaveBeenCalledWith('w1', {
+      completed_at: expect.any(String),
+    })
   })
 
   it('a non-offline mutation key is never dehydrated, matching queryClient.ts', () => {

@@ -2,8 +2,11 @@ import { useState } from 'react'
 import { useMutation, useQueryClient, type MutateOptions } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { trackEvent } from '@/lib/analytics'
-import { OFFLINE_MUTATION_KEYS, type EditSetVariables } from '@/lib/offlineMutations'
-import { updateWorkout } from '@/features/workouts/api/workouts.api'
+import {
+  OFFLINE_MUTATION_KEYS,
+  type EditSetVariables,
+  type ToggleWorkoutCompleteVariables,
+} from '@/lib/offlineMutations'
 import {
   addSet,
   addWorkoutExercise,
@@ -56,15 +59,23 @@ export function useSessionMutations(workoutId: string) {
     return prev
   }
 
-  const setCompleted = useMutation({
-    mutationFn: (done: boolean) =>
-      updateWorkout(workoutId, { completed_at: done ? new Date().toISOString() : null }),
-    onSuccess: (_data, done) => {
-      void queryClient.invalidateQueries({ queryKey: ['workout', workoutId] })
-      void queryClient.invalidateQueries({ queryKey: ['workouts', userId] })
+  // Shares its mutationKey/mutationFn with useWorkoutMutations' toggleComplete
+  // (same underlying write, two call sites) — see offlineMutations.ts.
+  const setCompletedMutation = useMutation<Workout, Error, ToggleWorkoutCompleteVariables>({
+    mutationKey: OFFLINE_MUTATION_KEYS.toggleWorkoutComplete,
+    onSuccess: (_data, { done }) => {
       if (done) trackEvent('workout_finished')
     },
   })
+  const setCompleted = {
+    ...setCompletedMutation,
+    mutate: (
+      done: boolean,
+      options?: MutateOptions<Workout, Error, ToggleWorkoutCompleteVariables>,
+    ) => setCompletedMutation.mutate({ id: workoutId, userId, done }, options),
+    mutateAsync: (done: boolean) =>
+      setCompletedMutation.mutateAsync({ id: workoutId, userId, done }),
+  }
 
   const createLibraryExercise = useMutation({
     mutationFn: ({ name, muscleGroup }: { name: string; muscleGroup: string | null }) =>
