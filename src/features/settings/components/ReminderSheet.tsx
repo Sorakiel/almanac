@@ -18,6 +18,12 @@ interface ReminderSheetProps {
   enabled: boolean
   hour: number
   minute: number
+  /**
+   * Whether the weekly digest is also on — it shares this same device push
+   * subscription, so turning the reminder off must not unsubscribe a browser
+   * the digest still needs.
+   */
+  digestEnabled: boolean
 }
 
 /**
@@ -25,7 +31,14 @@ interface ReminderSheetProps {
  * time on days you still have habits left to complete. On mobile the OS delivers
  * it even when the app is closed; on desktop it fires while the app is running.
  */
-export function ReminderSheet({ open, onOpenChange, enabled, hour, minute }: ReminderSheetProps) {
+export function ReminderSheet({
+  open,
+  onOpenChange,
+  enabled,
+  hour,
+  minute,
+  digestEnabled,
+}: ReminderSheetProps) {
   const { update, isPending } = useUpdateProfile()
   const { user } = useSession()
   const [on, setOn] = useState(enabled)
@@ -65,7 +78,7 @@ export function ReminderSheet({ open, onOpenChange, enabled, hour, minute }: Rem
         }
       } else {
         await clearScheduledReminders()
-        if (!isTauri() && !isCapacitor() && pushSupported())
+        if (!digestEnabled && !isTauri() && !isCapacitor() && pushSupported())
           await disablePush().catch(() => undefined)
       }
       await update({
