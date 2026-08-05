@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
-import { submitFeedback } from '@/features/modules/api/feedback.api'
+import { OFFLINE_MUTATION_KEYS, type SendFeedbackVariables } from '@/lib/offlineMutations'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
 
@@ -32,8 +32,8 @@ export function FeedbackSheet({ open, onOpenChange }: FeedbackSheetProps) {
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
-  const send = useMutation({
-    mutationFn: (body: string) => submitFeedback(user?.id ?? '', body),
+  const sendMutation = useMutation<void, Error, SendFeedbackVariables>({
+    mutationKey: OFFLINE_MUTATION_KEYS.sendFeedback,
     onSuccess: () => {
       toast.success(t('modulesPage.feedback.sent'))
       reset()
@@ -42,6 +42,10 @@ export function FeedbackSheet({ open, onOpenChange }: FeedbackSheetProps) {
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : t('modulesPage.feedback.failed')),
   })
+  const send = {
+    ...sendMutation,
+    mutate: (body: string) => sendMutation.mutate({ userId: user?.id ?? '', body }),
+  }
 
   const onSubmit = handleSubmit((values) => send.mutate(values.body))
 
