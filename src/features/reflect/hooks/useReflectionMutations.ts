@@ -1,11 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, type MutateOptions } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { trackEvent } from '@/lib/analytics'
 import {
-  createReflection,
-  deleteReflection,
-  updateReflection,
-} from '@/features/reflect/api/reflections.api'
+  OFFLINE_MUTATION_KEYS,
+  type DeleteReflectionVariables,
+  type SaveReflectionVariables,
+} from '@/lib/offlineMutations'
+import type { Reflection } from '@/features/reflect/types'
 
 interface SaveInput {
   /** Existing reflection id when editing today's entry, else null to create. */
@@ -18,37 +19,38 @@ interface SaveInput {
   dayRating: number | null
 }
 
-/** Save (create or update today's) and delete reflections; invalidate on settle. */
+/**
+ * Save (create or update today's) and delete reflections; invalidate on
+ * settle. mutationFn and the settle invalidation live once in
+ * registerOfflineMutations (src/lib/offlineMutations.ts) — see
+ * useToggleHabit for why.
+ */
 export function useReflectionMutations() {
-  const queryClient = useQueryClient()
   const { user } = useSession()
   const userId = user?.id ?? ''
-  const key = ['reflections', userId]
-  const invalidate = () => void queryClient.invalidateQueries({ queryKey: key })
 
-  const save = useMutation({
-    mutationFn: ({ id, date, body, quoteId, mood, energy, dayRating }: SaveInput) =>
-      id
-        ? updateReflection(id, { body, mood, energy, day_rating: dayRating })
-        : createReflection({
-            user_id: userId,
-            date,
-            body,
-            quote_id: quoteId,
-            mood,
-            energy,
-            day_rating: dayRating,
-          }),
-    onSuccess: () => {
-      invalidate()
-      trackEvent('reflection_saved')
-    },
+  const saveMutation = useMutation<Reflection, Error, SaveReflectionVariables>({
+    mutationKey: OFFLINE_MUTATION_KEYS.saveReflection,
+    onSuccess: () => trackEvent('reflection_saved'),
   })
+  const save = {
+    ...saveMutation,
+    mutate: (
+      input: SaveInput,
+      options?: MutateOptions<Reflection, Error, SaveReflectionVariables>,
+    ) => saveMutation.mutate({ ...input, userId }, options),
+    mutateAsync: (input: SaveInput) => saveMutation.mutateAsync({ ...input, userId }),
+  }
 
-  const remove = useMutation({
-    mutationFn: (id: string) => deleteReflection(id),
-    onSuccess: invalidate,
+  const removeMutation = useMutation<void, Error, DeleteReflectionVariables>({
+    mutationKey: OFFLINE_MUTATION_KEYS.deleteReflection,
   })
+  const remove = {
+    ...removeMutation,
+    mutate: (id: string, options?: MutateOptions<void, Error, DeleteReflectionVariables>) =>
+      removeMutation.mutate({ id, userId }, options),
+    mutateAsync: (id: string) => removeMutation.mutateAsync({ id, userId }),
+  }
 
   return { save, remove }
 }
