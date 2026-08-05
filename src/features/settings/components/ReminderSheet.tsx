@@ -4,11 +4,16 @@ import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { useUpdateProfile } from '@/features/settings/hooks/useUpdateProfile'
-import { REMINDER_PRESETS, reminderTimeLabel } from '@/features/settings/lib/reminder'
+import {
+  REMINDER_PRESETS,
+  reminderPresetLabel,
+  reminderTimeLabel,
+} from '@/features/settings/lib/reminder'
 import { clearScheduledReminders, requestNotifyPermission } from '@/lib/notify'
 import { disablePush, enablePush, pushSupported } from '@/lib/push'
 import { isCapacitor, isTauri } from '@/lib/notify'
 import { useSession } from '@/hooks/useSession'
+import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
 
 interface ReminderSheetProps {
@@ -39,6 +44,7 @@ export function ReminderSheet({
   minute,
   digestEnabled,
 }: ReminderSheetProps) {
+  const { t } = useT()
   const { update, isPending } = useUpdateProfile()
   const { user } = useSession()
   const [on, setOn] = useState(enabled)
@@ -64,7 +70,7 @@ export function ReminderSheet({
       if (on) {
         const granted = await requestNotifyPermission()
         if (!granted) {
-          toast.error('Allow notifications for Almanac in your system settings to get reminders.')
+          toast.error(t('settings.reminderPermissionDenied'))
         }
         // On the web the server can only reach this device through a Web Push
         // subscription — the native shell schedules its own local notification
@@ -73,7 +79,7 @@ export function ReminderSheet({
           try {
             await enablePush(user.id)
           } catch {
-            toast.error('Reminder saved, but this browser could not be subscribed.')
+            toast.error(t('settings.reminderSubscribeFailed'))
           }
         }
       } else {
@@ -86,10 +92,10 @@ export function ReminderSheet({
         reminder_hour: selectedHour,
         reminder_minute: selectedMinute,
       })
-      toast.success(on ? 'Daily reminder on' : 'Daily reminder off')
+      toast.success(on ? t('settings.reminderOn') : t('settings.reminderOff'))
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not update reminder')
+      toast.error(error instanceof Error ? error.message : t('settings.reminderSaveFailed'))
     }
   }
 
@@ -97,36 +103,40 @@ export function ReminderSheet({
     <Sheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Daily reminder"
-      description="Get a notification on days you still have habits to finish."
+      title={t('settings.reminderTitle')}
+      description={t('settings.reminderDescription')}
     >
       <div className="flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <div className="min-w-0">
-            <p className="text-sm font-medium">Push notification</p>
-            <p className="text-xs text-muted">Sent to this device.</p>
+            <p className="text-sm font-medium">{t('settings.reminderToggleLabel')}</p>
+            <p className="text-xs text-muted">{t('settings.reminderToggleHint')}</p>
           </div>
-          <Switch checked={on} onCheckedChange={setOn} aria-label="Enable daily reminder" />
+          <Switch checked={on} onCheckedChange={setOn} aria-label={t('settings.reminderTitle')} />
         </div>
 
         <div className="flex flex-col gap-2.5">
           <label className="flex flex-col gap-1.5">
-            <span className="label-mono">Time</span>
+            <span className="label-mono">{t('settings.reminderTime')}</span>
             <input
               type="time"
               value={timeValue}
               onChange={(event) => onTimeChange(event.target.value)}
               disabled={!on}
-              aria-label="Reminder time"
+              aria-label={t('settings.reminderTime')}
               className="w-full rounded-tile border bg-surface px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
             />
           </label>
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Time presets">
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label={t('settings.reminderTime')}
+          >
             {REMINDER_PRESETS.map((preset) => {
               const active = selectedHour === preset.hour && selectedMinute === preset.minute
               return (
                 <button
-                  key={preset.label}
+                  key={preset.key}
                   type="button"
                   disabled={!on}
                   aria-pressed={active}
@@ -142,16 +152,16 @@ export function ReminderSheet({
                       : 'border-border text-muted hover:text-foreground',
                   )}
                 >
-                  {preset.label} · {reminderTimeLabel(preset.hour, preset.minute)}
+                  {reminderPresetLabel(preset, t)} · {reminderTimeLabel(preset.hour, preset.minute)}
                 </button>
               )
             })}
           </div>
-          <span className="text-xs text-muted">In your local timezone.</span>
+          <span className="text-xs text-muted">{t('settings.reminderTimezoneHint')}</span>
         </div>
 
         <Button size="lg" onClick={save} disabled={isPending || !dirty}>
-          {isPending ? 'Saving…' : 'Save reminder'}
+          {isPending ? t('settings.reminderSaving') : t('settings.reminderSaveButton')}
         </Button>
       </div>
     </Sheet>
