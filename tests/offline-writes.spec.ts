@@ -60,5 +60,8 @@ test('a habit tapped offline lands on the server once the connection returns', a
     .single()
   expect(log?.count).toBe(1)
 
-  expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
+  // Forcing the browser offline necessarily fails any in-flight resource load
+  // with this error — expected noise from the test setup, not the app.
+  const realErrors = errors.filter((e) => !e.includes('ERR_INTERNET_DISCONNECTED'))
+  expect(realErrors, `console errors:\n${realErrors.join('\n')}`).toEqual([])
 })
