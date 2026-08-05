@@ -804,6 +804,8 @@ export const ru: Translations = {
     exportData: 'Экспорт данных',
     runInBackground: 'Работать в фоне',
     adminConsole: 'Консоль администратора',
+    signOutConfirm: 'Выйти из Almanac?',
+    signOutConfirmHint: 'Данные никуда не денутся — просто понадобится пароль, чтобы вернуться.',
     signOut: 'Выйти',
     member: 'участник',
     joined: '{count} дн.',
