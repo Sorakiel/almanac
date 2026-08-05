@@ -1,6 +1,8 @@
 import { WEEKDAY_LABELS } from '@/features/workouts/lib/recurrence'
 import type { WorkoutRecurrence } from '@/features/workouts/types'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
+import type { TranslationKey } from '@/i18n/types'
 
 export interface RecurrenceValue {
   recurrence: WorkoutRecurrence
@@ -13,15 +15,17 @@ interface RecurrencePickerProps {
   onChange: (value: RecurrenceValue) => void
 }
 
-const MODES: { value: WorkoutRecurrence; label: string }[] = [
-  { value: 'none', label: 'Once' },
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekdays', label: 'Weekdays' },
-  { value: 'every_n_days', label: 'Every N' },
+/** Schedule modes; labels come from `workouts.recurrence.*` at render. */
+const MODES: { value: WorkoutRecurrence; labelKey: TranslationKey }[] = [
+  { value: 'none', labelKey: 'workouts.recurrence.once' },
+  { value: 'daily', labelKey: 'workouts.recurrence.daily2' },
+  { value: 'weekdays', labelKey: 'workouts.recurrence.weekdays' },
+  { value: 'every_n_days', labelKey: 'workouts.recurrence.everyN' },
 ]
 
 /** Schedule picker: one-off, daily, specific weekdays, or every-N-days. */
 export function RecurrencePicker({ value, onChange }: RecurrencePickerProps) {
+  const { t } = useT()
   const toggleDay = (day: number) => {
     const days = value.days.includes(day)
       ? value.days.filter((d) => d !== day)
@@ -31,7 +35,11 @@ export function RecurrencePicker({ value, onChange }: RecurrencePickerProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label="Repeat">
+      <div
+        className="grid grid-cols-4 gap-2"
+        role="radiogroup"
+        aria-label={t('workouts.recurrence.none')}
+      >
         {MODES.map((mode) => (
           <button
             key={mode.value}
@@ -47,13 +55,17 @@ export function RecurrencePicker({ value, onChange }: RecurrencePickerProps) {
                 : 'text-muted hover:text-foreground',
             )}
           >
-            {mode.label}
+            {t(mode.labelKey)}
           </button>
         ))}
       </div>
 
       {value.recurrence === 'weekdays' ? (
-        <div className="flex justify-between gap-1.5" role="group" aria-label="Days of the week">
+        <div
+          className="flex justify-between gap-1.5"
+          role="group"
+          aria-label={t('workouts.recurrence.daysOfWeek')}
+        >
           {WEEKDAY_LABELS.map((label, day) => {
             const active = value.days.includes(day)
             return (
@@ -80,7 +92,7 @@ export function RecurrencePicker({ value, onChange }: RecurrencePickerProps) {
 
       {value.recurrence === 'every_n_days' ? (
         <label className="flex items-center gap-2 text-sm text-muted">
-          Every
+          {t('workouts.recurrence.every')}
           <input
             type="number"
             min={1}
@@ -91,7 +103,7 @@ export function RecurrencePicker({ value, onChange }: RecurrencePickerProps) {
             }
             className="h-10 w-16 rounded-lg border bg-surface text-center text-sm tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           />
-          days
+          {t('workouts.daysLower')}
         </label>
       ) : null}
     </div>

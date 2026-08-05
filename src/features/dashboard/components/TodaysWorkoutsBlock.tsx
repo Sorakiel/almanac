@@ -17,7 +17,7 @@ function Row({ item }: { item: DueWorkout }) {
   const { toggleComplete } = useWorkoutMutations()
   const { t } = useT()
   const { workout, doneToday } = item
-  const label = recurrenceLabel(workout) ?? t('dashboard.scheduledToday')
+  const label = recurrenceLabel(workout, t) ?? t('dashboard.scheduledToday')
 
   const toggle = () =>
     toggleComplete.mutate(

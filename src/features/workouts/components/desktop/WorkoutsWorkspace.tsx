@@ -12,6 +12,8 @@ import { dayStateFor } from '@/features/workouts/lib/week'
 import { workoutForDay } from '@/features/workouts/lib/week'
 import type { TrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import type { WorkoutView } from '@/features/workouts/types'
+import { useT } from '@/hooks/useT'
+import { intlLocale } from '@/lib/dateLocale'
 
 interface WorkoutsWorkspaceProps {
   workouts: WorkoutView[]
@@ -22,10 +24,10 @@ interface WorkoutsWorkspaceProps {
   onNew: () => void
 }
 
-/** Friendly "Monday, 6 July" from a `YYYY-MM-DD` key, UTC-safe. */
-function dayLabel(dateKey: string): string {
+/** Friendly "Monday, 6 July" from a `YYYY-MM-DD` key, UTC-safe, in the UI language. */
+function dayLabel(dateKey: string, locale: string): string {
   const [y, m, d] = dateKey.split('-').map(Number)
-  return new Intl.DateTimeFormat('en-GB', {
+  return new Intl.DateTimeFormat(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -41,6 +43,7 @@ export function WorkoutsWorkspace({
   refetch,
   onNew,
 }: WorkoutsWorkspaceProps) {
+  const { t, locale } = useT()
   const [selectedKey, setSelectedKey] = useState(overview.todayKey)
   const selected = workoutForDay(overview.workouts, selectedKey, overview.timezone)
 
@@ -49,28 +52,28 @@ export function WorkoutsWorkspace({
       <header>
         <p className="label-mono">// {overview.week.label}</p>
         <div className="mt-1.5 flex items-center justify-between gap-4">
-          <h1 className="text-[40px] leading-none tracking-title">Training</h1>
+          <h1 className="text-[40px] leading-none tracking-title">{t('workouts.title')}</h1>
           <Button onClick={onNew} className="flex-none shadow-glow">
             <Plus className="h-4 w-4" />
-            New workout
+            {t('workouts.newWorkout')}
           </Button>
         </div>
-        <p className="mt-2 text-[15px] text-muted">Plan sessions and log what you actually did.</p>
+        <p className="mt-2 text-[15px] text-muted">{t('workouts.subtitle')}</p>
       </header>
 
       {isLoading ? (
         <div className="flex justify-center py-24" role="status" aria-live="polite">
           <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-          <span className="sr-only">Loading workouts…</span>
+          <span className="sr-only">{t('workouts.loading')}</span>
         </div>
       ) : isError ? (
         <EmptyState
           icon={RefreshCw}
-          title="Couldn't load your workouts"
-          description="Something went wrong reaching the server."
+          title={t('workouts.loadFailed')}
+          description={t('workouts.loadFailedHint')}
           action={
             <Button size="sm" variant="surface" onClick={refetch}>
-              Try again
+              {t('workouts.tryAgain')}
             </Button>
           }
         />
@@ -78,12 +81,12 @@ export function WorkoutsWorkspace({
         <div className="mt-8">
           <EmptyState
             icon={Dumbbell}
-            title="No workouts yet"
-            description="Add your first training session to start a log."
+            title={t('workouts.emptyTitle')}
+            description={t('workouts.emptyHint')}
             action={
               <Button size="sm" onClick={onNew}>
                 <Plus className="h-4 w-4" />
-                New workout
+                {t('workouts.newWorkout')}
               </Button>
             }
           />
@@ -102,7 +105,9 @@ export function WorkoutsWorkspace({
 
           <section className="mt-8">
             <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-strong">
-              {selectedKey === overview.todayKey ? 'today' : dayLabel(selectedKey)}
+              {selectedKey === overview.todayKey
+                ? t('workouts.todayLower')
+                : dayLabel(selectedKey, intlLocale(locale))}
             </p>
             {selected ? (
               <TodaySessionCard
@@ -112,13 +117,15 @@ export function WorkoutsWorkspace({
               />
             ) : (
               <div className="rounded-[22px] border border-dashed p-7 text-center">
-                <p className="text-sm text-muted">No session scheduled — rest day.</p>
+                <p className="text-sm text-muted">{t('workouts.restDay')}</p>
               </div>
             )}
           </section>
 
           <section className="mt-8 flex flex-col gap-3">
-            <SectionLabel accessory={`${workouts.length}`}>ALL WORKOUTS</SectionLabel>
+            <SectionLabel accessory={`${workouts.length}`}>
+              {t('workouts.allWorkouts')}
+            </SectionLabel>
             {workouts.map((w) => (
               <WorkoutCard key={w.id} workout={w} />
             ))}

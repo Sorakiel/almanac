@@ -1,6 +1,7 @@
 import { Tag } from '@/components/common/Tag'
 import { exerciseTargetLabel } from '@/features/workouts/lib/session'
 import type { SessionExercise, SetLog } from '@/features/workouts/types'
+import { useT } from '@/hooks/useT'
 
 interface ExerciseViewProps {
   exercise: SessionExercise
@@ -16,6 +17,7 @@ function setLine(set: SetLog): string {
 
 /** Read-only exercise card — the plan as it reads before you tap Edit. */
 export function ExerciseView({ exercise }: ExerciseViewProps) {
+  const { t } = useT()
   const target = exerciseTargetLabel(exercise)
 
   return (
@@ -52,7 +54,7 @@ export function ExerciseView({ exercise }: ExerciseViewProps) {
           ))}
         </div>
       ) : (
-        <p className="mt-3 text-sm text-muted">No sets planned.</p>
+        <p className="mt-3 text-sm text-muted">{t('workouts.noSetsPlanned')}</p>
       )}
     </div>
   )

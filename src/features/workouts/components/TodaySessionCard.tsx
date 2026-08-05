@@ -7,6 +7,7 @@ import { useWorkoutSessionStore } from '@/stores/workoutSession'
 import { estimateMinutes, plannedVolume } from '@/features/workouts/lib/session'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import type { SessionExercise, WorkoutView } from '@/features/workouts/types'
+import { useT } from '@/hooks/useT'
 
 interface TodaySessionCardProps {
   workout: WorkoutView
@@ -40,13 +41,17 @@ function DayStatus({ dayState, done }: { dayState: 'past' | 'future'; done: bool
 
 /** The selected day's session card — the warm spec-board "today" panel. */
 export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionCardProps) {
+  const { t } = useT()
   const navigate = useNavigate()
   const start = useWorkoutSessionStore((s) => s.start)
   const hasActiveSession = useWorkoutSessionStore((s) => Boolean(s.sessions[workout.id]))
   const { exercises } = useWorkoutDetail(workout.id)
   const hasPlan = exercises.length > 0
   const volume = plannedVolume(exercises)
-  const overline = muscleSummary(exercises) ?? recurrenceLabel(workout)?.toUpperCase() ?? 'SESSION'
+  const overline =
+    muscleSummary(exercises) ??
+    recurrenceLabel(workout, t)?.toUpperCase() ??
+    t('workouts.session.title').toUpperCase()
   const isToday = dayState === 'today'
 
   const openDetail = () => navigate(`/train/${workout.id}`)
@@ -88,9 +93,7 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
             ) : null}
           </div>
         ) : (
-          <p className="mt-4 text-sm text-muted">
-            No exercises planned yet — add some to start a session.
-          </p>
+          <p className="mt-4 text-sm text-muted">{t('workouts.noExercisesToStart')}</p>
         )}
       </button>
 
@@ -102,7 +105,7 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
             onClick={openDetail}
           >
             <Layers className="h-4 w-4" />
-            View plan
+            {t('workouts.viewPlan')}
           </Button>
         ) : !hasPlan ? (
           <Button
@@ -111,12 +114,12 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
             onClick={openDetail}
           >
             <Layers className="h-4 w-4" />
-            Plan session
+            {t('workouts.planSession')}
           </Button>
         ) : hasActiveSession ? (
           <Button className="w-full shadow-glow sm:w-auto sm:min-w-[220px]" onClick={startSession}>
             <Play className="h-4 w-4 fill-current" />
-            Resume session
+            {t('workouts.resumeSession')}
           </Button>
         ) : doneToday ? (
           <Button
@@ -125,12 +128,12 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
             onClick={startSession}
           >
             <Check className="h-4 w-4" />
-            Done — train again
+            {t('workouts.doneTrainAgain')}
           </Button>
         ) : (
           <Button className="w-full shadow-glow sm:w-auto sm:min-w-[220px]" onClick={startSession}>
             <Play className="h-4 w-4" />
-            Start session
+            {t('workouts.startSession')}
           </Button>
         )}
       </div>

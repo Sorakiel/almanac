@@ -16,6 +16,7 @@ describe('computeAchievementStats', () => {
       workoutsCompleted: 4,
       booksFinished: 1,
       pagesRead: 300,
+      chaptersRead: 0,
       notesWritten: 4,
       reflections: 0,
       betaUser: true,
@@ -35,6 +36,24 @@ describe('computeAchievementStats', () => {
       workoutsCompleted: 0,
       booksFinished: 0,
       pagesRead: 42,
+      chaptersRead: 0,
+      notesWritten: 0,
+      reflections: 1,
+      betaUser: false,
+    })
+    expect(stats.activeModules).toBe(2)
+  })
+
+  it('counts reading as active from chapters alone', () => {
+    const stats = computeAchievementStats({
+      totalCompletions: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+      habitsCount: 0,
+      workoutsCompleted: 0,
+      booksFinished: 0,
+      pagesRead: 0,
+      chaptersRead: 6,
       notesWritten: 0,
       reflections: 1,
       betaUser: false,
@@ -64,6 +83,7 @@ const baseStats: AchievementStats = {
   workoutsCompleted: 0,
   booksFinished: 0,
   pagesRead: 0,
+  chaptersRead: 0,
   notesWritten: 0,
   reflections: 0,
   activeModules: 0,

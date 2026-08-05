@@ -2,6 +2,7 @@ import { format, getISOWeek, parseISO } from 'date-fns'
 import { weekdayOfKey } from '@/lib/date'
 import { isDoneOn, isDueOn } from '@/features/workouts/lib/recurrence'
 import type { WorkoutView } from '@/features/workouts/types'
+import type { TFunction } from '@/hooks/useT'
 
 export interface WeekDay {
   /** Local calendar date, `YYYY-MM-DD`. */
@@ -24,6 +25,8 @@ export interface WeekView {
 }
 
 const WEEKDAY_SHORT = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+/** Dictionary keys for the strip, Monday-first to match WEEKDAY_SHORT. */
+const WEEKDAY_STRIP_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
 /** Add whole days to a `YYYY-MM-DD` key using UTC math (no tz drift). */
 function addDays(dateKey: string, days: number): string {
@@ -37,7 +40,13 @@ function addDays(dateKey: string, days: number): string {
  * The Monday-anchored 7-day strip containing `todayKey`, each day carrying how
  * many workouts are due and how many were completed — the training week header.
  */
-export function buildWeek(todayKey: string, workouts: WorkoutView[], timezone: string): WeekView {
+export function buildWeek(
+  todayKey: string,
+  workouts: WorkoutView[],
+  timezone: string,
+  t?: TFunction,
+  locale = 'en-GB',
+): WeekView {
   // weekdayOfKey is 0=Sun … 6=Sat; step back to this week's Monday.
   const mondayOffset = (weekdayOfKey(todayKey) + 6) % 7
   const monday = addDays(todayKey, -mondayOffset)
@@ -47,7 +56,7 @@ export function buildWeek(todayKey: string, workouts: WorkoutView[], timezone: s
     const due = workouts.filter((w) => isDueOn(w, dateKey))
     return {
       dateKey,
-      weekday,
+      weekday: t ? t(`workouts.weekdayStrip.${WEEKDAY_STRIP_KEYS[i]!}`) : weekday,
       dayOfMonth: Number(dateKey.slice(8, 10)),
       isToday: dateKey === todayKey,
       dueCount: due.length,
@@ -56,7 +65,11 @@ export function buildWeek(todayKey: string, workouts: WorkoutView[], timezone: s
   })
 
   const monthDate = parseISO(`${monday}T00:00:00`)
-  const label = `${format(monthDate, 'MMM').toUpperCase()} · WEEK ${getISOWeek(monthDate)}`
+  const month = t
+    ? new Intl.DateTimeFormat(locale, { month: 'short' }).format(monthDate).toUpperCase()
+    : format(monthDate, 'MMM').toUpperCase()
+  const week = getISOWeek(monthDate)
+  const label = t ? t('workouts.weekLabel', { month, week }) : `${month} · WEEK ${week}`
 
   return { label, days }
 }

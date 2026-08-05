@@ -16,8 +16,11 @@ import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
 import { useTrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import { dayStateFor, workoutForDay } from '@/features/workouts/lib/week'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useT } from '@/hooks/useT'
+import { intlLocale } from '@/lib/dateLocale'
 
 function WorkoutsPage() {
+  const { t, locale } = useT()
   const { workouts, isLoading, isError, refetch } = useWorkouts()
   const overview = useTrainingOverview()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
@@ -48,7 +51,7 @@ function WorkoutsPage() {
   }
 
   const selectedDay = workoutForDay(overview.workouts, selectedKey, overview.timezone)
-  const selectedDayLabel = new Intl.DateTimeFormat('en-GB', {
+  const selectedDayLabel = new Intl.DateTimeFormat(intlLocale(locale), {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -61,35 +64,35 @@ function WorkoutsPage() {
       <header className="flex items-end justify-between">
         <div>
           <p className="label-mono">// {overview.week.label}</p>
-          <h1 className="mt-1 text-2xl">Training</h1>
+          <h1 className="mt-1 text-2xl">{t('workouts.title')}</h1>
         </div>
       </header>
 
       {isLoading ? (
         <div className="flex justify-center py-16" role="status" aria-live="polite">
           <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-          <span className="sr-only">Loading workouts…</span>
+          <span className="sr-only">{t('workouts.loading')}</span>
         </div>
       ) : isError ? (
         <EmptyState
           icon={RefreshCw}
-          title="Couldn't load your workouts"
-          description="Something went wrong reaching the server."
+          title={t('workouts.loadFailed')}
+          description={t('workouts.loadFailedHint')}
           action={
             <Button size="sm" variant="surface" onClick={refetch}>
-              Try again
+              {t('workouts.tryAgain')}
             </Button>
           }
         />
       ) : workouts.length === 0 ? (
         <EmptyState
           icon={Dumbbell}
-          title="No workouts yet"
-          description="Add your first training session to start a log."
+          title={t('workouts.emptyTitle')}
+          description={t('workouts.emptyHint')}
           action={
             <Button size="sm" onClick={openNew}>
               <Plus className="h-4 w-4" />
-              New workout
+              {t('workouts.newWorkout')}
             </Button>
           }
         />
@@ -105,7 +108,9 @@ function WorkoutsPage() {
 
           <div className="flex flex-col gap-2">
             <SectionLabel>
-              {selectedKey === overview.todayKey ? 'TODAY' : selectedDayLabel}
+              {selectedKey === overview.todayKey
+                ? t('workouts.todayLower').toUpperCase()
+                : selectedDayLabel}
             </SectionLabel>
             {selectedDay ? (
               <TodaySessionCard
@@ -115,13 +120,15 @@ function WorkoutsPage() {
               />
             ) : (
               <div className="rounded-[22px] border border-dashed p-6 text-center">
-                <p className="text-sm text-muted">No session scheduled — rest day.</p>
+                <p className="text-sm text-muted">{t('workouts.restDay')}</p>
               </div>
             )}
           </div>
 
           <div className="flex flex-col gap-3">
-            <SectionLabel accessory={`${workouts.length}`}>ALL WORKOUTS</SectionLabel>
+            <SectionLabel accessory={`${workouts.length}`}>
+              {t('workouts.allWorkouts')}
+            </SectionLabel>
             {workouts.map((w) => (
               <WorkoutCard key={w.id} workout={w} />
             ))}
@@ -129,7 +136,7 @@ function WorkoutsPage() {
 
           <Button size="lg" onClick={openNew} className="w-full shadow-glow">
             <Plus className="h-4 w-4" />
-            New workout
+            {t('workouts.newWorkout')}
           </Button>
         </Cascade>
       )}
