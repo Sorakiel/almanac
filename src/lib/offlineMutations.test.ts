@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, onlineManager, dehydrate, hydrate } from '@tanstack/react-query'
 import { addFreeze, createHabit, setHabitCount } from '@/features/habits/api/habits.api'
 import { updateWorkout } from '@/features/workouts/api/workouts.api'
+import { createReflection, updateReflection } from '@/features/reflect/api/reflections.api'
 import { OFFLINE_MUTATION_KEYS, registerOfflineMutations } from '@/lib/offlineMutations'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 
@@ -24,6 +25,11 @@ vi.mock('@/features/workouts/api/workouts.api', () => ({
   createWorkout: vi.fn(async () => ({ id: 'new-workout' })),
   updateWorkout: vi.fn(async () => ({ id: 'w1', completed_at: null })),
   deleteWorkout: vi.fn(async () => undefined),
+}))
+vi.mock('@/features/reflect/api/reflections.api', () => ({
+  createReflection: vi.fn(async () => ({ id: 'new-reflection' })),
+  updateReflection: vi.fn(async () => ({ id: 'r1' })),
+  deleteReflection: vi.fn(async () => undefined),
 }))
 
 const habit = { id: 'h1', isComplete: false, todayCount: 0 } as HabitWithTodayLog
@@ -162,6 +168,35 @@ describe('offline mutation resume', () => {
     expect(updateWorkout).toHaveBeenCalledWith('w1', {
       completed_at: expect.any(String),
     })
+  })
+
+  it('resumes a reflection save, branching on id to create vs update', async () => {
+    onlineManager.setOnline(false)
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    const mutation = client
+      .getMutationCache()
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.saveReflection })
+    const pending = mutation.execute({
+      id: null,
+      date: '2026-08-05',
+      body: 'offline entry',
+      quoteId: null,
+      mood: 3,
+      energy: 3,
+      dayRating: 4,
+      userId: 'u1',
+    })
+    await new Promise((r) => setTimeout(r, 10))
+
+    onlineManager.setOnline(true)
+    await client.resumePausedMutations()
+    await pending
+
+    expect(createReflection).toHaveBeenCalledWith(
+      expect.objectContaining({ user_id: 'u1', body: 'offline entry' }),
+    )
+    expect(updateReflection).not.toHaveBeenCalled()
   })
 
   it('a non-offline mutation key is never dehydrated, matching queryClient.ts', () => {

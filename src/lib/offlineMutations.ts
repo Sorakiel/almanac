@@ -18,6 +18,11 @@ import { updateSet } from '@/features/workouts/api/session.api'
 import { createWorkout, deleteWorkout, updateWorkout } from '@/features/workouts/api/workouts.api'
 import type { WorkoutFormInput } from '@/features/workouts/hooks/useWorkoutMutations'
 import type { SetLog } from '@/features/workouts/types'
+import {
+  createReflection,
+  deleteReflection,
+  updateReflection,
+} from '@/features/reflect/api/reflections.api'
 
 /**
  * Every offline-durable mutation key is namespaced under `'offline'` — that
@@ -43,6 +48,8 @@ export const OFFLINE_MUTATION_KEYS = {
   updateWorkout: [OFFLINE_MUTATION_ROOT, 'updateWorkout'] as const,
   deleteWorkout: [OFFLINE_MUTATION_ROOT, 'deleteWorkout'] as const,
   toggleWorkoutComplete: [OFFLINE_MUTATION_ROOT, 'toggleWorkoutComplete'] as const,
+  saveReflection: [OFFLINE_MUTATION_ROOT, 'saveReflection'] as const,
+  deleteReflection: [OFFLINE_MUTATION_ROOT, 'deleteReflection'] as const,
 }
 
 export interface ToggleHabitVariables {
@@ -123,6 +130,22 @@ export interface ToggleWorkoutCompleteVariables {
   id: string
   userId: string
   done: boolean
+}
+
+export interface SaveReflectionVariables {
+  id: string | null
+  date: string
+  body: string
+  quoteId: string | null
+  mood: number | null
+  energy: number | null
+  dayRating: number | null
+  userId: string
+}
+
+export interface DeleteReflectionVariables {
+  id: string
+  userId: string
 }
 
 /**
@@ -258,6 +281,40 @@ export function registerOfflineMutations(client: QueryClient): void {
     onSettled: (_data, _error, { id, userId }: ToggleWorkoutCompleteVariables) => {
       void client.invalidateQueries({ queryKey: ['workout', id] })
       void client.invalidateQueries({ queryKey: ['workouts', userId] })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.saveReflection, {
+    mutationFn: ({
+      id,
+      date,
+      body,
+      quoteId,
+      mood,
+      energy,
+      dayRating,
+      userId,
+    }: SaveReflectionVariables) =>
+      id
+        ? updateReflection(id, { body, mood, energy, day_rating: dayRating })
+        : createReflection({
+            user_id: userId,
+            date,
+            body,
+            quote_id: quoteId,
+            mood,
+            energy,
+            day_rating: dayRating,
+          }),
+    onSettled: (_data, _error, { userId }: SaveReflectionVariables) => {
+      void client.invalidateQueries({ queryKey: ['reflections', userId] })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.deleteReflection, {
+    mutationFn: ({ id }: DeleteReflectionVariables) => deleteReflection(id),
+    onSettled: (_data, _error, { userId }: DeleteReflectionVariables) => {
+      void client.invalidateQueries({ queryKey: ['reflections', userId] })
     },
   })
 }
