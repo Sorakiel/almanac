@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { differenceInCalendarDays, parseISO } from 'date-fns'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useProfile } from '@/features/settings/hooks/useProfile'
@@ -21,13 +22,13 @@ interface UseAchievementsResult {
 /** Evaluate the achievement catalog against the user's live stats. */
 export function useAchievements(): UseAchievementsResult {
   const { user } = useSession()
-  const { dateKey } = useToday()
+  const { dateKey, timezone } = useToday()
   const { profile } = useProfile()
   const userId = user?.id ?? ''
 
   const query = useQuery({
     queryKey: ['achievements', userId, dateKey],
-    queryFn: () => fetchAchievementData(userId, dateKey),
+    queryFn: () => fetchAchievementData(userId, dateKey, timezone),
     enabled: Boolean(userId),
   })
 
@@ -37,11 +38,15 @@ export function useAchievements(): UseAchievementsResult {
     enabled: Boolean(userId),
   })
 
-  const betaUser = (profile?.created_at ?? user?.created_at ?? '9999').slice(0, 10) < BETA_CUTOFF
+  const joinedAt = profile?.created_at ?? user?.created_at ?? null
+  const betaUser = (joinedAt ?? '9999').slice(0, 10) < BETA_CUTOFF
+  const accountDays = joinedAt
+    ? Math.max(0, differenceInCalendarDays(parseISO(dateKey), parseISO(joinedAt.slice(0, 10))))
+    : 0
 
   const achievements = query.data
     ? evaluateAll(
-        computeAchievementStats({ ...query.data, betaUser }),
+        computeAchievementStats({ ...query.data, betaUser, accountDays }),
         new Set(grantsQuery.data ?? []),
       )
     : []

@@ -13,6 +13,13 @@ export interface AchievementStatsInput {
   notesWritten: number
   reflections: number
   betaUser: boolean
+  tonnage: number
+  focusMinutes: number
+  earlyCount: number
+  lateCount: number
+  friendsCount: number
+  /** Calendar days since the account was created. */
+  accountDays: number
 }
 
 /** Fold raw aggregates into the stats every achievement is scored against. */
@@ -36,5 +43,11 @@ export function computeAchievementStats(input: AchievementStatsInput): Achieveme
     reflections: input.reflections,
     activeModules,
     betaUser: input.betaUser,
+    tonnage: input.tonnage,
+    focusMinutes: input.focusMinutes,
+    earlyCount: input.earlyCount,
+    lateCount: input.lateCount,
+    friendsCount: input.friendsCount,
+    accountDays: input.accountDays,
   }
 }

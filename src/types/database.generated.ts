@@ -800,14 +800,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      achievement_stats: {
-        Args: { p_today: string }
-        Returns: {
-          best_streak: number
-          current_streak: number
-          total_completions: number
-        }[]
-      }
+      achievement_stats:
+        | {
+            Args: { p_today: string }
+            Returns: {
+              best_streak: number
+              current_streak: number
+              total_completions: number
+            }[]
+          }
+        | {
+            Args: { p_timezone: string; p_today: string }
+            Returns: {
+              best_streak: number
+              current_streak: number
+              early_count: number
+              focus_minutes: number
+              late_count: number
+              total_completions: number
+              total_tonnage: number
+            }[]
+          }
       admin_delete_user: { Args: { target: string }; Returns: undefined }
       are_friends: { Args: { a: string; b: string }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }

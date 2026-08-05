@@ -45,6 +45,18 @@ export interface AchievementStats {
   activeModules: number
   /** Joined during the beta window. */
   betaUser: boolean
+  /** Total kg lifted across all logged, done sets. */
+  tonnage: number
+  /** Total minutes across all focus (deep-work) sessions. */
+  focusMinutes: number
+  /** Habit check-offs logged before 07:00 local time. */
+  earlyCount: number
+  /** Habit check-offs logged at or after 23:00 local time. */
+  lateCount: number
+  /** Accepted friendships. */
+  friendsCount: number
+  /** Calendar days since the account was created. */
+  accountDays: number
 }
 
 export interface EvaluatedAchievement {
