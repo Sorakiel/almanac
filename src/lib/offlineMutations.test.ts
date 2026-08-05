@@ -1,11 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, onlineManager, dehydrate, hydrate } from '@tanstack/react-query'
-import { setHabitCount } from '@/features/habits/api/habits.api'
+import { addFreeze, createHabit, setHabitCount } from '@/features/habits/api/habits.api'
 import { OFFLINE_MUTATION_KEYS, registerOfflineMutations } from '@/lib/offlineMutations'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 
 vi.mock('@/features/habits/api/habits.api', () => ({
   setHabitCount: vi.fn(async () => undefined),
+  addFreeze: vi.fn(async () => undefined),
+  removeFreeze: vi.fn(async () => undefined),
+  createHabit: vi.fn(async () => ({ id: 'new-habit', frequency: 'daily' })),
+  updateHabit: vi.fn(async () => undefined),
+  archiveHabit: vi.fn(async () => undefined),
+  updateHabitOrder: vi.fn(async () => undefined),
+  createSubtask: vi.fn(async () => ({ id: 'new-subtask' })),
+  deleteSubtask: vi.fn(async () => undefined),
+  setSubtaskCompletedDates: vi.fn(async () => undefined),
 }))
 vi.mock('@/features/workouts/api/session.api', () => ({
   updateSet: vi.fn(async () => undefined),
@@ -83,6 +92,51 @@ describe('offline mutation resume', () => {
       count: 1,
     })
     expect(client2.getMutationCache().getAll()[0]?.state.status).toBe('success')
+  })
+
+  it('resumes a freeze toggle (branching mutationFn) after reconnect', async () => {
+    onlineManager.setOnline(false)
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    const mutation = client
+      .getMutationCache()
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.toggleFreeze })
+    const pending = mutation.execute({
+      userId: 'u1',
+      habitId: 'h1',
+      date: '2026-08-05',
+      freeze: true,
+    })
+    await new Promise((r) => setTimeout(r, 10))
+
+    onlineManager.setOnline(true)
+    await client.resumePausedMutations()
+    await pending
+
+    expect(addFreeze).toHaveBeenCalledWith('u1', 'h1', '2026-08-05')
+  })
+
+  it('resumes habit creation and returns the created row', async () => {
+    onlineManager.setOnline(false)
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    const mutation = client
+      .getMutationCache()
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.createHabit })
+    const pending = mutation.execute({
+      userId: 'u1',
+      input: { name: 'Read', frequency: 'daily', target_count: 1, time_of_day: null },
+    })
+    await new Promise((r) => setTimeout(r, 10))
+
+    onlineManager.setOnline(true)
+    await client.resumePausedMutations()
+    const result = await pending
+
+    expect(createHabit).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Read', user_id: 'u1' }),
+    )
+    expect(result).toEqual({ id: 'new-habit', frequency: 'daily' })
   })
 
   it('a non-offline mutation key is never dehydrated, matching queryClient.ts', () => {
