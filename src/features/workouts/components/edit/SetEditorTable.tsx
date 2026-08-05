@@ -1,5 +1,6 @@
 import { Plus, X } from 'lucide-react'
 import { Stepper } from '@/features/workouts/components/edit/Stepper'
+import { useT } from '@/hooks/useT'
 import {
   REST_PRESETS,
   restLabel,
@@ -29,13 +30,14 @@ export function SetEditorTable({
   onRemoveSet,
   onAddSet,
 }: SetEditorTableProps) {
+  const { t } = useT()
   return (
     <div className="mt-4">
       <div className="grid grid-cols-[2.25rem_1fr_1fr_auto] items-center gap-2 px-1 pb-2 font-mono text-[9px] uppercase tracking-label text-muted-strong lg:grid-cols-[2.25rem_1fr_1fr_4.5rem_auto] lg:gap-3">
         <span>set</span>
-        <span className="text-center">reps</span>
-        <span className="text-center">weight · kg</span>
-        <span className="hidden text-center lg:block">rest</span>
+        <span className="text-center">{t('workouts.reps')}</span>
+        <span className="text-center">{t('workouts.weightKg')}</span>
+        <span className="hidden text-center lg:block">{t('workouts.rest')}</span>
         <span className="w-8" />
       </div>
 
@@ -87,7 +89,7 @@ export function SetEditorTable({
         className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed py-3 font-mono text-[13px] text-accent transition-colors hover:bg-accent/5"
       >
         <Plus className="h-4 w-4" aria-hidden="true" />
-        add set
+        {t('workouts.addSet')}
       </button>
     </div>
   )

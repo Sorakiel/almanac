@@ -9,6 +9,8 @@ import { useWorkoutMutations } from '@/features/workouts/hooks/useWorkoutMutatio
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import type { WorkoutStatus, WorkoutView } from '@/features/workouts/types'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
+import { intlLocale } from '@/lib/dateLocale'
 
 interface WorkoutCardProps {
   workout: WorkoutView
@@ -20,16 +22,10 @@ const STATUS_TONE: Record<WorkoutStatus, 'teal' | 'accent' | 'muted'> = {
   unplanned: 'muted',
 }
 
-const STATUS_LABEL: Record<WorkoutStatus, string> = {
-  completed: 'done',
-  scheduled: 'planned',
-  unplanned: 'anytime',
-}
-
 /** Friendly label for a `YYYY-MM-DD` date, UTC-safe to avoid tz drift. */
-function formatDate(dateKey: string): string {
+function formatDate(dateKey: string, locale: string): string {
   const [y, m, d] = dateKey.split('-').map(Number)
-  return new Intl.DateTimeFormat('en-GB', {
+  return new Intl.DateTimeFormat(locale, {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -38,19 +34,22 @@ function formatDate(dateKey: string): string {
 
 /** A workout row: complete toggle, identity (tap to edit), status badge. */
 export function WorkoutCard({ workout }: WorkoutCardProps) {
+  const { t, locale } = useT()
   const navigate = useNavigate()
   const { toggleComplete } = useWorkoutMutations()
   const done = Boolean(workout.completed_at)
   const subtitle =
-    recurrenceLabel(workout) ??
-    (workout.scheduled_date ? formatDate(workout.scheduled_date) : 'No date set')
+    recurrenceLabel(workout, t) ??
+    (workout.scheduled_date
+      ? formatDate(workout.scheduled_date, intlLocale(locale))
+      : t('workouts.noDateSet'))
 
   const handleToggle = () => {
     toggleComplete.mutate(
       { id: workout.id, done: !done },
       {
         onError: (error) =>
-          toast.error(error instanceof Error ? error.message : 'Could not update the workout'),
+          toast.error(error instanceof Error ? error.message : t('workouts.updateFailed')),
       },
     )
   }
@@ -78,7 +77,7 @@ export function WorkoutCard({ workout }: WorkoutCardProps) {
         <p className="truncate text-sm text-muted">{subtitle}</p>
       </button>
 
-      <Tag tone={STATUS_TONE[workout.status]}>{STATUS_LABEL[workout.status]}</Tag>
+      <Tag tone={STATUS_TONE[workout.status]}>{t(`workouts.statuses.${workout.status}`)}</Tag>
     </Card>
   )
 }

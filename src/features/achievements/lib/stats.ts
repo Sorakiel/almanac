@@ -9,6 +9,7 @@ export interface AchievementStatsInput {
   workoutsCompleted: number
   booksFinished: number
   pagesRead: number
+  chaptersRead: number
   notesWritten: number
   reflections: number
   betaUser: boolean
@@ -19,7 +20,7 @@ export function computeAchievementStats(input: AchievementStatsInput): Achieveme
   const activeModules = [
     input.habitsCount > 0,
     input.workoutsCompleted > 0,
-    input.booksFinished > 0 || input.pagesRead > 0,
+    input.booksFinished > 0 || input.pagesRead > 0 || input.chaptersRead > 0,
     input.reflections > 0,
   ].filter(Boolean).length
 
@@ -30,6 +31,7 @@ export function computeAchievementStats(input: AchievementStatsInput): Achieveme
     workoutsCompleted: input.workoutsCompleted,
     booksFinished: input.booksFinished,
     pagesRead: input.pagesRead,
+    chaptersRead: input.chaptersRead,
     notesWritten: input.notesWritten,
     reflections: input.reflections,
     activeModules,

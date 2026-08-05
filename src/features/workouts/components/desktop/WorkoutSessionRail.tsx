@@ -1,5 +1,6 @@
 import { Dumbbell } from 'lucide-react'
 import type { SessionExercise, Workout } from '@/features/workouts/types'
+import { useT } from '@/hooks/useT'
 
 interface WorkoutSessionRailProps {
   workout: Workout
@@ -17,6 +18,7 @@ function Row({ label, value }: { label: string; value: string }) {
 
 /** Desktop rail for a workout session: progress and total volume lifted. */
 export function WorkoutSessionRail({ workout, exercises }: WorkoutSessionRailProps) {
+  const { t } = useT()
   const allSets = exercises.flatMap((e) => e.sets)
   const doneSets = allSets.filter((s) => s.done)
   const volume = doneSets.reduce((sum, s) => sum + (s.reps ?? 0) * (s.weight ?? 0), 0)
@@ -39,18 +41,20 @@ export function WorkoutSessionRail({ workout, exercises }: WorkoutSessionRailPro
       </div>
 
       <div className="rounded-[18px] border bg-surface p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">session</p>
+        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
+          {t('workouts.sessionLower')}
+        </p>
         <div className="mt-2 flex flex-col">
-          <Row label="exercises" value={String(exercises.length)} />
-          <Row label="sets done" value={`${doneSets.length} / ${allSets.length}`} />
-          <Row label="volume" value={`${Math.round(volume)} kg`} />
+          <Row label={t('workouts.exercisesLower')} value={String(exercises.length)} />
+          <Row label={t('workouts.setsDone')} value={`${doneSets.length} / ${allSets.length}`} />
+          <Row label={t('workouts.volume')} value={`${Math.round(volume)} kg`} />
         </div>
       </div>
 
       <div className="rounded-[16px] border border-teal/25 bg-gradient-to-br from-teal/10 to-transparent p-[18px]">
         <p className="font-mono text-[10px] uppercase tracking-label text-teal">tip</p>
         <p className="mt-2 text-[13px] leading-relaxed text-muted">
-          Tick each set as you finish it — volume is reps × weight across completed sets.
+          {t('workouts.session.railHint')}
         </p>
       </div>
     </div>

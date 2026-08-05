@@ -15,9 +15,11 @@ import {
 import { useWorkoutMutations } from '@/features/workouts/hooks/useWorkoutMutations'
 import { useToday } from '@/hooks/useToday'
 import type { Workout } from '@/features/workouts/types'
+import { useT } from '@/hooks/useT'
+import type { TranslationKey } from '@/i18n/types'
 
 const schema = z.object({
-  name: z.string().trim().min(1, 'Give the session a name').max(80),
+  name: z.string().trim().min(1, 'workouts.form.nameRequired').max(80),
   scheduled_date: z.string(),
 })
 
@@ -39,6 +41,7 @@ export function WorkoutFormSheet({
   workout,
   onDeleted,
 }: WorkoutFormSheetProps) {
+  const { t } = useT()
   const { create, update, remove } = useWorkoutMutations()
   const { dateKey } = useToday()
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -63,15 +66,16 @@ export function WorkoutFormSheet({
 
   // The date field only applies to a one-off or the every-N-days anchor.
   const showDate = recur.recurrence === 'none' || recur.recurrence === 'every_n_days'
-  const dateLabel = recur.recurrence === 'every_n_days' ? 'Start date' : 'Date (optional)'
+  const dateLabel =
+    recur.recurrence === 'every_n_days' ? t('workouts.form.startDate') : t('workouts.form.date')
 
   const onSubmit = handleSubmit(async (values) => {
     if (recur.recurrence === 'weekdays' && recur.days.length === 0) {
-      toast.error('Pick at least one weekday')
+      toast.error('workouts.form.pickWeekday')
       return
     }
     if (recur.recurrence === 'every_n_days' && (!recur.interval || recur.interval < 1)) {
-      toast.error('Set how many days between sessions')
+      toast.error('workouts.form.setInterval')
       return
     }
 
@@ -93,14 +97,14 @@ export function WorkoutFormSheet({
     try {
       if (workout) {
         await update.mutateAsync({ id: workout.id, input })
-        toast.success('Workout updated')
+        toast.success(t('workouts.form.updated'))
       } else {
         await create.mutateAsync(input)
-        toast.success('Workout added')
+        toast.success(t('workouts.form.added'))
       }
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not save the workout')
+      toast.error(error instanceof Error ? error.message : t('workouts.form.saveFailed'))
     }
   })
 
@@ -108,12 +112,12 @@ export function WorkoutFormSheet({
     if (!workout) return
     try {
       await remove.mutateAsync(workout.id)
-      toast.success('Workout deleted')
+      toast.success(t('workouts.form.removed'))
       setConfirmDelete(false)
       onOpenChange(false)
       onDeleted?.()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not delete the workout')
+      toast.error(error instanceof Error ? error.message : t('workouts.form.removeFailed'))
     }
   }
 
@@ -124,20 +128,26 @@ export function WorkoutFormSheet({
       <Sheet
         open={open}
         onOpenChange={onOpenChange}
-        title={isEdit ? 'Edit workout' : 'New workout'}
-        description={isEdit ? undefined : 'Plan a training session — add exercises next.'}
+        title={isEdit ? t('workouts.form.editTitle') : t('workouts.form.addTitle')}
+        description={isEdit ? undefined : t('workouts.form.addDescription')}
       >
         <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
           <label className="flex flex-col gap-1.5">
-            <span className="label-mono">Name</span>
-            <Input placeholder="e.g. Push day" autoFocus {...register('name')} />
+            <span className="label-mono">{t('workouts.form.name')}</span>
+            <Input
+              placeholder={t('workouts.form.namePlaceholder')}
+              autoFocus
+              {...register('name')}
+            />
             {errors.name ? (
-              <span className="text-xs text-accent">{errors.name.message}</span>
+              <span className="text-xs text-accent">
+                {t(errors.name.message as TranslationKey)}
+              </span>
             ) : null}
           </label>
 
           <div className="flex flex-col gap-1.5">
-            <span className="label-mono">Repeat</span>
+            <span className="label-mono">{t('workouts.form.repeat')}</span>
             <RecurrencePicker value={recur} onChange={setRecur} />
           </div>
 
@@ -149,7 +159,11 @@ export function WorkoutFormSheet({
           ) : null}
 
           <Button type="submit" size="lg" disabled={pending}>
-            {pending ? 'Saving…' : isEdit ? 'Save changes' : 'Add workout'}
+            {pending
+              ? t('workouts.form.saving')
+              : isEdit
+                ? t('workouts.form.save')
+                : t('workouts.form.create')}
           </Button>
 
           {isEdit ? (
@@ -161,7 +175,7 @@ export function WorkoutFormSheet({
               onClick={() => setConfirmDelete(true)}
             >
               <Trash2 className="h-4 w-4" />
-              Delete workout
+              {t('workouts.form.remove')}
             </Button>
           ) : null}
         </form>
@@ -170,9 +184,9 @@ export function WorkoutFormSheet({
       <ConfirmSheet
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Delete this workout?"
+        title={t('workouts.form.removeConfirm')}
         description={workout ? `"${workout.name}" and its exercises will be removed.` : undefined}
-        confirmLabel={remove.isPending ? 'Deleting…' : 'Delete workout'}
+        confirmLabel={remove.isPending ? t('workouts.form.removing') : t('workouts.form.remove')}
         pending={remove.isPending}
         onConfirm={onDelete}
       />

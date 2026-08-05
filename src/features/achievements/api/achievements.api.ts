@@ -8,6 +8,7 @@ export interface RawAchievementData {
   workoutsCompleted: number
   booksFinished: number
   pagesRead: number
+  chaptersRead: number
   notesWritten: number
   reflections: number
 }
@@ -51,6 +52,9 @@ export async function fetchAchievementData(
     booksFinished: bookRows.filter((b) => b.status === 'finished').length,
     pagesRead: bookRows
       .filter((b) => b.progress_mode === 'pages')
+      .reduce((sum, b) => sum + b.current_unit, 0),
+    chaptersRead: bookRows
+      .filter((b) => b.progress_mode === 'chapters')
       .reduce((sum, b) => sum + b.current_unit, 0),
     notesWritten: notes.count ?? 0,
     reflections: reflections.count ?? 0,

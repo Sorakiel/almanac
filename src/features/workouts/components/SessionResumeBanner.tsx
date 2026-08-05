@@ -4,6 +4,7 @@ import { Play, Timer } from 'lucide-react'
 import { sessionElapsed, useWorkoutSessionStore } from '@/stores/workoutSession'
 import { formatClock } from '@/features/workouts/lib/session'
 import type { WorkoutView } from '@/features/workouts/types'
+import { useT } from '@/hooks/useT'
 
 interface SessionResumeBannerProps {
   workouts: WorkoutView[]
@@ -14,6 +15,7 @@ interface SessionResumeBannerProps {
  * in after navigating away. Renders nothing when no session is in progress.
  */
 export function SessionResumeBanner({ workouts }: SessionResumeBannerProps) {
+  const { t } = useT()
   const navigate = useNavigate()
   const sessions = useWorkoutSessionStore((s) => s.sessions)
   const start = useWorkoutSessionStore((s) => s.start)
@@ -63,7 +65,7 @@ export function SessionResumeBanner({ workouts }: SessionResumeBannerProps) {
       </div>
       <span className="flex flex-none items-center gap-1.5 rounded-full bg-accent px-3.5 py-1.5 text-[13px] font-semibold text-on-accent">
         <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-        Resume
+        {t('workouts.resume')}
       </span>
     </button>
   )

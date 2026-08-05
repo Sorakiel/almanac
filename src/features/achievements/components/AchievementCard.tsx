@@ -45,6 +45,7 @@ const UNIT_KEY: Record<string, TranslationKey> = {
   entries: 'achievements.units.entries',
   areas: 'achievements.units.areas',
   pages: 'achievements.units.pages',
+  chapters: 'achievements.units.chapters',
   notes: 'achievements.units.notes',
 }
 

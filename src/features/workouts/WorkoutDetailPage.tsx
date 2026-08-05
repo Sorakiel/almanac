@@ -17,6 +17,7 @@ import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutatio
 import { useWorkoutSessionStore } from '@/stores/workoutSession'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
+import { useT } from '@/hooks/useT'
 
 /** Friendly label for a `YYYY-MM-DD` date, UTC-safe. */
 function formatDate(dateKey: string): string {
@@ -29,6 +30,7 @@ function formatDate(dateKey: string): string {
 }
 
 function WorkoutDetailPage() {
+  const { t } = useT()
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
@@ -42,7 +44,7 @@ function WorkoutDetailPage() {
     return (
       <div className="flex justify-center py-24" role="status" aria-live="polite">
         <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading workout…</span>
+        <span className="sr-only">{t('workouts.loadingOne')}</span>
       </div>
     )
   }
@@ -50,10 +52,10 @@ function WorkoutDetailPage() {
   if (isError || !workout) {
     return (
       <EmptyState
-        title="Couldn't load this workout"
+        title={t('workouts.loadOneFailed')}
         action={
           <Button size="sm" variant="surface" onClick={() => navigate('/train')}>
-            Back to workouts
+            {t('workouts.backToWorkouts')}
           </Button>
         }
       />
@@ -63,12 +65,12 @@ function WorkoutDetailPage() {
   const done = Boolean(workout.completed_at)
   const hasExercises = exercises.length > 0
   const subtitle =
-    recurrenceLabel(workout) ??
-    (workout.scheduled_date ? formatDate(workout.scheduled_date) : 'No date set')
+    recurrenceLabel(workout, t) ??
+    (workout.scheduled_date ? formatDate(workout.scheduled_date) : t('workouts.noDateSet'))
 
   const toggleComplete = () =>
     mutations.setCompleted.mutate(!done, {
-      onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not update the workout'),
+      onError: (e) => toast.error(e instanceof Error ? e.message : t('workouts.updateFailed')),
     })
 
   const startSession = () => {
@@ -83,7 +85,7 @@ function WorkoutDetailPage() {
           <button
             type="button"
             onClick={() => navigate('/train')}
-            aria-label="Back to workouts"
+            aria-label="{t('workouts.backToWorkouts')}"
             className="rounded-full p-1 text-muted hover:text-foreground"
           >
             <ArrowLeft className="h-5 w-5" aria-hidden="true" />
@@ -93,28 +95,30 @@ function WorkoutDetailPage() {
             <h1 className="truncate text-2xl lg:text-[30px] lg:tracking-title">{workout.name}</h1>
             <p className="mt-0.5 flex items-center gap-2 text-sm text-muted">
               {subtitle}
-              {done ? <Tag tone="teal">done</Tag> : null}
+              {done ? <Tag tone="teal">{t('workouts.doneLower')}</Tag> : null}
             </p>
           </div>
           <button
             type="button"
             onClick={() => setSettingsOpen(true)}
-            aria-label="Schedule & delete"
+            aria-label={t('workouts.scheduleAndDelete')}
             className="flex h-9 w-9 flex-none items-center justify-center rounded-[11px] border text-muted transition-colors hover:text-foreground"
           >
             <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
           </button>
           <Button size="sm" variant="surface" onClick={() => navigate(`/train/${id}/edit`)}>
             <Pencil className="h-3.5 w-3.5" />
-            Edit
+            {t('workouts.edit')}
           </Button>
         </header>
 
         <section className="flex flex-col gap-3">
-          <SectionLabel accessory={`${exercises.length} exercises`}>EXERCISES</SectionLabel>
+          <SectionLabel accessory={t('workouts.exerciseCount', { count: exercises.length })}>
+            {t('workouts.exercises')}
+          </SectionLabel>
           {!hasExercises ? (
             <p className="rounded-card border border-dashed bg-surface/40 px-4 py-8 text-center text-sm text-muted">
-              No exercises planned yet — tap Edit to build the session.
+              {t('workouts.noExercisesPlanned')}
             </p>
           ) : (
             exercises.map((ex) => <ExerciseView key={ex.id} exercise={ex} />)
@@ -129,7 +133,11 @@ function WorkoutDetailPage() {
               onClick={startSession}
             >
               <Play className="h-4 w-4" />
-              {hasActiveSession ? 'Resume session' : done ? 'Train again' : 'Start session'}
+              {hasActiveSession
+                ? t('workouts.resumeSession')
+                : done
+                  ? t('workouts.trainAgain')
+                  : t('workouts.startSession')}
             </Button>
           ) : null}
           <Button
@@ -140,7 +148,7 @@ function WorkoutDetailPage() {
             onClick={toggleComplete}
           >
             <Check className="h-4 w-4" />
-            {done ? 'Completed — tap to reopen' : 'Mark complete'}
+            {done ? t('workouts.completedTapToReopen') : t('workouts.markComplete')}
           </Button>
         </div>
       </div>
@@ -161,7 +169,7 @@ function WorkoutDetailPage() {
       <CelebrationModal
         open={mutations.celebrate}
         onOpenChange={(o) => !o && mutations.dismissCelebrate()}
-        title="Workout complete!"
+        title={t('workouts.workoutComplete')}
         message={`Every set of ${workout.name} is done. Strong session — well earned.`}
       />
     </>

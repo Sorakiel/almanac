@@ -1,6 +1,7 @@
 import type { WorkoutInsights } from '@/features/insights/types'
 import type { WorkoutView } from '@/features/workouts/types'
 import type { InsightLine } from '@/lib/insight'
+import type { TFunction } from '@/hooks/useT'
 
 /** Whole days from `fromKey` to `toKey` (both `YYYY-MM-DD`), parsed as UTC. */
 function daysBetween(fromKey: string, toKey: string): number {
@@ -20,6 +21,8 @@ export function buildWorkoutLines(
   workouts: WorkoutView[],
   insights: WorkoutInsights | null,
   dateKey: string,
+  t: TFunction,
+  locale: string,
 ): InsightLine[] {
   if (workouts.length === 0) return []
 
@@ -33,13 +36,13 @@ export function buildWorkoutLines(
   if (dueToday.length > 0) {
     lines.push({
       id: 'due-today',
-      text: `${dueToday.length} session${dueToday.length > 1 ? 's' : ''} on the plan for today.`,
+      text: t('workouts.lines.dueToday', { count: dueToday.length }),
       tone: 'urgent',
     })
   } else if (overdue.length > 0) {
     lines.push({
       id: 'overdue',
-      text: `${overdue.length} planned session${overdue.length > 1 ? 's' : ''} overdue — run or reschedule.`,
+      text: t('workouts.lines.overdue', { count: overdue.length }),
       tone: 'urgent',
     })
   }
@@ -55,16 +58,14 @@ export function buildWorkoutLines(
     if (days >= 4) {
       lines.push({
         id: 'rest',
-        text: `${days} days since your last session — time to move.`,
+        text: t('workouts.lines.rest', { count: days }),
         tone: 'urgent',
       })
     } else {
       lines.push({
         id: 'last',
         text:
-          days <= 0
-            ? 'You trained today. Nice work.'
-            : `Last session was ${days} day${days > 1 ? 's' : ''} ago.`,
+          days <= 0 ? t('workouts.trainedToday') : t('workouts.lines.lastSession', { count: days }),
         tone: 'good',
       })
     }
@@ -73,7 +74,7 @@ export function buildWorkoutLines(
   if (upcoming.length > 0) {
     lines.push({
       id: 'upcoming',
-      text: `${upcoming.length} session${upcoming.length > 1 ? 's' : ''} coming up on your plan.`,
+      text: t('workouts.lines.upcoming', { count: upcoming.length }),
       tone: 'info',
     })
   }
@@ -84,21 +85,23 @@ export function buildWorkoutLines(
     if (pr) {
       lines.push({
         id: 'pr',
-        text: `Heaviest lift on record: ${pr.name} at ${pr.weight}kg × ${pr.reps}.`,
+        text: t('workouts.lines.pr', { name: pr.name, weight: pr.weight, reps: pr.reps }),
         tone: 'good',
       })
     }
     if (insights.completed30d > 0) {
       lines.push({
         id: 'done-30d',
-        text: `${insights.completed30d} session${insights.completed30d > 1 ? 's' : ''} done in the last 30 days.`,
+        text: t('workouts.lines.done30d', { count: insights.completed30d }),
         tone: insights.completed30d >= 8 ? 'good' : 'info',
       })
     }
     if (insights.volume30d > 0) {
       lines.push({
         id: 'volume',
-        text: `${Math.round(insights.volume30d).toLocaleString('en-US')}kg of volume moved this month.`,
+        text: t('workouts.lines.volume30d', {
+          volume: Math.round(insights.volume30d).toLocaleString(locale),
+        }),
         tone: 'info',
       })
     }
@@ -106,7 +109,7 @@ export function buildWorkoutLines(
     if (top) {
       lines.push({
         id: 'top-ex',
-        text: `Most-trained lift: ${top.name} across ${top.sessions} session${top.sessions > 1 ? 's' : ''}.`,
+        text: t('workouts.lines.topExercise', { name: top.name, count: top.sessions }),
         tone: 'info',
       })
     }

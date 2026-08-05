@@ -2,6 +2,7 @@ import { Check, Play } from 'lucide-react'
 import { exerciseTargetLabel } from '@/features/workouts/lib/session'
 import type { SessionExercise, SetLog } from '@/features/workouts/types'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface CurrentExercisePanelProps {
   exercise: SessionExercise
@@ -52,13 +53,14 @@ function SetCell({ set, isCurrent }: { set: SetLog; isCurrent: boolean }) {
 
 /** The focused current-exercise block: warm gradient card, target, and set grid. */
 export function CurrentExercisePanel({ exercise, currentSet }: CurrentExercisePanelProps) {
+  const { t } = useT()
   const target = exerciseTargetLabel(exercise)
 
   return (
     <>
       <p className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
         <Play className="h-3 w-3 fill-current" aria-hidden="true" />
-        current exercise
+        {t('workouts.currentExercise')}
       </p>
 
       <div className="relative mt-3.5">
@@ -86,9 +88,7 @@ export function CurrentExercisePanel({ exercise, currentSet }: CurrentExercisePa
               ))}
             </div>
           ) : (
-            <p className="mt-5 text-sm text-muted">
-              No sets planned — add sets on the workout page.
-            </p>
+            <p className="mt-5 text-sm text-muted">{t('workouts.noSetsPlannedSession')}</p>
           )}
         </div>
       </div>
