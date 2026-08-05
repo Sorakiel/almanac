@@ -76,7 +76,13 @@ export function Providers({ children }: ProvidersProps) {
       // render the pre-change state and — being inside `staleTime` — refuse to
       // refetch it. Invalidating on restore makes this stale-while-revalidate.
       // Offline the refetch simply fails and the cached screen stays put.
-      onSuccess={() => queryClient.invalidateQueries()}
+      onSuccess={() => {
+        queryClient.invalidateQueries()
+        // Covers a mutation that paused before this session started (app
+        // closed offline, reopened already online) — the 'online' listener
+        // in queryClient.ts only fires on a transition, not on load.
+        void queryClient.resumePausedMutations()
+      }}
     >
       {children}
       <Toaster theme={theme === 'coffee' ? 'light' : 'dark'} position="top-center" richColors />

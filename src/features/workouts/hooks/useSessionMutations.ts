@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, type MutateOptions } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { trackEvent } from '@/lib/analytics'
+import { OFFLINE_MUTATION_KEYS, type EditSetVariables } from '@/lib/offlineMutations'
 import { updateWorkout } from '@/features/workouts/api/workouts.api'
 import {
   addSet,
@@ -9,9 +10,15 @@ import {
   createExercise,
   removeSet,
   removeWorkoutExercise,
-  updateSet,
 } from '@/features/workouts/api/session.api'
 import type { SessionExercise, SetLog, Workout } from '@/features/workouts/types'
+
+interface EditSetArgs {
+  id: string
+  patch: EditSetVariables['patch']
+}
+
+type EditSetContext = { previous: SessionExercise[] | undefined } | undefined
 
 interface AddExerciseArgs {
   exerciseId: string
@@ -93,9 +100,13 @@ export function useSessionMutations(workoutId: string) {
     onSuccess: invalidateSession,
   })
 
-  const editSet = useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: Partial<SetLog> }) => updateSet(id, patch),
-    onMutate: async ({ id, patch }) => {
+  // mutationFn and the post-write invalidation live once in
+  // registerOfflineMutations (src/lib/offlineMutations.ts) — a set logged
+  // offline mid-workout resumes headlessly and has to run the exact same
+  // write. See useToggleHabit for why that split exists.
+  const editSetMutation = useMutation<void, Error, EditSetVariables, EditSetContext>({
+    mutationKey: OFFLINE_MUTATION_KEYS.editSet,
+    onMutate: async ({ id, patch }: EditSetVariables) => {
       await queryClient.cancelQueries({ queryKey: sessionKey })
       const previous = patchSet(id, patch)
       // Ticking the last remaining set auto-completes the workout + celebrates.
@@ -112,8 +123,15 @@ export function useSessionMutations(workoutId: string) {
     onError: (_e, _v, ctx) => {
       if (ctx?.previous) queryClient.setQueryData(sessionKey, ctx.previous)
     },
-    onSettled: invalidateSession,
   })
+  const editSet = {
+    ...editSetMutation,
+    mutate: (
+      args: EditSetArgs,
+      options?: MutateOptions<void, Error, EditSetVariables, EditSetContext>,
+    ) => editSetMutation.mutate({ ...args, workoutId }, options),
+    mutateAsync: (args: EditSetArgs) => editSetMutation.mutateAsync({ ...args, workoutId }),
+  }
 
   const deleteSet = useMutation({
     mutationFn: (id: string) => removeSet(id),

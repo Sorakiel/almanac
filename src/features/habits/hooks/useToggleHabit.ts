@@ -1,8 +1,8 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, type MutateOptions } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { trackEvent } from '@/lib/analytics'
-import { setHabitCount } from '@/features/habits/api/habits.api'
+import { OFFLINE_MUTATION_KEYS, type ToggleHabitVariables } from '@/lib/offlineMutations'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
 import { habitsWindowStart } from '@/features/habits/hooks/useHabits'
 import { dailyTarget } from '@/features/habits/lib/frequency'
@@ -14,10 +14,19 @@ interface ToggleArgs {
   habit: HabitWithTodayLog
 }
 
+type ToggleContext = { previous: HabitLog[] } | undefined
+
 /**
  * One-tap completion. A tap increments the day's count (so multi-target habits
  * fill up); tapping a completed habit clears it. The recent-logs cache is
  * updated optimistically for instant feedback and rolled back on error.
+ *
+ * `mutationFn` and the post-write cache invalidation are NOT declared here —
+ * they live once in `registerOfflineMutations` (src/lib/offlineMutations.ts)
+ * and this mutation inherits them via `mutationKey`, because a tap made
+ * offline resumes headlessly (no mounted component) and has to run the exact
+ * same write. Redeclaring either here would just be a second implementation
+ * that silently stops matching the first.
  */
 export function useToggleHabit() {
   const queryClient = useQueryClient()
@@ -27,12 +36,9 @@ export function useToggleHabit() {
   // The optimistic patch has to land on the exact window the habit list reads.
   const logsKey = habitKeys.logsSince(userId, habitsWindowStart(dateKey))
 
-  return useMutation({
-    mutationFn: ({ habit }: ToggleArgs) => {
-      const nextCount = habit.isComplete ? 0 : habit.todayCount + 1
-      return setHabitCount({ userId, habitId: habit.id, date: dateKey, count: nextCount })
-    },
-    onMutate: async ({ habit }: ToggleArgs) => {
+  const mutation = useMutation<void, Error, ToggleHabitVariables, ToggleContext>({
+    mutationKey: OFFLINE_MUTATION_KEYS.toggleHabit,
+    onMutate: async ({ habit }: ToggleHabitVariables) => {
       await queryClient.cancelQueries({ queryKey: logsKey })
       const previous = queryClient.getQueryData<HabitLog[]>(logsKey) ?? []
       const nextCount = habit.isComplete ? 0 : habit.todayCount + 1
@@ -58,7 +64,7 @@ export function useToggleHabit() {
       queryClient.setQueryData<HabitLog[]>(logsKey, next)
       return { previous }
     },
-    onSuccess: (_data, { habit }: ToggleArgs) => {
+    onSuccess: (_data, { habit }: ToggleHabitVariables) => {
       // When this tap completes the habit and pushes its streak to a milestone,
       // publish a privacy-safe feed event (a day count only — never the habit
       // name). Completing on a due day extends the run by one. Best-effort +
@@ -81,10 +87,21 @@ export function useToggleHabit() {
     onError: (_error, _vars, context) => {
       if (context?.previous) queryClient.setQueryData(logsKey, context.previous)
     },
-    onSettled: () => {
-      // Every log window, not just the one the list reads — insights keeps a
-      // deeper one, and it used to sit stale after a completion.
-      void queryClient.invalidateQueries({ queryKey: habitKeys.logsRoot(userId) })
-    },
+    // No onSettled here — the registered default already invalidates
+    // habitKeys.logsRoot on settle (every log window, not just the one this
+    // list reads; insights keeps a deeper one and used to sit stale after a
+    // completion) and still runs because this call doesn't override it.
   })
+
+  // Callers only ever hand over the habit — userId/date are this hook's own
+  // state, not something a tap needs to know about. Injecting them here keeps
+  // the mutation's persisted variables fully self-contained (no closures) for
+  // when a resume runs with no component mounted.
+  const mutate = (
+    args: ToggleArgs,
+    options?: MutateOptions<void, Error, ToggleHabitVariables, ToggleContext>,
+  ) => mutation.mutate({ ...args, userId, date: dateKey }, options)
+  const mutateAsync = (args: ToggleArgs) => mutation.mutateAsync({ ...args, userId, date: dateKey })
+
+  return { ...mutation, mutate, mutateAsync }
 }
