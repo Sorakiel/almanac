@@ -15,6 +15,8 @@ import { habitKeys } from '@/features/habits/hooks/queryKeys'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import type { HabitFormInput } from '@/features/habits/hooks/useHabitMutations'
 import { updateSet } from '@/features/workouts/api/session.api'
+import { createWorkout, deleteWorkout, updateWorkout } from '@/features/workouts/api/workouts.api'
+import type { WorkoutFormInput } from '@/features/workouts/hooks/useWorkoutMutations'
 import type { SetLog } from '@/features/workouts/types'
 
 /**
@@ -37,6 +39,10 @@ export const OFFLINE_MUTATION_KEYS = {
   reorderHabits: [OFFLINE_MUTATION_ROOT, 'reorderHabits'] as const,
   createSubtask: [OFFLINE_MUTATION_ROOT, 'createSubtask'] as const,
   deleteSubtask: [OFFLINE_MUTATION_ROOT, 'deleteSubtask'] as const,
+  createWorkout: [OFFLINE_MUTATION_ROOT, 'createWorkout'] as const,
+  updateWorkout: [OFFLINE_MUTATION_ROOT, 'updateWorkout'] as const,
+  deleteWorkout: [OFFLINE_MUTATION_ROOT, 'deleteWorkout'] as const,
+  toggleWorkoutComplete: [OFFLINE_MUTATION_ROOT, 'toggleWorkoutComplete'] as const,
 }
 
 export interface ToggleHabitVariables {
@@ -95,6 +101,28 @@ export interface CreateSubtaskVariables {
 export interface DeleteSubtaskVariables {
   id: string
   habitId: string
+}
+
+export interface CreateWorkoutVariables {
+  input: WorkoutFormInput
+  userId: string
+}
+
+export interface UpdateWorkoutVariables {
+  id: string
+  input: WorkoutFormInput
+  userId: string
+}
+
+export interface DeleteWorkoutVariables {
+  id: string
+  userId: string
+}
+
+export interface ToggleWorkoutCompleteVariables {
+  id: string
+  userId: string
+  done: boolean
 }
 
 /**
@@ -196,6 +224,40 @@ export function registerOfflineMutations(client: QueryClient): void {
     mutationFn: ({ id }: DeleteSubtaskVariables) => deleteSubtask(id),
     onSettled: (_data, _error, { habitId }: DeleteSubtaskVariables) => {
       void client.invalidateQueries({ queryKey: habitKeys.subtasks(habitId) })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.createWorkout, {
+    mutationFn: ({ input, userId }: CreateWorkoutVariables) =>
+      createWorkout({ ...input, user_id: userId }),
+    onSettled: (_data, _error, { userId }: CreateWorkoutVariables) => {
+      void client.invalidateQueries({ queryKey: ['workouts', userId] })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.updateWorkout, {
+    mutationFn: ({ id, input }: UpdateWorkoutVariables) => updateWorkout(id, input),
+    onSettled: (_data, _error, { userId }: UpdateWorkoutVariables) => {
+      void client.invalidateQueries({ queryKey: ['workouts', userId] })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.deleteWorkout, {
+    mutationFn: ({ id }: DeleteWorkoutVariables) => deleteWorkout(id),
+    onSettled: (_data, _error, { userId }: DeleteWorkoutVariables) => {
+      void client.invalidateQueries({ queryKey: ['workouts', userId] })
+    },
+  })
+
+  // Shared by useWorkoutMutations' toggleComplete (list view) and
+  // useSessionMutations' setCompleted (in-session finish button) — same
+  // underlying write, two call sites.
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.toggleWorkoutComplete, {
+    mutationFn: ({ id, done }: ToggleWorkoutCompleteVariables) =>
+      updateWorkout(id, { completed_at: done ? new Date().toISOString() : null }),
+    onSettled: (_data, _error, { id, userId }: ToggleWorkoutCompleteVariables) => {
+      void client.invalidateQueries({ queryKey: ['workout', id] })
+      void client.invalidateQueries({ queryKey: ['workouts', userId] })
     },
   })
 }
