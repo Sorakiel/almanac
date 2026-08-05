@@ -23,6 +23,18 @@ import {
   deleteReflection,
   updateReflection,
 } from '@/features/reflect/api/reflections.api'
+import {
+  createBook,
+  deleteBook,
+  updateBook,
+  type BookPatch,
+} from '@/features/reading/api/books.api'
+import { createBookNote, deleteBookNote } from '@/features/reading/api/notes.api'
+import { logBookRatingEvent } from '@/features/reading/api/ratings.api'
+import { createReadingSession } from '@/features/reading/api/sessions.api'
+import { statusForProgress } from '@/features/reading/lib/progress'
+import { emitActivity } from '@/features/social/api/social.api'
+import type { Book, BookInsert } from '@/features/reading/types'
 
 /**
  * Every offline-durable mutation key is namespaced under `'offline'` — that
@@ -50,6 +62,13 @@ export const OFFLINE_MUTATION_KEYS = {
   toggleWorkoutComplete: [OFFLINE_MUTATION_ROOT, 'toggleWorkoutComplete'] as const,
   saveReflection: [OFFLINE_MUTATION_ROOT, 'saveReflection'] as const,
   deleteReflection: [OFFLINE_MUTATION_ROOT, 'deleteReflection'] as const,
+  logReadingProgress: [OFFLINE_MUTATION_ROOT, 'logReadingProgress'] as const,
+  rateBook: [OFFLINE_MUTATION_ROOT, 'rateBook'] as const,
+  createBook: [OFFLINE_MUTATION_ROOT, 'createBook'] as const,
+  updateBook: [OFFLINE_MUTATION_ROOT, 'updateBook'] as const,
+  deleteBook: [OFFLINE_MUTATION_ROOT, 'deleteBook'] as const,
+  createBookNote: [OFFLINE_MUTATION_ROOT, 'createBookNote'] as const,
+  deleteBookNote: [OFFLINE_MUTATION_ROOT, 'deleteBookNote'] as const,
 }
 
 export interface ToggleHabitVariables {
@@ -146,6 +165,48 @@ export interface SaveReflectionVariables {
 export interface DeleteReflectionVariables {
   id: string
   userId: string
+}
+
+export interface LogReadingProgressVariables {
+  book: Book
+  nextUnit: number
+  minutes: number
+  userId: string
+  dateKey: string
+}
+
+export interface RateBookVariables {
+  book: Book
+  rating: number | null
+  userId: string
+}
+
+export interface CreateBookVariables {
+  input: Omit<BookInsert, 'user_id'>
+  userId: string
+}
+
+export interface UpdateBookVariables {
+  id: string
+  patch: BookPatch
+  userId: string
+}
+
+export interface DeleteBookVariables {
+  id: string
+  userId: string
+}
+
+export interface CreateBookNoteVariables {
+  userId: string
+  bookId: string
+  body: string
+  page: number | null
+}
+
+export interface DeleteBookNoteVariables {
+  id: string
+  bookId: string
 }
 
 /**
@@ -315,6 +376,109 @@ export function registerOfflineMutations(client: QueryClient): void {
     mutationFn: ({ id }: DeleteReflectionVariables) => deleteReflection(id),
     onSettled: (_data, _error, { userId }: DeleteReflectionVariables) => {
       void client.invalidateQueries({ queryKey: ['reflections', userId] })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.logReadingProgress, {
+    mutationFn: async ({
+      book,
+      nextUnit,
+      minutes,
+      userId,
+      dateKey,
+    }: LogReadingProgressVariables) => {
+      const capped =
+        book.total_units && book.total_units > 0
+          ? Math.min(nextUnit, book.total_units)
+          : Math.max(0, nextUnit)
+      const delta = Math.max(0, capped - book.current_unit)
+      const status = statusForProgress(book, capped)
+
+      const patch: BookPatch = { current_unit: capped, status }
+      if (status === 'reading' && !book.started_on) patch.started_on = dateKey
+      if (status === 'finished' && !book.finished_on) patch.finished_on = dateKey
+
+      await updateBook(book.id, patch)
+      if (delta > 0 || minutes > 0) {
+        await createReadingSession({
+          user_id: userId,
+          book_id: book.id,
+          minutes,
+          units_read: delta,
+          date: dateKey,
+        })
+      }
+      if (delta > 0) {
+        void emitActivity({
+          user_id: userId,
+          kind: 'reading_progress',
+          subject: book.id,
+          meta: { units: delta, unit: book.progress_mode },
+          event_date: dateKey,
+        }).catch(() => undefined)
+      }
+    },
+    onSettled: (_data, _error, { book, userId }: LogReadingProgressVariables) => {
+      void client.invalidateQueries({ queryKey: ['books', userId] })
+      void client.invalidateQueries({ queryKey: ['book', book.id] })
+      void client.invalidateQueries({ queryKey: ['readingSessions', book.id] })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.rateBook, {
+    mutationFn: async ({ book, rating, userId }: RateBookVariables) => {
+      await updateBook(book.id, { rating })
+      if (rating !== null) {
+        await logBookRatingEvent({
+          user_id: userId,
+          book_id: book.id,
+          rating,
+          current_unit: book.current_unit,
+        })
+      }
+    },
+    onSettled: (_data, _error, { book, userId }: RateBookVariables) => {
+      void client.invalidateQueries({ queryKey: ['books', userId] })
+      void client.invalidateQueries({ queryKey: ['book', book.id] })
+      void client.invalidateQueries({ queryKey: ['bookRatingEvents', book.id] })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.createBook, {
+    mutationFn: ({ input, userId }: CreateBookVariables) =>
+      createBook({ ...input, user_id: userId }),
+    onSettled: (_data, _error, { userId }: CreateBookVariables) => {
+      void client.invalidateQueries({ queryKey: ['books', userId] })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.updateBook, {
+    mutationFn: ({ id, patch }: UpdateBookVariables) => updateBook(id, patch),
+    onSettled: (_data, _error, { id, userId }: UpdateBookVariables) => {
+      void client.invalidateQueries({ queryKey: ['books', userId] })
+      void client.invalidateQueries({ queryKey: ['book', id] })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.deleteBook, {
+    mutationFn: ({ id }: DeleteBookVariables) => deleteBook(id),
+    onSettled: (_data, _error, { userId }: DeleteBookVariables) => {
+      void client.invalidateQueries({ queryKey: ['books', userId] })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.createBookNote, {
+    mutationFn: ({ userId, bookId, body, page }: CreateBookNoteVariables) =>
+      createBookNote({ user_id: userId, book_id: bookId, body, page }),
+    onSettled: (_data, _error, { bookId }: CreateBookNoteVariables) => {
+      void client.invalidateQueries({ queryKey: ['bookNotes', bookId] })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.deleteBookNote, {
+    mutationFn: ({ id }: DeleteBookNoteVariables) => deleteBookNote(id),
+    onSettled: (_data, _error, { bookId }: DeleteBookNoteVariables) => {
+      void client.invalidateQueries({ queryKey: ['bookNotes', bookId] })
     },
   })
 }

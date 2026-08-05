@@ -3,8 +3,11 @@ import { QueryClient, onlineManager, dehydrate, hydrate } from '@tanstack/react-
 import { addFreeze, createHabit, setHabitCount } from '@/features/habits/api/habits.api'
 import { updateWorkout } from '@/features/workouts/api/workouts.api'
 import { createReflection, updateReflection } from '@/features/reflect/api/reflections.api'
+import { updateBook } from '@/features/reading/api/books.api'
+import { createReadingSession } from '@/features/reading/api/sessions.api'
 import { OFFLINE_MUTATION_KEYS, registerOfflineMutations } from '@/lib/offlineMutations'
 import type { HabitWithTodayLog } from '@/features/habits/types'
+import type { Book } from '@/features/reading/types'
 
 vi.mock('@/features/habits/api/habits.api', () => ({
   setHabitCount: vi.fn(async () => undefined),
@@ -30,6 +33,24 @@ vi.mock('@/features/reflect/api/reflections.api', () => ({
   createReflection: vi.fn(async () => ({ id: 'new-reflection' })),
   updateReflection: vi.fn(async () => ({ id: 'r1' })),
   deleteReflection: vi.fn(async () => undefined),
+}))
+vi.mock('@/features/reading/api/books.api', () => ({
+  createBook: vi.fn(async () => ({ id: 'new-book' })),
+  updateBook: vi.fn(async (id: string, patch: unknown) => ({ id, ...(patch as object) })),
+  deleteBook: vi.fn(async () => undefined),
+}))
+vi.mock('@/features/reading/api/notes.api', () => ({
+  createBookNote: vi.fn(async () => ({ id: 'new-note' })),
+  deleteBookNote: vi.fn(async () => undefined),
+}))
+vi.mock('@/features/reading/api/ratings.api', () => ({
+  logBookRatingEvent: vi.fn(async () => undefined),
+}))
+vi.mock('@/features/reading/api/sessions.api', () => ({
+  createReadingSession: vi.fn(async () => ({ id: 'new-session' })),
+}))
+vi.mock('@/features/social/api/social.api', () => ({
+  emitActivity: vi.fn(async () => undefined),
 }))
 
 const habit = { id: 'h1', isComplete: false, todayCount: 0 } as HabitWithTodayLog
@@ -197,6 +218,41 @@ describe('offline mutation resume', () => {
       expect.objectContaining({ user_id: 'u1', body: 'offline entry' }),
     )
     expect(updateReflection).not.toHaveBeenCalled()
+  })
+
+  it('resumes a reading progress log, capping to total_units and moving status', async () => {
+    onlineManager.setOnline(false)
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    const book = {
+      id: 'b1',
+      current_unit: 10,
+      total_units: 100,
+      progress_mode: 'pages',
+      status: 'reading',
+      started_on: '2026-08-01',
+      finished_on: null,
+    } as unknown as Book
+    const mutation = client
+      .getMutationCache()
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.logReadingProgress })
+    const pending = mutation.execute({
+      book,
+      nextUnit: 30,
+      minutes: 15,
+      userId: 'u1',
+      dateKey: '2026-08-05',
+    })
+    await new Promise((r) => setTimeout(r, 10))
+
+    onlineManager.setOnline(true)
+    await client.resumePausedMutations()
+    await pending
+
+    expect(updateBook).toHaveBeenCalledWith('b1', expect.objectContaining({ current_unit: 30 }))
+    expect(createReadingSession).toHaveBeenCalledWith(
+      expect.objectContaining({ book_id: 'b1', units_read: 20, minutes: 15 }),
+    )
   })
 
   it('a non-offline mutation key is never dehydrated, matching queryClient.ts', () => {
