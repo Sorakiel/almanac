@@ -48,6 +48,17 @@ export async function signInWithMagicLink(email: string): Promise<void> {
   if (error) throw error
 }
 
+/**
+ * Passkey sign-in (RET-8). A discoverable-credential ceremony — the
+ * authenticator resolves the account, no email needed up front. Throws
+ * `passkey_disabled` until the project's Relying Party is configured in the
+ * Supabase dashboard (see handoff.md).
+ */
+export async function signInWithPasskey(): Promise<void> {
+  const { error } = await supabase.auth.signInWithPasskey()
+  if (error) throw error
+}
+
 export async function signOut(): Promise<void> {
   // Local scope: drop the stored session without a server round-trip. A global
   // sign-out tries to revoke the token server-side, which hangs or 400s when

@@ -10,6 +10,7 @@ import {
   Download,
   Languages,
   Heart,
+  KeyRound,
   Laptop,
   Moon,
   Newspaper,
@@ -28,6 +29,7 @@ import { SettingsRail } from '@/features/settings/components/SettingsRail'
 import { TimezoneSheet } from '@/features/settings/components/TimezoneSheet'
 import { ReminderSheet } from '@/features/settings/components/ReminderSheet'
 import { DigestSheet } from '@/features/settings/components/DigestSheet'
+import { PasskeysSheet } from '@/features/settings/components/PasskeysSheet'
 import { BackgroundSheet } from '@/features/settings/components/BackgroundSheet'
 import { SupportSheet } from '@/features/settings/components/SupportSheet'
 import { LanguageSheet } from '@/features/settings/components/LanguageSheet'
@@ -63,6 +65,7 @@ function SettingsPage() {
   const [timezoneOpen, setTimezoneOpen] = useState(false)
   const [reminderOpen, setReminderOpen] = useState(false)
   const [digestOpen, setDigestOpen] = useState(false)
+  const [passkeysOpen, setPasskeysOpen] = useState(false)
   const [backgroundOpen, setBackgroundOpen] = useState(false)
   const [supportOpen, setSupportOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
@@ -184,6 +187,11 @@ function SettingsPage() {
               onClick={() => setTimezoneOpen(true)}
             />
             <Row
+              icon={KeyRound}
+              label={t('settings.passkeys')}
+              onClick={() => setPasskeysOpen(true)}
+            />
+            <Row
               icon={reminderEnabled ? AlarmClock : Bell}
               label={t('settings.dailyReminder')}
               value={
@@ -275,6 +283,7 @@ function SettingsPage() {
           reminderEnabled={reminderEnabled}
         />
       ) : null}
+      {passkeysOpen ? <PasskeysSheet open onOpenChange={setPasskeysOpen} /> : null}
       {backgroundOpen ? <BackgroundSheet open onOpenChange={setBackgroundOpen} /> : null}
       {supportOpen ? <SupportSheet open onOpenChange={setSupportOpen} /> : null}
       {exportOpen ? <ExportSheet open onOpenChange={setExportOpen} /> : null}

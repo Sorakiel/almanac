@@ -29,7 +29,7 @@ deployed, skip straight to step 3.
      VAPID_PUBLIC_KEY="B..." \
      VAPID_PRIVATE_KEY="..." \
      VAPID_SUBJECT="mailto:you@example.com" \
-     APP_URL="https://almanac-psi-three.vercel.app"
+     APP_URL="https://almanac-sorakiels-projects.vercel.app"
    ```
 
 2. **Deploy:**

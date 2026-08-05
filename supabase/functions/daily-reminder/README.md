@@ -47,7 +47,7 @@ Deployed on **staging** and verified as far as the environment allows:
      VAPID_PUBLIC_KEY="B..." \
      VAPID_PRIVATE_KEY="..." \
      VAPID_SUBJECT="mailto:you@example.com" \
-     APP_URL="https://almanac-psi-three.vercel.app"
+     APP_URL="https://almanac-sorakiels-projects.vercel.app"
    ```
 
    `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected automatically.

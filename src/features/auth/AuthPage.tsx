@@ -13,6 +13,7 @@ import { MIN_ACCEPTED_LEVEL, scorePassword } from '@/features/auth/passwordStren
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useSession } from '@/hooks/useSession'
 import { setRememberMe } from '@/lib/supabase'
+import { passkeysSupported } from '@/lib/webauthn'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'
 
@@ -35,7 +36,7 @@ function AuthPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(true)
   const { status } = useSession()
-  const { signIn, signUp, magicLink, resetRequest } = useAuthActions()
+  const { signIn, signUp, magicLink, passkeySignIn, resetRequest } = useAuthActions()
   const {
     register,
     handleSubmit,
@@ -45,7 +46,11 @@ function AuthPage() {
   } = useForm<FormValues>({ resolver: zodResolver(schema), mode: 'onChange' })
 
   const pending =
-    signIn.isPending || signUp.isPending || resetRequest.isPending || magicLink.isPending
+    signIn.isPending ||
+    signUp.isPending ||
+    resetRequest.isPending ||
+    magicLink.isPending ||
+    passkeySignIn.isPending
 
   // Live strength gate — only enforced on signup; existing accounts sign in
   // with whatever password they already have.
@@ -90,6 +95,15 @@ function AuthPage() {
       toast.error(error instanceof Error ? error.message : t('auth.genericError'))
     }
   })
+
+  const onPasskeySignIn = async () => {
+    try {
+      setRememberMe(remember)
+      await passkeySignIn.mutateAsync()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('auth.passkeyFailed'))
+    }
+  }
 
   const onForgot = async () => {
     const email = getValues('email').trim()
@@ -252,6 +266,17 @@ function AuthPage() {
           >
             {magicLink.isPending ? t('auth.magicLinkSending') : t('auth.magicLink')}
           </Button>
+
+          {mode === 'signin' && passkeysSupported() ? (
+            <Button
+              variant="ghost"
+              className="w-full border bg-transparent font-semibold"
+              onClick={onPasskeySignIn}
+              disabled={passkeySignIn.isPending}
+            >
+              {passkeySignIn.isPending ? t('auth.passkeySigningIn') : t('auth.passkeySignIn')}
+            </Button>
+          ) : null}
         </div>
       </main>
     </div>
