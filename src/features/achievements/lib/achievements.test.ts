@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { computeAchievementStats } from '@/features/achievements/lib/stats'
 import { evaluate } from '@/features/achievements/lib/evaluate'
+import { CATALOG } from '@/features/achievements/lib/catalog'
 import type { AchievementDef, AchievementStats } from '@/features/achievements/types'
 import { Flame } from 'lucide-react'
 
@@ -20,11 +21,23 @@ describe('computeAchievementStats', () => {
       notesWritten: 4,
       reflections: 0,
       betaUser: true,
+      tonnage: 1250,
+      focusMinutes: 90,
+      earlyCount: 2,
+      lateCount: 1,
+      friendsCount: 3,
+      accountDays: 45,
     })
     expect(stats.totalCompletions).toBe(3)
     expect(stats.bestStreak).toBe(2)
     expect(stats.activeModules).toBe(3) // habits, workouts, reading (not reflect)
     expect(stats.betaUser).toBe(true)
+    expect(stats.tonnage).toBe(1250)
+    expect(stats.focusMinutes).toBe(90)
+    expect(stats.earlyCount).toBe(2)
+    expect(stats.lateCount).toBe(1)
+    expect(stats.friendsCount).toBe(3)
+    expect(stats.accountDays).toBe(45)
   })
 
   it('counts reading as active from pages alone', () => {
@@ -40,6 +53,12 @@ describe('computeAchievementStats', () => {
       notesWritten: 0,
       reflections: 1,
       betaUser: false,
+      tonnage: 0,
+      focusMinutes: 0,
+      earlyCount: 0,
+      lateCount: 0,
+      friendsCount: 0,
+      accountDays: 0,
     })
     expect(stats.activeModules).toBe(2)
   })
@@ -57,6 +76,12 @@ describe('computeAchievementStats', () => {
       notesWritten: 0,
       reflections: 1,
       betaUser: false,
+      tonnage: 0,
+      focusMinutes: 0,
+      earlyCount: 0,
+      lateCount: 0,
+      friendsCount: 0,
+      accountDays: 0,
     })
     expect(stats.activeModules).toBe(2)
   })
@@ -88,6 +113,12 @@ const baseStats: AchievementStats = {
   reflections: 0,
   activeModules: 0,
   betaUser: false,
+  tonnage: 0,
+  focusMinutes: 0,
+  earlyCount: 0,
+  lateCount: 0,
+  friendsCount: 0,
+  accountDays: 0,
 }
 
 const NONE = new Set<string>()
@@ -128,5 +159,24 @@ describe('evaluate', () => {
     }
     expect(evaluate(manual, baseStats, NONE).unlocked).toBe(false)
     expect(evaluate(manual, baseStats, new Set(['founder'])).unlocked).toBe(true)
+  })
+})
+
+describe('catalog metrics', () => {
+  const defOf = (id: string): AchievementDef => {
+    const def = CATALOG.find((d) => d.id === id)
+    if (!def) throw new Error(`missing catalog entry: ${id}`)
+    return def
+  }
+
+  it('rounds down focus minutes to whole hours', () => {
+    const metric = defOf('focus').metric
+    expect(metric({ ...baseStats, focusMinutes: 119 })).toBe(1)
+    expect(metric({ ...baseStats, focusMinutes: 120 })).toBe(2)
+  })
+
+  it('rounds tonnage to a whole number', () => {
+    const metric = defOf('tonnage').metric
+    expect(metric({ ...baseStats, tonnage: 1234.6 })).toBe(1235)
   })
 })

@@ -47,6 +47,9 @@ const UNIT_KEY: Record<string, TranslationKey> = {
   pages: 'achievements.units.pages',
   chapters: 'achievements.units.chapters',
   notes: 'achievements.units.notes',
+  kg: 'achievements.units.kg',
+  hours: 'achievements.units.hours',
+  friends: 'achievements.units.friends',
 }
 
 export function AchievementCard({ item }: { item: EvaluatedAchievement }) {
