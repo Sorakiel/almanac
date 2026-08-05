@@ -25,18 +25,33 @@ function StatTile({
   value,
   unit,
   accent,
+  glowPct,
 }: {
   label: string
   value: string
   unit?: string
   accent?: boolean
+  /** 0–100: when set, tints the tile's canvas by how close it is to done — the
+   * same ambient-glow language as the mobile hero card (`TodaySummary`). */
+  glowPct?: number
 }) {
   const isInt = /^\d+$/.test(value)
   return (
-    <div className="flex-1 rounded-2xl border bg-panel px-5 py-[18px]">
-      <p className="font-mono text-[9.5px] uppercase tracking-label text-muted-strong">{label}</p>
+    <div className="relative flex-1 overflow-hidden rounded-2xl border bg-panel px-5 py-[18px]">
+      {glowPct !== undefined ? (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: `radial-gradient(circle at 85% 0%, rgb(var(--color-accent) / ${(0.05 + (glowPct / 100) * 0.22).toFixed(3)}) 0%, transparent 72%)`,
+          }}
+        />
+      ) : null}
+      <p className="relative font-mono text-[9.5px] uppercase tracking-label text-muted-strong">
+        {label}
+      </p>
       <p
-        className={`mt-1 text-[30px] font-semibold tabular-nums tracking-title ${accent ? 'text-accent' : ''}`}
+        className={`relative mt-1 text-[30px] font-semibold tabular-nums tracking-title ${accent ? 'text-accent' : ''}`}
       >
         {isInt ? <CountUp value={Number(value)} /> : value}
         {unit ? <span className="text-base text-muted-strong">{unit}</span> : null}
@@ -140,7 +155,7 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
         </div>
 
         <section className="mt-6 flex gap-3">
-          <StatTile label={t('dashboard.today')} value={String(pct)} unit="%" />
+          <StatTile label={t('dashboard.today')} value={String(pct)} unit="%" glowPct={pct} />
           <StatTile label={t('dashboard.thisWeek')} value={String(weekRate)} unit="%" accent />
           <StatTile
             label={t('dashboard.active')}
