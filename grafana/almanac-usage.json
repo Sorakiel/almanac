@@ -63,16 +63,48 @@
     {
       "id": 2,
       "type": "stat",
-      "title": "Active users · last 7 days",
-      "description": "Distinct people who closed at least one habit.",
+      "title": "Active users · 7d",
+      "description": "Distinct people with any logged activity in the trailing 7 days.",
       "datasource": { "type": "grafana-postgresql-datasource", "uid": "${datasource}" },
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "gridPos": { "h": 4, "w": 3, "x": 12, "y": 0 },
       "targets": [
         {
           "refId": "A",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select max(active_users) as \"active\" from analytics.daily_activity where day > current_date - 7"
+          "rawSql": "select active_7d as \"active\" from analytics.active_users_rolling order by day desc limit 1"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Active users · 30d",
+      "description": "Distinct people with any logged activity in the trailing 30 days.",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 3, "x": 15, "y": 0 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select active_30d as \"active\" from analytics.active_users_rolling order by day desc limit 1"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Active users · 100d",
+      "description": "Distinct people with any logged activity in the trailing 100 days.",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 3, "x": 18, "y": 0 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select active_100d as \"active\" from analytics.active_users_rolling order by day desc limit 1"
         }
       ]
     },
@@ -81,7 +113,7 @@
       "type": "stat",
       "title": "Total users",
       "datasource": { "type": "grafana-postgresql-datasource", "uid": "${datasource}" },
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "gridPos": { "h": 4, "w": 3, "x": 21, "y": 0 },
       "targets": [
         {
           "refId": "A",
@@ -92,11 +124,56 @@
       ]
     },
     {
+      "id": 8,
+      "type": "stat",
+      "title": "New users · 7d",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select new_users_7d as \"new\" from analytics.new_users_rolling order by day desc limit 1"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "stat",
+      "title": "New users · 30d",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select new_users_30d as \"new\" from analytics.new_users_rolling order by day desc limit 1"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "stat",
+      "title": "New users · 100d",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${datasource}" },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select new_users_100d as \"new\" from analytics.new_users_rolling order by day desc limit 1"
+        }
+      ]
+    },
+    {
       "id": 4,
       "type": "timeseries",
       "title": "Habit completions per day",
       "datasource": { "type": "grafana-postgresql-datasource", "uid": "${datasource}" },
-      "gridPos": { "h": 5, "w": 12, "x": 12, "y": 4 },
+      "gridPos": { "h": 5, "w": 12, "x": 12, "y": 8 },
       "targets": [
         {
           "refId": "A",
@@ -111,18 +188,56 @@
       }
     },
     {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Active users, rolling 7/30/100d",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 9 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "select day as time, active_7d, active_30d, active_100d from analytics.active_users_rolling order by day"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "fillOpacity": 8, "lineWidth": 2 } },
+        "overrides": []
+      }
+    },
+    {
       "id": 5,
       "type": "timeseries",
       "title": "Other modules per day",
       "description": "Workouts, reading sessions, reflections, focus blocks. Flat lines here are the whole point of the dashboard.",
       "datasource": { "type": "grafana-postgresql-datasource", "uid": "${datasource}" },
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 15 },
       "targets": [
         {
           "refId": "A",
           "format": "time_series",
           "rawQuery": true,
           "rawSql": "select day as time, workouts_completed, reading_sessions, reflections_written, focus_sessions from analytics.daily_activity order by day"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "fillOpacity": 8, "lineWidth": 2 } },
+        "overrides": []
+      }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "New users, rolling 7/30/100d",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 23 },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "select day as time, new_users_7d, new_users_30d, new_users_100d from analytics.new_users_rolling order by day"
         }
       ],
       "fieldConfig": {
