@@ -7,13 +7,6 @@ import {
   type EditSetVariables,
   type ToggleWorkoutCompleteVariables,
 } from '@/lib/offlineMutations'
-import {
-  addSet,
-  addWorkoutExercise,
-  createExercise,
-  removeSet,
-  removeWorkoutExercise,
-} from '@/features/workouts/api/session.api'
 import type { SessionExercise, SetLog, Workout } from '@/features/workouts/types'
 
 interface EditSetArgs {
@@ -22,14 +15,6 @@ interface EditSetArgs {
 }
 
 type EditSetContext = { previous: SessionExercise[] | undefined } | undefined
-
-interface AddExerciseArgs {
-  exerciseId: string
-  sortOrder: number
-  targetSets: number | null
-  targetReps: number | null
-  targetWeight: number | null
-}
 
 /** Every logged set is done and there's at least one — the session is finished. */
 function allSetsDone(exercises: SessionExercise[]): boolean {
@@ -45,7 +30,6 @@ export function useSessionMutations(workoutId: string) {
   const [celebrate, setCelebrate] = useState(false)
 
   const sessionKey = ['workoutSession', workoutId]
-  const invalidateSession = () => void queryClient.invalidateQueries({ queryKey: sessionKey })
 
   // Patch a single set inside the cached session for instant feedback.
   const patchSet = (setId: string, patch: Partial<SetLog>) => {
@@ -76,40 +60,6 @@ export function useSessionMutations(workoutId: string) {
     mutateAsync: (done: boolean) =>
       setCompletedMutation.mutateAsync({ id: workoutId, userId, done }),
   }
-
-  const createLibraryExercise = useMutation({
-    mutationFn: ({ name, muscleGroup }: { name: string; muscleGroup: string | null }) =>
-      createExercise(userId, name, muscleGroup),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['exerciseLibrary', userId] }),
-  })
-
-  const addExercise = useMutation({
-    mutationFn: (args: AddExerciseArgs) =>
-      addWorkoutExercise({
-        workoutId,
-        exerciseId: args.exerciseId,
-        sortOrder: args.sortOrder,
-        targetSets: args.targetSets,
-        targetReps: args.targetReps,
-        targetWeight: args.targetWeight,
-      }),
-    onSuccess: invalidateSession,
-  })
-
-  const removeExercise = useMutation({
-    mutationFn: (id: string) => removeWorkoutExercise(id),
-    onSuccess: invalidateSession,
-  })
-
-  const appendSet = useMutation({
-    mutationFn: (args: {
-      workoutExerciseId: string
-      setNumber: number
-      reps: number | null
-      weight: number | null
-    }) => addSet(args),
-    onSuccess: invalidateSession,
-  })
 
   // mutationFn and the post-write invalidation live once in
   // registerOfflineMutations (src/lib/offlineMutations.ts) — a set logged
@@ -144,18 +94,8 @@ export function useSessionMutations(workoutId: string) {
     mutateAsync: (args: EditSetArgs) => editSetMutation.mutateAsync({ ...args, workoutId }),
   }
 
-  const deleteSet = useMutation({
-    mutationFn: (id: string) => removeSet(id),
-    onSuccess: invalidateSession,
-  })
-
   return {
-    createLibraryExercise,
-    addExercise,
-    removeExercise,
-    appendSet,
     editSet,
-    deleteSet,
     setCompleted,
     /** True right after the final set is ticked — drives the congrats modal. */
     celebrate,
