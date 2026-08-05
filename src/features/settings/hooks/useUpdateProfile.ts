@@ -1,6 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
-import { updateOwnProfile, type Profile } from '@/features/settings/api/profiles.api'
+import type { Profile } from '@/features/settings/api/profiles.api'
+import { OFFLINE_MUTATION_KEYS, type UpdateProfileVariables } from '@/lib/offlineMutations'
 import type { Database } from '@/types/database.generated'
 
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
@@ -10,18 +11,21 @@ interface UseUpdateProfileResult {
   isPending: boolean
 }
 
-/** Patch the signed-in user's own profile and refresh the cached row. */
+/**
+ * Patch the signed-in user's own profile and refresh the cached row.
+ * mutationFn and the cache patch live once in registerOfflineMutations
+ * (src/lib/offlineMutations.ts) — see useToggleHabit for why.
+ */
 export function useUpdateProfile(): UseUpdateProfileResult {
   const { user } = useSession()
-  const queryClient = useQueryClient()
   const userId = user?.id ?? ''
 
-  const mutation = useMutation({
-    mutationFn: (patch: ProfileUpdate) => updateOwnProfile(userId, patch),
-    onSuccess: (profile) => {
-      queryClient.setQueryData(['profile', userId], profile)
-    },
+  const mutation = useMutation<Profile, Error, UpdateProfileVariables>({
+    mutationKey: OFFLINE_MUTATION_KEYS.updateProfile,
   })
 
-  return { update: mutation.mutateAsync, isPending: mutation.isPending }
+  return {
+    update: (patch: ProfileUpdate) => mutation.mutateAsync({ userId, patch }),
+    isPending: mutation.isPending,
+  }
 }

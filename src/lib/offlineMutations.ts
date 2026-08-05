@@ -33,8 +33,19 @@ import { createBookNote, deleteBookNote } from '@/features/reading/api/notes.api
 import { logBookRatingEvent } from '@/features/reading/api/ratings.api'
 import { createReadingSession } from '@/features/reading/api/sessions.api'
 import { statusForProgress } from '@/features/reading/lib/progress'
-import { emitActivity } from '@/features/social/api/social.api'
+import {
+  acceptFriendRequest,
+  emitActivity,
+  removeFriendship,
+  sendFriendRequest,
+} from '@/features/social/api/social.api'
+import { socialKeys } from '@/features/social/hooks/queryKeys'
 import type { Book, BookInsert } from '@/features/reading/types'
+import { submitFeedback } from '@/features/modules/api/feedback.api'
+import { updateOwnProfile } from '@/features/settings/api/profiles.api'
+import type { Database } from '@/types/database.generated'
+
+type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
 
 /**
  * Every offline-durable mutation key is namespaced under `'offline'` — that
@@ -69,6 +80,11 @@ export const OFFLINE_MUTATION_KEYS = {
   deleteBook: [OFFLINE_MUTATION_ROOT, 'deleteBook'] as const,
   createBookNote: [OFFLINE_MUTATION_ROOT, 'createBookNote'] as const,
   deleteBookNote: [OFFLINE_MUTATION_ROOT, 'deleteBookNote'] as const,
+  sendFriendRequest: [OFFLINE_MUTATION_ROOT, 'sendFriendRequest'] as const,
+  acceptFriendRequest: [OFFLINE_MUTATION_ROOT, 'acceptFriendRequest'] as const,
+  removeFriendship: [OFFLINE_MUTATION_ROOT, 'removeFriendship'] as const,
+  updateProfile: [OFFLINE_MUTATION_ROOT, 'updateProfile'] as const,
+  sendFeedback: [OFFLINE_MUTATION_ROOT, 'sendFeedback'] as const,
 }
 
 export interface ToggleHabitVariables {
@@ -207,6 +223,31 @@ export interface CreateBookNoteVariables {
 export interface DeleteBookNoteVariables {
   id: string
   bookId: string
+}
+
+export interface SendFriendRequestVariables {
+  requesterId: string
+  addresseeId: string
+}
+
+export interface AcceptFriendRequestVariables {
+  friendshipId: string
+  userId: string
+}
+
+export interface RemoveFriendshipVariables {
+  friendshipId: string
+  userId: string
+}
+
+export interface UpdateProfileVariables {
+  userId: string
+  patch: ProfileUpdate
+}
+
+export interface SendFeedbackVariables {
+  userId: string
+  body: string
 }
 
 /**
@@ -480,5 +521,39 @@ export function registerOfflineMutations(client: QueryClient): void {
     onSettled: (_data, _error, { bookId }: DeleteBookNoteVariables) => {
       void client.invalidateQueries({ queryKey: ['bookNotes', bookId] })
     },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.sendFriendRequest, {
+    mutationFn: ({ requesterId, addresseeId }: SendFriendRequestVariables) =>
+      sendFriendRequest(requesterId, addresseeId),
+    onSettled: (_data, _error, { requesterId }: SendFriendRequestVariables) => {
+      void client.invalidateQueries({ queryKey: socialKeys.friendships(requesterId) })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.acceptFriendRequest, {
+    mutationFn: ({ friendshipId }: AcceptFriendRequestVariables) =>
+      acceptFriendRequest(friendshipId),
+    onSettled: (_data, _error, { userId }: AcceptFriendRequestVariables) => {
+      void client.invalidateQueries({ queryKey: socialKeys.friendships(userId) })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.removeFriendship, {
+    mutationFn: ({ friendshipId }: RemoveFriendshipVariables) => removeFriendship(friendshipId),
+    onSettled: (_data, _error, { userId }: RemoveFriendshipVariables) => {
+      void client.invalidateQueries({ queryKey: socialKeys.friendships(userId) })
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.updateProfile, {
+    mutationFn: ({ userId, patch }: UpdateProfileVariables) => updateOwnProfile(userId, patch),
+    onSuccess: (profile, { userId }: UpdateProfileVariables) => {
+      client.setQueryData(['profile', userId], profile)
+    },
+  })
+
+  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.sendFeedback, {
+    mutationFn: ({ userId, body }: SendFeedbackVariables) => submitFeedback(userId, body),
   })
 }

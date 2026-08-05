@@ -5,6 +5,7 @@ import { updateWorkout } from '@/features/workouts/api/workouts.api'
 import { createReflection, updateReflection } from '@/features/reflect/api/reflections.api'
 import { updateBook } from '@/features/reading/api/books.api'
 import { createReadingSession } from '@/features/reading/api/sessions.api'
+import { sendFriendRequest } from '@/features/social/api/social.api'
 import { OFFLINE_MUTATION_KEYS, registerOfflineMutations } from '@/lib/offlineMutations'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import type { Book } from '@/features/reading/types'
@@ -51,6 +52,15 @@ vi.mock('@/features/reading/api/sessions.api', () => ({
 }))
 vi.mock('@/features/social/api/social.api', () => ({
   emitActivity: vi.fn(async () => undefined),
+  sendFriendRequest: vi.fn(async () => undefined),
+  acceptFriendRequest: vi.fn(async () => undefined),
+  removeFriendship: vi.fn(async () => undefined),
+}))
+vi.mock('@/features/modules/api/feedback.api', () => ({
+  submitFeedback: vi.fn(async () => undefined),
+}))
+vi.mock('@/features/settings/api/profiles.api', () => ({
+  updateOwnProfile: vi.fn(async (id: string, patch: unknown) => ({ id, ...(patch as object) })),
 }))
 
 const habit = { id: 'h1', isComplete: false, todayCount: 0 } as HabitWithTodayLog
@@ -253,6 +263,23 @@ describe('offline mutation resume', () => {
     expect(createReadingSession).toHaveBeenCalledWith(
       expect.objectContaining({ book_id: 'b1', units_read: 20, minutes: 15 }),
     )
+  })
+
+  it('resumes a friend request', async () => {
+    onlineManager.setOnline(false)
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    const mutation = client
+      .getMutationCache()
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.sendFriendRequest })
+    const pending = mutation.execute({ requesterId: 'u1', addresseeId: 'u2' })
+    await new Promise((r) => setTimeout(r, 10))
+
+    onlineManager.setOnline(true)
+    await client.resumePausedMutations()
+    await pending
+
+    expect(sendFriendRequest).toHaveBeenCalledWith('u1', 'u2')
   })
 
   it('a non-offline mutation key is never dehydrated, matching queryClient.ts', () => {
