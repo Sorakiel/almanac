@@ -2,6 +2,7 @@ import { Check } from 'lucide-react'
 import { exerciseTargetLabel, isExerciseDone } from '@/features/workouts/lib/session'
 import type { SessionExercise } from '@/features/workouts/types'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface SessionQueueProps {
   exercises: SessionExercise[]
@@ -49,6 +50,7 @@ function QueueCard({
 
 /** The session queue: exercises still ahead (Up Next) and finished ones (Done). */
 export function SessionQueue({ exercises, currentIndex }: SessionQueueProps) {
+  const { t } = useT()
   const upNext = exercises
     .map((exercise, index) => ({ exercise, index }))
     .filter(({ exercise, index }) => index > currentIndex && !isExerciseDone(exercise))
@@ -58,7 +60,7 @@ export function SessionQueue({ exercises, currentIndex }: SessionQueueProps) {
     <div className="flex flex-col gap-6">
       {upNext.length > 0 ? (
         <section>
-          <Eyebrow>up next</Eyebrow>
+          <Eyebrow>{t('workouts.upNext')}</Eyebrow>
           <div className="mt-3 flex flex-col gap-2.5">
             {upNext.map(({ exercise, index }, i) => (
               <QueueCard
@@ -83,7 +85,7 @@ export function SessionQueue({ exercises, currentIndex }: SessionQueueProps) {
 
       {done.length > 0 ? (
         <section>
-          <Eyebrow>done</Eyebrow>
+          <Eyebrow>{t('workouts.doneLower')}</Eyebrow>
           <div className="mt-3 flex flex-col gap-2.5">
             {done.map((exercise) => (
               <QueueCard

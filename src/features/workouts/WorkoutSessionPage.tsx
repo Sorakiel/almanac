@@ -32,9 +32,11 @@ import {
   sessionProgress,
 } from '@/features/workouts/lib/session'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 /** Focused live-session runner (no app shell) — spec-board screen 08. */
 function WorkoutSessionPage() {
+  const { t } = useT()
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
@@ -60,7 +62,7 @@ function WorkoutSessionPage() {
     return (
       <div className="flex min-h-dvh items-center justify-center" role="status" aria-live="polite">
         <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading session…</span>
+        <span className="sr-only">{t('workouts.loadingSession')}</span>
       </div>
     )
   }
@@ -69,10 +71,10 @@ function WorkoutSessionPage() {
     return (
       <div className="mx-auto flex min-h-dvh max-w-md items-center px-5">
         <EmptyState
-          title="Couldn't load this session"
+          title={t('workouts.loadSessionFailed')}
           action={
             <Button size="sm" variant="surface" onClick={() => navigate('/train')}>
-              Back to training
+              {t('workouts.backToTraining')}
             </Button>
           }
         />
@@ -93,7 +95,10 @@ function WorkoutSessionPage() {
     if (!currentSet) return
     mutations.editSet.mutate(
       { id: currentSet.id, patch: { done: true } },
-      { onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not log the set') },
+      {
+        onError: (e) =>
+          toast.error(e instanceof Error ? e.message : t('workouts.session.logFailed')),
+      },
     )
     startRest()
   }
@@ -107,7 +112,8 @@ function WorkoutSessionPage() {
     setMenuOpen(false)
     mutations.setCompleted.mutate(true, {
       onSuccess: () => setFinishing(true),
-      onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not finish the workout'),
+      onError: (e) =>
+        toast.error(e instanceof Error ? e.message : t('workouts.session.finishFailed')),
     })
   }
 
@@ -115,7 +121,7 @@ function WorkoutSessionPage() {
   const discardSession = () => {
     end(id)
     setConfirmDiscard(false)
-    toast('Session discarded')
+    toast(t('workouts.session.discarded'))
     navigate(`/train/${id}`)
   }
 
@@ -127,7 +133,7 @@ function WorkoutSessionPage() {
           <button
             type="button"
             onClick={leave}
-            aria-label="Leave session"
+            aria-label={t('workouts.session.leave')}
             className="-ml-1 rounded-full p-1 text-muted hover:text-foreground"
           >
             <ChevronLeft className="h-5 w-5" aria-hidden="true" />
@@ -146,7 +152,7 @@ function WorkoutSessionPage() {
           <button
             type="button"
             onClick={togglePause}
-            aria-label={running ? 'Pause session' : 'Resume session'}
+            aria-label={running ? t('workouts.pauseSession') : t('workouts.resumeSession')}
             className="flex h-7 w-7 flex-none items-center justify-center rounded-full border text-muted transition-colors hover:text-foreground"
           >
             {running ? (
@@ -163,7 +169,7 @@ function WorkoutSessionPage() {
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
-            aria-label="Session options"
+            aria-label={t('workouts.session.options')}
             className="flex h-8 w-8 items-center justify-center rounded-full border text-muted transition-colors hover:text-foreground"
           >
             <EllipsisVertical className="h-4 w-4" aria-hidden="true" />
@@ -192,11 +198,11 @@ function WorkoutSessionPage() {
           {exercises.length === 0 ? (
             <div className="mt-10">
               <EmptyState
-                title="No exercises in this session"
-                description="Plan the workout first, then come back to run it."
+                title="{t('workouts.session.noExercises')}"
+                description="{t('workouts.planFirst')}"
                 action={
                   <Button size="sm" onClick={leave}>
-                    Plan this workout
+                    {t('workouts.planThisWorkout')}
                   </Button>
                 }
               />
@@ -242,7 +248,9 @@ function WorkoutSessionPage() {
                   onClick={completeCurrentSet}
                 >
                   <Check className="h-4 w-4" />
-                  {currentSet ? `Complete set ${currentSet.set_number}` : 'Session complete'}
+                  {currentSet
+                    ? `Complete set ${currentSet.set_number}`
+                    : t('workouts.session.complete')}
                 </Button>
               </div>
 
@@ -262,11 +270,11 @@ function WorkoutSessionPage() {
         ) : null}
       </div>
 
-      <Sheet open={menuOpen} onOpenChange={setMenuOpen} title="Session" mono>
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen} title={t('workouts.session.title')} mono>
         <div className="flex flex-col gap-3">
           <Button size="lg" disabled={mutations.setCompleted.isPending} onClick={finishWorkout}>
             <Flag className="h-4 w-4" />
-            Finish workout
+            {t('workouts.session.finishWorkout')}
           </Button>
           <Button
             size="lg"
@@ -278,7 +286,7 @@ function WorkoutSessionPage() {
             }}
           >
             <Ban className="h-4 w-4" />
-            Discard session
+            {t('workouts.session.discard')}
           </Button>
         </div>
       </Sheet>
@@ -286,9 +294,9 @@ function WorkoutSessionPage() {
       <ConfirmSheet
         open={confirmDiscard}
         onOpenChange={setConfirmDiscard}
-        title="Discard this session?"
-        description="The timer is dropped; sets you already ticked stay logged."
-        confirmLabel="Discard session"
+        title={t('workouts.session.discardConfirm')}
+        description={t('workouts.session.discardHint')}
+        confirmLabel={t('workouts.session.discard')}
         onConfirm={discardSession}
       />
 
@@ -302,9 +310,9 @@ function WorkoutSessionPage() {
             navigate(`/train/${id}`)
           }
         }}
-        title="Session complete!"
+        title={t('workouts.session.completeBang')}
         message={`Nice work on ${workout.name} — logged and done. Recovery counts too.`}
-        actionLabel="Finish"
+        actionLabel={t('workouts.session.finish')}
       />
     </div>
   )

@@ -30,6 +30,7 @@ import { estimateMinutes, muscleSummary } from '@/features/workouts/lib/draft'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import type { SessionExercise } from '@/features/workouts/types'
+import { useT } from '@/hooks/useT'
 
 /** Draft editor, mounted only once the workout has loaded (stable snapshot). */
 function DraftEditor({
@@ -41,6 +42,7 @@ function DraftEditor({
   name: string
   exercises: SessionExercise[]
 }) {
+  const { t } = useT()
   const navigate = useNavigate()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const { draft, isDirty, actions, saveDraft, isSaving } = useWorkoutDraft(
@@ -87,7 +89,7 @@ function DraftEditor({
 
   const save = () =>
     saveDraft(() => {
-      toast.success('Workout saved')
+      toast.success(t('workouts.editor.saved'))
       navigate(`/train/${workoutId}`)
     })
 
@@ -121,7 +123,7 @@ function DraftEditor({
 
   const emptyExercises = (
     <p className="rounded-[20px] border border-dashed bg-surface/40 px-4 py-10 text-center text-sm text-muted">
-      No exercises yet — add one from the library.
+      {t('workouts.editor.empty')}
     </p>
   )
 
@@ -129,8 +131,8 @@ function DraftEditor({
     <input
       value={draft.name}
       onChange={(e) => actions.setName(e.target.value)}
-      aria-label="Workout name"
-      placeholder="Workout name"
+      aria-label={t('workouts.editor.name')}
+      placeholder={t('workouts.editor.name')}
       className="w-full rounded-[14px] border bg-surface px-4 py-3 text-2xl font-semibold tracking-title focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
     />
   )
@@ -139,9 +141,9 @@ function DraftEditor({
     <ConfirmSheet
       open={discardOpen}
       onOpenChange={setDiscardOpen}
-      title="Discard changes?"
-      description="Your edits to this workout won't be saved."
-      confirmLabel="Discard"
+      title={t('workouts.editor.discardTitle')}
+      description={t('workouts.editor.discardHint')}
+      confirmLabel={t('workouts.editor.discard')}
       onConfirm={() => navigate(`/train/${workoutId}`)}
     />
   )
@@ -156,10 +158,10 @@ function DraftEditor({
             <div className="min-w-0 max-w-[520px] flex-1">{nameField}</div>
             <div className="flex flex-none gap-2">
               <Button variant="surface" onClick={cancel}>
-                Cancel
+                {t('workouts.editor.cancel')}
               </Button>
               <Button className="shadow-glow" disabled={!isDirty || isSaving} onClick={save}>
-                {isSaving ? 'Saving…' : 'Save workout'}
+                {isSaving ? t('workouts.editor.saving') : t('workouts.editor.save')}
               </Button>
             </div>
           </div>
@@ -177,10 +179,11 @@ function DraftEditor({
 
           <div className="mt-7 flex items-center justify-between">
             <p className="label-mono">
-              ◇ exercises · <span className="text-foreground">{draft.exercises.length}</span>
+              ◇ {t('workouts.editor.exercisesCount')} ·{' '}
+              <span className="text-foreground">{draft.exercises.length}</span>
             </p>
             <span className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-              drag ≡ to reorder
+              {t('workouts.editor.dragToReorder')}
             </span>
           </div>
           <div className="mt-3">{draft.exercises.length === 0 ? emptyExercises : exerciseList}</div>
@@ -206,30 +209,31 @@ function DraftEditor({
         <button
           type="button"
           onClick={cancel}
-          aria-label="Cancel editing"
+          aria-label={t('workouts.editor.cancelEditing')}
           className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-label text-muted"
         >
           <X className="h-4 w-4" aria-hidden="true" />
-          edit workout
+          {t('workouts.editor.editWorkout')}
         </button>
         <Button size="sm" disabled={!isDirty || isSaving} onClick={save}>
-          {isSaving ? 'Saving…' : 'Save'}
+          {isSaving ? t('workouts.editor.saving') : t('workouts.editor.saveShort')}
         </Button>
       </header>
 
       <div>
         <p className="mb-1.5 font-mono text-[10px] uppercase tracking-label text-muted-strong">
-          workout name
+          {t('workouts.editor.workoutNameLower')}
         </p>
         {nameField}
       </div>
 
       <div className="flex items-center justify-between">
         <p className="label-mono">
-          ◇ exercises · <span className="text-foreground">{draft.exercises.length}</span>
+          ◇ {t('workouts.editor.exercisesCount')} ·{' '}
+          <span className="text-foreground">{draft.exercises.length}</span>
         </p>
         <span className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-          drag ≡ to reorder
+          {t('workouts.editor.dragToReorder')}
         </span>
       </div>
       {draft.exercises.length === 0 ? emptyExercises : exerciseList}
@@ -243,13 +247,13 @@ function DraftEditor({
         }}
       >
         <Plus className="h-4 w-4" />
-        Add exercise
+        {t('workouts.editor.addExercise')}
       </Button>
 
       <Sheet
         open={libraryOpen}
         onOpenChange={setLibraryOpen}
-        title={swapName ? 'Swap exercise' : 'Add exercise'}
+        title={swapName ? t('workouts.editor.swapExercise') : t('workouts.editor.addExercise')}
         mono
       >
         <div className="max-h-[70vh]">
@@ -268,6 +272,7 @@ function DraftEditor({
 
 /** Route wrapper: load the workout, then hand a stable snapshot to the editor. */
 function WorkoutEditPage() {
+  const { t } = useT()
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
@@ -277,7 +282,7 @@ function WorkoutEditPage() {
     return (
       <div className="flex justify-center py-24" role="status" aria-live="polite">
         <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading workout…</span>
+        <span className="sr-only">{t('workouts.loadingOne')}</span>
       </div>
     )
   }
@@ -285,10 +290,10 @@ function WorkoutEditPage() {
   if (isError || !workout) {
     return (
       <EmptyState
-        title="Couldn't load this workout"
+        title={t('workouts.loadOneFailed')}
         action={
           <Button size="sm" variant="surface" onClick={() => navigate('/train')}>
-            Back to workouts
+            {t('workouts.backToWorkouts')}
           </Button>
         }
       />

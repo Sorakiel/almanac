@@ -1,7 +1,5 @@
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
 import { useProfile } from '@/features/settings/hooks/useProfile'
-import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
+import { SignOutButton } from '@/features/settings/components/SignOutButton'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
 import { intlLocale } from '@/lib/dateLocale'
@@ -22,7 +20,6 @@ export function SettingsRail() {
   const { t, locale } = useT()
   const { user } = useSession()
   const { profile } = useProfile()
-  const { logOut } = useAuthActions()
 
   // Month names have to follow the interface language, not the build locale.
   const joined = user?.created_at
@@ -36,14 +33,6 @@ export function SettingsRail() {
       : profile?.role === 'admin'
         ? t('rail.admin')
         : t('rail.member')
-
-  const handleSignOut = async () => {
-    try {
-      await logOut.mutateAsync()
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('errors.signOut'))
-    }
-  }
 
   return (
     <div className="flex flex-1 flex-col gap-3.5">
@@ -75,14 +64,7 @@ export function SettingsRail() {
 
       <p className="px-1 text-[13px] italic leading-relaxed text-muted">{t('rail.motto')}</p>
 
-      <Button
-        variant="outline"
-        className="mt-auto w-full"
-        onClick={handleSignOut}
-        disabled={logOut.isPending}
-      >
-        {t('settings.signOut')}
-      </Button>
+      <SignOutButton className="mt-auto w-full" />
     </div>
   )
 }

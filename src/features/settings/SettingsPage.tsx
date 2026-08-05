@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
 import {
   AlarmClock,
   BarChart3,
@@ -18,7 +17,6 @@ import {
   Volume2,
   type LucideIcon,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Segmented } from '@/components/ui/segmented'
 import { Switch } from '@/components/ui/switch'
 import { Avatar } from '@/components/common/Avatar'
@@ -31,6 +29,7 @@ import { ReminderSheet } from '@/features/settings/components/ReminderSheet'
 import { BackgroundSheet } from '@/features/settings/components/BackgroundSheet'
 import { SupportSheet } from '@/features/settings/components/SupportSheet'
 import { LanguageSheet } from '@/features/settings/components/LanguageSheet'
+import { SignOutButton } from '@/features/settings/components/SignOutButton'
 import { ExportSheet } from '@/features/settings/components/ExportSheet'
 import { reminderTimeLabel } from '@/features/settings/lib/reminder'
 import { isDesktopApp } from '@/lib/desktop'
@@ -43,7 +42,6 @@ import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
 import { useTheme } from '@/hooks/useTheme'
 import { useToday } from '@/hooks/useToday'
-import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSupportConfig } from '@/features/settings/hooks/useSupportConfig'
 import { browserTimezone } from '@/lib/date'
@@ -57,7 +55,6 @@ function SettingsPage() {
   const setSound = usePrefsStore((s) => s.setSound)
   const analytics = usePrefsStore((s) => s.analytics)
   const setAnalytics = usePrefsStore((s) => s.setAnalytics)
-  const { logOut } = useAuthActions()
   const { profile } = useProfile()
   const { config: supportConfig } = useSupportConfig()
   const { dateKey } = useToday()
@@ -90,14 +87,6 @@ function SettingsPage() {
   const handleAnalyticsChange = (on: boolean) => {
     setAnalytics(on)
     setAnalyticsEnabled(on)
-  }
-
-  const handleSignOut = async () => {
-    try {
-      await logOut.mutateAsync()
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('errors.signOut'))
-    }
   }
 
   return (
@@ -236,14 +225,7 @@ function SettingsPage() {
           </section>
         ) : null}
 
-        <Button
-          variant="outline"
-          className="w-full lg:hidden"
-          onClick={handleSignOut}
-          disabled={logOut.isPending}
-        >
-          {t('settings.signOut')}
-        </Button>
+        <SignOutButton className="w-full lg:hidden" />
 
         <p className="label-mono text-center">ALMANAC v{APP_VERSION} · ◇</p>
       </div>

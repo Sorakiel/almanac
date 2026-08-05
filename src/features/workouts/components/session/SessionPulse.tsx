@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { DEFAULT_REST_SECONDS, formatClock } from '@/features/workouts/lib/session'
 import { prefersReducedMotion } from '@/lib/motion'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface SessionPulseProps {
   /** False while the session clock is paused. */
@@ -91,6 +92,7 @@ export function SessionPulse({
   elapsedMs,
   className,
 }: SessionPulseProps) {
+  const { t } = useT()
   const mode: PulseMode =
     totalSets > 0 && doneSets >= totalSets
       ? 'complete'
@@ -182,7 +184,7 @@ export function SessionPulse({
 
   return (
     <section
-      aria-label="Session effort trace"
+      aria-label={t('workouts.session.effortTrace')}
       className={cn(
         'relative flex flex-col overflow-hidden rounded-card border border-accent/20 bg-bg-deep',
         className,

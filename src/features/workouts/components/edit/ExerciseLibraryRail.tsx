@@ -10,6 +10,7 @@ import { createExercise } from '@/features/workouts/api/session.api'
 import { draftSummary, volumeLabel, type WorkoutDraft } from '@/features/workouts/lib/draft'
 import type { LibraryPick } from '@/features/workouts/hooks/useWorkoutDraft'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface ExerciseLibraryRailProps {
   draft: WorkoutDraft
@@ -26,6 +27,7 @@ export function ExerciseLibraryRail({
   swapName,
   onCancelSwap,
 }: ExerciseLibraryRailProps) {
+  const { t } = useT()
   const { user } = useSession()
   const queryClient = useQueryClient()
   const { exercises } = useExerciseLibrary()
@@ -52,24 +54,27 @@ export function ExerciseLibraryRail({
       setNewName('')
       setCreating(false)
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not create the exercise'),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t('workouts.editor.createFailed')),
   })
 
   const summary = draftSummary(draft)
 
   return (
     <div className="flex h-full flex-col gap-3.5">
-      <p className="label-mono">// {swapName ? 'swap exercise' : 'add exercise'}</p>
+      <p className="label-mono">
+        //{' '}
+        {swapName ? t('workouts.editor.swapExerciseLower') : t('workouts.editor.addExerciseLower')}
+      </p>
 
       {swapName ? (
         <div className="flex items-center justify-between gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 text-[13px]">
           <span className="min-w-0 truncate">
-            Replacing <span className="font-semibold">{swapName}</span>
+            {t('workouts.editor.replacing')} <span className="font-semibold">{swapName}</span>
           </span>
           <button
             type="button"
             onClick={onCancelSwap}
-            aria-label="Cancel swap"
+            aria-label={t('workouts.editor.cancelSwap')}
             className="flex-none text-muted hover:text-foreground"
           >
             <X className="h-4 w-4" aria-hidden="true" />
@@ -85,9 +90,9 @@ export function ExerciseLibraryRail({
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search library…"
+          placeholder={t('workouts.editor.searchPlaceholder')}
           className="pl-9"
-          aria-label="Search exercise library"
+          aria-label={t('workouts.editor.searchLibrary')}
         />
       </div>
 
@@ -118,7 +123,7 @@ export function ExerciseLibraryRail({
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
         {filtered.length === 0 ? (
           <p className="rounded-xl border border-dashed p-4 text-center text-sm text-muted">
-            No matching exercises.
+            {t('workouts.editor.noMatches')}
           </p>
         ) : (
           filtered.map((e) => (
@@ -136,7 +141,11 @@ export function ExerciseLibraryRail({
                 onClick={() =>
                   onPick({ exerciseId: e.id, name: e.name, muscleGroup: e.muscle_group })
                 }
-                aria-label={`${swapName ? 'Swap to' : 'Add'} ${e.name}`}
+                aria-label={
+                  swapName
+                    ? t('workouts.recurrence.swapToAria', { name: e.name })
+                    : t('workouts.recurrence.addExerciseAria', { name: e.name })
+                }
                 className="flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-accent/15 text-accent transition-colors hover:bg-accent hover:text-on-accent"
               >
                 <Plus className="h-4 w-4" aria-hidden="true" />
@@ -151,8 +160,8 @@ export function ExerciseLibraryRail({
           <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="New exercise name"
-            aria-label="New exercise name"
+            placeholder={t('workouts.editor.newExerciseName')}
+            aria-label={t('workouts.editor.newExerciseName')}
             autoFocus
           />
           <div className="flex gap-2">
@@ -165,7 +174,7 @@ export function ExerciseLibraryRail({
               Create{muscle ? ` · ${muscle}` : ''}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setCreating(false)}>
-              Cancel
+              {t('workouts.editor.cancel')}
             </Button>
           </div>
         </div>
@@ -176,18 +185,18 @@ export function ExerciseLibraryRail({
           className="flex items-center justify-center gap-2 rounded-xl border border-dashed py-2.5 font-mono text-[12px] text-accent transition-colors hover:bg-accent/5"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
-          Create a custom exercise
+          {t('workouts.editor.createCustom')}
         </button>
       )}
 
       <div className="rounded-2xl border bg-surface p-4">
         <p className="font-mono text-[9px] uppercase tracking-label text-muted-strong">
-          template summary
+          {t('workouts.editor.templateSummary')}
         </p>
         <div className="mt-2 flex items-baseline gap-5">
-          <SummaryStat value={String(summary.exercises)} label="exercises" />
-          <SummaryStat value={String(summary.sets)} label="sets" />
-          <SummaryStat value={volumeLabel(summary.volume)} label="volume" />
+          <SummaryStat value={String(summary.exercises)} label={t('workouts.exercisesLower')} />
+          <SummaryStat value={String(summary.sets)} label={t('workouts.sets')} />
+          <SummaryStat value={volumeLabel(summary.volume)} label={t('workouts.volume')} />
         </div>
       </div>
     </div>

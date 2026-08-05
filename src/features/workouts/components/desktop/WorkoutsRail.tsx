@@ -1,6 +1,7 @@
 import { Dumbbell } from 'lucide-react'
 import { RecentSessions } from '@/features/workouts/components/RecentSessions'
 import type { TrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
+import { useT } from '@/hooks/useT'
 
 interface WorkoutsRailProps {
   overview: TrainingOverview
@@ -17,6 +18,7 @@ function StatTile({ label, value }: { label: string; value: React.ReactNode }) {
 
 /** Desktop training rail: this-week / completed tiles and recent sessions. */
 export function WorkoutsRail({ overview }: WorkoutsRailProps) {
+  const { t } = useT()
   return (
     <div className="flex flex-col gap-3.5">
       <div className="flex items-center gap-3">
@@ -27,14 +29,14 @@ export function WorkoutsRail({ overview }: WorkoutsRailProps) {
           <Dumbbell className="h-[18px] w-[18px]" />
         </span>
         <div>
-          <p className="text-[15px] font-semibold">Training</p>
-          <p className="font-mono text-[10px] text-muted-strong">your week</p>
+          <p className="text-[15px] font-semibold">{t('workouts.title')}</p>
+          <p className="font-mono text-[10px] text-muted-strong">{t('workouts.yourWeek')}</p>
         </div>
       </div>
 
       <div className="flex gap-3">
         <StatTile
-          label="this week"
+          label={t('workouts.thisWeek')}
           value={
             <>
               {overview.weekDone}
@@ -42,12 +44,12 @@ export function WorkoutsRail({ overview }: WorkoutsRailProps) {
             </>
           }
         />
-        <StatTile label="completed" value={overview.completedCount} />
+        <StatTile label={t('workouts.completed')} value={overview.completedCount} />
       </div>
 
       <div className="rounded-[18px] border bg-surface p-[18px]">
         <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-strong">
-          recent
+          {t('workouts.recent')}
         </p>
         <div className="mt-2">
           <RecentSessions workouts={overview.recent} />

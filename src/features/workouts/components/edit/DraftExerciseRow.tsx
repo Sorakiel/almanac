@@ -10,6 +10,7 @@ import {
   type DraftSet,
 } from '@/features/workouts/lib/draft'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface DraftExerciseRowProps {
   exercise: DraftExercise
@@ -35,6 +36,7 @@ export function DraftExerciseRow({
   onRemoveSet,
   onAddSet,
 }: DraftExerciseRowProps) {
+  const { t } = useT()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: exercise.id,
   })
@@ -78,12 +80,12 @@ export function DraftExerciseRow({
               className="flex items-center gap-1.5 rounded-[10px] border px-3 py-1.5 font-mono text-[11px] text-muted transition-colors hover:text-foreground"
             >
               <Repeat2 className="h-3.5 w-3.5" aria-hidden="true" />
-              Swap
+              {t('workouts.editor.swap')}
             </button>
             <button
               type="button"
               onClick={onRemove}
-              aria-label={`Remove ${exercise.name}`}
+              aria-label={t('workouts.recurrence.removeExercise', { name: exercise.name })}
               className="flex h-9 w-9 flex-none items-center justify-center rounded-lg text-muted-strong transition-colors hover:text-accent"
             >
               <Trash2 className="h-4 w-4" aria-hidden="true" />
