@@ -1,4 +1,7 @@
 import { Cascade } from '@/components/common/Cascade'
+import { YearStrip } from '@/components/common/YearStrip'
+import { useYearActivity } from '@/features/insights/hooks/useYearActivity'
+import { useToday } from '@/hooks/useToday'
 import { CompletionTrend } from '@/features/insights/components/CompletionTrend'
 import { InsightStat } from '@/features/insights/components/InsightStat'
 import { RangeToggle } from '@/features/insights/components/RangeToggle'
@@ -38,13 +41,15 @@ export function InsightsWorkspace({
   onRangeChange,
 }: InsightsWorkspaceProps) {
   const { t } = useT()
+  const { days: yearDays } = useYearActivity()
+  const { dateKey } = useToday()
   const completionPct = Math.round(insights.completionRate * 100)
 
   return (
     <div className="mx-auto max-w-[900px]">
       <header className="flex items-start justify-between">
         <div>
-          <p className="label-mono">// {insightRangeLabel(range)}</p>
+          <p className="label-mono">// {insightRangeLabel(range, t)}</p>
           <h1 className="mt-1.5 text-[44px] leading-none tracking-title">{t('insights.title')}</h1>
           <p className="mt-2 text-[15px] text-muted">{t('insights.subtitle')}</p>
         </div>
@@ -52,15 +57,19 @@ export function InsightsWorkspace({
       </header>
 
       <Cascade>
+        <div className="mt-7">
+          <YearStrip days={yearDays} todayKey={dateKey} />
+        </div>
+
         {insights.hasData ? (
           <>
-            <section className="mt-7 flex gap-3.5">
+            <section className="mt-4 flex gap-3.5">
               <InsightStat
                 label={t('insights.completion')}
                 value={String(completionPct)}
                 unit="%"
                 delta={insights.completionDelta}
-                deltaSuffix="% vs prev"
+                deltaSuffix={t('insights.vsPrev')}
               />
               <InsightStat
                 label={t('insights.bestStreak')}
@@ -69,12 +78,12 @@ export function InsightsWorkspace({
               />
               <InsightStat label={t('insights.active')} value={String(insights.activeHabits)} />
               <InsightStat
-                label={`done · ${insightRangeSuffix(range)}`}
+                label={`${t('insights.doneLower')} · ${insightRangeSuffix(range, t)}`}
                 value={String(insights.totalDone)}
               />
             </section>
 
-            <p className="label-mono mb-3 mt-8">// completion over time</p>
+            <p className="label-mono mb-3 mt-8">{t('insights.completionOverTime')}</p>
             <CompletionTrend weekly={insights.weekly} />
           </>
         ) : null}

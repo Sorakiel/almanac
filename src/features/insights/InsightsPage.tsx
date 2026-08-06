@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { BarChart3, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Cascade } from '@/components/common/Cascade'
+import { YearStrip } from '@/components/common/YearStrip'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Rail } from '@/components/common/desktop/rail'
 import { CompletionTrend } from '@/features/insights/components/CompletionTrend'
@@ -19,11 +20,13 @@ import { InsightsRail } from '@/features/insights/components/desktop/InsightsRai
 import { insightRangeLabel, insightRangeSuffix } from '@/features/insights/lib/insightRange'
 import type { InsightRange } from '@/features/insights/types'
 import { useInsights } from '@/features/insights/hooks/useInsights'
+import { useYearActivity } from '@/features/insights/hooks/useYearActivity'
 import { useWorkoutInsights } from '@/features/insights/hooks/useWorkoutInsights'
 import { useReadingInsights } from '@/features/insights/hooks/useReadingInsights'
 import { useReflectInsights } from '@/features/insights/hooks/useReflectInsights'
 import { useFocusInsights } from '@/features/insights/hooks/useFocusInsights'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
 import { useT } from '@/hooks/useT'
 
@@ -41,6 +44,8 @@ function InsightsPage() {
   const { data: readingInsights, isLoading: rdLoading } = useReadingInsights()
   const { data: reflectInsights, isLoading: rfLoading } = useReflectInsights()
   const { data: focusInsights, isLoading: fcLoading } = useFocusInsights()
+  const { days: yearDays } = useYearActivity()
+  const { dateKey } = useToday()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   if (isLoading || woLoading || rdLoading || rfLoading || fcLoading) {
@@ -119,7 +124,7 @@ function InsightsPage() {
     <section className="flex flex-col gap-6">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="label-mono">// {insightRangeLabel(range)}</p>
+          <p className="label-mono">// {insightRangeLabel(range, t)}</p>
           <h1 className="mt-1 text-2xl">{t('insights.title')}</h1>
         </div>
         <RangeToggle value={range} onChange={setRange} className="mt-0.5" />
@@ -127,6 +132,8 @@ function InsightsPage() {
 
       <Cascade>
         <InsightsTicker habits={tickerInsights} />
+
+        <YearStrip days={yearDays} todayKey={dateKey} />
 
         {habitHasData ? (
           <div className="flex flex-col gap-5">
@@ -136,7 +143,7 @@ function InsightsPage() {
                 value={String(completionPct)}
                 unit="%"
                 delta={insights.completionDelta}
-                deltaSuffix="% vs prev"
+                deltaSuffix={t('insights.vsPrev')}
               />
               <InsightStat
                 label={t('insights.bestStreak')}
@@ -145,13 +152,13 @@ function InsightsPage() {
               />
               <InsightStat label={t('insights.active')} value={String(insights.activeHabits)} />
               <InsightStat
-                label={`done · ${insightRangeSuffix(range)}`}
+                label={`${t('insights.doneLower')} · ${insightRangeSuffix(range, t)}`}
                 value={String(insights.totalDone)}
               />
             </div>
 
             <div>
-              <p className="label-mono mb-3">// completion over time</p>
+              <p className="label-mono mb-3">{t('insights.completionOverTime')}</p>
               <CompletionTrend weekly={insights.weekly} height={150} />
             </div>
 
