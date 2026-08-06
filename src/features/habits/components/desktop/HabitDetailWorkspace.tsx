@@ -76,8 +76,12 @@ export function HabitDetailWorkspace({
       </header>
 
       <div className="mt-6 flex gap-3.5">
-        <Stat label={t('habits.streak')} value={`◆ ${stats.streak}d`} accent />
-        <Stat label={t('habits.best')} value={`${stats.best}d`} />
+        <Stat
+          label={t('habits.streak')}
+          value={`◆ ${t('units.daysShort', { count: stats.streak })}`}
+          accent
+        />
+        <Stat label={t('habits.best')} value={t('units.daysShort', { count: stats.best })} />
         <Stat label={t('habits.rate')} value={`${stats.ratePct}%`} />
         <Stat label={t('habits.total')} value={String(stats.total)} />
       </div>

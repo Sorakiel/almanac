@@ -6,7 +6,7 @@ export function AuthBrandPanel() {
   const { t, locale } = useT()
   const { stats } = useLandingStats()
   const members = stats ? stats.members.toLocaleString(locale) : '—'
-  const longestStreak = stats ? `${stats.longestStreak}d` : '—'
+  const longestStreak = stats ? t('units.daysShort', { count: stats.longestStreak }) : '—'
   const avgCompletion = stats ? `${stats.avgCompletion}%` : '—'
 
   return (
