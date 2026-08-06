@@ -46,3 +46,23 @@ export async function setBadgeCount(count: number): Promise<void> {
     console.debug('[desktop] set_badge failed', err)
   }
 }
+
+/**
+ * Push today's habit summary to the macOS tray — a disabled summary line plus
+ * up to a few not-yet-done habit names, rebuilt above Open/Quit (see
+ * `set_widget_summary` in `src-tauri/src/lib.rs`). Read-only, mirroring the
+ * Android widget's contract: the tray never writes back. No-op off desktop.
+ */
+export async function setWidgetSummary(
+  done: number,
+  total: number,
+  pending: string[],
+): Promise<void> {
+  if (!isDesktopApp()) return
+  try {
+    const { invoke } = await import('@tauri-apps/api/core')
+    await invoke('set_widget_summary', { done, total, pending })
+  } catch (err) {
+    console.debug('[desktop] set_widget_summary failed', err)
+  }
+}

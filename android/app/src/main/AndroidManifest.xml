@@ -37,6 +37,19 @@
             android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
         </provider>
+
+        <!-- RET-4: home-screen widget. Read-only — see WidgetBridgePlugin.kt
+             and TodayWidgetProvider.kt. -->
+        <receiver
+            android:name=".widget.TodayWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/today_widget_info" />
+        </receiver>
     </application>
 
     <!-- Permissions -->
