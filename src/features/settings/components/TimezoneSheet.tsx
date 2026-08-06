@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { useUpdateProfile } from '@/features/settings/hooks/useUpdateProfile'
 import { browserTimezone, listTimezones, timezoneOffsetLabel } from '@/lib/date'
+import { useT } from '@/hooks/useT'
 
 interface TimezoneSheetProps {
   open: boolean
@@ -17,6 +18,7 @@ interface TimezoneSheetProps {
  * silently shifts streak boundaries — we default to the detected device zone.
  */
 export function TimezoneSheet({ open, onOpenChange, current }: TimezoneSheetProps) {
+  const { t } = useT()
   const { update, isPending } = useUpdateProfile()
   const [selected, setSelected] = useState(current)
   const zones = useMemo(() => listTimezones(), [])
@@ -25,10 +27,10 @@ export function TimezoneSheet({ open, onOpenChange, current }: TimezoneSheetProp
   const save = async () => {
     try {
       await update({ timezone: selected })
-      toast.success('Timezone updated')
+      toast.success(t('settings.timezoneUpdated'))
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not update timezone')
+      toast.error(error instanceof Error ? error.message : t('settings.timezoneUpdateFailed'))
     }
   }
 
@@ -36,12 +38,12 @@ export function TimezoneSheet({ open, onOpenChange, current }: TimezoneSheetProp
     <Sheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Timezone"
-      description="Almanac uses this to decide when your day starts and ends."
+      title={t('settings.timezoneTitle')}
+      description={t('settings.timezoneDescription')}
     >
       <div className="flex flex-col gap-4">
         <label className="flex flex-col gap-1.5">
-          <span className="label-mono">Zone</span>
+          <span className="label-mono">{t('settings.timezoneZone')}</span>
           <select
             value={selected}
             onChange={(event) => setSelected(event.target.value)}
@@ -60,11 +62,11 @@ export function TimezoneSheet({ open, onOpenChange, current }: TimezoneSheetProp
           onClick={() => setSelected(device)}
           className="self-start text-sm text-muted transition-colors hover:text-accent"
         >
-          Use device timezone ({device.replace(/_/g, ' ')})
+          {t('settings.timezoneUseDevice', { device: device.replace(/_/g, ' ') })}
         </button>
 
         <Button size="lg" onClick={save} disabled={isPending || selected === current}>
-          {isPending ? 'Saving…' : 'Save timezone'}
+          {isPending ? t('settings.timezoneSaving') : t('settings.timezoneSaveButton')}
         </Button>
       </div>
     </Sheet>

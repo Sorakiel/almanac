@@ -66,7 +66,7 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
       <button
         type="button"
         onClick={openDetail}
-        aria-label={`View ${workout.name} plan`}
+        aria-label={t('a11y.viewPlan', { name: workout.name })}
         className="group block w-full text-left"
       >
         <div className="flex items-start justify-between gap-4">

@@ -1,5 +1,6 @@
 import { Minus, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface StepperProps {
   value: number | null
@@ -22,6 +23,7 @@ function parseNum(value: string): number | null {
 
 /** A compact "− value +" numeric stepper; the value is also directly editable. */
 export function Stepper({ value, onChange, onStep, step = 1, ariaLabel, className }: StepperProps) {
+  const { t } = useT()
   return (
     <div
       className={cn(
@@ -32,7 +34,7 @@ export function Stepper({ value, onChange, onStep, step = 1, ariaLabel, classNam
       <button
         type="button"
         onClick={() => onStep(-step)}
-        aria-label={`Decrease ${ariaLabel}`}
+        aria-label={t('a11y.decrease', { name: ariaLabel })}
         className="flex h-10 w-10 flex-none items-center justify-center rounded-l-xl text-accent transition-colors hover:bg-bg"
       >
         <Minus className="h-4 w-4" aria-hidden="true" />
@@ -49,7 +51,7 @@ export function Stepper({ value, onChange, onStep, step = 1, ariaLabel, classNam
       <button
         type="button"
         onClick={() => onStep(step)}
-        aria-label={`Increase ${ariaLabel}`}
+        aria-label={t('a11y.increase', { name: ariaLabel })}
         className="flex h-10 w-10 flex-none items-center justify-center rounded-r-xl text-accent transition-colors hover:bg-bg"
       >
         <Plus className="h-4 w-4" aria-hidden="true" />

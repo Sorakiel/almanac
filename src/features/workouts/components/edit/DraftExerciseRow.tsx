@@ -57,7 +57,7 @@ export function DraftExerciseRow({
       <div className="flex items-center gap-3">
         <button
           type="button"
-          aria-label={`Reorder ${exercise.name}`}
+          aria-label={t('a11y.reorder', { name: exercise.name })}
           className="flex-none cursor-grab touch-none text-muted-strong hover:text-foreground"
           {...attributes}
           {...listeners}
@@ -101,7 +101,7 @@ export function DraftExerciseRow({
             <button
               type="button"
               onClick={onToggle}
-              aria-label={`Expand ${exercise.name}`}
+              aria-label={t('a11y.expand', { name: exercise.name })}
               className="flex h-8 w-8 flex-none items-center justify-center rounded-lg text-muted-strong transition-colors hover:text-foreground"
             >
               <ChevronRight className="h-4 w-4" aria-hidden="true" />

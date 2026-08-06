@@ -2,6 +2,7 @@ import { IconTile } from '@/components/common/IconTile'
 import { AlmanacNarrator } from '@/features/dashboard/components/AlmanacNarrator'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import type { HabitWithTodayLog } from '@/features/habits/types'
+import { useT } from '@/hooks/useT'
 
 interface HabitsRailProps {
   habits: HabitWithTodayLog[]
@@ -9,6 +10,7 @@ interface HabitsRailProps {
 
 /** Desktop "Habits" context rail: week summary, strongest, needs attention. */
 export function HabitsRail({ habits }: HabitsRailProps) {
+  const { t } = useT()
   if (habits.length === 0) return null
 
   const weekRate = Math.round((habits.reduce((s, h) => s + h.rate, 0) / habits.length) * 100)
@@ -23,18 +25,18 @@ export function HabitsRail({ habits }: HabitsRailProps) {
 
       <div>
         <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-          this week
+          {t('habits.rail.thisWeek')}
         </p>
         <div className="mt-3.5 flex gap-3">
           <div className="flex-1 rounded-2xl border bg-surface p-4">
             <p className="font-mono text-[9px] uppercase tracking-label text-muted-strong">
-              completion
+              {t('habits.rail.completion')}
             </p>
             <p className="mt-1 text-[26px] font-semibold text-accent">{weekRate}%</p>
           </div>
           <div className="flex-1 rounded-2xl border bg-surface p-4">
             <p className="font-mono text-[9px] uppercase tracking-label text-muted-strong">
-              active
+              {t('habits.rail.active')}
             </p>
             <p className="mt-1 text-[26px] font-semibold">{habits.length}</p>
           </div>
@@ -43,15 +45,15 @@ export function HabitsRail({ habits }: HabitsRailProps) {
 
       <div>
         <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-          strongest
+          {t('habits.rail.strongest')}
         </p>
         <div className="mt-2.5 flex items-center gap-3 rounded-2xl border bg-surface p-[15px]">
           <IconTile icon={StrongIcon} tone={strongColor.tile} size="sm" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{strongest.name}</p>
             <p className="font-mono text-[10px] text-muted-strong">
-              {Math.round(strongest.rate * 100)}% · {strongest.completedRecent} of{' '}
-              {strongest.windowDays}
+              {Math.round(strongest.rate * 100)}% · {strongest.completedRecent}{' '}
+              {t('habits.ofLastDays', { count: strongest.windowDays })}
             </p>
           </div>
         </div>

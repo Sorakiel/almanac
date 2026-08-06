@@ -7,6 +7,30 @@
  * `t(key, vars)`; `{count}` additionally selects the plural form.
  */
 export const en = {
+  /**
+   * Screen-reader-only labels that don't belong to one feature's vocabulary.
+   * These are as translatable as visible text — a Russian interface reading
+   * English to a screen reader is the same bug, only harder to notice.
+   */
+  a11y: {
+    ratedOfFive: 'Rated {value} of 5',
+    daysJournaled: '{count} of {total} days journaled',
+    percentRead: '{percent}% read',
+    habitCompletion: '{name} completion',
+    enableDailyReminder: 'Enable daily reminder',
+    reminderTime: 'Reminder time',
+    timePresets: 'Time presets',
+    keepRunning: 'Keep Almanac running in the background',
+    setsDone: '{done} of {total} sets done',
+    completeSet: 'Complete set {number}',
+    decrease: 'Decrease {name}',
+    increase: 'Increase {name}',
+    reorder: 'Reorder {name}',
+    expand: 'Expand {name}',
+    viewPlan: 'View {name} plan',
+    restForSet: 'Rest for set {number}: {value}, tap to change',
+    removeSet: 'Remove set {number}',
+  },
   nav: {
     today: 'Today',
     habits: 'Habits',
@@ -260,6 +284,7 @@ export const en = {
     eyebrow: 'MODULES',
     railBlurb: 'Almanac grows with you — one module at a time.',
     pinned: 'Pinned',
+    overview: 'overview',
     inYourNav: 'in your nav',
     comingSoon: 'COMING SOON',
     comingSoonLower: 'coming soon',
@@ -709,6 +734,7 @@ export const en = {
       noExercises: 'No exercises in this session',
       logFailed: 'Could not log the set',
       finishFailed: 'Could not finish the workout',
+      completeSet: 'Complete set {number}',
       effortTrace: 'Session effort trace',
       railHint: 'Tick each set as you finish it — volume is reps × weight across completed sets.',
     },
@@ -799,6 +825,7 @@ export const en = {
     },
   },
   dashboard: {
+    friend: 'friend',
     goodMorning: 'Good morning',
     goodAfternoon: 'Good afternoon',
     goodEvening: 'Good evening',
@@ -888,7 +915,10 @@ export const en = {
     emptyHint: 'Create your first habit to start a streak.',
     filterHintMobile: 'Tap the filter pill to cycle to another frequency.',
     filterHintDesktop: 'Pick another frequency above.',
-    activeCount: '{count} active',
+    activeCount: {
+      one: '{count} active',
+      other: '{count} active',
+    },
     markDone: 'Mark done for today',
     completedToday: 'Completed today',
     freezeToday: 'Freeze today',
@@ -927,6 +957,33 @@ export const en = {
     },
     ofLastDays: 'of last {count}',
     doneTodayAria: '{done} of {total} habits done today',
+    resting: 'resting',
+    restingIn: 'resting · in {count}d',
+    rail: {
+      thisWeek: 'this week',
+      completion: 'completion',
+      active: 'active',
+      strongest: 'strongest',
+      recent: 'recent',
+      notes: '// notes',
+      statusToday: 'today',
+    },
+    aria: {
+      complete: 'Complete {name}',
+      markIncomplete: 'Mark {name} incomplete',
+      resting: '{name} is resting',
+      restingDays: {
+        one: '{name} rests for {count} more day',
+        other: '{name} rests for {count} more days',
+      },
+      open: 'Open {name}',
+      reorder: 'Reorder {name}',
+      check: 'Check {name}',
+      uncheck: 'Uncheck {name}',
+      removeItem: 'Remove {name}',
+      icon: 'Icon {name}',
+      color: 'Color {name}',
+    },
     freq: {
       daily: 'daily',
       weekdays: 'weekdays',
@@ -1023,6 +1080,14 @@ export const en = {
     achievements: 'Achievements',
     support: 'Support Almanac',
     timezone: 'Timezone',
+    timezoneTitle: 'Timezone',
+    timezoneDescription: 'Almanac uses this to decide when your day starts and ends.',
+    timezoneZone: 'Zone',
+    timezoneUseDevice: 'Use device timezone ({device})',
+    timezoneSaveButton: 'Save timezone',
+    timezoneSaving: 'Saving…',
+    timezoneUpdated: 'Timezone updated',
+    timezoneUpdateFailed: 'Could not update timezone',
     dailyReminder: 'Daily reminder',
     weeklyDigest: 'Weekly digest',
     digestTitle: 'Weekly digest',

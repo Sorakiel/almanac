@@ -66,7 +66,10 @@ export function SetEditorTable({
             <button
               type="button"
               onClick={() => onEditSet(set.id, { restSeconds: nextRest(set.restSeconds) })}
-              aria-label={`Rest for set ${i + 1}: ${restLabel(set.restSeconds)}, tap to change`}
+              aria-label={t('a11y.restForSet', {
+                number: i + 1,
+                value: restLabel(set.restSeconds),
+              })}
               className="hidden h-10 items-center justify-center rounded-xl border bg-bg font-mono text-[13px] tabular-nums text-muted transition-colors hover:text-foreground lg:flex"
             >
               {restLabel(set.restSeconds)}
@@ -74,7 +77,7 @@ export function SetEditorTable({
             <button
               type="button"
               onClick={() => onRemoveSet(set.id)}
-              aria-label={`Remove set ${i + 1}`}
+              aria-label={t('a11y.removeSet', { number: i + 1 })}
               className="flex h-9 w-8 flex-none items-center justify-center rounded-lg text-muted-strong transition-colors hover:text-accent"
             >
               <X className="h-4 w-4" aria-hidden="true" />

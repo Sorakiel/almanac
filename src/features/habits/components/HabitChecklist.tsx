@@ -53,7 +53,11 @@ export function HabitChecklist({ habit, className }: HabitChecklistProps) {
                 done={checked}
                 onToggle={toggle}
                 size="sm"
-                aria-label={checked ? `Uncheck ${subtask.title}` : `Check ${subtask.title}`}
+                aria-label={
+                  checked
+                    ? t('habits.aria.uncheck', { name: subtask.title })
+                    : t('habits.aria.check', { name: subtask.title })
+                }
               />
               <button
                 type="button"

@@ -108,7 +108,7 @@ All user-owned tables carry `user_id` and are protected by RLS. Use `timestamptz
 
 | Table                | Key columns                                                                                                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `profiles`           | id → auth.users, display_name, avatar_url, timezone, role (`user`\|`admin`\|`owner`), onboarded, reminder_enabled, reminder_hour, reminder_minute, reminder_sent_on, created_at |
+| `profiles`           | id → auth.users, display_name, avatar_url, timezone, role (`user`\|`admin`\|`owner`), onboarded, reminder_enabled, reminder_hour, reminder_minute, reminder_sent_on, digest_enabled, digest_day, digest_hour, digest_minute, digest_sent_on, created_at |
 | `habits`             | id, user_id, name, description, icon, color, frequency (`daily`\|`weekly`\|`x_per_week`), target_count, sort_order, archived_at, created_at                                     |
 | `habit_logs`         | id, user_id, habit_id, date (local calendar date), count, note, created_at — **unique(habit_id, date)**                                                                         |
 | `workouts`           | id, user_id, name, scheduled_date, completed_at, created_at                                                                                                                     |
@@ -215,12 +215,21 @@ The specs share **one pre-seeded staging account** and clean up their own rows t
 - Cleanup belongs in `afterEach`, **not** a `finally` inside the test: Playwright aborts the body on timeout and the `finally` may never run.
 - Pin anything environment-dependent. A spec that asserted "the timezone is not UTC" passed locally and failed on UTC runners, where "adopted the zone" and "wrote nothing" are the same string.
 
-**Offline is reads only.** The service worker precaches the app shell and React Query's
-cache is persisted, so a cold start with no network opens on real data. Writes are not
-covered: a mutation paused while offline does not resume in this version, and persisted
-mutations come back without a `mutationFn`. Restored data is invalidated on restore rather
-than trusted — the snapshot is throttled, and without that a reload right after a change
-replays the pre-change state.
+**Offline covers reads _and_ writes.** The service worker precaches the app shell and
+React Query's cache is persisted, so a cold start with no network opens on real data.
+Writes survive too: `src/lib/offlineMutations.ts` registers each write path's
+`mutationFn` + settle handler under an `'offline'` mutationKey namespace, and
+`shouldDehydrateMutation` persists only those — so nothing can resume into "No mutationFn
+found". The resume is an **explicit** `resumePausedMutations()` call (the browser `online`
+event in `queryClient.ts`, plus the persisted-cache restore in `providers.tsx`); the
+automatic continue on the `onlineManager` transition is broken and must not be relied on.
+Restored data is invalidated on restore rather than trusted — the snapshot is throttled,
+and without that a reload right after a change replays the pre-change state.
+
+Adding a new write path: register its key + fn in `offlineMutations.ts`, give the live
+hook a `mutationKey` instead of its own `mutationFn`, and keep the variables JSON-safe —
+no closures, everything the `mutationFn` needs must travel in `variables`. Deliberately
+excluded: admin actions (owner-only, connectivity assumed) and auth (must stay live).
 
 **What a browser sandbox cannot verify.** Notification permission is denied there, so Web Push delivery has never been proven end to end from a dev machine, and there is no Android emulator. Verify every link you can, then say plainly which one you could not.
 
@@ -276,9 +285,17 @@ English and untranslated screens fall back to it, so a stage never regresses a s
 
 **Shipped:** auth + dashboard, habits (schedule-aware streaks, freezes, heatmap), workouts, reading, reflect, flow (deep-work), insights, achievements, friends, onboarding, admin/feedback — plus a motion & celebration layer (cascade entrances, view-transition theme wipe, confetti, streak flames, focus console, the Almanac narrator).
 
-Plus the v0.4 reliability and observability work: timezone-correct days, bounded queries, e2e in CI, PostHog, a Grafana usage dashboard, Web Push reminders, and installability as a PWA.
+**v0.4 is closed:** timezone-correct days, bounded queries, e2e in CI, PostHog, a Grafana usage dashboard, Web Push reminders + weekly digest, PWA installability, offline reads _and_ writes, Russian across the member-facing UI, data export, passkeys (server-side off), and read-only Today widgets (Android AppWidget + macOS tray).
 
-**The numbers say breadth already outran depth.** Of five registered users three are active, and only habits see daily use — workouts have never had a single session completed. Retention beats another module: finish RET (offline, i18n/ru, data export, widgets) before adding a tenth life area.
+**v0.5 «Альманах» is the current plan — see `../handoff.md`.** It finishes the almanac
+metaphor rather than adding a tenth life area: a real command line in the terminal header,
+a year strip, daylight-following background, a day seal replacing the perfect-day flash, a
+shareable day capsule, a typewriter narrator, and achievement stamps — plus the daily-loop
+fixes the 2026-08-06 audit found (action above the fold on mobile, 44px targets, the
+remaining i18n holes, eager-bundle chunking).
+
+Do **not** re-derive priorities from adoption numbers. There is one real user — the owner —
+so module-adoption counts measure nothing yet. Priority is judged by his own daily loop.
 
 Keep the daily loop fast and low-friction above all — the #1 risk is still abandonment, not a missing feature.
 

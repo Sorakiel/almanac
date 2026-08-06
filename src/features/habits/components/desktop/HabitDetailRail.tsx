@@ -1,20 +1,24 @@
-import { format, parseISO } from 'date-fns'
+import { parseISO } from 'date-fns'
 import { Check, Snowflake } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { intlLocale } from '@/lib/dateLocale'
 import { cn } from '@/lib/utils'
+import type { TranslationKey } from '@/i18n/types'
 import type { Habit } from '@/features/habits/types'
 import type { HabitDetailStats } from '@/features/habits/hooks/useHabitDetail'
 import type { DayStatus } from '@/features/habits/lib/schedule'
 import { useT } from '@/hooks/useT'
 
-/** Label + glyph + tone for each history-row status. Rest days read neutral,
- *  never as a miss — key for interval/weekday cadences. */
-const STATUS_META: Record<DayStatus, { label: string; glyph: string; tone: string }> = {
-  done: { label: 'done', glyph: '✓', tone: 'text-accent' },
-  frozen: { label: 'frozen', glyph: '❄', tone: 'text-teal' },
-  due: { label: 'today', glyph: '○', tone: 'text-foreground' },
-  missed: { label: 'missed', glyph: '○', tone: 'text-muted-strong' },
-  rest: { label: 'rest', glyph: '·', tone: 'text-muted-strong' },
+/** Glyph + tone + label *key* for each history-row status. Rest days read
+ *  neutral, never as a miss — key for interval/weekday cadences. The label is a
+ *  key rather than a string because a label resolved at module scope stops
+ *  updating when the language changes. */
+const STATUS_META: Record<DayStatus, { labelKey: TranslationKey; glyph: string; tone: string }> = {
+  done: { labelKey: 'habits.legendDone', glyph: '✓', tone: 'text-accent' },
+  frozen: { labelKey: 'habits.legendFrozen', glyph: '❄', tone: 'text-teal' },
+  due: { labelKey: 'habits.rail.statusToday', glyph: '○', tone: 'text-foreground' },
+  missed: { labelKey: 'habits.legendMissed', glyph: '○', tone: 'text-muted-strong' },
+  rest: { labelKey: 'habits.legendRest', glyph: '·', tone: 'text-muted-strong' },
 }
 
 interface HabitDetailRailProps {
@@ -35,16 +39,21 @@ export function HabitDetailRail({
   onToggleFreeze,
   freezePending,
 }: HabitDetailRailProps) {
-  const { t } = useT()
+  const { t, locale } = useT()
   // Newest-first, last five days of the window.
   const recent = [...stats.heatmap].slice(-5).reverse()
+  const dayFormatter = new Intl.DateTimeFormat(intlLocale(locale), {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+  })
 
   return (
     <div className="flex min-h-full flex-col gap-6">
       {habit.description ? (
         <div>
           <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-            // notes
+            {t('habits.rail.notes')}
           </p>
           <p className="mt-3 rounded-r-2xl border-l-2 border-accent bg-surface px-4 py-3.5 text-[13.5px] leading-relaxed text-foreground/85">
             {habit.description}
@@ -53,7 +62,9 @@ export function HabitDetailRail({
       ) : null}
 
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">recent</p>
+        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
+          {t('habits.rail.recent')}
+        </p>
         <ul className="mt-3 flex flex-col gap-2.5">
           {recent.map((day) => {
             const meta = STATUS_META[day.status]
@@ -69,9 +80,9 @@ export function HabitDetailRail({
                   {meta.glyph}
                 </span>
                 <span className="flex-1 text-[13px]">
-                  {format(parseISO(day.date), 'EEE · dd MMM')}
+                  {dayFormatter.format(parseISO(day.date))}
                 </span>
-                <span className="font-mono text-[10px] text-muted-strong">{meta.label}</span>
+                <span className="font-mono text-[10px] text-muted-strong">{t(meta.labelKey)}</span>
               </li>
             )
           })}

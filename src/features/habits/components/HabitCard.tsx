@@ -32,8 +32,8 @@ export function HabitCard({ habit }: HabitCardProps) {
     habit.description,
     resting
       ? habit.dueInDays > 0
-        ? `resting · in ${habit.dueInDays}d`
-        : 'resting'
+        ? t('habits.restingIn', { count: habit.dueInDays })
+        : t('habits.resting')
       : frequencyLabel(habit, t),
     timeLabel,
   ]
@@ -57,7 +57,7 @@ export function HabitCard({ habit }: HabitCardProps) {
       <button
         type="button"
         onClick={() => navigate(`/habits/${habit.id}`)}
-        aria-label={`Open ${habit.name}`}
+        aria-label={t('habits.aria.open', { name: habit.name })}
         className="absolute inset-0 z-0 rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
       />
       <div className="flex items-start gap-3">
@@ -132,21 +132,21 @@ interface CheckToggleProps {
 
 /** Habit completion checkbox used on cards and rows. Locked while resting. */
 export function CheckToggle({ habit, onToggle }: CheckToggleProps) {
+  const { t } = useT()
   const resting = !habit.isComplete && !habit.dueToday
+  const label = resting
+    ? habit.dueInDays > 0
+      ? t('habits.aria.restingDays', { name: habit.name, count: habit.dueInDays })
+      : t('habits.aria.resting', { name: habit.name })
+    : habit.isComplete
+      ? t('habits.aria.markIncomplete', { name: habit.name })
+      : t('habits.aria.complete', { name: habit.name })
   return (
     <CompletionToggle
       done={habit.isComplete}
       onToggle={onToggle}
       disabled={resting}
-      aria-label={
-        resting
-          ? habit.dueInDays > 0
-            ? `${habit.name} rests for ${habit.dueInDays} more day(s)`
-            : `${habit.name} is resting`
-          : habit.isComplete
-            ? `Mark ${habit.name} incomplete`
-            : `Complete ${habit.name}`
-      }
+      aria-label={label}
     />
   )
 }

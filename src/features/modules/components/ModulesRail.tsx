@@ -1,4 +1,5 @@
 import { useModulesStore } from '@/stores/modules'
+import { SOON_MODULES } from '@/features/modules/soon'
 import { useT } from '@/hooks/useT'
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -34,10 +35,12 @@ export function ModulesRail() {
       </div>
 
       <div className="rounded-[18px] border bg-surface p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">overview</p>
+        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
+          {t('modulesPage.overview')}
+        </p>
         <div className="mt-2 flex flex-col">
           <Row label={t('modulesPage.inYourNav')} value={String(active)} />
-          <Row label={t('modulesPage.comingSoonLower')} value="4" />
+          <Row label={t('modulesPage.comingSoonLower')} value={String(SOON_MODULES.length)} />
         </div>
       </div>
 

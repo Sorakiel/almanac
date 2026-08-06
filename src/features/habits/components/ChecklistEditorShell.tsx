@@ -47,7 +47,7 @@ export function ChecklistEditorShell({
               <span className="min-w-0 flex-1 truncate text-sm">{item.title}</span>
               <button
                 type="button"
-                aria-label={`Remove ${item.title}`}
+                aria-label={t('habits.aria.removeItem', { name: item.title })}
                 onClick={() => onRemove(item.id)}
                 className="flex h-6 w-6 flex-none items-center justify-center rounded-lg text-muted transition-colors hover:text-accent"
               >

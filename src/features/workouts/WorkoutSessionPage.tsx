@@ -187,7 +187,10 @@ function WorkoutSessionPage() {
               blocks={14}
               size="lg"
               animated
-              aria-label={`${progress.doneSets} of ${progress.totalSets} sets done`}
+              aria-label={t('a11y.setsDone', {
+                done: progress.doneSets,
+                total: progress.totalSets,
+              })}
             />
             <div className="flex-1" />
             <span className="font-mono text-2xl font-semibold tabular-nums lg:text-[28px]">
@@ -249,7 +252,7 @@ function WorkoutSessionPage() {
                 >
                   <Check className="h-4 w-4" />
                   {currentSet
-                    ? `Complete set ${currentSet.set_number}`
+                    ? t('workouts.session.completeSet', { number: currentSet.set_number })
                     : t('workouts.session.complete')}
                 </Button>
               </div>
