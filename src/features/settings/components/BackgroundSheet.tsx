@@ -42,7 +42,7 @@ export function BackgroundSheet({ open, onOpenChange }: BackgroundSheetProps) {
           <Switch
             checked={runInBackground}
             onCheckedChange={(v) => void toggle(v)}
-            aria-label="Keep Almanac running in the background"
+            aria-label={t('a11y.keepRunning')}
           />
         </div>
 

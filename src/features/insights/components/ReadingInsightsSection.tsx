@@ -49,7 +49,7 @@ export function ReadingInsightsSection({ data }: ReadingInsightsSectionProps) {
                         size="md"
                         color="rgb(var(--color-amber))"
                         className="min-w-0"
-                        aria-label={`${book.pct}% read`}
+                        aria-label={t('a11y.percentRead', { percent: book.pct })}
                       />
                     </span>
                   ) : null}

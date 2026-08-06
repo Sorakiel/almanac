@@ -224,7 +224,7 @@ export function HabitFormSheet() {
                   <button
                     key={key}
                     type="button"
-                    aria-label={`Icon ${key}`}
+                    aria-label={t('habits.aria.icon', { name: key })}
                     aria-pressed={active}
                     onClick={() => setValue('icon', key)}
                     className={cn(
@@ -250,7 +250,7 @@ export function HabitFormSheet() {
                   <button
                     key={key}
                     type="button"
-                    aria-label={`Color ${key}`}
+                    aria-label={t('habits.aria.color', { name: key })}
                     aria-pressed={active}
                     onClick={() => setValue('color', key)}
                     className={cn(

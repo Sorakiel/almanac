@@ -67,6 +67,7 @@ export function SortableHabitList({ habits }: SortableHabitListProps) {
 }
 
 function SortableRow({ habit }: { habit: HabitWithTodayLog }) {
+  const { t } = useT()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: habit.id,
   })
@@ -79,7 +80,7 @@ function SortableRow({ habit }: { habit: HabitWithTodayLog }) {
     >
       <button
         type="button"
-        aria-label={`Reorder ${habit.name}`}
+        aria-label={t('habits.aria.reorder', { name: habit.name })}
         {...attributes}
         {...listeners}
         className="cursor-grab touch-none rounded p-1 text-muted-strong hover:text-foreground active:cursor-grabbing"

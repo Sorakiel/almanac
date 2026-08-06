@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CircleDollarSign, Moon, Plus, Target } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Cascade } from '@/components/common/Cascade'
 import { IconTile } from '@/components/common/IconTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { Rail } from '@/components/common/desktop/rail'
 import { ModulesRail } from '@/features/modules/components/ModulesRail'
 import { FeedbackSheet } from '@/features/modules/components/FeedbackSheet'
+import { SOON_MODULES } from '@/features/modules/soon'
 import { NAV_MODULES, useModulesStore, type ModuleKey } from '@/stores/modules'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
@@ -23,13 +24,6 @@ const MODULE_TONE: Record<ModuleKey, string> = {
   reading: 'bg-amber/15 text-amber',
   social: 'bg-accent/15 text-accent',
 }
-
-/** Not-yet-built modules. `key` resolves to `modulesPage.soonModules.*` at render. */
-const SOON = [
-  { key: 'finances', icon: CircleDollarSign },
-  { key: 'goals', icon: Target },
-  { key: 'sleep', icon: Moon },
-] as const
 
 function ModulesPage() {
   const { t } = useT()
@@ -104,7 +98,7 @@ function ModulesPage() {
           <section className="flex flex-col gap-3">
             <SectionLabel>{t('modulesPage.comingSoon')}</SectionLabel>
             <div className="grid grid-cols-3 gap-3">
-              {SOON.map((m) => (
+              {SOON_MODULES.map((m) => (
                 <div
                   key={m.key}
                   className="flex flex-col items-center gap-2 rounded-[18px] border border-dashed px-3 py-4 text-center opacity-80"

@@ -36,8 +36,11 @@ function DashboardPage() {
   const openNewHabit = useUiStore((s) => s.openNewHabit)
   const isDesktop = useMediaQuery('(min-width: 1024px)')
 
-  const name = (user?.user_metadata.display_name as string | undefined) ?? 'there'
-  const firstName = name.split(' ')[0] ?? 'there'
+  // The fallback is a translated word, not a bare "there": an account with no
+  // display name showed "Доброе утро, there" on a fully Russian screen.
+  const fallbackName = t('dashboard.friend')
+  const name = (user?.user_metadata.display_name as string | undefined)?.trim() || fallbackName
+  const firstName = name.split(' ')[0] || fallbackName
   const dueHabits = habits.filter((h) => h.dueToday || h.isComplete)
   const completed = dueHabits.filter((h) => h.isComplete).length
 

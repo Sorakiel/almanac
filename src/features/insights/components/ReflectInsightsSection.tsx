@@ -36,7 +36,7 @@ export function ReflectInsightsSection({ data }: ReflectInsightsSectionProps) {
             blocks={30}
             size="lg"
             className="min-w-0"
-            aria-label={`${data.daysJournaled30d} of 30 days journaled`}
+            aria-label={t('a11y.daysJournaled', { count: data.daysJournaled30d, total: 30 })}
           />
         </div>
         <p className="mt-3 text-sm text-muted">

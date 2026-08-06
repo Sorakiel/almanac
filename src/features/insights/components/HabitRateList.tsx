@@ -23,7 +23,7 @@ export function HabitRateList({ habits }: HabitRateListProps) {
                 blocks={18}
                 color={color.stroke}
                 animated
-                aria-label={`${habit.name} completion`}
+                aria-label={t('a11y.habitCompletion', { name: habit.name })}
               />
               <span
                 className="flex-none font-mono text-[13px] tabular-nums"
