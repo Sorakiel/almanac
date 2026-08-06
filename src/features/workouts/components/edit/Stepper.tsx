@@ -1,5 +1,6 @@
 import { Minus, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface StepperProps {
   value: number | null
@@ -22,6 +23,7 @@ function parseNum(value: string): number | null {
 
 /** A compact "− value +" numeric stepper; the value is also directly editable. */
 export function Stepper({ value, onChange, onStep, step = 1, ariaLabel, className }: StepperProps) {
+  const { t } = useT()
   return (
     <div
       className={cn(

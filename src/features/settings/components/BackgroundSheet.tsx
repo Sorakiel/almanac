@@ -4,6 +4,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { applyRunInBackground } from '@/lib/desktop'
 import { useDesktopStore } from '@/stores/desktop'
+import { useT } from '@/hooks/useT'
 
 interface BackgroundSheetProps {
   open: boolean
@@ -16,6 +17,7 @@ interface BackgroundSheetProps {
  * the destructive-to-notifications choice, so we spell that out inline.
  */
 export function BackgroundSheet({ open, onOpenChange }: BackgroundSheetProps) {
+  const { t } = useT()
   const runInBackground = useDesktopStore((s) => s.runInBackground)
   const setRunInBackground = useDesktopStore((s) => s.setRunInBackground)
 

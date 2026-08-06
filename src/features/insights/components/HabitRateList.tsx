@@ -1,4 +1,5 @@
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
+import { useT } from '@/hooks/useT'
 import { resolveHabitColor } from '@/features/habits/lib/habitVisuals'
 import type { HabitRate } from '@/features/insights/types'
 
@@ -8,6 +9,7 @@ interface HabitRateListProps {
 
 /** Per-habit completion bars (name · % · colored track), strongest first. */
 export function HabitRateList({ habits }: HabitRateListProps) {
+  const { t } = useT()
   return (
     <div className="flex flex-col gap-3.5">
       {habits.map((habit) => {
