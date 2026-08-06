@@ -10,6 +10,7 @@ import { StatusLine } from '@/components/common/StatusLine'
 import { Rail } from '@/components/common/desktop/rail'
 import { NowBlock } from '@/features/dashboard/components/NowBlock'
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
+import { TodayStrip } from '@/features/dashboard/components/TodayStrip'
 import { TodaysWorkoutsBlock } from '@/features/dashboard/components/TodaysWorkoutsBlock'
 import { DashboardWorkspace } from '@/features/dashboard/components/desktop/DashboardWorkspace'
 import { DashboardRail } from '@/features/dashboard/components/desktop/DashboardRail'
@@ -101,23 +102,19 @@ function DashboardPage() {
         </Link>
       </header>
 
+      {/* Order is the whole point of this screen: the thing the app is opened
+          to do comes first. A running focus block outranks even that, because
+          it is live; the narrator and the quote are reading material and sit
+          below the fold on purpose. */}
       <Cascade>
-        <AlmanacNarrator habits={habits} />
+        <NowBlock />
 
-        <QuoteCard />
-
-        <NowBlock habits={habits} />
+        <TodayStrip habits={habits} />
 
         <section className="flex flex-col gap-2">
-          <SectionLabel
-            accessory={
-              habits.length > 0
-                ? t('dashboard.doneOf', { done: completed, total: dueHabits.length })
-                : undefined
-            }
-          >
-            {t('dashboard.todayHabits')}
-          </SectionLabel>
+          {/* No done/total accessory here — the strip directly above already
+              carries it, and two copies a centimetre apart taught nothing. */}
+          <SectionLabel>{t('dashboard.todayHabits')}</SectionLabel>
 
           {habits.length === 0 ? (
             <EmptyState
@@ -136,6 +133,10 @@ function DashboardPage() {
         </section>
 
         <TodaysWorkoutsBlock />
+
+        <AlmanacNarrator habits={habits} />
+
+        <QuoteCard />
 
         <StatusLine habitCount={habits.length} className="mt-1 px-1" />
       </Cascade>

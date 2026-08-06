@@ -73,6 +73,7 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
   const weekRate = habits.length
     ? Math.round((habits.reduce((sum, h) => sum + h.rate, 0) / habits.length) * 100)
     : 0
+  const bestStreak = habits.reduce((best, h) => Math.max(best, h.streak), 0)
   const weekday = longDate.split(',')[0] ?? ''
   const datePart = longDate.replace(/^[^,]*,\s*/, '')
 
@@ -84,8 +85,10 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
           <h1 className="mt-1.5 text-[44px] leading-none tracking-title">
             {greeting}, {firstName}
           </h1>
+          {/* The count lives on the habit section's own header, three lines
+              down — one copy is enough. */}
           <p className="mt-2 text-[15px] text-muted">
-            {datePart} · {t('dashboard.ofHabits', { done: completed, total: due.length })}
+            {datePart}
             {focusRunning ? t('dashboard.focusBlockRunning') : ''}
           </p>
         </div>
@@ -119,16 +122,13 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
         {focusRunning ? (
           <section className="mt-8">
             <p className="label-mono mb-3 text-accent">{t('dashboard.nowFocusBlock')}</p>
-            <NowBlock habits={habits} />
+            <NowBlock />
           </section>
         ) : null}
 
         <section className="mt-8">
           <div className="mb-3 flex items-baseline justify-between">
             <span className="label-mono">{t('dashboard.todayHabitsMono')}</span>
-            <span className="font-mono text-[11px] text-muted-strong">
-              {t('dashboard.doneOf', { done: completed, total: due.length })}
-            </span>
           </div>
           {habits.length === 0 ? (
             <EmptyState
@@ -154,8 +154,17 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
           <TodaysWorkoutsBlock />
         </div>
 
+        {/* Today's percentage is the header's own headline number and the
+            donut in the rail — a third copy in a tile taught nothing. The slot
+            carries the longest live streak instead, which nothing else on this
+            screen answers. */}
         <section className="mt-6 flex gap-3">
-          <StatTile label={t('dashboard.today')} value={String(pct)} unit="%" glowPct={pct} />
+          <StatTile
+            label={t('dashboard.bestStreak')}
+            value={String(bestStreak)}
+            unit={t('dashboard.daysUnit')}
+            glowPct={pct}
+          />
           <StatTile label={t('dashboard.thisWeek')} value={String(weekRate)} unit="%" accent />
           <StatTile
             label={t('dashboard.active')}
