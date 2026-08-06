@@ -12,6 +12,7 @@ import { RailTargetProvider } from '@/components/common/desktop/rail'
 import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
 import { useCelebrationWatchers } from '@/hooks/useCelebrationWatchers'
 import { useDailyReminder } from '@/hooks/useDailyReminder'
+import { useNativeWidgetSync } from '@/hooks/useNativeWidgetSync'
 import { useSession } from '@/hooks/useSession'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useOnboardingStore } from '@/stores/onboarding'
@@ -36,6 +37,9 @@ export function AppLayout() {
 
   // Drive the native/foreground daily habit reminder from the saved preference.
   useDailyReminder()
+
+  // Keep the Android widget / macOS tray glance in sync with today's habits.
+  useNativeWidgetSync()
 
   // Watch live data for moments worth celebrating (perfect day, streak
   // milestones, achievement unlocks). Rendered visuals come from <CelebrationHost>.
