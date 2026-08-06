@@ -1,21 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
-import { TodaySummary } from '@/features/dashboard/components/TodaySummary'
 import { useFocusStore } from '@/stores/focus'
-import type { HabitWithTodayLog } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
 
-interface NowBlockProps {
-  habits: HabitWithTodayLog[]
-}
-
 /**
- * The home screen's "now" slot: a live flow session when one is running,
- * otherwise today's habit-completion bar. As other timed activities (workouts,
- * reading) land they can surface here too.
+ * The home screen's "now" slot: a live flow session, or nothing. As other timed
+ * activities (workouts, reading) land they can surface here too.
  */
-export function NowBlock({ habits }: NowBlockProps) {
+export function NowBlock() {
   const { t } = useT()
   const { endsAt, durationMin, label } = useFocusStore()
   const running = endsAt !== null && durationMin !== null
@@ -27,9 +20,11 @@ export function NowBlock({ habits }: NowBlockProps) {
     return () => clearInterval(timer)
   }, [running])
 
-  if (!running) {
-    return habits.length > 0 ? <TodaySummary habits={habits} /> : null
-  }
+  // Nothing running is nothing to show. The completion summary used to live
+  // here as the fallback, which made "now" mean two different things depending
+  // on state; each layout now places its own summary (donut on desktop, strip
+  // on mobile) where it belongs.
+  if (!running) return null
 
   const msLeft = Math.max(endsAt - now, 0)
   const minLeft = Math.ceil(msLeft / 60_000)
@@ -46,9 +41,9 @@ export function NowBlock({ habits }: NowBlockProps) {
       />
       <div className="relative flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <span className="label-mono text-accent">◷ flow · in session</span>
+          <span className="label-mono text-accent">{t('dashboard.flowInSession')}</span>
           <span className="label-mono normal-case tabular-nums tracking-normal">
-            {minLeft} min left
+            {t('dashboard.minLeft', { count: minLeft })}
           </span>
         </div>
         <p className="truncate text-lg font-semibold tracking-title">
@@ -58,7 +53,7 @@ export function NowBlock({ habits }: NowBlockProps) {
           value={Math.round(elapsedMin * 10)}
           total={durationMin * 10}
           blocks={22}
-          aria-label={`${minLeft} minutes left`}
+          aria-label={t('dashboard.minLeft', { count: minLeft })}
         />
       </div>
     </Link>
