@@ -23,11 +23,14 @@
     background-attachment: fixed;
   }
 
-  /* Desktop workspace is a flat paper frame (measured #F4ECDD / #1B1B1D), so
-     drop the glow at lg — bg-bg carries the color. */
+  /* Desktop workspace stays a flat paper frame (measured #F4ECDD / #1B1B1D):
+     the phone's radial glow is dropped at lg. What replaces it is `--bg-veil`,
+     a 22%-tall wash of the same daylight colour — weak enough that panels keep
+     their edge against the canvas, present enough that the room changes over a
+     working day. Both variables are written by `useDaylight`. */
   @media (min-width: 1024px) {
     body {
-      background-image: none;
+      background-image: var(--bg-veil);
     }
   }
 

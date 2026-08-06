@@ -8,6 +8,7 @@ import { checkForDesktopUpdate } from '@/lib/platform/desktopUpdater'
 import { applyRunInBackground } from '@/lib/platform/desktop'
 import { clearQueryCache, persistOptions, queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
+import { useDaylight } from '@/app/hooks/useDaylight'
 import { useDesktopStore } from '@/stores/desktop'
 import { useSessionStore } from '@/stores/session'
 
@@ -17,6 +18,9 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   const setSession = useSessionStore((s) => s.setSession)
+  // The canvas glow tracks the local clock — see `lib/daylight.ts`.
+  useDaylight()
+
   // Native auto-update on launch; both are no-ops in the browser build.
   useEffect(() => {
     void checkForDesktopUpdate()

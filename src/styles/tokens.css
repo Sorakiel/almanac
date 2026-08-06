@@ -49,6 +49,7 @@
      edge into the base (spec board). Desktop keeps the frame flat (globals.css
      drops the gradient at lg, matching the measured #1b1b1d workspace). */
   --bg-gradient: radial-gradient(120% 80% at 50% 0%, #2a1f16 0%, rgb(var(--color-bg)) 46%);
+  --bg-veil: linear-gradient(180deg, #2a1f16 0%, rgb(var(--color-bg)) 22%);
 
   --border-opacity: 0.08;
   color-scheme: dark;
@@ -88,6 +89,7 @@
   /* Coffee mobile glow — warm peach rising from the top into the paper canvas
      (spec board phone). Desktop stays flat #F4ECDD (globals.css drops it at lg). */
   --bg-gradient: radial-gradient(120% 80% at 50% 0%, #f6ddc7 0%, rgb(var(--color-bg)) 48%);
+  --bg-veil: linear-gradient(180deg, #f6ddc7 0%, rgb(var(--color-bg)) 22%);
 
   --border-opacity: 0.12;
   color-scheme: light;
