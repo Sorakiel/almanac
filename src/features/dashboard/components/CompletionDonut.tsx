@@ -79,7 +79,14 @@ export function CompletionDonut({ completed, total, size = 160 }: CompletionDonu
             y2={t.y2}
             strokeWidth={5}
             strokeLinecap="butt"
-            stroke={i < filled ? 'rgb(var(--color-accent))' : 'rgb(var(--color-border) / 0.16)'}
+            // The unfilled tick reads off `--border-opacity`, which is 0.08 on
+            // dark and 0.12 on coffee — a flat 0.16 made the ring nearly
+            // invisible on warm paper while being fine on dark.
+            stroke={
+              i < filled
+                ? 'rgb(var(--color-accent))'
+                : 'rgb(var(--color-border) / calc(var(--border-opacity) * 2))'
+            }
             className="transition-colors duration-300 motion-reduce:transition-none"
             style={{ transitionDelay: `${i * 12}ms` }}
           />

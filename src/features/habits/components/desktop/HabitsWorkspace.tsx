@@ -2,6 +2,7 @@ import { ListChecks, Loader2, Plus, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { HabitCard } from '@/features/habits/components/HabitCard'
+import { FILTER_THRESHOLD } from '@/features/habits/lib/filters'
 import { riseStagger } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 import type { HabitFrequency, HabitWithTodayLog } from '@/features/habits/types'
@@ -43,13 +44,17 @@ export function HabitsWorkspace({
           <p className="label-mono">// {t('habits.activeCount', { count: habits.length })}</p>
           <h1 className="mt-1.5 text-[40px] leading-none tracking-title">{t('habits.title')}</h1>
         </div>
-        <Button onClick={onNew} className="rounded-[13px] shadow-glow">
-          <Plus className="h-4 w-4" />
-          {t('habits.newHabit')}
-        </Button>
+        {/* The empty state carries its own CTA; two identical buttons 200px
+            apart is a choice the reader has to make for no reason. */}
+        {habits.length > 0 ? (
+          <Button onClick={onNew} className="rounded-[13px] shadow-glow">
+            <Plus className="h-4 w-4" />
+            {t('habits.newHabit')}
+          </Button>
+        ) : null}
       </header>
 
-      {habits.length > 0 ? (
+      {habits.length >= FILTER_THRESHOLD ? (
         <div className="mt-[22px] flex flex-wrap gap-2">
           {filters.map((f, i) => (
             <button

@@ -42,7 +42,11 @@ export function HabitRow({ habit }: HabitRowProps) {
         {habit.name}
       </Link>
       {resting ? (
-        <Tag tone="muted">{habit.dueInDays > 0 ? `in ${habit.dueInDays}d` : 'rest'}</Tag>
+        <Tag tone="muted">
+          {habit.dueInDays > 0
+            ? t('habits.inDays', { count: habit.dueInDays })
+            : t('habits.legendRest')}
+        </Tag>
       ) : (
         <Tag>{frequencyLabel(habit, t)}</Tag>
       )}

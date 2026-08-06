@@ -120,7 +120,7 @@ export function StreakBadge({ streak, atRisk }: StreakBadgeProps) {
     >
       <span aria-hidden="true">· </span>
       <StreakFlame streak={streak} atRisk={atRisk} />
-      <span>{streak}d</span>
+      <span>{t('units.daysShort', { count: streak })}</span>
     </span>
   )
 }

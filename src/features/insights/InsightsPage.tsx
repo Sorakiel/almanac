@@ -140,7 +140,7 @@ function InsightsPage() {
               />
               <InsightStat
                 label={t('insights.bestStreak')}
-                value={`${insights.bestStreak}d`}
+                value={t('units.daysShort', { count: insights.bestStreak })}
                 accent
               />
               <InsightStat label={t('insights.active')} value={String(insights.activeHabits)} />

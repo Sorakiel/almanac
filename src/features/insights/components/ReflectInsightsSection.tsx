@@ -18,7 +18,10 @@ export function ReflectInsightsSection({ data }: ReflectInsightsSectionProps) {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <InsightStat label={t('insights.entries30d')} value={String(data.entries30d)} accent />
-        <InsightStat label={t('insights.streak')} value={`${data.currentStreak}d`} />
+        <InsightStat
+          label={t('insights.streak')}
+          value={t('units.daysShort', { count: data.currentStreak })}
+        />
         <InsightStat label={t('insights.days30d')} value={String(data.daysJournaled30d)} />
         <InsightStat
           label={t('insights.avgDay')}

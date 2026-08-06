@@ -12,6 +12,10 @@ export const en = {
    * These are as translatable as visible text — a Russian interface reading
    * English to a screen reader is the same bug, only harder to notice.
    */
+  units: {
+    /** Compact day count next to a streak — "12d". */
+    daysShort: '{count}d',
+  },
   a11y: {
     ratedOfFive: 'Rated {value} of 5',
     daysJournaled: '{count} of {total} days journaled',
@@ -958,6 +962,7 @@ export const en = {
     ofLastDays: 'of last {count}',
     doneTodayAria: '{done} of {total} habits done today',
     resting: 'resting',
+    inDays: 'in {count}d',
     restingIn: 'resting · in {count}d',
     rail: {
       thisWeek: 'this week',

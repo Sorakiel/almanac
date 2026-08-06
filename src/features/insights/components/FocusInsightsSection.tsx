@@ -30,7 +30,10 @@ export function FocusInsightsSection({ data }: FocusInsightsSectionProps) {
           accent
         />
         <InsightStat label={t('insights.sessions30d')} value={String(data.sessions30d)} />
-        <InsightStat label={t('insights.streak')} value={`${data.currentStreak}d`} />
+        <InsightStat
+          label={t('insights.streak')}
+          value={t('units.daysShort', { count: data.currentStreak })}
+        />
         <InsightStat label={t('insights.total')} value={`${data.hoursTotal}`} unit="h" />
       </div>
 

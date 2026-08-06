@@ -9,6 +9,9 @@ import type { Translations } from '@/i18n/types'
  * addresses nobody directly, which is also how the English copy reads.
  */
 export const ru: Translations = {
+  units: {
+    daysShort: '{count} дн',
+  },
   a11y: {
     ratedOfFive: 'Оценка {value} из 5',
     daysJournaled: '{count} из {total} дней с записями',
@@ -996,6 +999,7 @@ export const ru: Translations = {
     ofLastDays: 'из последних {count}',
     doneTodayAria: '{done} из {total} привычек выполнено сегодня',
     resting: 'отдыхает',
+    inDays: 'через {count} дн',
     restingIn: 'отдыхает · через {count} дн',
     rail: {
       thisWeek: 'на неделе',

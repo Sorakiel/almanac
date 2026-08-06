@@ -1,7 +1,8 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import type { DayStatus } from '@/features/habits/lib/schedule'
-import { useT } from '@/hooks/useT'
+import { useT, type TFunction } from '@/hooks/useT'
+import type { TranslationKey } from '@/i18n/types'
 
 interface HeatmapDay {
   date: string
@@ -28,7 +29,10 @@ interface HabitHeatmapProps {
  * a barely-there void so a brand-new habit's year isn't a wall of "rest".
  */
 function cellClass(day: HeatmapDay, createdKey?: string): string {
-  if (createdKey && day.date < createdKey) return 'bg-foreground/[0.04]'
+  // Faint, but not invisible: at 4% a brand-new habit's card read as an empty
+  // rectangle with a legend under it. The grid should look like ruled paper
+  // waiting to be filled — that is the point of showing a year at all.
+  if (createdKey && day.date < createdKey) return 'bg-foreground/[0.07]'
   if (day.done) return 'bg-accent'
   if (day.frozen) return 'bg-teal/70'
   switch (day.status) {
@@ -53,11 +57,20 @@ function LegendKey({ className, label }: { className: string; label: string }) {
   )
 }
 
+/** Status label keys for the readout; resolved at render, never at module scope. */
+const STATUS_KEY: Record<DayStatus, TranslationKey> = {
+  done: 'habits.legendDone',
+  frozen: 'habits.legendFrozen',
+  due: 'habits.rail.statusToday',
+  missed: 'habits.legendMissed',
+  rest: 'habits.legendRest',
+}
+
 /** Hover/tap label: date plus its status, so a rest day reads as intentional. */
-function cellTitle(day: HeatmapDay): string {
-  if (day.done) return `${day.date} · done`
-  if (day.frozen) return `${day.date} · frozen`
-  return day.status ? `${day.date} · ${day.status}` : day.date
+function cellTitle(day: HeatmapDay, t: TFunction): string {
+  if (day.done) return `${day.date} · ${t('habits.legendDone')}`
+  if (day.frozen) return `${day.date} · ${t('habits.legendFrozen')}`
+  return day.status ? `${day.date} · ${t(STATUS_KEY[day.status])}` : day.date
 }
 
 // Cap the diagonal wave delay so a full year still finishes filling promptly.
@@ -88,7 +101,7 @@ export function HabitHeatmap({ days, createdKey, fill = false }: HabitHeatmapPro
   const cell = (day: HeatmapDay, wi: number, di: number, sizeClass: string) => (
     <span
       key={day.date}
-      title={cellTitle(day)}
+      title={cellTitle(day, t)}
       onMouseEnter={() => setActive(day)}
       onFocus={() => setActive(day)}
       onClick={() => setActive(day)}
@@ -130,7 +143,7 @@ export function HabitHeatmap({ days, createdKey, fill = false }: HabitHeatmapPro
       {/* Readout: the focused cell's day, or the legend when nothing's active. */}
       {active ? (
         <p className="label-mono normal-case tracking-normal text-foreground">
-          {cellTitle(active)}
+          {cellTitle(active, t)}
         </p>
       ) : (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">

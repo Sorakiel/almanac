@@ -198,8 +198,12 @@ function HabitDetailPage() {
       </header>
 
       <div className="grid grid-cols-3 gap-3">
-        <StatTile label={t('habits.streak')} value={`${stats.streak}d`} accent />
-        <StatTile label={t('habits.best')} value={`${stats.best}d`} />
+        <StatTile
+          label={t('habits.streak')}
+          value={t('units.daysShort', { count: stats.streak })}
+          accent
+        />
+        <StatTile label={t('habits.best')} value={t('units.daysShort', { count: stats.best })} />
         <StatTile label={t('habits.rate')} value={`${stats.ratePct}%`} />
       </div>
 

@@ -9,22 +9,11 @@ import { TodayProgress } from '@/features/habits/components/TodayProgress'
 import { HabitsWorkspace } from '@/features/habits/components/desktop/HabitsWorkspace'
 import { HabitsRail } from '@/features/habits/components/desktop/HabitsRail'
 import { useHabits } from '@/features/habits/hooks/useHabits'
+import { FILTERS, FILTER_THRESHOLD } from '@/features/habits/lib/filters'
 import { riseStagger } from '@/lib/motion'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useUiStore } from '@/stores/ui'
-import type { HabitFrequency } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
-
-/** Frequency filters, in cycle order. Labels come from `habits.filters.*`. */
-const FILTERS: { value: HabitFrequency | 'all' }[] = [
-  { value: 'all' },
-  { value: 'daily' },
-  { value: 'weekdays' },
-  { value: 'weekly' },
-  { value: 'x_per_week' },
-  { value: 'every_n_days' },
-  { value: 'every_n_weeks' },
-]
 
 function HabitsPage() {
   const { t } = useT()
@@ -66,7 +55,7 @@ function HabitsPage() {
           <p className="label-mono">// {t('habits.activeCount', { count: habits.length })}</p>
           <h1 className="mt-1 text-2xl">{t('habits.title')}</h1>
         </div>
-        {habits.length > 0 ? (
+        {habits.length >= FILTER_THRESHOLD ? (
           <button
             type="button"
             onClick={() => setFilterIndex((i) => (i + 1) % FILTERS.length)}
