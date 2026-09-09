@@ -1,13 +1,27 @@
+import { BrandMark } from '@/components/common/BrandMark'
 import { useLandingStats } from '@/features/auth/hooks/useLandingStats'
 import { useT } from '@/hooks/useT'
+import type { TranslationKey } from '@/i18n/types'
+import { cn } from '@/lib/utils'
 
 /** Desktop auth brand panel (spec board 03): warm-corner gradient, story, stats. */
 export function AuthBrandPanel() {
   const { t, locale } = useT()
   const { stats } = useLandingStats()
-  const members = stats ? stats.members.toLocaleString(locale) : '—'
-  const longestStreak = stats ? t('units.daysShort', { count: stats.longestStreak }) : '—'
-  const avgCompletion = stats ? `${stats.avgCompletion}%` : '—'
+
+  // Dashes until the counters land — the panel renders before the RPC answers.
+  const figures: { key: TranslationKey; value: string; accent?: boolean }[] = [
+    {
+      key: 'auth.members',
+      value: stats ? stats.members.toLocaleString(locale) : '—',
+      accent: true,
+    },
+    {
+      key: 'auth.longestStreak',
+      value: stats ? t('units.daysShort', { count: stats.longestStreak }) : '—',
+    },
+    { key: 'auth.avgCompletion', value: stats ? `${stats.avgCompletion}%` : '—' },
+  ]
 
   return (
     <aside className="relative hidden w-[620px] flex-none flex-col overflow-hidden bg-bg-deep px-14 py-14 lg:flex">
@@ -27,12 +41,7 @@ export function AuthBrandPanel() {
 
       <div className="relative flex flex-1 flex-col">
         <div className="flex items-center gap-3">
-          <span className="relative flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-gradient-to-br from-accent-bright to-accent-deep">
-            <span
-              aria-hidden="true"
-              className="h-[11px] w-[11px] rotate-45 border-[1.8px] border-bg-deep"
-            />
-          </span>
+          <BrandMark onDeep />
           <span className="font-mono text-[19px] font-bold tracking-[0.05em]">ALMANAC</span>
         </div>
 
@@ -42,28 +51,20 @@ export function AuthBrandPanel() {
           {t('auth.brandTagline')}
         </h2>
         <p className="mt-4 max-w-[420px] text-base leading-relaxed text-muted">
-          {t('auth.brandBlurb')} quietly relentless command center.
+          {t('auth.brandBlurb')}
         </p>
 
         <dl className="mt-10 flex gap-9 font-mono">
-          <div>
-            <dd className="text-[26px] font-semibold text-accent">{members}</dd>
-            <dt className="mt-1 text-[10px] uppercase tracking-label text-muted-strong">
-              {t('auth.members')}
-            </dt>
-          </div>
-          <div>
-            <dd className="text-[26px] font-semibold">{longestStreak}</dd>
-            <dt className="mt-1 text-[10px] uppercase tracking-label text-muted-strong">
-              {t('auth.longestStreak')}
-            </dt>
-          </div>
-          <div>
-            <dd className="text-[26px] font-semibold">{avgCompletion}</dd>
-            <dt className="mt-1 text-[10px] uppercase tracking-label text-muted-strong">
-              {t('auth.avgCompletion')}
-            </dt>
-          </div>
+          {figures.map((figure) => (
+            <div key={figure.key}>
+              <dd className={cn('text-[26px] font-semibold', figure.accent && 'text-accent')}>
+                {figure.value}
+              </dd>
+              <dt className="mt-1 text-[10px] uppercase tracking-label text-muted-strong">
+                {t(figure.key)}
+              </dt>
+            </div>
+          ))}
         </dl>
       </div>
     </aside>
