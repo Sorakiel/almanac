@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { Toaster } from 'sonner'
+import { AppToaster } from '@/components/common/AppToaster'
 import { identifyUser, resetAnalytics } from '@/lib/analytics'
 import { checkForAndroidUpdate } from '@/lib/androidUpdater'
 import { initDeepLinks } from '@/lib/deepLink'
@@ -10,7 +10,6 @@ import { clearQueryCache, persistOptions, queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
 import { useDesktopStore } from '@/stores/desktop'
 import { useSessionStore } from '@/stores/session'
-import { useThemeStore } from '@/stores/theme'
 
 interface ProvidersProps {
   children: ReactNode
@@ -18,8 +17,6 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   const setSession = useSessionStore((s) => s.setSession)
-  const theme = useThemeStore((s) => s.theme)
-
   // Native auto-update on launch; both are no-ops in the browser build.
   useEffect(() => {
     void checkForDesktopUpdate()
@@ -85,7 +82,7 @@ export function Providers({ children }: ProvidersProps) {
       }}
     >
       {children}
-      <Toaster theme={theme === 'coffee' ? 'light' : 'dark'} position="top-center" richColors />
+      <AppToaster />
     </PersistQueryClientProvider>
   )
 }
