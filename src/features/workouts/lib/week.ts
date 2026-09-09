@@ -1,5 +1,5 @@
 import { format, getISOWeek, parseISO } from 'date-fns'
-import { weekdayOfKey } from '@/lib/date'
+import { addDaysToKey, weekdayOfKey } from '@/lib/date'
 import { isDoneOn, isDueOn } from '@/features/workouts/lib/recurrence'
 import type { WorkoutView } from '@/features/workouts/types'
 import type { TFunction } from '@/hooks/useT'
@@ -28,14 +28,6 @@ const WEEKDAY_SHORT = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 /** Dictionary keys for the strip, Monday-first to match WEEKDAY_SHORT. */
 const WEEKDAY_STRIP_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
-/** Add whole days to a `YYYY-MM-DD` key using UTC math (no tz drift). */
-function addDays(dateKey: string, days: number): string {
-  const [y, m, d] = dateKey.split('-').map(Number)
-  const base = Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)
-  const next = new Date(base + days * 86_400_000)
-  return next.toISOString().slice(0, 10)
-}
-
 /**
  * The Monday-anchored 7-day strip containing `todayKey`, each day carrying how
  * many workouts are due and how many were completed — the training week header.
@@ -49,10 +41,10 @@ export function buildWeek(
 ): WeekView {
   // weekdayOfKey is 0=Sun … 6=Sat; step back to this week's Monday.
   const mondayOffset = (weekdayOfKey(todayKey) + 6) % 7
-  const monday = addDays(todayKey, -mondayOffset)
+  const monday = addDaysToKey(todayKey, -mondayOffset)
 
   const days: WeekDay[] = WEEKDAY_SHORT.map((weekday, i) => {
-    const dateKey = addDays(monday, i)
+    const dateKey = addDaysToKey(monday, i)
     const due = workouts.filter((w) => isDueOn(w, dateKey))
     return {
       dateKey,

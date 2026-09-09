@@ -1,11 +1,4 @@
-/** Whole days between two `YYYY-MM-DD` keys (constant math, no `Date.now`). */
-function daysBetween(fromKey: string, toKey: string): number {
-  const [fy, fm, fd] = fromKey.split('-').map(Number)
-  const [ty, tm, td] = toKey.split('-').map(Number)
-  const from = Date.UTC(fy ?? 1970, (fm ?? 1) - 1, fd ?? 1)
-  const to = Date.UTC(ty ?? 1970, (tm ?? 1) - 1, td ?? 1)
-  return Math.round((to - from) / 86_400_000)
-}
+import { dateFromKey, daysBetween } from '@/lib/date'
 
 /**
  * Day-granularity "joined" label relative to `todayKey`. Deliberately avoids
@@ -18,8 +11,7 @@ export function joinedLabel(createdAtIso: string, todayKey: string): string {
   if (diff <= 0) return 'today'
   if (diff === 1) return '1d ago'
   if (diff < 30) return `${diff}d ago`
-  const [y, m, d] = created.split('-').map(Number)
   return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' }).format(
-    new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)),
+    dateFromKey(created),
   )
 }

@@ -1,13 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
+import { daysBetween } from '@/lib/date'
 import { useToday } from '@/hooks/useToday'
 import { fetchQuotes, type Quote } from '@/features/dashboard/api/quotes.api'
 
-/** Day-of-year index so the quote rotates once per local day, stably. */
+/** Day-of-year index (1-based) so the quote rotates once per local day, stably. */
 function dayOfYear(dateKey: string): number {
-  const [y, m, d] = dateKey.split('-').map(Number)
-  const start = Date.UTC(y ?? 1970, 0, 0)
-  const now = Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)
-  return Math.floor((now - start) / 86_400_000)
+  return daysBetween(`${dateKey.slice(0, 4)}-01-01`, dateKey) + 1
 }
 
 interface UseDailyQuoteResult {

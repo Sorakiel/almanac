@@ -8,6 +8,7 @@ import { Tag } from '@/components/common/Tag'
 import { useWorkoutMutations } from '@/features/workouts/hooks/useWorkoutMutations'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import type { WorkoutStatus, WorkoutView } from '@/features/workouts/types'
+import { dateFromKey } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
 import { intlLocale } from '@/lib/dateLocale'
@@ -24,12 +25,11 @@ const STATUS_TONE: Record<WorkoutStatus, 'teal' | 'accent' | 'muted'> = {
 
 /** Friendly label for a `YYYY-MM-DD` date, UTC-safe to avoid tz drift. */
 function formatDate(dateKey: string, locale: string): string {
-  const [y, m, d] = dateKey.split('-').map(Number)
   return new Intl.DateTimeFormat(locale, {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
-  }).format(new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)))
+  }).format(dateFromKey(dateKey))
 }
 
 /** A workout row: complete toggle, identity (tap to edit), status badge. */

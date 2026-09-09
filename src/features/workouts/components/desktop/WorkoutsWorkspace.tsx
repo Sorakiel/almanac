@@ -13,6 +13,7 @@ import { workoutForDay } from '@/features/workouts/lib/week'
 import type { TrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import type { WorkoutView } from '@/features/workouts/types'
 import { useT } from '@/hooks/useT'
+import { dateFromKey } from '@/lib/date'
 import { intlLocale } from '@/lib/dateLocale'
 
 interface WorkoutsWorkspaceProps {
@@ -26,12 +27,11 @@ interface WorkoutsWorkspaceProps {
 
 /** Friendly "Monday, 6 July" from a `YYYY-MM-DD` key, UTC-safe, in the UI language. */
 function dayLabel(dateKey: string, locale: string): string {
-  const [y, m, d] = dateKey.split('-').map(Number)
   return new Intl.DateTimeFormat(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-  }).format(new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)))
+  }).format(dateFromKey(dateKey))
 }
 
 /** Desktop training workspace: week strip, the selected day's session, sessions. */
