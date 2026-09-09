@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Check, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { BrandMark } from '@/components/common/BrandMark'
 import { useUpdateProfile } from '@/features/settings/hooks/useUpdateProfile'
 import { useHabitMutations, type HabitFormInput } from '@/features/habits/hooks/useHabitMutations'
 import { HABIT_ICONS, type HabitColor, type HabitIcon } from '@/features/habits/lib/habitVisuals'
@@ -297,9 +298,7 @@ function WelcomeStep() {
   const { t } = useT()
   return (
     <>
-      <span className="relative mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-[22px] bg-gradient-to-br from-accent-bright to-accent-deep shadow-glow">
-        <span aria-hidden="true" className="h-6 w-6 rotate-45 border-[2.4px] border-bg" />
-      </span>
+      <BrandMark size="xl" glow className="mx-auto" />
       <p className="mt-8 font-mono text-xs uppercase tracking-[0.18em] text-accent">
         {t('onboarding.welcomeTo')}
       </p>
