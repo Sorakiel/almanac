@@ -1,6 +1,7 @@
 import { Link, NavLink } from 'react-router-dom'
 import { Home, type LucideIcon } from 'lucide-react'
 import { Avatar } from '@/components/common/Avatar'
+import { BrandMark } from '@/components/common/BrandMark'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSession } from '@/hooks/useSession'
@@ -17,21 +18,6 @@ interface NavEntry {
   end?: boolean
   /** Optional live count badge (resolved by the sidebar). */
   count?: number
-}
-
-/** Diamond brand mark — accent gradient tile with a rotated cut-out. */
-function BrandMark({ className }: { className?: string }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        'relative block rounded-[9px] bg-gradient-to-br from-accent-bright to-accent-deep',
-        className,
-      )}
-    >
-      <span className="absolute left-1/2 top-1/2 h-[10px] w-[10px] -translate-x-1/2 -translate-y-1/2 rotate-45 border-[1.6px] border-bg" />
-    </span>
-  )
 }
 
 function NavRow({ entry }: { entry: NavEntry }) {
@@ -118,7 +104,7 @@ export function Sidebar() {
         viewTransition
         className="mb-[22px] flex items-center gap-[11px] px-2 focus-visible:outline-none"
       >
-        <BrandMark className="h-[30px] w-[30px]" />
+        <BrandMark size="sm" />
         <span className="font-mono text-[17px] font-bold tracking-[0.06em]">ALMANAC</span>
       </Link>
 
