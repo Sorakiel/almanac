@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { InsightLine, InsightTone } from '@/lib/insight'
 import { useT } from '@/hooks/useT'
+import { useTypewriter } from '@/hooks/useTypewriter'
 
 interface InsightTickerProps {
   /** Mono micro-label above the readout, e.g. "the almanac // reading your day". */
@@ -44,10 +45,14 @@ export function InsightTicker({ title, lines }: InsightTickerProps): ReactElemen
   // Drop any pending resume timer on unmount.
   useEffect(() => () => window.clearTimeout(resumeRef.current), [])
 
-  if (count === 0) return null
+  // Resolved before the empty-list bail-out: `useTypewriter` is a hook and
+  // cannot sit after an early return.
+  const active = count === 0 ? 0 : ((i % count) + count) % count
+  const line = lines[active]
+  const { shown, typing } = useTypewriter(line?.text ?? '')
 
-  const active = ((i % count) + count) % count
-  const line = lines[active]!
+  if (count === 0 || !line) return null
+
   const tone = TONE[line.tone]
 
   const pauseAuto = () => {
@@ -81,14 +86,22 @@ export function InsightTicker({ title, lines }: InsightTickerProps): ReactElemen
         <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">{title}</p>
       </div>
 
-      {/* keyed so each rotation re-runs the fade-in */}
-      <p
-        key={line.id}
-        className="mt-3 min-h-[2.5em] font-mono text-[13px] leading-relaxed motion-safe:animate-in motion-safe:fade-in"
-        aria-live="polite"
-      >
+      {/* The line types itself in. `aria-live` carries the finished text, not
+          the partial one — a screen reader announcing a line character by
+          character would be unusable. */}
+      <p className="mt-3 min-h-[2.5em] font-mono text-[13px] leading-relaxed">
         <span className={cn('font-bold', tone.className)}>{tone.glyph}</span>{' '}
-        <span className="text-foreground">{line.text}</span>
+        <span className="text-foreground" aria-hidden="true">
+          {shown}
+        </span>
+        {typing ? (
+          <span aria-hidden="true" className="ml-px animate-caret-blink text-accent">
+            ▮
+          </span>
+        ) : null}
+        <span className="sr-only" aria-live="polite">
+          {line.text}
+        </span>
       </p>
 
       {multi ? (
