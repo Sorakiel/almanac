@@ -1,4 +1,4 @@
-import { localDateKey, weekdayOfKey } from '@/lib/date'
+import { daysBetween, localDateKey, weekdayOfKey } from '@/lib/date'
 import type { Workout } from '@/features/workouts/types'
 import type { TFunction } from '@/hooks/useT'
 
@@ -7,15 +7,6 @@ export const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 /** Dictionary keys for the same weekdays, in the same Sunday-first order. */
 const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
-
-/** Whole days from `fromKey` to `toKey` (UTC math on `YYYY-MM-DD`). */
-function daysBetween(fromKey: string, toKey: string): number {
-  const [fy, fm, fd] = fromKey.split('-').map(Number)
-  const [ty, tm, td] = toKey.split('-').map(Number)
-  const from = Date.UTC(fy ?? 1970, (fm ?? 1) - 1, fd ?? 1)
-  const to = Date.UTC(ty ?? 1970, (tm ?? 1) - 1, td ?? 1)
-  return Math.round((to - from) / 86_400_000)
-}
 
 /**
  * Human label for a workout's schedule, or null when it's a plain one-off.

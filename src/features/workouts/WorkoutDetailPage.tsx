@@ -16,17 +16,17 @@ import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
 import { useWorkoutSessionStore } from '@/stores/workoutSession'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
+import { dateFromKey } from '@/lib/date'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import { useT } from '@/hooks/useT'
 
 /** Friendly label for a `YYYY-MM-DD` date, UTC-safe. */
 function formatDate(dateKey: string): string {
-  const [y, m, d] = dateKey.split('-').map(Number)
   return new Intl.DateTimeFormat('en-GB', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-  }).format(new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)))
+  }).format(dateFromKey(dateKey))
 }
 
 function WorkoutDetailPage() {

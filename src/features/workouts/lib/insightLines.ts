@@ -1,16 +1,8 @@
+import { daysBetween } from '@/lib/date'
 import type { WorkoutInsights } from '@/features/insights/types'
 import type { WorkoutView } from '@/features/workouts/types'
 import type { InsightLine } from '@/lib/insight'
 import type { TFunction } from '@/hooks/useT'
-
-/** Whole days from `fromKey` to `toKey` (both `YYYY-MM-DD`), parsed as UTC. */
-function daysBetween(fromKey: string, toKey: string): number {
-  const [fy, fm, fd] = fromKey.split('-').map(Number)
-  const [ty, tm, td] = toKey.split('-').map(Number)
-  const from = Date.UTC(fy ?? 1970, (fm ?? 1) - 1, fd ?? 1)
-  const to = Date.UTC(ty ?? 1970, (tm ?? 1) - 1, td ?? 1)
-  return Math.round((to - from) / 86_400_000)
-}
 
 /**
  * Rule-based training observations derived from the user's workouts + insights,

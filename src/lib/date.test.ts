@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
+  addDaysToKey,
+  dateFromKey,
+  daysBetween,
   isWeekendKey,
   lastNDateKeys,
   localDateKey,
   msUntilDailyTime,
+  utcFromKey,
   weekdayOfKey,
 } from '@/lib/date'
 
@@ -117,5 +121,54 @@ describe('msUntilDailyTime at midnight', () => {
         )
       }
     }
+  })
+})
+
+describe('utcFromKey', () => {
+  it('reads a key at UTC midnight, not the local zone', () => {
+    expect(utcFromKey('2026-07-08')).toBe(Date.parse('2026-07-08T00:00:00Z'))
+  })
+
+  it('gives back a Date on the same instant', () => {
+    expect(dateFromKey('2026-07-08').toISOString()).toBe('2026-07-08T00:00:00.000Z')
+  })
+})
+
+describe('daysBetween', () => {
+  it('counts whole days forward', () => {
+    expect(daysBetween('2026-07-01', '2026-07-08')).toBe(7)
+  })
+
+  it('is zero for the same day and negative backwards', () => {
+    expect(daysBetween('2026-07-08', '2026-07-08')).toBe(0)
+    expect(daysBetween('2026-07-08', '2026-07-01')).toBe(-7)
+  })
+
+  it('crosses a month and a year boundary', () => {
+    expect(daysBetween('2026-01-31', '2026-02-01')).toBe(1)
+    expect(daysBetween('2025-12-31', '2026-01-01')).toBe(1)
+  })
+
+  it('counts a leap day', () => {
+    expect(daysBetween('2028-02-28', '2028-03-01')).toBe(2)
+  })
+
+  it('is unaffected by a DST transition', () => {
+    // Europe/London springs forward on 2026-03-29. Read as local instants that
+    // span is 23 hours and rounds wrong; as UTC calendar keys it is one day.
+    expect(daysBetween('2026-03-28', '2026-03-29')).toBe(1)
+    expect(daysBetween('2026-03-28', '2026-03-30')).toBe(2)
+  })
+})
+
+describe('addDaysToKey', () => {
+  it('steps forward and back across boundaries', () => {
+    expect(addDaysToKey('2026-01-31', 1)).toBe('2026-02-01')
+    expect(addDaysToKey('2026-01-01', -1)).toBe('2025-12-31')
+    expect(addDaysToKey('2026-07-08', 0)).toBe('2026-07-08')
+  })
+
+  it('round-trips against daysBetween', () => {
+    expect(daysBetween('2026-07-08', addDaysToKey('2026-07-08', 45))).toBe(45)
   })
 })

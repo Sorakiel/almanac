@@ -1,10 +1,11 @@
+import { addDaysToKey, dateFromKey } from '@/lib/date'
+
 /**
  * Friendly label for a `YYYY-MM-DD` key, e.g. "Monday, 8 July". Parsed as UTC so
  * the label never drifts by a day across timezones (the key is already local).
  */
 export function reflectionDateLabel(dateKey: string, locale: string = 'en-GB'): string {
-  const [y, m, d] = dateKey.split('-').map(Number)
-  const date = new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1))
+  const date = dateFromKey(dateKey)
   return new Intl.DateTimeFormat(locale, {
     timeZone: 'UTC',
     weekday: 'long',
@@ -18,8 +19,7 @@ export function reflectionDateLabel(dateKey: string, locale: string = 'en-GB'): 
  * cards where the full weekday/month name would wrap.
  */
 export function reflectionDateShortLabel(dateKey: string, locale: string = 'en-GB'): string {
-  const [y, m, d] = dateKey.split('-').map(Number)
-  const date = new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1))
+  const date = dateFromKey(dateKey)
   const weekday = new Intl.DateTimeFormat(locale, { timeZone: 'UTC', weekday: 'short' }).format(
     date,
   )
@@ -37,14 +37,13 @@ export function reflectionDateShortLabel(dateKey: string, locale: string = 'en-G
  * `dateKeys` is the set of days that have a reflection.
  */
 export function journalStreak(dateKeys: Set<string>, todayKey: string): number {
-  const [y, m, d] = todayKey.split('-').map(Number)
-  let cursor = Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)
+  let cursor = todayKey
   // If there's nothing for today yet, the streak can still run through yesterday.
-  if (!dateKeys.has(new Date(cursor).toISOString().slice(0, 10))) cursor -= 86_400_000
+  if (!dateKeys.has(cursor)) cursor = addDaysToKey(cursor, -1)
   let streak = 0
-  while (dateKeys.has(new Date(cursor).toISOString().slice(0, 10))) {
+  while (dateKeys.has(cursor)) {
     streak += 1
-    cursor -= 86_400_000
+    cursor = addDaysToKey(cursor, -1)
   }
   return streak
 }
