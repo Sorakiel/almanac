@@ -1,4 +1,4 @@
-import { isMobilePlatform, isTauri } from '@/lib/notify'
+import { isMobilePlatform, isTauri } from '@/lib/platform/notify'
 
 /** True only inside a desktop (macOS/Windows/Linux) Tauri shell. */
 export function isDesktopApp(): boolean {

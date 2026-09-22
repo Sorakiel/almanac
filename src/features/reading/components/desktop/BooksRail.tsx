@@ -4,8 +4,8 @@ import { libraryStats } from '@/features/reading/lib/library'
 import { useToday } from '@/hooks/useToday'
 import type { Book } from '@/features/reading/types'
 import { useT } from '@/hooks/useT'
-import { RailCard, RailRow } from '@/components/common/desktop/RailCard'
-import { RailIdentity } from '@/components/common/desktop/RailIdentity'
+import { RailCard, RailRow } from '@/components/rail/RailCard'
+import { RailIdentity } from '@/components/rail/RailIdentity'
 
 /** Desktop Reading context rail: identity + a library snapshot. */
 export function BooksRail({ books }: { books: Book[] }) {

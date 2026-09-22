@@ -1,7 +1,7 @@
 import { Crown, ShieldCheck } from 'lucide-react'
 import { Tag } from '@/components/common/Tag'
-import { RailCard, RailNote, RailRow } from '@/components/common/desktop/RailCard'
-import { RailIdentity } from '@/components/common/desktop/RailIdentity'
+import { RailCard, RailNote, RailRow } from '@/components/rail/RailCard'
+import { RailIdentity } from '@/components/rail/RailIdentity'
 import { joinedLabel } from '@/features/admin/lib/format'
 import type { AdminData, FeedbackStatus } from '@/features/admin/types'
 

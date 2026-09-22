@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { Home, LayoutGrid, type LucideIcon } from 'lucide-react'
-import { RadialAddMenu } from '@/components/common/RadialAddMenu'
+import { RadialAddMenu } from '@/app/shell/RadialAddMenu'
 import { CORE_MODULES } from '@/stores/modules'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'

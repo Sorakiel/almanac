@@ -1,6 +1,6 @@
 import { Avatar } from '@/components/common/Avatar'
 import { Tag } from '@/components/common/Tag'
-import { RailCard, RailNote, RailRow } from '@/components/common/desktop/RailCard'
+import { RailCard, RailNote, RailRow } from '@/components/rail/RailCard'
 import { joinedLabel } from '@/features/admin/lib/format'
 import type { AdminUserDetail, UserRole } from '@/features/admin/types'
 

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Play, Timer } from 'lucide-react'
-import { sessionElapsed, useWorkoutSessionStore } from '@/stores/workoutSession'
+import { sessionElapsed, useWorkoutSessionStore } from '@/features/workouts/stores/workoutSession'
 import { formatClock } from '@/features/workouts/lib/session'
 import type { WorkoutView } from '@/features/workouts/types'
 import { useT } from '@/hooks/useT'

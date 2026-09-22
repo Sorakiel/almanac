@@ -2,7 +2,7 @@ import { AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Sheet } from '@/components/ui/sheet'
 import { SwitchRow } from '@/components/common/SwitchRow'
-import { applyRunInBackground } from '@/lib/desktop'
+import { applyRunInBackground } from '@/lib/platform/desktop'
 import { useDesktopStore } from '@/stores/desktop'
 import { useT } from '@/hooks/useT'
 

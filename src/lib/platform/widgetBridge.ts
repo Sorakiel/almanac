@@ -1,5 +1,5 @@
 import { registerPlugin } from '@capacitor/core'
-import { isCapacitor } from '@/lib/notify'
+import { isCapacitor } from '@/lib/platform/notify'
 
 interface WidgetBridgePlugin {
   updateToday(options: { done: number; total: number; pending: string[] }): Promise<void>

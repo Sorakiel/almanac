@@ -2,8 +2,8 @@ import { Dumbbell } from 'lucide-react'
 import { RecentSessions } from '@/features/workouts/components/RecentSessions'
 import type { TrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import { useT } from '@/hooks/useT'
-import { RailCard } from '@/components/common/desktop/RailCard'
-import { RailIdentity } from '@/components/common/desktop/RailIdentity'
+import { RailCard } from '@/components/rail/RailCard'
+import { RailIdentity } from '@/components/rail/RailIdentity'
 
 interface WorkoutsRailProps {
   overview: TrainingOverview

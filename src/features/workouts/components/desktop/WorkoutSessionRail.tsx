@@ -1,8 +1,8 @@
 import { Dumbbell } from 'lucide-react'
 import type { SessionExercise, Workout } from '@/features/workouts/types'
 import { useT } from '@/hooks/useT'
-import { RailCard, RailNote, RailRow } from '@/components/common/desktop/RailCard'
-import { RailIdentity } from '@/components/common/desktop/RailIdentity'
+import { RailCard, RailNote, RailRow } from '@/components/rail/RailCard'
+import { RailIdentity } from '@/components/rail/RailIdentity'
 
 interface WorkoutSessionRailProps {
   workout: Workout

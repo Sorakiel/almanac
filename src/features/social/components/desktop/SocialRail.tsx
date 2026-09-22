@@ -3,7 +3,7 @@ import { RequestsList } from '@/features/social/components/RequestsList'
 import { FriendsList } from '@/features/social/components/FriendsList'
 import type { FriendsData } from '@/features/social/types'
 import { useT } from '@/hooks/useT'
-import { RailIdentity } from '@/components/common/desktop/RailIdentity'
+import { RailIdentity } from '@/components/rail/RailIdentity'
 
 interface SocialRailProps {
   data: FriendsData

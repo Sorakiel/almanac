@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { applyNativeStatusBar } from '@/lib/statusBar'
+import { applyNativeStatusBar } from '@/lib/platform/statusBar'
 import { themeViewTransition } from '@/lib/viewTransition'
 
 export type Theme = 'dark' | 'coffee'

@@ -15,7 +15,7 @@ import { SessionQueue } from '@/features/workouts/components/session/SessionQueu
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
 import { useSessionClock } from '@/features/workouts/hooks/useSessionClock'
-import { useWorkoutSessionStore } from '@/stores/workoutSession'
+import { useWorkoutSessionStore } from '@/features/workouts/stores/workoutSession'
 import {
   currentExerciseIndex,
   currentSet as firstUndoneSet,

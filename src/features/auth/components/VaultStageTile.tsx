@@ -1,6 +1,6 @@
 import { DoorOpen, LockKeyhole, ShieldCheck, Vault } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { StrengthLevel } from '../passwordStrength'
+import type { StrengthLevel } from '@/features/auth/lib/passwordStrength'
 
 interface VaultStageTileProps {
   level: StrengthLevel

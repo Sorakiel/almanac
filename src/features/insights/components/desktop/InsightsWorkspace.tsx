@@ -1,5 +1,5 @@
 import { Cascade } from '@/components/common/Cascade'
-import { YearStrip } from '@/components/common/YearStrip'
+import { YearStrip } from '@/features/insights/components/YearStrip'
 import { useYearActivity } from '@/features/insights/hooks/useYearActivity'
 import { useToday } from '@/hooks/useToday'
 import { CompletionTrend } from '@/features/insights/components/CompletionTrend'

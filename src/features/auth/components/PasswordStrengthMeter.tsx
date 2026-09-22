@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
-import { scorePassword, type StrengthLevel } from '../passwordStrength'
-import { VaultStageTile } from './VaultStageTile'
+import { scorePassword, type StrengthLevel } from '@/features/auth/lib/passwordStrength'
+import { VaultStageTile } from '@/features/auth/components/VaultStageTile'
 import { useT } from '@/hooks/useT'
 
 interface PasswordStrengthMeterProps {

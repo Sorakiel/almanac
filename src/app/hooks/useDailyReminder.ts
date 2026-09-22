@@ -1,15 +1,15 @@
 import { useEffect, useRef } from 'react'
 import { browserTimezone, msUntilDailyTime } from '@/lib/date'
-import { setBadgeCount } from '@/lib/desktop'
+import { setBadgeCount } from '@/lib/platform/desktop'
 import {
   clearScheduledReminders,
   isNativeScheduler,
   isNotifyGranted,
   pushNotification,
   scheduleDailyReminder,
-} from '@/lib/notify'
-import { isCapacitor, isTauri } from '@/lib/notify'
-import { enablePush, pushSupported } from '@/lib/push'
+} from '@/lib/platform/notify'
+import { isCapacitor, isTauri } from '@/lib/platform/notify'
+import { enablePush, pushSupported } from '@/lib/platform/push'
 import { useSession } from '@/hooks/useSession'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useProfile } from '@/features/settings/hooks/useProfile'

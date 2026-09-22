@@ -1,8 +1,8 @@
 import { useModulesStore } from '@/stores/modules'
 import { SOON_MODULES } from '@/features/modules/soon'
 import { useT } from '@/hooks/useT'
-import { RailCard, RailRow } from '@/components/common/desktop/RailCard'
-import { RailIdentity } from '@/components/common/desktop/RailIdentity'
+import { RailCard, RailRow } from '@/components/rail/RailCard'
+import { RailIdentity } from '@/components/rail/RailIdentity'
 
 /** Desktop Modules context rail: hub identity + overview counts. */
 export function ModulesRail() {

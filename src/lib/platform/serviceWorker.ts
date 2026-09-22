@@ -1,4 +1,4 @@
-import { isCapacitor, isTauri } from '@/lib/notify'
+import { isCapacitor, isTauri } from '@/lib/platform/notify'
 
 /**
  * Register the app-shell worker.

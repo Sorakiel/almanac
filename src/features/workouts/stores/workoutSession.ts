@@ -44,7 +44,10 @@ export const useWorkoutSessionStore = create<WorkoutSessionState>()(
           if (!current?.startedAt) return state
           const banked = current.accumulatedMs + Math.max(0, Date.now() - current.startedAt)
           return {
-            sessions: { ...state.sessions, [workoutId]: { startedAt: null, accumulatedMs: banked } },
+            sessions: {
+              ...state.sessions,
+              [workoutId]: { startedAt: null, accumulatedMs: banked },
+            },
           }
         }),
       end: (workoutId) =>

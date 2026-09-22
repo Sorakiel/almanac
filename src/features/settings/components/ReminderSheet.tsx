@@ -16,8 +16,8 @@ import {
   isCapacitor,
   isTauri,
   requestNotifyPermission,
-} from '@/lib/notify'
-import { disablePush, enablePush, pushSupported } from '@/lib/push'
+} from '@/lib/platform/notify'
+import { disablePush, enablePush, pushSupported } from '@/lib/platform/push'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
 

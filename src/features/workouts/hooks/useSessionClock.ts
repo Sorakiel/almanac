@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useNow } from '@/hooks/useNow'
 import { DEFAULT_REST_SECONDS } from '@/features/workouts/lib/session'
-import { sessionElapsed, type SessionRecord } from '@/stores/workoutSession'
+import { sessionElapsed, type SessionRecord } from '@/features/workouts/stores/workoutSession'
 
 interface SessionClock {
   /** Milliseconds elapsed for the session (frozen while paused). */

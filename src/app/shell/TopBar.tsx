@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom'
-import { Caret } from '@/components/common/Caret'
+import { Caret } from '@/app/shell/Caret'
 import { useTheme } from '@/hooks/useTheme'
 import { useBreadcrumbStore } from '@/stores/breadcrumb'
 

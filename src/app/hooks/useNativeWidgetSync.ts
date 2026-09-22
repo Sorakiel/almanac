@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { setWidgetSummary } from '@/lib/desktop'
-import { updateAndroidWidget } from '@/lib/widgetBridge'
+import { setWidgetSummary } from '@/lib/platform/desktop'
+import { updateAndroidWidget } from '@/lib/platform/widgetBridge'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 

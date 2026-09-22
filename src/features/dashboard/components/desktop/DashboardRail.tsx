@@ -4,7 +4,7 @@ import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
 import { TodaySummary } from '@/features/dashboard/components/TodaySummary'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
-import { RailCard } from '@/components/common/desktop/RailCard'
+import { RailCard } from '@/components/rail/RailCard'
 
 interface DashboardRailProps {
   habits: HabitWithTodayLog[]
