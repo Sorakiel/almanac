@@ -40,7 +40,7 @@ deployed, skip straight to step 3.
 
 3. **Schedule it every five minutes**, same cadence as the daily reminder —
    the function itself decides who's actually due, matching a day-of-week
-   *and* a five-minute time window per profile. Run once in the SQL editor,
+   _and_ a five-minute time window per profile. Run once in the SQL editor,
    replacing `<PROJECT_REF>` and `<ANON_OR_SERVICE_KEY>`:
 
    ```sql

@@ -139,26 +139,30 @@ Deno.serve(async () => {
 
     const since = weekAgoDateKey(timezone)
 
-    const [{ count: checkIns }, { data: activeHabits }, { count: workoutsDone }, { data: sessions }] =
-      await Promise.all([
-        supabase
-          .from('habit_logs')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', profile.id)
-          .gte('date', since)
-          .gte('count', 1),
-        supabase.from('habits').select('id').eq('user_id', profile.id).is('archived_at', null),
-        supabase
-          .from('workouts')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', profile.id)
-          .gte('completed_at', `${since}T00:00:00Z`),
-        supabase
-          .from('reading_sessions')
-          .select('units_read')
-          .eq('user_id', profile.id)
-          .gte('date', since),
-      ])
+    const [
+      { count: checkIns },
+      { data: activeHabits },
+      { count: workoutsDone },
+      { data: sessions },
+    ] = await Promise.all([
+      supabase
+        .from('habit_logs')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', profile.id)
+        .gte('date', since)
+        .gte('count', 1),
+      supabase.from('habits').select('id').eq('user_id', profile.id).is('archived_at', null),
+      supabase
+        .from('workouts')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', profile.id)
+        .gte('completed_at', `${since}T00:00:00Z`),
+      supabase
+        .from('reading_sessions')
+        .select('units_read')
+        .eq('user_id', profile.id)
+        .gte('date', since),
+    ])
 
     // Nothing to report — skip rather than push an empty "0 across everything".
     const pagesRead = (sessions ?? []).reduce((sum, s) => sum + (s.units_read ?? 0), 0)
@@ -175,7 +179,9 @@ Deno.serve(async () => {
       title: 'Your week in Almanac',
       body:
         parts.join(' · ') +
-        (habitCount > 0 ? ` — across ${habitCount} active habit${habitCount === 1 ? '' : 's'}` : ''),
+        (habitCount > 0
+          ? ` — across ${habitCount} active habit${habitCount === 1 ? '' : 's'}`
+          : ''),
       url: appUrl,
       tag: 'almanac-weekly-digest',
     })
