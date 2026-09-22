@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import { IconTile } from '@/components/common/IconTile'
 import { Rail } from '@/components/common/desktop/rail'
+import { RailCard } from '@/components/common/desktop/RailCard'
 import { useT } from '@/hooks/useT'
 
 interface ComingSoonProps {
@@ -41,15 +42,12 @@ export function ComingSoon({ eyebrow, title, icon, description, phase }: ComingS
               <p className="font-mono text-[10px] text-muted-strong">on the roadmap</p>
             </div>
           </div>
-          <div className="rounded-[18px] border bg-surface p-[18px]">
-            <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-              status
-            </p>
-            <div className="mt-2 flex items-center justify-between text-[13.5px]">
+          <RailCard label="status">
+            <div className="flex items-center justify-between text-[13.5px]">
               <span className="text-muted">planned for</span>
               <span className="font-mono text-accent">{phase}</span>
             </div>
-          </div>
+          </RailCard>
           <p className="px-1 text-[13px] italic leading-relaxed text-muted">{description}</p>
         </div>
       </Rail>

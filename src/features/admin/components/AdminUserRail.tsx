@@ -1,5 +1,6 @@
 import { Avatar } from '@/components/common/Avatar'
 import { Tag } from '@/components/common/Tag'
+import { RailCard, RailNote, RailRow } from '@/components/common/desktop/RailCard'
 import { joinedLabel } from '@/features/admin/lib/format'
 import type { AdminUserDetail, UserRole } from '@/features/admin/types'
 
@@ -12,15 +13,6 @@ const ROLE_TONE: Record<UserRole, 'accent' | 'muted' | 'teal'> = {
   owner: 'teal',
   admin: 'accent',
   user: 'muted',
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3 pt-2.5 text-[13.5px] first:pt-0">
-      <span className="text-muted">{label}</span>
-      <span className="min-w-0 truncate font-mono tabular-nums">{value}</span>
-    </div>
-  )
 }
 
 /** Desktop context rail for the admin user-detail page: identity + snapshot. */
@@ -37,22 +29,14 @@ export function AdminUserRail({ user, todayKey }: AdminUserRailProps) {
         </div>
       </div>
 
-      <div className="rounded-[18px] border bg-surface p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">account</p>
-        <div className="mt-2 flex flex-col">
-          <Row label="joined" value={joinedLabel(user.joinedAt, todayKey)} />
-          <Row label="timezone" value={user.timezone?.replace(/_/g, ' ') ?? '—'} />
-        </div>
-      </div>
+      <RailCard label="account">
+        <RailRow label="joined" value={joinedLabel(user.joinedAt, todayKey)} />
+        <RailRow label="timezone" value={user.timezone?.replace(/_/g, ' ') ?? '—'} />
+      </RailCard>
 
-      <div className="rounded-[16px] border border-accent/25 bg-gradient-to-br from-accent/10 to-transparent p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-accent">
-          elevated access
-        </p>
-        <p className="mt-2 text-[13px] leading-relaxed text-muted">
-          You&apos;re viewing another member&apos;s data. Role changes and deletion are permanent.
-        </p>
-      </div>
+      <RailNote label="elevated access">
+        You&apos;re viewing another member&apos;s data. Role changes and deletion are permanent.
+      </RailNote>
     </div>
   )
 }
