@@ -47,7 +47,8 @@ describe('assembleFriends', () => {
   it('falls back to a placeholder when a profile is missing', () => {
     const rows = [friendship({ id: 'x', addressee_id: 'ghost', status: 'accepted' })]
     const data = assembleFriends(rows, profiles, ME)
-    expect(data.friends[0]?.displayName).toBe('Almanac user')
+    // Empty, so the UI can render the placeholder in the reader's language.
+    expect(data.friends[0]?.displayName).toBe('')
     expect(data.friends[0]?.id).toBe('ghost')
   })
 })

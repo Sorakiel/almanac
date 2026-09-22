@@ -36,7 +36,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'streak',
     title: 'Kept the Flame',
-    description: 'Consecutive days keeping a habit.',
     icon: Flame,
     tone: 'accent',
     unit: 'days',
@@ -52,7 +51,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'devotion',
     title: 'Slave to My Habits',
-    description: 'Logged 100 habit check-offs. There is no escape now.',
     icon: Link2,
     tone: 'accent',
     unit: 'check-offs',
@@ -62,7 +60,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'training',
     title: 'Under the Bar',
-    description: 'Workouts completed.',
     icon: Dumbbell,
     tone: 'teal',
     unit: 'sessions',
@@ -77,7 +74,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'reading',
     title: 'Cover to Cover',
-    description: 'Books finished.',
     icon: BookOpen,
     tone: 'amber',
     unit: 'books',
@@ -92,7 +88,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'reflection',
     title: 'Know Thyself',
-    description: 'Daily reflections written.',
     icon: NotebookPen,
     tone: 'accent',
     unit: 'entries',
@@ -107,7 +102,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'polymath',
     title: 'Renaissance',
-    description: 'Active across multiple life areas at once.',
     icon: Sparkles,
     tone: 'teal',
     unit: 'areas',
@@ -121,7 +115,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'pages',
     title: 'Page Turner',
-    description: 'Pages read across your books.',
     icon: BookMarked,
     tone: 'amber',
     unit: 'pages',
@@ -136,7 +129,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'chapters',
     title: 'By the Chapter',
-    description: 'Chapters read across your books.',
     icon: BookText,
     tone: 'amber',
     unit: 'chapters',
@@ -151,7 +143,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'beta',
     title: 'Beta User',
-    description: 'Here before v1 — thank you for testing Almanac.',
     icon: Rocket,
     tone: 'accent',
     metric: (s) => (s.betaUser ? 1 : 0),
@@ -161,7 +152,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'hot_streak',
     title: 'Hot Streak',
-    description: 'Your current run of consecutive days.',
     icon: Zap,
     tone: 'accent',
     unit: 'days',
@@ -176,7 +166,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'relentless',
     title: 'Relentless',
-    description: 'Total habit check-offs, all-time.',
     icon: Target,
     tone: 'teal',
     unit: 'check-offs',
@@ -191,7 +180,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'annotator',
     title: 'Annotator',
-    description: 'Notes captured while reading.',
     icon: Highlighter,
     tone: 'amber',
     unit: 'notes',
@@ -206,7 +194,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'tonnage',
     title: 'Iron Mountain',
-    description: 'Total weight lifted, across every logged set.',
     icon: Mountain,
     tone: 'teal',
     unit: 'kg',
@@ -221,7 +208,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'focus',
     title: 'Deep Work Marathon',
-    description: 'Hours spent in focus sessions.',
     icon: Timer,
     tone: 'accent',
     unit: 'hours',
@@ -236,7 +222,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'friends',
     title: 'Not Alone',
-    description: 'Friends connected on Almanac.',
     icon: Users,
     tone: 'accent',
     unit: 'friends',
@@ -251,7 +236,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'early_bird',
     title: 'Early Bird',
-    description: 'Habits checked off before 7am.',
     icon: Sunrise,
     tone: 'amber',
     unit: 'check-offs',
@@ -266,7 +250,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'night_owl',
     title: 'Night Owl',
-    description: 'Habits checked off at or after 11pm.',
     icon: Moon,
     tone: 'teal',
     unit: 'check-offs',
@@ -281,7 +264,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'veteran',
     title: 'Almanac Veteran',
-    description: 'Days since your account was created.',
     icon: Hourglass,
     tone: 'accent',
     unit: 'days',
@@ -298,7 +280,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'bug_hunter',
     title: 'Bug Hunter',
-    description: 'Found and reported a real bug. The app thanks you.',
     icon: Bug,
     tone: 'teal',
     manual: true,
@@ -308,7 +289,6 @@ export const CATALOG: AchievementDef[] = [
   {
     id: 'almanac_honour',
     title: 'Almanac Honour',
-    description: 'Bestowed by Almanac itself for something special.',
     icon: Award,
     tone: 'accent',
     manual: true,

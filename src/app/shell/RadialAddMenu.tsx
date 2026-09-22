@@ -59,7 +59,7 @@ export function RadialAddMenu() {
 
   const moduleItems: FanItem[] = OPTIONAL_MODULES.filter((m) => enabled[m.key]).map((m) => ({
     key: m.key,
-    label: m.label,
+    label: t(`modules.${m.key}.label`),
     icon: m.icon,
     run: () => navigate(m.to),
   }))
@@ -194,7 +194,7 @@ export function RadialAddMenu() {
                   className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 whitespace-nowrap font-mono text-[9px] uppercase tracking-label text-muted"
                   style={{ left: anchor.x, top: anchor.y - (LABEL_RADIUS + 34) }}
                 >
-                  <RotateCw className="h-3 w-3" aria-hidden="true" /> drag to turn
+                  <RotateCw className="h-3 w-3" aria-hidden="true" /> {t('shell.dragToTurn')}
                 </span>
               ) : null}
 

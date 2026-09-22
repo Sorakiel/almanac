@@ -112,7 +112,7 @@ function FlowPage() {
     return (
       <div className="flex flex-col gap-5 lg:mx-auto lg:max-w-xl">
         <header>
-          <p className="label-mono text-accent">// in session</p>
+          <p className="label-mono text-accent">{t('flow.inSessionLabel')}</p>
           <h1 className="mt-1 text-2xl">{t('flow.title')}</h1>
         </header>
 
@@ -124,7 +124,7 @@ function FlowPage() {
           pct={pct}
           onEnd={endSession}
           onComplete={bookId ? undefined : () => void completeSession(focusedMin)}
-          completeLabel={habitId ? 'Complete' : 'Done'}
+          completeLabel={habitId ? t('flow.complete') : t('flow.doneLabel')}
         />
 
         {bookId ? (

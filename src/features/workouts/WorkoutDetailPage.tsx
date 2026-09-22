@@ -166,7 +166,7 @@ function WorkoutDetailPage() {
         open={mutations.celebrate}
         onOpenChange={(o) => !o && mutations.dismissCelebrate()}
         title={t('workouts.workoutComplete')}
-        message={`Every set of ${workout.name} is done. Strong session — well earned.`}
+        message={t('workouts.completeMessage', { name: workout.name })}
       />
     </>
   )

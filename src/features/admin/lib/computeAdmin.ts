@@ -21,7 +21,7 @@ function signupsByWeek(profiles: Profile[], todayKey: string): SignupWeek[] {
     if (idx < 0) continue
     counts[Math.min(SIGNUP_WEEKS - 1, Math.floor(idx / 7))] += 1
   }
-  return counts.map((count, i) => ({ label: `W${i + 1}`, count }))
+  return counts.map((count, i) => ({ week: i + 1, count }))
 }
 
 /**

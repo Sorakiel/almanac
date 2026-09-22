@@ -19,14 +19,7 @@ export const REMINDER_PRESETS: ReminderPreset[] = [
   { key: 'night', hour: 22, minute: 0 },
 ]
 
-const PRESET_FALLBACK_LABELS: Record<ReminderPreset['key'], string> = {
-  morning: 'Morning',
-  midday: 'Midday',
-  evening: 'Evening',
-  night: 'Night',
-}
-
 /** Human label for a reminder preset, e.g. "Morning". */
-export function reminderPresetLabel(preset: ReminderPreset, t?: TFunction): string {
-  return t ? t(`settings.reminderPreset.${preset.key}`) : PRESET_FALLBACK_LABELS[preset.key]
+export function reminderPresetLabel(preset: ReminderPreset, t: TFunction): string {
+  return t(`settings.reminderPreset.${preset.key}`)
 }

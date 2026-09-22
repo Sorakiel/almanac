@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { buildWeek } from '@/features/workouts/lib/week'
 import type { Workout, WorkoutView } from '@/features/workouts/types'
+import { translate } from '@/i18n'
+import type { TFunction } from '@/hooks/useT'
+
+const t: TFunction = (key, vars) => translate('en', key, vars)
 
 function makeWorkout(overrides: Partial<Workout> = {}): WorkoutView {
   const base: Workout = {
@@ -24,19 +28,19 @@ describe('buildWeek', () => {
   const tz = 'UTC'
 
   it('anchors the strip on Monday and spans 7 days', () => {
-    const { days } = buildWeek(today, [], tz)
+    const { days } = buildWeek(today, [], tz, t, 'en-GB')
     expect(days).toHaveLength(7)
     expect(days[0]).toMatchObject({ weekday: 'MON', dateKey: '2026-07-06', dayOfMonth: 6 })
     expect(days[6]).toMatchObject({ weekday: 'SUN', dateKey: '2026-07-12', dayOfMonth: 12 })
   })
 
   it('marks today', () => {
-    const { days } = buildWeek(today, [], tz)
+    const { days } = buildWeek(today, [], tz, t, 'en-GB')
     expect(days.filter((d) => d.isToday).map((d) => d.dateKey)).toEqual(['2026-07-08'])
   })
 
   it('labels the month and ISO week', () => {
-    expect(buildWeek(today, [], tz).label).toBe('JUL · WEEK 28')
+    expect(buildWeek(today, [], tz, t, 'en-GB').label).toBe('JUL · WEEK 28')
   })
 
   it('counts due and done workouts per day', () => {
@@ -46,7 +50,7 @@ describe('buildWeek', () => {
       scheduled_date: '2026-07-06',
       completed_at: '2026-07-06T12:00:00Z',
     })
-    const { days } = buildWeek(today, [oneOff, done], tz)
+    const { days } = buildWeek(today, [oneOff, done], tz, t, 'en-GB')
     const wed = days.find((d) => d.dateKey === '2026-07-08')
     const mon = days.find((d) => d.dateKey === '2026-07-06')
     expect(wed).toMatchObject({ dueCount: 1, doneCount: 0 })

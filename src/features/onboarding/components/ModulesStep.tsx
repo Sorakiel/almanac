@@ -18,11 +18,10 @@ export function ModulesStep({ modules, onToggle }: ModulesStepProps) {
       </p>
       <p className="mt-2.5 text-3xl font-semibold tracking-title">{t('onboarding.pickModules')}</p>
       <p className="mx-auto mt-3 max-w-[420px] text-sm text-muted-strong">
-        Habits and Insights are always on. Add whatever else you want — you can change this any time
-        under More.
+        {t('onboarding.modulesHint')}
       </p>
       <div className="mt-8 grid grid-cols-2 gap-3 text-left">
-        {OPTIONAL_MODULES.map(({ key, label, icon: Icon }) => {
+        {OPTIONAL_MODULES.map(({ key, icon: Icon }) => {
           const on = modules[key]
           return (
             <SelectTile key={key} on={on} onClick={() => onToggle(key)}>
@@ -34,7 +33,7 @@ export function ModulesStep({ modules, onToggle }: ModulesStepProps) {
               >
                 <Icon className="h-5 w-5" aria-hidden="true" />
               </span>
-              <span className="min-w-0 flex-1 font-semibold">{label}</span>
+              <span className="min-w-0 flex-1 font-semibold">{t(`modules.${key}.label`)}</span>
             </SelectTile>
           )
         })}

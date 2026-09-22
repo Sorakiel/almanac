@@ -67,7 +67,7 @@ function ResetPasswordPage() {
                 onClick={() => setShowPassword((v) => !v)}
                 className="absolute inset-y-0 right-3 my-auto h-fit font-mono text-[10px] uppercase tracking-label text-muted hover:text-foreground"
               >
-                {showPassword ? 'hide' : 'show'}
+                {showPassword ? t('auth.hide') : t('auth.show')}
               </button>
             </div>
             {errors.password ? (

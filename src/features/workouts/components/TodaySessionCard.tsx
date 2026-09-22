@@ -8,6 +8,7 @@ import { estimateMinutes, plannedVolume } from '@/features/workouts/lib/session'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import type { SessionExercise, WorkoutView } from '@/features/workouts/types'
 import { useT } from '@/hooks/useT'
+import { intlLocale } from '@/lib/dateLocale'
 
 interface TodaySessionCardProps {
   workout: WorkoutView
@@ -41,7 +42,7 @@ function DayStatus({ dayState, done }: { dayState: 'past' | 'future'; done: bool
 
 /** The selected day's session card — the warm spec-board "today" panel. */
 export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionCardProps) {
-  const { t } = useT()
+  const { t, locale } = useT()
   const navigate = useNavigate()
   const start = useWorkoutSessionStore((s) => s.start)
   const hasActiveSession = useWorkoutSessionStore((s) => Boolean(s.sessions[workout.id]))
@@ -86,10 +87,14 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
 
         {hasPlan ? (
           <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5">
-            <Meta icon={Layers}>{`${exercises.length} exercises`}</Meta>
-            <Meta icon={Timer}>{`~${estimateMinutes(exercises)} min`}</Meta>
+            <Meta icon={Layers}>{t('workouts.exerciseCount', { count: exercises.length })}</Meta>
+            <Meta icon={Timer}>
+              {t('workouts.estimateMin', { count: estimateMinutes(exercises) })}
+            </Meta>
             {volume > 0 ? (
-              <Meta icon={TrendingUp}>{`${volume.toLocaleString('en-US')} kg`}</Meta>
+              <Meta icon={TrendingUp}>
+                {t('units.kgValue', { value: volume.toLocaleString(intlLocale(locale)) })}
+              </Meta>
             ) : null}
           </div>
         ) : (

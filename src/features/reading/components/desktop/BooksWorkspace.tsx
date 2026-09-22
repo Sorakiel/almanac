@@ -22,7 +22,7 @@ export function BooksWorkspace({ books, isLoading, isError, refetch, onNew }: Bo
     <div className="mx-auto max-w-[900px]">
       <header className="flex items-start justify-between">
         <div>
-          <p className="label-mono">// your shelf</p>
+          <p className="label-mono">{t('reading.shelfLabel')}</p>
           <h1 className="mt-1.5 text-[44px] leading-none tracking-title">{t('reading.title')}</h1>
           <p className="mt-2 text-[15px] text-muted">{t('reading.subtitle')}</p>
         </div>

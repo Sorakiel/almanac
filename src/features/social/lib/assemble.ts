@@ -13,7 +13,7 @@ export function otherPartyId(f: Friendship, userId: string): string {
   return f.requester_id === userId ? f.addressee_id : f.requester_id
 }
 
-const FALLBACK: FriendProfile = { id: '', displayName: 'Almanac user', avatarUrl: null }
+const FALLBACK: FriendProfile = { id: '', displayName: '', avatarUrl: null }
 
 /**
  * Split friendships into accepted friends, incoming requests (awaiting my

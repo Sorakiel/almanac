@@ -22,16 +22,21 @@ export function WorkoutSessionRail({ workout, exercises }: WorkoutSessionRailPro
         icon={Dumbbell}
         tone="bg-teal/15 text-teal"
         title={workout.name}
-        subtitle={workout.completed_at ? 'completed' : 'in progress'}
+        subtitle={
+          workout.completed_at ? t('workouts.statusCompleted') : t('workouts.statusInProgress')
+        }
       />
 
       <RailCard label={t('workouts.sessionLower')}>
         <RailRow label={t('workouts.exercisesLower')} value={String(exercises.length)} />
         <RailRow label={t('workouts.setsDone')} value={`${doneSets.length} / ${allSets.length}`} />
-        <RailRow label={t('workouts.volume')} value={`${Math.round(volume)} kg`} />
+        <RailRow
+          label={t('workouts.volume')}
+          value={t('units.kgValue', { value: Math.round(volume) })}
+        />
       </RailCard>
 
-      <RailNote label="tip" tone="teal">
+      <RailNote label={t('workouts.tip')} tone="teal">
         {t('workouts.session.railHint')}
       </RailNote>
     </div>

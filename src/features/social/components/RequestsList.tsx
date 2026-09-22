@@ -3,6 +3,7 @@ import { Avatar } from '@/components/common/Avatar'
 import { Button } from '@/components/ui/button'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import type { FriendRequest } from '@/features/social/types'
+import { friendName } from '@/features/social/lib/format'
 import { useT } from '@/hooks/useT'
 
 interface RequestsListProps {
@@ -22,15 +23,15 @@ export function RequestsList({ incoming, outgoing, onAccept, onRemove, busy }: R
     <div className="flex flex-col gap-4">
       {incoming.length > 0 ? (
         <section className="flex flex-col gap-2">
-          <SectionLabel>Requests · {incoming.length}</SectionLabel>
+          <SectionLabel>{t('social.requestsCount', { count: incoming.length })}</SectionLabel>
           {incoming.map((req) => (
             <div
               key={req.friendshipId}
               className="flex items-center gap-3 rounded-card border bg-surface px-4 py-3"
             >
-              <Avatar name={req.profile.displayName} size="sm" />
+              <Avatar name={friendName(req.profile, t)} size="sm" />
               <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                {req.profile.displayName}
+                {friendName(req.profile, t)}
               </span>
               <Button
                 size="icon"
@@ -59,15 +60,15 @@ export function RequestsList({ incoming, outgoing, onAccept, onRemove, busy }: R
 
       {outgoing.length > 0 ? (
         <section className="flex flex-col gap-2">
-          <SectionLabel>Sent · {outgoing.length}</SectionLabel>
+          <SectionLabel>{t('social.sentCount', { count: outgoing.length })}</SectionLabel>
           {outgoing.map((req) => (
             <div
               key={req.friendshipId}
               className="flex items-center gap-3 rounded-card border bg-surface px-4 py-3"
             >
-              <Avatar name={req.profile.displayName} size="sm" />
+              <Avatar name={friendName(req.profile, t)} size="sm" />
               <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                {req.profile.displayName}
+                {friendName(req.profile, t)}
               </span>
               <span className="label-mono flex items-center gap-1 text-[10px]">
                 <Clock className="h-3.5 w-3.5" aria-hidden="true" /> {t('social.pending')}

@@ -7,7 +7,6 @@ export type { InsightRange }
 /** Lookback length in days for the fixed-size ranges ("all" uses the full fetched window). */
 const RANGE_DAYS: Record<'7d' | '30d', number> = { '7d': 7, '30d': 30 }
 const TREND_WEEKS = 6
-const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 /**
  * Expected completions per week for a habit's cadence. Used as the denominator
@@ -83,7 +82,7 @@ function trendPoints(
 ): WeekPoint[] {
   if (range === '7d') {
     return current.map((key) => ({
-      label: WEEKDAY_NAMES[weekdayOfKey(key)] ?? key,
+      weekday: weekdayOfKey(key),
       rate: rateOver(habits, done, [key]),
     }))
   }
@@ -94,7 +93,7 @@ function trendPoints(
     const end = windowKeys.length - w * 7
     const weekKeys = windowKeys.slice(Math.max(0, end - 7), end)
     if (weekKeys.length === 0) continue
-    points.push({ label: `W${weeks - w}`, rate: rateOver(habits, done, weekKeys) })
+    points.push({ week: weeks - w, rate: rateOver(habits, done, weekKeys) })
   }
   return points
 }
@@ -169,14 +168,9 @@ export function computeInsights(
     rate: sched > 0 ? dayDone[wd] / sched : null,
   }))
   const rated = weekdayRates.filter((d): d is { wd: number; rate: number } => d.rate !== null)
-  const bestWeekday =
-    rated.length > 0
-      ? (WEEKDAY_NAMES[rated.reduce((a, b) => (b.rate > a.rate ? b : a)).wd] ?? null)
-      : null
+  const bestWeekday = rated.length > 0 ? rated.reduce((a, b) => (b.rate > a.rate ? b : a)).wd : null
   const worstWeekday =
-    rated.length > 1
-      ? (WEEKDAY_NAMES[rated.reduce((a, b) => (b.rate < a.rate ? b : a)).wd] ?? null)
-      : null
+    rated.length > 1 ? rated.reduce((a, b) => (b.rate < a.rate ? b : a)).wd : null
 
   return {
     completionRate,

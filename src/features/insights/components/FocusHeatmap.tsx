@@ -1,5 +1,6 @@
 import { Heatmap, HeatmapSwatch } from '@/components/common/Heatmap'
 import type { FocusDay } from '@/features/insights/types'
+import { useT } from '@/hooks/useT'
 
 interface FocusHeatmapProps {
   /** Days oldest→newest; length should be a multiple of 7 for clean columns. */
@@ -20,19 +21,24 @@ function intensityClass(minutes: number): string {
 
 /** Focus grid: each day shaded by the minutes focused. */
 export function FocusHeatmap({ days, fill = false }: FocusHeatmapProps) {
+  const { t } = useT()
   return (
     <Heatmap
       days={days}
       fill={fill}
       cellClass={(day) => intensityClass(day.minutes)}
-      cellTitle={(day) => `${day.date} · ${day.minutes} min`}
+      cellTitle={(day) => t('insights.focusDay', { date: day.date, count: day.minutes })}
       legend={
         <div className="flex items-center gap-1.5">
-          <span className="label-mono normal-case tracking-normal">less</span>
+          <span className="label-mono normal-case tracking-normal">
+            {t('insights.heatmapLess')}
+          </span>
           {INTENSITY.map((className) => (
             <HeatmapSwatch key={className} className={className} />
           ))}
-          <span className="label-mono normal-case tracking-normal">more</span>
+          <span className="label-mono normal-case tracking-normal">
+            {t('insights.heatmapMore')}
+          </span>
         </div>
       }
     />

@@ -172,7 +172,8 @@ export function ExerciseLibraryRail({
               disabled={!newName.trim() || create.isPending}
               onClick={() => create.mutate(newName.trim())}
             >
-              Create{muscle ? ` · ${muscle}` : ''}
+              {t('workouts.createExercise')}
+              {muscle ? ` · ${muscle}` : ''}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setCreating(false)}>
               {t('workouts.editor.cancel')}

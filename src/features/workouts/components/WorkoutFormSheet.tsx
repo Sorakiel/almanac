@@ -185,7 +185,7 @@ export function WorkoutFormSheet({
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
         title={t('workouts.form.removeConfirm')}
-        description={workout ? `"${workout.name}" and its exercises will be removed.` : undefined}
+        description={workout ? t('workouts.removeBody', { name: workout.name }) : undefined}
         confirmLabel={remove.isPending ? t('workouts.form.removing') : t('workouts.form.remove')}
         pending={remove.isPending}
         onConfirm={onDelete}

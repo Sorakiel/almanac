@@ -45,7 +45,7 @@ function BooksPage() {
     <section className="flex flex-col gap-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="label-mono">// your shelf</p>
+          <p className="label-mono">{t('reading.shelfLabel')}</p>
           <h1 className="mt-1 text-2xl">{t('reading.title')}</h1>
         </div>
       </header>

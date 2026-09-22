@@ -5,6 +5,7 @@ import { buildReadingLines } from '@/features/reading/lib/insightLines'
 import { useToday } from '@/hooks/useToday'
 import type { Book } from '@/features/reading/types'
 import { useT } from '@/hooks/useT'
+import { intlLocale } from '@/lib/dateLocale'
 
 interface BookTickerProps {
   books: Book[]
@@ -12,9 +13,12 @@ interface BookTickerProps {
 
 /** Reading readout — the shared ticker fed by the reading line generator. */
 export function BookTicker({ books }: BookTickerProps): ReactElement | null {
-  const { t } = useT()
+  const { t, locale } = useT()
   const { data } = useReadingInsights()
   const { dateKey } = useToday()
-  const lines = useMemo(() => buildReadingLines(books, data, dateKey), [books, data, dateKey])
+  const lines = useMemo(
+    () => buildReadingLines(books, data, dateKey, t, intlLocale(locale)),
+    [books, data, dateKey, t, locale],
+  )
   return <InsightTicker title={t('reading.tickerTitle')} lines={lines} />
 }

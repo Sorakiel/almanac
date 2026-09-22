@@ -14,7 +14,7 @@ export function ReflectInsightsSection({ data }: ReflectInsightsSectionProps) {
 
   return (
     <div className="flex flex-col gap-5">
-      <p className="label-mono">// reflect · last 30 days</p>
+      <p className="label-mono">{t('insights.sectionReflect')}</p>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <InsightStat label={t('insights.entries30d')} value={String(data.entries30d)} accent />
@@ -30,7 +30,7 @@ export function ReflectInsightsSection({ data }: ReflectInsightsSectionProps) {
       </div>
 
       <div className="rounded-card border bg-surface p-4">
-        <p className="label-mono mb-3">consistency</p>
+        <p className="label-mono mb-3">{t('insights.consistency')}</p>
         <div className="flex items-center gap-3">
           <span className="shrink-0 font-mono text-lg text-accent">{consistencyPct}%</span>
           <ProgressBlocks
@@ -43,8 +43,10 @@ export function ReflectInsightsSection({ data }: ReflectInsightsSectionProps) {
           />
         </div>
         <p className="mt-3 text-sm text-muted">
-          {data.daysJournaled30d} of the last 30 days journaled · {data.totalEntries} entries
-          all-time.
+          {t('insights.journaledSummary', {
+            count: data.daysJournaled30d,
+            total: data.totalEntries,
+          })}
         </p>
       </div>
     </div>

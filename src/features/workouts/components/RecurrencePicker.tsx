@@ -1,8 +1,8 @@
-import { WEEKDAY_LABELS } from '@/features/workouts/lib/recurrence'
 import type { WorkoutRecurrence } from '@/features/workouts/types'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'
+import { weekdayLabels } from '@/lib/dateLocale'
 
 export interface RecurrenceValue {
   recurrence: WorkoutRecurrence
@@ -25,7 +25,7 @@ const MODES: { value: WorkoutRecurrence; labelKey: TranslationKey }[] = [
 
 /** Schedule picker: one-off, daily, specific weekdays, or every-N-days. */
 export function RecurrencePicker({ value, onChange }: RecurrencePickerProps) {
-  const { t } = useT()
+  const { t, locale } = useT()
   const toggleDay = (day: number) => {
     const days = value.days.includes(day)
       ? value.days.filter((d) => d !== day)
@@ -66,7 +66,7 @@ export function RecurrencePicker({ value, onChange }: RecurrencePickerProps) {
           role="group"
           aria-label={t('workouts.recurrence.daysOfWeek')}
         >
-          {WEEKDAY_LABELS.map((label, day) => {
+          {weekdayLabels(locale).map((label, day) => {
             const active = value.days.includes(day)
             return (
               <button

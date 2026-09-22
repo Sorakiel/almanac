@@ -12,6 +12,7 @@ interface CurrentExercisePanelProps {
 
 /** One set cell: ✓ when done, rep-count with an accent ring when current, else ○. */
 function SetCell({ set, isCurrent }: { set: SetLog; isCurrent: boolean }) {
+  const { t } = useT()
   return (
     <div
       className={cn(
@@ -31,7 +32,7 @@ function SetCell({ set, isCurrent }: { set: SetLog; isCurrent: boolean }) {
           isCurrent ? 'text-accent' : 'text-muted-strong',
         )}
       >
-        set {set.set_number}
+        {t('workouts.setN', { n: set.set_number })}
       </div>
       <div className="mt-1.5 flex h-6 items-center justify-center">
         {set.done ? (

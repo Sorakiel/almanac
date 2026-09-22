@@ -11,11 +11,10 @@ import {
 import { isCapacitor, isTauri } from '@/lib/platform/notify'
 import { enablePush, pushSupported } from '@/lib/platform/push'
 import { useSession } from '@/hooks/useSession'
+import { useT, type TFunction } from '@/hooks/useT'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import type { HabitWithTodayLog } from '@/features/habits/types'
-
-const REMINDER_BODY = 'Time to log your habits for today.'
 
 /** Habits still due and unfinished today. */
 function remainingCount(habits: HabitWithTodayLog[]): number {
@@ -23,12 +22,11 @@ function remainingCount(habits: HabitWithTodayLog[]): number {
 }
 
 /** Send the desktop/web nudge — but only if something's actually left to do. */
-async function fireForegroundNudge(habits: HabitWithTodayLog[]): Promise<void> {
+async function fireForegroundNudge(habits: HabitWithTodayLog[], t: TFunction): Promise<void> {
   const remaining = remainingCount(habits)
   if (remaining === 0) return
   if (!(await isNotifyGranted())) return
-  const noun = remaining === 1 ? 'habit' : 'habits'
-  await pushNotification('Almanac', `You still have ${remaining} ${noun} to finish today.`)
+  await pushNotification('Almanac', t('shell.reminderRemaining', { count: remaining }))
 }
 
 /**
@@ -43,6 +41,8 @@ export function useDailyReminder(): void {
   const { profile } = useProfile()
   const { habits } = useHabits()
   const { user } = useSession()
+  const { t } = useT()
+  const reminderBody = t('shell.reminderBody')
 
   const enabled = profile?.reminder_enabled ?? false
   const hour = profile?.reminder_hour ?? 8
@@ -51,9 +51,11 @@ export function useDailyReminder(): void {
 
   // Read the freshest habits inside the timer without re-arming on every change.
   const habitsRef = useRef(habits)
+  const tRef = useRef(t)
   useEffect(() => {
     habitsRef.current = habits
-  }, [habits])
+    tRef.current = t
+  }, [habits, t])
 
   // Keep the app-icon badge in sync with unfinished habits (native shell only).
   useEffect(() => {
@@ -77,9 +79,9 @@ export function useDailyReminder(): void {
 
   // Native mobile schedule: survives the app being closed.
   useEffect(() => {
-    if (enabled) void scheduleDailyReminder(hour, minute, REMINDER_BODY)
+    if (enabled) void scheduleDailyReminder(hour, minute, reminderBody)
     else void clearScheduledReminders()
-  }, [enabled, hour, minute])
+  }, [enabled, hour, minute, reminderBody])
 
   // Foreground scheduler for everywhere the OS can't hold a schedule for us.
   // Gated on the scheduler, not on "is mobile": a phone running the web build
@@ -91,7 +93,7 @@ export function useDailyReminder(): void {
     const arm = () => {
       timer = window.setTimeout(
         () => {
-          void fireForegroundNudge(habitsRef.current)
+          void fireForegroundNudge(habitsRef.current, tRef.current)
           arm()
         },
         msUntilDailyTime(hour, minute, timezone),

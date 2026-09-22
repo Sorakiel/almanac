@@ -75,7 +75,7 @@ function SettingsPage() {
 
   if (status === 'anonymous') return <Navigate to="/auth" replace />
 
-  const name = (user?.user_metadata.display_name as string | undefined) ?? 'Almanac user'
+  const name = (user?.user_metadata.display_name as string | undefined) ?? t('social.anonymous')
   const email = user?.email ?? ''
   const joinedDays = user?.created_at
     ? Math.max(
@@ -250,7 +250,9 @@ function SettingsPage() {
 
         <SignOutButton className="w-full lg:hidden" />
 
-        <p className="label-mono text-center">ALMANAC v{APP_VERSION} · ◇</p>
+        <p className="label-mono text-center">
+          {t('settings.versionLine', { version: APP_VERSION })}
+        </p>
       </div>
       <Rail>
         <SettingsRail />

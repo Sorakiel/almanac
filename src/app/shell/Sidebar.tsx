@@ -70,7 +70,7 @@ export function Sidebar() {
   const enabled = useModulesStore((s) => s.enabled)
 
   const dueCount = habits.filter((h) => (h.dueToday || h.isComplete) && !h.isComplete).length
-  const name = (user?.user_metadata.display_name as string | undefined) ?? 'You'
+  const name = (user?.user_metadata.display_name as string | undefined) ?? t('settings.you')
   const roleLabel =
     profile?.role === 'owner'
       ? t('rail.owner')

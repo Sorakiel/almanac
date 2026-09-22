@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Confetti } from '@/components/common/Confetti'
 import { CelebrationModal } from '@/components/common/CelebrationModal'
 import { useCelebrationStore } from '@/stores/celebration'
+import { useT } from '@/hooks/useT'
 
 /** How long a lightweight (non-modal) burst stays before auto-clearing. */
 const BURST_MS = 2000
@@ -12,6 +13,7 @@ const BURST_MS = 2000
  * top-of-screen confetti burst with a caption that clears itself.
  */
 export function CelebrationHost() {
+  const { t } = useT()
   const active = useCelebrationStore((s) => s.active)
   const token = useCelebrationStore((s) => s.token)
   const dismiss = useCelebrationStore((s) => s.dismiss)
@@ -38,7 +40,7 @@ export function CelebrationHost() {
         title={active.title}
         message={active.message ?? ''}
         icon={active.icon}
-        actionLabel="Nice"
+        actionLabel={t('celebrate.nice')}
       />
     )
   }

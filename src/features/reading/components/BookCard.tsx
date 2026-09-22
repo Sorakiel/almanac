@@ -2,16 +2,10 @@ import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { RatingBars } from '@/components/common/RatingBars'
-import { Tag } from '@/components/common/Tag'
-import { progressPct, statusLabel, unitNounPlural } from '@/features/reading/lib/progress'
-import type { Book, BookStatus } from '@/features/reading/types'
+import { progressPct, unitCount } from '@/features/reading/lib/progress'
+import type { Book } from '@/features/reading/types'
+import { BookStatusTag } from '@/features/reading/components/BookStatusTag'
 import { useT } from '@/hooks/useT'
-
-const STATUS_TONE: Record<BookStatus, 'muted' | 'accent' | 'teal'> = {
-  to_read: 'muted',
-  reading: 'accent',
-  finished: 'teal',
-}
 
 /** Library list item: title, author, status, and progress. Links to detail. */
 export function BookCard({ book }: { book: Book }) {
@@ -31,7 +25,7 @@ export function BookCard({ book }: { book: Book }) {
             )}
           </div>
           <div className="flex flex-none flex-col items-end gap-1">
-            <Tag tone={STATUS_TONE[book.status]}>{statusLabel(book.status, t)}</Tag>
+            <BookStatusTag status={book.status} />
             {book.rating ? (
               <RatingBars
                 value={book.rating}
@@ -50,7 +44,7 @@ export function BookCard({ book }: { book: Book }) {
           </div>
         ) : book.current_unit > 0 ? (
           <p className="font-mono text-[11px] text-muted-strong">
-            {book.current_unit} {unitNounPlural(book.progress_mode, t)} in
+            {t('reading.unitsIn', { units: unitCount(book.progress_mode, book.current_unit, t) })}
           </p>
         ) : null}
       </Card>

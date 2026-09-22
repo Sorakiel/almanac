@@ -20,14 +20,14 @@ export function BooksRail({ books }: { books: Book[] }) {
         icon={BookOpen}
         tone="bg-amber/15 text-amber"
         title={t('reading.library')}
-        subtitle="your shelf"
+        subtitle={t('reading.shelf')}
       />
 
-      <RailCard label="snapshot">
+      <RailCard label={t('reading.snapshot')}>
         <RailRow label={t('reading.books')} value={String(stats.total)} />
         <RailRow label={t('reading.readingLower')} value={String(stats.reading)} />
         <RailRow label={t('reading.finishedLower')} value={String(stats.finished)} />
-        <RailRow label={`finished ${year}`} value={String(stats.finishedThisYear)} />
+        <RailRow label={t('reading.finishedIn', { year })} value={String(stats.finishedThisYear)} />
       </RailCard>
 
       <BookTicker books={books} />

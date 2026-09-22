@@ -2,24 +2,14 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Check, RotateCcw, Trash2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Tag } from '@/components/common/Tag'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { useFeedbackManagement } from '@/features/admin/hooks/useFeedbackManagement'
-import { joinedLabel } from '@/features/admin/lib/format'
-import type { FeedbackRow, FeedbackStatus, UserRole } from '@/features/admin/types'
-
-const STATUS_TONE: Record<FeedbackStatus, 'accent' | 'teal' | 'amber' | 'muted'> = {
-  open: 'amber',
-  planned: 'accent',
-  done: 'teal',
-  closed: 'muted',
-}
-
-const ROLE_TONE: Record<UserRole, 'accent' | 'muted' | 'teal'> = {
-  owner: 'teal',
-  admin: 'accent',
-  user: 'muted',
-}
+import type { FeedbackRow, FeedbackStatus } from '@/features/admin/types'
+import { FeedbackStatusTag } from '@/features/admin/components/FeedbackStatusTag'
+import { RoleTag } from '@/features/admin/components/RoleTag'
+import { useJoinedLabel } from '@/features/admin/hooks/useJoinedLabel'
+import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 /** Bodies longer than this collapse behind a Show more/less toggle. */
 const CLAMP_AT = 220
@@ -33,10 +23,11 @@ interface FeedbackManagerProps {
 
 /** Admin/owner feedback triage list: full text, status changes, delete. */
 export function FeedbackManager({ items, todayKey, hideAuthor }: FeedbackManagerProps) {
+  const { t } = useT()
   if (items.length === 0) {
     return (
       <p className="rounded-card border bg-surface px-4 py-6 text-center text-sm text-muted">
-        No feedback submitted.
+        {t('admin.noFeedback')}
       </p>
     )
   }
@@ -56,6 +47,8 @@ interface FeedbackCardProps {
 }
 
 function FeedbackCard({ item, todayKey, hideAuthor }: FeedbackCardProps) {
+  const { t } = useT()
+  const joined = useJoinedLabel()
   const { setStatus, remove, isUpdating, isRemoving } = useFeedbackManagement()
   const [expanded, setExpanded] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -66,7 +59,7 @@ function FeedbackCard({ item, todayKey, hideAuthor }: FeedbackCardProps) {
       await setStatus({ id: item.id, status })
       toast.success(label)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not update feedback')
+      toast.error(error instanceof Error ? error.message : t('admin.feedbackUpdateFailed'))
     }
   }
 
@@ -74,30 +67,30 @@ function FeedbackCard({ item, todayKey, hideAuthor }: FeedbackCardProps) {
     try {
       await remove(item.id)
       setConfirmDelete(false)
-      toast.success('Feedback deleted')
+      toast.success(t('admin.feedbackDeleted'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not delete feedback')
+      toast.error(error instanceof Error ? error.message : t('admin.feedbackDeleteFailed'))
     }
   }
 
   return (
     <div className="rounded-card border bg-surface px-4 py-3.5">
       <div className="mb-1.5 flex items-center gap-2">
-        <Tag tone={STATUS_TONE[item.status]}>{item.status}</Tag>
+        <FeedbackStatusTag status={item.status} />
         {!hideAuthor ? (
           <>
-            <Tag tone={ROLE_TONE[item.authorRole]}>{item.authorRole}</Tag>
+            <RoleTag role={item.authorRole} />
             <span className="min-w-0 truncate font-mono text-[10px] text-muted-strong">
               {item.authorName}
             </span>
           </>
         ) : null}
         <span className="ml-auto flex-none font-mono text-[10px] text-muted-strong">
-          {joinedLabel(item.createdAt, todayKey)}
+          {joined(item.createdAt, todayKey)}
         </span>
       </div>
 
-      <p className={`text-sm leading-relaxed ${long && !expanded ? 'line-clamp-3' : ''}`}>
+      <p className={cn('text-sm leading-relaxed', long && !expanded && 'line-clamp-3')}>
         {item.body}
       </p>
       {long ? (
@@ -106,7 +99,7 @@ function FeedbackCard({ item, todayKey, hideAuthor }: FeedbackCardProps) {
           onClick={() => setExpanded((v) => !v)}
           className="mt-1 font-mono text-[10px] uppercase tracking-label text-accent hover:underline"
         >
-          {expanded ? 'Show less' : 'Show more'}
+          {expanded ? t('admin.showLess') : t('admin.showMore')}
         </button>
       ) : null}
 
@@ -116,9 +109,9 @@ function FeedbackCard({ item, todayKey, hideAuthor }: FeedbackCardProps) {
             variant="surface"
             size="sm"
             disabled={isUpdating}
-            onClick={() => changeStatus('done', 'Marked resolved')}
+            onClick={() => changeStatus('done', t('admin.resolved'))}
           >
-            <Check className="h-4 w-4" /> Resolve
+            <Check className="h-4 w-4" /> {t('admin.resolve')}
           </Button>
         ) : null}
         {item.status !== 'closed' ? (
@@ -126,9 +119,9 @@ function FeedbackCard({ item, todayKey, hideAuthor }: FeedbackCardProps) {
             variant="surface"
             size="sm"
             disabled={isUpdating}
-            onClick={() => changeStatus('closed', 'Feedback rejected')}
+            onClick={() => changeStatus('closed', t('admin.rejected'))}
           >
-            <X className="h-4 w-4" /> Reject
+            <X className="h-4 w-4" /> {t('admin.reject')}
           </Button>
         ) : null}
         {item.status !== 'open' ? (
@@ -136,16 +129,16 @@ function FeedbackCard({ item, todayKey, hideAuthor }: FeedbackCardProps) {
             variant="surface"
             size="sm"
             disabled={isUpdating}
-            onClick={() => changeStatus('open', 'Feedback reopened')}
+            onClick={() => changeStatus('open', t('admin.reopened'))}
           >
-            <RotateCcw className="h-4 w-4" /> Reopen
+            <RotateCcw className="h-4 w-4" /> {t('admin.reopen')}
           </Button>
         ) : null}
         <Button
           variant="surface"
           size="sm"
           className="ml-auto text-accent"
-          aria-label="Delete feedback"
+          aria-label={t('admin.deleteFeedback')}
           disabled={isRemoving}
           onClick={() => setConfirmDelete(true)}
         >
@@ -156,9 +149,9 @@ function FeedbackCard({ item, todayKey, hideAuthor }: FeedbackCardProps) {
       <ConfirmSheet
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Delete this feedback?"
-        description="This permanently removes the feedback item. This cannot be undone."
-        confirmLabel={isRemoving ? 'Deleting…' : 'Delete feedback'}
+        title={t('admin.deleteFeedbackTitle')}
+        description={t('admin.deleteFeedbackBody')}
+        confirmLabel={isRemoving ? t('admin.deleting') : t('admin.deleteFeedback')}
         pending={isRemoving}
         onConfirm={confirmRemove}
       />

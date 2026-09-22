@@ -26,7 +26,7 @@ export function HabitChecklist({ habit, className }: HabitChecklistProps) {
   return (
     <div className={className}>
       <p className="flex items-baseline justify-between font-mono text-[10px] uppercase tracking-label text-muted-strong">
-        checklist
+        {t('habits.checklistLabel')}
         <span className="tabular-nums">
           {done}/{subtasks.length}
         </span>

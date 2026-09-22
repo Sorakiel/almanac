@@ -1,5 +1,6 @@
 import { ratingBarClass, ratingTextClass } from '@/lib/ratingColor'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface StarRatingProps {
   /** Current rating 1–max, or null when unrated. */
@@ -34,6 +35,7 @@ export function StarRating({
   'aria-label': ariaLabel,
   disabled,
 }: StarRatingProps) {
+  const { t } = useT()
   const s = SIZES[size]
   const fillClass = value ? ratingBarClass(value, max) : 'bg-accent'
   return (
@@ -50,7 +52,7 @@ export function StarRating({
               type="button"
               role="radio"
               aria-checked={active}
-              aria-label={`${step} of ${max}`}
+              aria-label={t('a11y.valueOf', { value: step, max })}
               disabled={disabled}
               onClick={() => onChange(value === step ? null : step)}
               className={cn(

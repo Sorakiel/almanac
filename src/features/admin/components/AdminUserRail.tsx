@@ -1,42 +1,35 @@
 import { Avatar } from '@/components/common/Avatar'
-import { Tag } from '@/components/common/Tag'
 import { RailCard, RailNote, RailRow } from '@/components/rail/RailCard'
-import { joinedLabel } from '@/features/admin/lib/format'
-import type { AdminUserDetail, UserRole } from '@/features/admin/types'
+import { RoleTag } from '@/features/admin/components/RoleTag'
+import { useJoinedLabel } from '@/features/admin/hooks/useJoinedLabel'
+import type { AdminUserDetail } from '@/features/admin/types'
+import { useT } from '@/hooks/useT'
 
 interface AdminUserRailProps {
   user: AdminUserDetail
   todayKey: string
 }
 
-const ROLE_TONE: Record<UserRole, 'accent' | 'muted' | 'teal'> = {
-  owner: 'teal',
-  admin: 'accent',
-  user: 'muted',
-}
-
 /** Desktop context rail for the admin user-detail page: identity + snapshot. */
 export function AdminUserRail({ user, todayKey }: AdminUserRailProps) {
+  const { t } = useT()
+  const joined = useJoinedLabel()
   return (
     <div className="flex flex-col gap-3.5">
       <div className="flex items-center gap-3">
         <Avatar name={user.name} size="md" />
         <div className="min-w-0">
           <p className="truncate text-[15px] font-semibold">{user.name}</p>
-          <Tag tone={ROLE_TONE[user.role]} className="mt-0.5">
-            {user.role}
-          </Tag>
+          <RoleTag role={user.role} className="mt-0.5" />
         </div>
       </div>
 
-      <RailCard label="account">
-        <RailRow label="joined" value={joinedLabel(user.joinedAt, todayKey)} />
-        <RailRow label="timezone" value={user.timezone?.replace(/_/g, ' ') ?? '—'} />
+      <RailCard label={t('admin.account')}>
+        <RailRow label={t('admin.colJoined')} value={joined(user.joinedAt, todayKey)} />
+        <RailRow label={t('admin.timezone')} value={user.timezone?.replace(/_/g, ' ') ?? '—'} />
       </RailCard>
 
-      <RailNote label="elevated access">
-        You&apos;re viewing another member&apos;s data. Role changes and deletion are permanent.
-      </RailNote>
+      <RailNote label={t('admin.elevatedAccess')}>{t('admin.userNote')}</RailNote>
     </div>
   )
 }

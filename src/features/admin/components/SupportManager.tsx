@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Loader2, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -11,12 +11,15 @@ import {
   isMethodLive,
   type SupportMethod,
 } from '@/features/settings/lib/support'
+import { LoadingState } from '@/components/common/LoadingState'
+import { useT } from '@/hooks/useT'
 
 /**
  * Owner-only console block: flip whether users see the Support section at all,
  * and manage which donation methods appear (add, edit, show/hide, remove).
  */
 export function SupportManager() {
+  const { t } = useT()
   const { methods, enabled, isLoading, isError, setEnabled } = useSupportAdmin(true)
   const [editing, setEditing] = useState<SupportMethod | null>(null)
   const [creating, setCreating] = useState(false)
@@ -24,24 +27,19 @@ export function SupportManager() {
   const toggleSection = async (next: boolean) => {
     try {
       await setEnabled(next)
-      toast.success(next ? 'Support section shown to users' : 'Support section hidden')
+      toast.success(next ? t('admin.supportShown') : t('admin.supportHidden'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not update')
+      toast.error(error instanceof Error ? error.message : t('admin.updateFailed'))
     }
   }
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-8" role="status" aria-live="polite">
-        <Loader2 className="h-5 w-5 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading support config…</span>
-      </div>
-    )
+    return <LoadingState label={t('admin.supportLoading')} className="py-8" />
   }
   if (isError || !methods) {
     return (
       <p className="rounded-card border bg-surface px-4 py-6 text-center text-sm text-muted">
-        Couldn’t load the support config.
+        {t('admin.supportLoadFailed')}
       </p>
     )
   }
@@ -50,21 +48,19 @@ export function SupportManager() {
     <div className="flex flex-col gap-2.5">
       <label className="flex items-center justify-between rounded-card border bg-surface px-4 py-3.5">
         <span className="min-w-0">
-          <span className="block text-sm font-medium">Show Support section</span>
-          <span className="block text-xs text-muted">
-            Off hides “Support Almanac” from everyone’s settings.
-          </span>
+          <span className="block text-sm font-medium">{t('admin.supportToggle')}</span>
+          <span className="block text-xs text-muted">{t('admin.supportToggleHint')}</span>
         </span>
         <Switch
           checked={enabled ?? false}
           onCheckedChange={(v) => void toggleSection(v)}
-          aria-label="Show Support section to users"
+          aria-label={t('admin.supportToggleAria')}
         />
       </label>
 
       {methods.length === 0 ? (
         <p className="rounded-card border bg-surface px-4 py-6 text-center text-sm text-muted">
-          No methods yet — add one below.
+          {t('admin.noMethods')}
         </p>
       ) : (
         methods.map((method) => (
@@ -73,7 +69,7 @@ export function SupportManager() {
       )}
 
       <Button variant="surface" size="sm" className="self-start" onClick={() => setCreating(true)}>
-        <Plus className="h-4 w-4" /> Add method
+        <Plus className="h-4 w-4" /> {t('admin.addMethod')}
       </Button>
 
       {creating ? <SupportMethodSheet open onOpenChange={setCreating} /> : null}
@@ -90,6 +86,7 @@ interface MethodRowProps {
 }
 
 function MethodRow({ method, onEdit }: MethodRowProps) {
+  const { t } = useT()
   const { update } = useSupportAdmin(false)
   const Icon = SUPPORT_KIND_ICON[method.kind]
   const live = isMethodLive(method)
@@ -98,7 +95,7 @@ function MethodRow({ method, onEdit }: MethodRowProps) {
     try {
       await update({ id: method.id, patch: { enabled: next } })
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not update')
+      toast.error(error instanceof Error ? error.message : t('admin.updateFailed'))
     }
   }
 
@@ -114,17 +111,17 @@ function MethodRow({ method, onEdit }: MethodRowProps) {
           <span className="flex items-center gap-2">
             <span className="truncate text-[15px] font-medium">{method.label}</span>
             {method.network ? <Tag tone="teal">{method.network}</Tag> : null}
-            {!live ? <Tag tone="amber">soon</Tag> : null}
+            {!live ? <Tag tone="amber">{t('admin.soon')}</Tag> : null}
           </span>
           <span className="block truncate font-mono text-[11px] text-muted">
-            {method.value || '— no link/address yet —'}
+            {method.value || t('admin.noValue')}
           </span>
         </span>
       </button>
       <Switch
         checked={method.enabled}
         onCheckedChange={(v) => void toggle(v)}
-        aria-label={`Show ${method.label} to users`}
+        aria-label={t('admin.showMethod', { name: method.label })}
       />
     </div>
   )

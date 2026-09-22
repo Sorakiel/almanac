@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom'
 import { Caret } from '@/app/shell/Caret'
 import { useTheme } from '@/hooks/useTheme'
 import { useBreadcrumbStore } from '@/stores/breadcrumb'
+import { useT } from '@/hooks/useT'
 
 /**
  * Current route as a shell-style path, nested to mirror the real IA so the
@@ -37,6 +38,7 @@ function useRoutePath(): string {
 /** Desktop window chrome: shell-prompt path, theme toggle. */
 export function TopBar() {
   const routePath = useRoutePath()
+  const { t } = useT()
   const { theme, toggleTheme } = useTheme()
 
   return (
@@ -53,13 +55,17 @@ export function TopBar() {
       <button
         type="button"
         onClick={toggleTheme}
-        aria-label={`Switch to ${theme === 'dark' ? 'coffee' : 'dark'} theme`}
+        aria-label={t('shell.switchTheme', {
+          theme: t(theme === 'dark' ? 'settings.coffee' : 'settings.dark'),
+        })}
         className="flex items-center gap-2 rounded-pill px-2 py-1 font-mono text-[11px] text-muted-strong transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <span aria-hidden="true" className="text-accent">
           ◇
         </span>
-        {theme === 'dark' ? 'dark' : 'coffee'} · toggle theme
+        {t('shell.toggleTheme', {
+          theme: t(theme === 'dark' ? 'settings.dark' : 'settings.coffee'),
+        })}
       </button>
     </div>
   )

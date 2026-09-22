@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import type { Friend } from '@/features/social/types'
+import { friendName } from '@/features/social/lib/format'
 import { useT } from '@/hooks/useT'
 
 interface FriendsListProps {
@@ -31,15 +32,15 @@ export function FriendsList({ friends, onRemove, busy }: FriendsListProps) {
             key={friend.friendshipId}
             className="flex items-center gap-3 rounded-card border bg-surface px-4 py-3"
           >
-            <Avatar name={friend.displayName} size="sm" />
+            <Avatar name={friendName(friend, t)} size="sm" />
             <span className="min-w-0 flex-1 truncate text-sm font-medium">
-              {friend.displayName}
+              {friendName(friend, t)}
             </span>
             <Button
               size="icon"
               variant="ghost"
               className="h-9 w-9 text-muted hover:text-foreground"
-              aria-label={t('social.removeName', { name: friend.displayName })}
+              aria-label={t('social.removeName', { name: friendName(friend, t) })}
               onClick={() => setPending(friend)}
             >
               <UserMinus className="h-4 w-4" aria-hidden="true" />
@@ -51,7 +52,7 @@ export function FriendsList({ friends, onRemove, busy }: FriendsListProps) {
       <ConfirmSheet
         open={pending !== null}
         onOpenChange={(open) => !open && setPending(null)}
-        title={pending ? t('social.removeNameConfirm', { name: pending.displayName }) : ''}
+        title={pending ? t('social.removeNameConfirm', { name: friendName(pending, t) }) : ''}
         description={t('social.removeFriendHint')}
         confirmLabel={t('social.removeFriend')}
         pending={busy}

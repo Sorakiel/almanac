@@ -13,18 +13,22 @@ export function WorkoutInsightsSection({ data }: WorkoutInsightsSectionProps) {
   const { t } = useT()
   return (
     <div className="flex flex-col gap-5">
-      <p className="label-mono">// training · last 30 days</p>
+      <p className="label-mono">{t('insights.sectionTraining')}</p>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <InsightStat label={t('insights.sessions')} value={String(data.totalSessions)} accent />
         <InsightStat label={t('insights.completed')} value={String(data.completedSessions)} />
         <InsightStat label={t('insights.done30d')} value={String(data.completed30d)} />
-        <InsightStat label={t('insights.volume30d')} value={String(data.volume30d)} unit="kg" />
+        <InsightStat
+          label={t('insights.volume30d')}
+          value={String(data.volume30d)}
+          unit={t('units.kg')}
+        />
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
         <div className="min-w-0 rounded-card border bg-surface p-4">
-          <p className="label-mono mb-3">most frequent</p>
+          <p className="label-mono mb-3">{t('insights.mostFrequent')}</p>
           {data.topExercises.length === 0 ? (
             <p className="text-sm text-muted">{t('insights.noExercises')}</p>
           ) : (
@@ -34,7 +38,7 @@ export function WorkoutInsightsSection({ data }: WorkoutInsightsSectionProps) {
                   <IconTile icon={Dumbbell} tone="bg-teal/15 text-teal" size="sm" />
                   <span className="min-w-0 flex-1 truncate text-sm">{ex.name}</span>
                   <span className="font-mono text-[11px] text-muted-strong">
-                    {ex.sessions}× session{ex.sessions === 1 ? '' : 's'}
+                    {t('insights.exerciseSessions', { count: ex.sessions })}
                   </span>
                 </li>
               ))}
@@ -43,7 +47,7 @@ export function WorkoutInsightsSection({ data }: WorkoutInsightsSectionProps) {
         </div>
 
         <div className="min-w-0 rounded-card border bg-surface p-4">
-          <p className="label-mono mb-3">personal records</p>
+          <p className="label-mono mb-3">{t('insights.personalRecords')}</p>
           {data.prs.length === 0 ? (
             <p className="text-sm text-muted">{t('insights.noRecord')}</p>
           ) : (
@@ -52,7 +56,7 @@ export function WorkoutInsightsSection({ data }: WorkoutInsightsSectionProps) {
                 <li key={pr.name} className="flex items-center gap-3">
                   <span className="min-w-0 flex-1 truncate text-sm">{pr.name}</span>
                   <span className="font-mono text-[12px] text-accent">
-                    {pr.weight}kg × {pr.reps}
+                    {t('insights.prValue', { weight: pr.weight, reps: pr.reps })}
                   </span>
                 </li>
               ))}

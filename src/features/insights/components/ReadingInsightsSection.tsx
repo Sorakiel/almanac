@@ -14,17 +14,21 @@ export function ReadingInsightsSection({ data }: ReadingInsightsSectionProps) {
   const { t } = useT()
   return (
     <div className="flex flex-col gap-5">
-      <p className="label-mono">// reading · last 30 days</p>
+      <p className="label-mono">{t('insights.sectionReading')}</p>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <InsightStat label={t('insights.reading')} value={String(data.booksReading)} accent />
         <InsightStat label={t('insights.finished')} value={String(data.booksFinished)} />
         <InsightStat label={t('insights.pages30d')} value={String(data.pages30d)} />
-        <InsightStat label={t('insights.time30d')} value={String(data.minutes30d)} unit="min" />
+        <InsightStat
+          label={t('insights.time30d')}
+          value={String(data.minutes30d)}
+          unit={t('units.min')}
+        />
       </div>
 
       <div className="rounded-card border bg-surface p-4">
-        <p className="label-mono mb-3">currently reading</p>
+        <p className="label-mono mb-3">{t('insights.currentlyReading')}</p>
         {data.currentlyReading.length === 0 ? (
           <p className="text-sm text-muted">{t('insights.noBooksInProgress')}</p>
         ) : (

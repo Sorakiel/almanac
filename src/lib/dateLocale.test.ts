@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { weekdayLabels } from '@/features/settings/lib/digest'
+import { weekdayLabels } from '@/lib/dateLocale'
 
 describe('weekdayLabels', () => {
   it('returns 7 labels starting from Sunday', () => {
@@ -16,5 +16,12 @@ describe('weekdayLabels', () => {
     // Russian week starts Monday in common usage, but the array itself stays
     // Sunday-first (index 0) to match digest_day's 0=Sunday convention.
     expect(labels[0]).not.toEqual(labels[1])
+  })
+})
+
+describe('weekdayLabels long', () => {
+  it('spells the day out', () => {
+    expect(weekdayLabels('en', 'long')[1]).toBe('Monday')
+    expect(weekdayLabels('ru', 'long')[1]).toBe('понедельник')
   })
 })

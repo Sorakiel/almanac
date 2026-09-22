@@ -23,7 +23,7 @@ export function ReflectRail({ reflections, past, dateKey }: ReflectRailProps) {
     <div className="flex flex-col gap-3.5">
       <ReflectTicker reflections={reflections} dateKey={dateKey} />
 
-      <p className="label-mono">// past entries</p>
+      <p className="label-mono">{t('reflect.pastLabel')}</p>
 
       {past.length > 0 ? (
         <div className="flex flex-col gap-2.5">
@@ -49,7 +49,7 @@ export function ReflectRail({ reflections, past, dateKey }: ReflectRailProps) {
 
       {streak > 0 ? (
         <p className="mt-1 text-center font-mono text-[11px] text-muted-strong">
-          ◇ {streak}-day reflection streak
+          {t('reflect.streakLine', { count: streak })}
         </p>
       ) : null}
     </div>

@@ -1,4 +1,5 @@
 import type { Database } from '@/types/database.generated'
+import type { Habit } from '@/features/habits/types'
 
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Feedback = Database['public']['Tables']['feedback']['Row']
@@ -19,7 +20,8 @@ export interface AdminOverview {
 
 /** Signups in one calendar week, oldest→newest. */
 export interface SignupWeek {
-  label: string
+  /** 1-based, oldest first. */
+  week: number
   count: number
 }
 
@@ -37,7 +39,8 @@ export interface MemberRow {
 export interface UserHabitRow {
   id: string
   name: string
-  frequencyLabel: string
+  /** Cadence, labelled at render so it follows the interface language. */
+  frequency: Pick<Habit, 'frequency' | 'target_count'>
   /** Completed calendar days over the last 30 days. */
   doneLast30: number
 }

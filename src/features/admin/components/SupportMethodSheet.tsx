@@ -12,9 +12,11 @@ import { Switch } from '@/components/ui/switch'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { useSupportAdmin } from '@/features/admin/hooks/useSupportAdmin'
 import type { SupportKind, SupportMethod } from '@/features/settings/lib/support'
+import type { TranslationKey } from '@/i18n/types'
+import { useT } from '@/hooks/useT'
 
 const schema = z.object({
-  label: z.string().trim().min(1, 'Give it a name').max(40),
+  label: z.string().trim().min(1, 'admin.methodNameRequired').max(40),
   hint: z.string().trim().max(80).optional(),
   network: z.string().trim().max(24).optional(),
   value: z.string().trim().max(240).optional(),
@@ -31,6 +33,7 @@ interface SupportMethodSheetProps {
 
 /** Owner: add or edit a donation method — kind, label, link/address, visibility. */
 export function SupportMethodSheet({ open, onOpenChange, method }: SupportMethodSheetProps) {
+  const { t } = useT()
   const { create, update, remove, isMutating } = useSupportAdmin(true)
   const [kind, setKind] = useState<SupportKind>(method?.kind ?? 'link')
   const [enabled, setEnabled] = useState(method?.enabled ?? true)
@@ -55,7 +58,7 @@ export function SupportMethodSheet({ open, onOpenChange, method }: SupportMethod
   const onSubmit = handleSubmit(async (values) => {
     const value = values.value?.trim() ?? ''
     if (kind === 'link' && value && !/^https?:\/\//i.test(value)) {
-      setError('value', { message: 'Links must start with http:// or https://' })
+      setError('value', { message: 'admin.linkProtocol' })
       return
     }
     const input = {
@@ -69,14 +72,14 @@ export function SupportMethodSheet({ open, onOpenChange, method }: SupportMethod
     try {
       if (method) {
         await update({ id: method.id, patch: input })
-        toast.success('Method updated')
+        toast.success(t('admin.methodUpdated'))
       } else {
         await create(input)
-        toast.success('Method added')
+        toast.success(t('admin.methodAdded'))
       }
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not save the method')
+      toast.error(error instanceof Error ? error.message : t('admin.methodSaveFailed'))
     }
   })
 
@@ -84,11 +87,11 @@ export function SupportMethodSheet({ open, onOpenChange, method }: SupportMethod
     if (!method) return
     try {
       await remove(method.id)
-      toast.success('Method removed')
+      toast.success(t('admin.methodRemoved'))
       setConfirmDelete(false)
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not remove the method')
+      toast.error(error instanceof Error ? error.message : t('admin.methodRemoveFailed'))
     }
   }
 
@@ -97,66 +100,84 @@ export function SupportMethodSheet({ open, onOpenChange, method }: SupportMethod
       <Sheet
         open={open}
         onOpenChange={onOpenChange}
-        title={isEdit ? 'Edit method' : 'Add method'}
-        description={isEdit ? undefined : 'A donation option users see in Support Almanac.'}
+        title={isEdit ? t('admin.editMethod') : t('admin.addMethod')}
+        description={isEdit ? undefined : t('admin.methodDescription')}
       >
         <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
           <div className="flex flex-col gap-1.5">
-            <span className="label-mono">Type</span>
+            <span className="label-mono">{t('admin.methodType')}</span>
             <Segmented
-              aria-label="Method type"
+              aria-label={t('admin.methodTypeAria')}
               value={kind}
               onChange={setKind}
               options={[
-                { value: 'link', label: 'Link' },
-                { value: 'crypto', label: 'Crypto' },
+                { value: 'link', label: t('admin.kindLink') },
+                { value: 'crypto', label: t('admin.kindCrypto') },
               ]}
             />
           </div>
 
           <label className="flex flex-col gap-1.5">
-            <span className="label-mono">Name</span>
-            <Input placeholder="e.g. Boosty" autoFocus {...register('label')} />
+            <span className="label-mono">{t('admin.methodName')}</span>
+            <Input
+              placeholder={t('admin.methodNamePlaceholder')}
+              autoFocus
+              {...register('label')}
+            />
             {errors.label ? (
-              <span className="text-xs text-accent">{errors.label.message}</span>
+              <span className="text-xs text-accent">
+                {t(errors.label.message as TranslationKey)}
+              </span>
             ) : null}
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="label-mono">Hint (optional)</span>
-            <Input placeholder="e.g. One-off tip or monthly support" {...register('hint')} />
+            <span className="label-mono">{t('admin.methodHint')}</span>
+            <Input placeholder={t('admin.methodHintPlaceholder')} {...register('hint')} />
           </label>
 
           {kind === 'crypto' ? (
             <label className="flex flex-col gap-1.5">
-              <span className="label-mono">Network (optional)</span>
-              <Input placeholder="e.g. TON" {...register('network')} />
+              <span className="label-mono">{t('admin.methodNetwork')}</span>
+              <Input placeholder={t('admin.methodNetworkPlaceholder')} {...register('network')} />
             </label>
           ) : null}
 
           <label className="flex flex-col gap-1.5">
-            <span className="label-mono">{kind === 'link' ? 'URL' : 'Wallet address'}</span>
+            <span className="label-mono">
+              {kind === 'link' ? t('admin.methodUrl') : t('admin.methodWallet')}
+            </span>
             <Input
               placeholder={kind === 'link' ? 'https://boosty.to/…' : 'UQ… / T…'}
               {...register('value')}
             />
             {errors.value ? (
-              <span className="text-xs text-accent">{errors.value.message}</span>
+              <span className="text-xs text-accent">
+                {t(errors.value.message as TranslationKey)}
+              </span>
             ) : (
-              <span className="text-xs text-muted">Leave blank to show it as “coming soon”.</span>
+              <span className="text-xs text-muted">{t('admin.methodBlankHint')}</span>
             )}
           </label>
 
           <label className="flex items-center justify-between rounded-tile border bg-surface px-4 py-3">
             <span className="min-w-0">
-              <span className="block text-sm font-medium">Visible to users</span>
-              <span className="block text-xs text-muted">Off keeps it hidden from the sheet.</span>
+              <span className="block text-sm font-medium">{t('admin.methodVisible')}</span>
+              <span className="block text-xs text-muted">{t('admin.methodVisibleHint')}</span>
             </span>
-            <Switch checked={enabled} onCheckedChange={setEnabled} aria-label="Visible to users" />
+            <Switch
+              checked={enabled}
+              onCheckedChange={setEnabled}
+              aria-label={t('admin.methodVisible')}
+            />
           </label>
 
           <Button type="submit" size="lg" disabled={isMutating}>
-            {isMutating ? 'Saving…' : isEdit ? 'Save changes' : 'Add method'}
+            {isMutating
+              ? t('admin.saving')
+              : isEdit
+                ? t('admin.saveChanges')
+                : t('admin.addMethod')}
           </Button>
 
           {isEdit ? (
@@ -168,7 +189,7 @@ export function SupportMethodSheet({ open, onOpenChange, method }: SupportMethod
               onClick={() => setConfirmDelete(true)}
             >
               <Trash2 className="h-4 w-4" />
-              Remove method
+              {t('admin.removeMethod')}
             </Button>
           ) : null}
         </form>
@@ -177,11 +198,9 @@ export function SupportMethodSheet({ open, onOpenChange, method }: SupportMethod
       <ConfirmSheet
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title="Remove this method?"
-        description={
-          method ? `"${method.label}" will no longer appear in Support Almanac.` : undefined
-        }
-        confirmLabel={isMutating ? 'Removing…' : 'Remove method'}
+        title={t('admin.removeMethodTitle')}
+        description={method ? t('admin.removeMethodBody', { name: method.label }) : undefined}
+        confirmLabel={isMutating ? t('admin.removing') : t('admin.removeMethod')}
         pending={isMutating}
         onConfirm={onDelete}
       />

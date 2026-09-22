@@ -86,7 +86,7 @@ function OnboardingPage() {
             create.mutateAsync(toInput(tpl, t(`onboarding.suggestions.${tpl.key}`))),
           ),
         )
-        toast.success(`${chosen.length} habit${chosen.length > 1 ? 's' : ''} added`)
+        toast.success(t('onboarding.habitsAdded', { count: chosen.length }))
       } catch (error) {
         toast.error(error instanceof Error ? error.message : t('onboarding.createFailed'))
         setSaving(false)

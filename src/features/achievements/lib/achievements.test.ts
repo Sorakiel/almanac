@@ -90,7 +90,6 @@ describe('computeAchievementStats', () => {
 const STREAK_DEF: AchievementDef = {
   id: 'streak',
   title: 'Streak',
-  description: '',
   icon: Flame,
   tone: 'accent',
   metric: (s) => s.bestStreak,
@@ -150,7 +149,6 @@ describe('evaluate', () => {
     const manual: AchievementDef = {
       id: 'founder',
       title: 'Founder',
-      description: '',
       icon: Flame,
       tone: 'amber',
       manual: true,

@@ -29,13 +29,13 @@ export function ExerciseView({ exercise }: ExerciseViewProps) {
             {exercise.muscleGroup ? <Tag tone="teal">{exercise.muscleGroup}</Tag> : null}
             {target ? (
               <span className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-                target {target}
+                {t('workouts.targetLine', { target })}
               </span>
             ) : null}
           </div>
         </div>
         <span className="flex-none font-mono text-[10px] uppercase tracking-label text-muted-strong">
-          {exercise.sets.length} sets
+          {t('workouts.setsCount', { count: exercise.sets.length })}
         </span>
       </div>
 

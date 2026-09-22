@@ -61,7 +61,7 @@ export function WorkoutCard({ workout }: WorkoutCardProps) {
         onToggle={handleToggle}
         tone="teal"
         size="md"
-        aria-label={done ? `Mark ${workout.name} not done` : `Mark ${workout.name} done`}
+        aria-label={t(done ? 'workouts.markNotDone' : 'workouts.markDone', { name: workout.name })}
       />
 
       <IconTile icon={Dumbbell} tone="bg-teal/15 text-teal" />

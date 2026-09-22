@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { useFocusStore } from '@/stores/focus'
 import { useNow } from '@/hooks/useNow'
+import { useT } from '@/hooks/useT'
 
 /**
  * Persistent "active now" slot for the desktop context rail — shown on EVERY
@@ -10,6 +11,7 @@ import { useNow } from '@/hooks/useNow'
  * they land. Renders nothing when nothing is active.
  */
 export function RailActive() {
+  const { t } = useT()
   const { endsAt, durationMin, label } = useFocusStore()
   const running = endsAt !== null && durationMin !== null
   const now = useNow(running)
@@ -23,7 +25,7 @@ export function RailActive() {
   return (
     <div className="mb-5">
       <p className="mb-3 font-mono text-[10px] uppercase tracking-label text-accent">
-        ▶ now · active
+        {t('shell.nowActive')}
       </p>
       <Link
         to="/flow"
@@ -31,19 +33,21 @@ export function RailActive() {
       >
         <div className="flex items-center justify-between gap-3">
           <span className="font-mono text-[10px] uppercase tracking-label text-accent">
-            ◷ flow · in session
+            {t('dashboard.flowInSession')}
           </span>
           <span className="flex-none font-mono text-[11px] tabular-nums text-muted-strong">
-            {minLeft} min left
+            {t('dashboard.minLeft', { count: minLeft })}
           </span>
         </div>
-        <p className="mt-2 truncate text-[15px] font-semibold">{label ?? 'Focus session'}</p>
+        <p className="mt-2 truncate text-[15px] font-semibold">
+          {label ?? t('dashboard.focusSession')}
+        </p>
         <div className="mt-2.5">
           <ProgressBlocks
             value={Math.round(elapsedMin * 10)}
             total={durationMin * 10}
             blocks={18}
-            aria-label={`${minLeft} minutes left`}
+            aria-label={t('dashboard.minLeft', { count: minLeft })}
           />
         </div>
       </Link>

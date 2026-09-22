@@ -20,7 +20,7 @@ export function SocialRail({ data, onAccept, onRemove, busy }: SocialRailProps) 
       <RailIdentity
         icon={Users}
         title={t('social.yourCircle')}
-        subtitle={`${data.friends.length} friend${data.friends.length === 1 ? '' : 's'}`}
+        subtitle={t('social.friendsCount', { count: data.friends.length })}
       />
 
       <RequestsList

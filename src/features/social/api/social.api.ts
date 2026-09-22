@@ -34,7 +34,7 @@ export async function fetchProfiles(ids: string[]): Promise<FriendProfile[]> {
   if (error) throw error
   return data.map((p) => ({
     id: p.id,
-    displayName: p.display_name ?? 'Almanac user',
+    displayName: p.display_name ?? '',
     avatarUrl: p.avatar_url,
   }))
 }
@@ -47,7 +47,7 @@ export async function searchProfiles(query: string): Promise<FriendProfile[]> {
   if (error) throw error
   return (data ?? []).map((p) => ({
     id: p.id,
-    displayName: p.display_name ?? 'Almanac user',
+    displayName: p.display_name ?? '',
     avatarUrl: p.avatar_url,
   }))
 }

@@ -6,6 +6,7 @@ import { toCsv } from '@/features/settings/lib/csv'
 import { saveFile } from '@/features/settings/lib/download'
 import { APP_VERSION } from '@/lib/version'
 import { trackEvent } from '@/lib/analytics'
+import { useT } from '@/hooks/useT'
 
 export type ExportFormat = 'json' | 'csv'
 
@@ -21,11 +22,12 @@ function stamp(iso: string): string {
  * for so far.
  */
 export function useExportData(): UseMutationResult<void, Error, ExportFormat> {
+  const { t } = useT()
   const { user } = useSession()
 
   return useMutation<void, Error, ExportFormat>({
     mutationFn: async (format) => {
-      if (!user) throw new Error('Not signed in')
+      if (!user) throw new Error(t('errors.notSignedIn'))
       const payload = await fetchExport(user.id, user.email ?? null, APP_VERSION)
       const date = stamp(payload.exportedAt)
 
@@ -54,10 +56,10 @@ export function useExportData(): UseMutationResult<void, Error, ExportFormat> {
     },
     onSuccess: (_result, format) => {
       trackEvent('data_exported', { format })
-      toast.success('Export ready')
+      toast.success(t('settings.exportReady'))
     },
     onError: (error) => {
-      toast.error(error.message || 'Could not export your data')
+      toast.error(error.message || t('settings.exportFailed'))
     },
   })
 }

@@ -22,8 +22,8 @@ export function useFriendMutations() {
     OFFLINE_MUTATION_KEYS.acceptFriendRequest,
     (friendshipId: string) => ({ friendshipId, userId }),
     {
-      onSuccess: () => toast.success("You're now friends"),
-      onError: () => toast.error("Couldn't accept the request"),
+      onSuccess: () => toast.success(t('social.nowFriends')),
+      onError: () => toast.error(t('social.acceptFailed')),
     },
   )
   const remove = useOfflineMutation(

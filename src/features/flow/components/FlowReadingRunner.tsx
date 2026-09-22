@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { IconTile } from '@/components/common/IconTile'
 import { useBook } from '@/features/reading/hooks/useBook'
 import { useReadingProgress } from '@/features/reading/hooks/useReadingProgress'
-import { unitNoun, unitNounPlural } from '@/features/reading/lib/progress'
+import { unitNoun } from '@/features/reading/lib/progress'
 import { useT } from '@/hooks/useT'
 
 interface FlowReadingRunnerProps {
@@ -56,9 +56,12 @@ export function FlowReadingRunner({ bookId, minutes, onFinish }: FlowReadingRunn
         <div className="min-w-0">
           <p className="truncate font-semibold">{book.title}</p>
           <p className="font-mono text-[10px] text-muted-strong">
-            at {book.current_unit}
-            {book.total_units ? ` / ${book.total_units}` : ''}{' '}
-            {unitNounPlural(book.progress_mode, t)}
+            {t('flow.atPosition', {
+              position: `${book.current_unit}${book.total_units ? ` / ${book.total_units}` : ''} ${t(
+                `reading.unitWord.${book.progress_mode}`,
+                { count: book.total_units ?? book.current_unit },
+              )}`,
+            })}
           </p>
         </div>
       </div>

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { isDoneOn, isDueOn, isRecurring, recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import type { Workout } from '@/features/workouts/types'
+import { translate } from '@/i18n'
+import type { TFunction } from '@/hooks/useT'
+
+const t: TFunction = (key, vars) => translate('en', key, vars)
 
 /** Build a Workout row with sensible defaults, overriding only what a test needs. */
 function makeWorkout(overrides: Partial<Workout> = {}): Workout {
@@ -77,21 +81,21 @@ describe('isDoneOn', () => {
 
 describe('recurrenceLabel', () => {
   it('labels the common cadences', () => {
-    expect(recurrenceLabel(makeWorkout({ recurrence: 'daily' }))).toBe('Every day')
-    expect(recurrenceLabel(makeWorkout({ recurrence: 'none' }))).toBeNull()
+    expect(recurrenceLabel(makeWorkout({ recurrence: 'daily' }), t)).toBe('Every day')
+    expect(recurrenceLabel(makeWorkout({ recurrence: 'none' }), t)).toBeNull()
     expect(
-      recurrenceLabel(makeWorkout({ recurrence: 'every_n_days', recurrence_interval: 4 })),
+      recurrenceLabel(makeWorkout({ recurrence: 'every_n_days', recurrence_interval: 4 }), t),
     ).toBe('Every 4 days')
   })
 
   it('joins and sorts weekday labels', () => {
     const w = makeWorkout({ recurrence: 'weekdays', recurrence_days: [5, 1, 3] })
-    expect(recurrenceLabel(w)).toBe('Mon · Wed · Fri')
+    expect(recurrenceLabel(w, t)).toBe('Mon · Wed · Fri')
   })
 
   it('treats all seven weekdays as "Every day"', () => {
     const w = makeWorkout({ recurrence: 'weekdays', recurrence_days: [0, 1, 2, 3, 4, 5, 6] })
-    expect(recurrenceLabel(w)).toBe('Every day')
+    expect(recurrenceLabel(w, t)).toBe('Every day')
   })
 })
 

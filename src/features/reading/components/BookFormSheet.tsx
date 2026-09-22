@@ -10,7 +10,6 @@ import { Segmented } from '@/components/ui/segmented'
 import { Sheet } from '@/components/ui/sheet'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { useBookMutations } from '@/features/reading/hooks/useBookMutations'
-import { unitNounPlural } from '@/features/reading/lib/progress'
 import type { Book, BookProgressMode } from '@/features/reading/types'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'
@@ -138,7 +137,7 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
           </div>
 
           <label className="flex flex-col gap-1.5">
-            <span className="label-mono">Total {unitNounPlural(mode, t)} (optional)</span>
+            <span className="label-mono">{t(`reading.form.totalByMode.${mode}`)}</span>
             <Input
               type="number"
               inputMode="numeric"
@@ -149,9 +148,7 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="label-mono">
-              Daily goal · {unitNounPlural(mode, t)} / day (optional)
-            </span>
+            <span className="label-mono">{t(`reading.form.goalByMode.${mode}`)}</span>
             <Input
               type="number"
               inputMode="numeric"

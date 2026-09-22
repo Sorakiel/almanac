@@ -5,6 +5,8 @@ import { crossedMilestones } from '@/features/habits/lib/milestones'
 import { useToday } from '@/hooks/useToday'
 import { celebrate } from '@/lib/celebration'
 import type { EvaluatedAchievement } from '@/features/achievements/types'
+import { useT } from '@/hooks/useT'
+import { achievementDescription, achievementTitle } from '@/features/achievements/lib/text'
 
 const PERFECT_KEY = 'almanac:perfect-day' // last celebrated calendar date
 const SEEN_ACH_KEY = 'almanac:seen-achievements' // JSON array of unlocked signatures
@@ -20,6 +22,7 @@ const achSignature = (a: EvaluatedAchievement): string => `${a.def.id}:${a.tierI
  */
 export function useCelebrationWatchers(): void {
   const { habits } = useHabits()
+  const { t } = useT()
   const { dateKey } = useToday()
   const { achievements } = useAchievements()
 
@@ -33,10 +36,10 @@ export function useCelebrationWatchers(): void {
     localStorage.setItem(PERFECT_KEY, dateKey)
     celebrate({
       kind: 'perfect-day',
-      title: 'Perfect day',
-      message: 'Every habit closed today. Momentum kept.',
+      title: t('celebrate.perfectDayTitle'),
+      message: t('celebrate.perfectDayMessage'),
     })
-  }, [doneCount, dueCount, dateKey])
+  }, [doneCount, dueCount, dateKey, t])
 
   // ── Streak milestones ────────────────────────────────────────────────────
   const prevStreaks = useRef<Map<string, number> | null>(null)
@@ -52,11 +55,11 @@ export function useCelebrationWatchers(): void {
       const milestone = hit[hit.length - 1]!
       celebrate({
         kind: 'milestone',
-        title: `${milestone}-day streak`,
-        message: `${h.name} reached ${milestone} days.`,
+        title: t('celebrate.milestoneTitle', { count: milestone }),
+        message: t('celebrate.milestoneMessage', { count: milestone, name: h.name }),
       })
     }
-  }, [habits])
+  }, [habits, t])
 
   // ── Achievement unlocks ──────────────────────────────────────────────────
   useEffect(() => {
@@ -75,11 +78,11 @@ export function useCelebrationWatchers(): void {
     const top = fresh[0]!
     celebrate({
       kind: 'achievement',
-      title: top.displayTitle,
-      message: top.def.description,
+      title: achievementTitle(t, top.def, top.displayTitle),
+      message: achievementDescription(t, top.def),
       icon: top.def.icon,
       modal: true,
     })
     localStorage.setItem(SEEN_ACH_KEY, JSON.stringify([...seen, ...unlocked.map(achSignature)]))
-  }, [achievements])
+  }, [achievements, t])
 }

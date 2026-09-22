@@ -128,7 +128,7 @@ function HabitDetailPage() {
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
         title={t('habits.confirmDeleteTitle')}
-        description={`"${habit.name}" and its streak will disappear from your lists. Its history is kept.`}
+        description={t('habits.confirmDeleteBody', { name: habit.name })}
         confirmLabel={t('habits.deleteHabit')}
         pending={archive.isPending}
         onConfirm={handleDelete}

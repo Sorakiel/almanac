@@ -48,7 +48,7 @@ export function SessionResumeBanner({ workouts }: SessionResumeBannerProps) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="font-mono text-[10px] uppercase tracking-label text-accent">
-          {recordState.startedAt ? 'session in progress' : 'session paused'}
+          {recordState.startedAt ? t('workouts.sessionInProgress') : t('workouts.sessionPaused')}
         </p>
         <p className="mt-0.5 truncate text-sm font-semibold">
           {workout.name}

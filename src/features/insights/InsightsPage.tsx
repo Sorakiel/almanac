@@ -31,6 +31,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
 import { useT } from '@/hooks/useT'
+import { WeekdayReadout } from '@/features/insights/components/WeekdayReadout'
 
 function InsightsPage() {
   const { t } = useT()
@@ -132,30 +133,15 @@ function InsightsPage() {
 
             {insights.byHabit.length > 0 ? (
               <div>
-                <p className="label-mono mb-3">// by habit</p>
+                <p className="label-mono mb-3">{t('insights.byHabit')}</p>
                 <div className="rounded-card border bg-surface p-4">
                   <HabitRateList habits={insights.byHabit} />
                 </div>
               </div>
             ) : null}
 
-            {insights.bestWeekday ? (
-              <div className="rounded-card border border-accent/25 bg-gradient-to-br from-accent/10 to-transparent p-4">
-                <p className="label-mono text-accent">read-out</p>
-                <p className="mt-2 text-sm leading-relaxed text-muted">
-                  You&rsquo;re most consistent on{' '}
-                  <span className="font-medium text-accent">{insights.bestWeekday}</span>
-                  {insights.worstWeekday ? (
-                    <>
-                      {' '}
-                      — <span className="text-foreground">{insights.worstWeekday}</span> is your
-                      weak point.
-                    </>
-                  ) : (
-                    '.'
-                  )}
-                </p>
-              </div>
+            {insights.bestWeekday !== null ? (
+              <WeekdayReadout best={insights.bestWeekday} worst={insights.worstWeekday} />
             ) : null}
           </div>
         ) : null}
