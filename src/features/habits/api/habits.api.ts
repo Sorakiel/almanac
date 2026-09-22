@@ -20,17 +20,6 @@ export async function fetchHabits(userId: string): Promise<Habit[]> {
   return data
 }
 
-/** Today's habit logs (one row per habit per local date). */
-export async function fetchLogsForDate(userId: string, date: string): Promise<HabitLog[]> {
-  const { data, error } = await supabase
-    .from('habit_logs')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('date', date)
-  if (error) throw error
-  return data
-}
-
 /** Habit logs from `fromDate` (inclusive) onward — used for recent-history stats. */
 export async function fetchLogsSince(userId: string, fromDate: string): Promise<HabitLog[]> {
   const { data, error } = await supabase

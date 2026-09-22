@@ -1,7 +1,6 @@
 import type { Database } from '@/types/database.generated'
 
 export type Friendship = Database['public']['Tables']['friendships']['Row']
-export type FriendshipInsert = Database['public']['Tables']['friendships']['Insert']
 export type ActivityEvent = Database['public']['Tables']['activity_events']['Row']
 export type ActivityEventInsert = Database['public']['Tables']['activity_events']['Insert']
 

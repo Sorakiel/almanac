@@ -38,16 +38,6 @@ async function registration(): Promise<ServiceWorkerRegistration> {
   return navigator.serviceWorker.register('/sw.js', { scope: '/' })
 }
 
-/** Current state, without prompting for anything. */
-export async function currentPushState(): Promise<PushState> {
-  if (!pushSupported()) return 'unsupported'
-  if (Notification.permission === 'denied') return 'blocked'
-  const existing = await (
-    await navigator.serviceWorker.getRegistration('/')
-  )?.pushManager.getSubscription()
-  return existing ? 'on' : 'off'
-}
-
 /**
  * Ask for permission, subscribe, and store the endpoint.
  *

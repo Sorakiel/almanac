@@ -458,7 +458,6 @@ export function registerOfflineMutations(client: QueryClient): void {
     ({ book, userId }) => [
       ['books', userId],
       ['book', book.id],
-      ['bookRatingEvents', book.id],
     ],
   )
 
