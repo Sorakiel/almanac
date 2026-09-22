@@ -226,9 +226,11 @@ automatic continue on the `onlineManager` transition is broken and must not be r
 Restored data is invalidated on restore rather than trusted — the snapshot is throttled,
 and without that a reload right after a change replays the pre-change state.
 
-Adding a new write path: register its key + fn in `offlineMutations.ts`, give the live
-hook a `mutationKey` instead of its own `mutationFn`, and keep the variables JSON-safe —
-no closures, everything the `mutationFn` needs must travel in `variables`. Deliberately
+Adding a new write path: declare a typed `offlineKey<TData, TVariables>` and `register` its
+fn (+ the keys it invalidates) in `offlineMutations.ts`, then call it from the live hook
+through `useOfflineMutation(key, toVariables, options)` — never with its own `mutationFn`.
+Keep the variables JSON-safe — no closures, everything the `mutationFn` needs must travel in
+`variables`. Optimistic patches go through `patchQueryData` / `rollbackQueryData`. Deliberately
 excluded: admin actions (owner-only, connectivity assumed) and auth (must stay live).
 
 **What a browser sandbox cannot verify.** Notification permission is denied there, so Web Push delivery has never been proven end to end from a dev machine, and there is no Android emulator. Verify every link you can, then say plainly which one you could not.
