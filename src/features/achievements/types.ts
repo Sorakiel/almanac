@@ -34,6 +34,7 @@ export interface AchievementDef {
 export interface AchievementStats {
   currentStreak: number
   bestStreak: number
+  /** All-time habit check-offs (repeats across habits counted separately). */
   totalCompletions: number
   workoutsCompleted: number
   booksFinished: number
