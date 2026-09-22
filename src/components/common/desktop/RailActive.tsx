@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { useFocusStore } from '@/stores/focus'
+import { useNow } from '@/hooks/useNow'
 
 /**
  * Persistent "active now" slot for the desktop context rail — shown on EVERY
@@ -12,13 +12,7 @@ import { useFocusStore } from '@/stores/focus'
 export function RailActive() {
   const { endsAt, durationMin, label } = useFocusStore()
   const running = endsAt !== null && durationMin !== null
-
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    if (!running) return
-    const timer = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(timer)
-  }, [running])
+  const now = useNow(running)
 
   if (endsAt === null || durationMin === null) return null
 

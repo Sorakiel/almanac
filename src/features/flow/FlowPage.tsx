@@ -21,6 +21,7 @@ import { useFocusStore } from '@/stores/focus'
 import { useModulesStore } from '@/stores/modules'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { useNow } from '@/hooks/useNow'
 
 const DURATIONS_MIN = [15, 25, 45]
 type Mode = 'habit' | 'book' | 'custom'
@@ -45,7 +46,6 @@ function FlowPage() {
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null)
   const [customLabel, setCustomLabel] = useState('')
   const [duration, setDuration] = useState(25)
-  const [now, setNow] = useState(() => Date.now())
 
   // If Reading was just disabled, fall back to Habit.
   if (mode === 'book' && !readingEnabled) {
@@ -53,6 +53,7 @@ function FlowPage() {
   }
 
   const running = endsAt !== null && durationMin !== null
+  const now = useNow(running)
   const dueHabits = habits.filter((h) => h.dueToday && !h.isComplete)
   const openBooks = books.filter((b) => b.status !== 'finished')
   const selectedHabit = habits.find((h) => h.id === selectedId) ?? null
@@ -87,13 +88,6 @@ function FlowPage() {
     stop()
     toast.success(t('flow.doneShort'))
   }
-
-  // 1 Hz tick while a session runs; also catches sessions that expired offline.
-  useEffect(() => {
-    if (!running) return
-    const timer = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(timer)
-  }, [running])
 
   useEffect(() => {
     if (running && endsAt - now <= 0) {

@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Play, Timer } from 'lucide-react'
 import { sessionElapsed, useWorkoutSessionStore } from '@/stores/workoutSession'
 import { formatClock } from '@/features/workouts/lib/session'
 import type { WorkoutView } from '@/features/workouts/types'
 import { useT } from '@/hooks/useT'
+import { useNow } from '@/hooks/useNow'
 
 interface SessionResumeBannerProps {
   workouts: WorkoutView[]
@@ -19,16 +19,10 @@ export function SessionResumeBanner({ workouts }: SessionResumeBannerProps) {
   const navigate = useNavigate()
   const sessions = useWorkoutSessionStore((s) => s.sessions)
   const start = useWorkoutSessionStore((s) => s.start)
-  const [now, setNow] = useState(() => Date.now())
 
   const entry = Object.entries(sessions).find(([id]) => workouts.some((w) => w.id === id))
   const running = Boolean(entry?.[1].startedAt)
-
-  useEffect(() => {
-    if (!running) return
-    const timer = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(timer)
-  }, [running])
+  const now = useNow(running)
 
   if (!entry) return null
   const [workoutId, recordState] = entry

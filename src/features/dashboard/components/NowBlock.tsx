@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { useFocusStore } from '@/stores/focus'
 import { useT } from '@/hooks/useT'
+import { useNow } from '@/hooks/useNow'
 
 /**
  * The home screen's "now" slot: a live flow session, or nothing. As other timed
@@ -12,13 +12,7 @@ export function NowBlock() {
   const { t } = useT()
   const { endsAt, durationMin, label } = useFocusStore()
   const running = endsAt !== null && durationMin !== null
-  const [now, setNow] = useState(() => Date.now())
-
-  useEffect(() => {
-    if (!running) return
-    const timer = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(timer)
-  }, [running])
+  const now = useNow(running)
 
   // Nothing running is nothing to show. The completion summary used to live
   // here as the fallback, which made "now" mean two different things depending
