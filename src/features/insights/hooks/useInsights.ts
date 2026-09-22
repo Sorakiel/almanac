@@ -2,8 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { lastNDateKeys } from '@/lib/date'
-import { fetchHabits, fetchLogsSince } from '@/features/habits/api/habits.api'
-import { habitKeys } from '@/features/habits/hooks/queryKeys'
+import { habitQueries } from '@/features/habits/hooks/habitQueries'
 import { computeInsights } from '@/features/insights/lib/computeInsights'
 import type { Insights, InsightRange } from '@/features/insights/types'
 
@@ -26,27 +25,18 @@ export function useInsights(range: InsightRange = '30d'): UseInsightsResult {
   const { user } = useSession()
   const { dateKey } = useToday()
   const userId = user?.id ?? ''
-  const enabled = Boolean(userId)
   const windowKeys = lastNDateKeys(dateKey, FETCH_DAYS)
 
   const from = windowKeys[0]!
 
   // Same call, same key as the habit list: the app shell keeps `useHabits`
   // mounted, so this used to refetch a list already sitting in the cache.
-  const habitsQuery = useQuery({
-    queryKey: habitKeys.all(userId),
-    queryFn: () => fetchHabits(userId),
-    enabled,
-  })
+  const habitsQuery = useQuery(habitQueries.all(userId))
 
   // The logs, by contrast, stay a separate entry on purpose. Insights needs 90
   // days, the dashboard 64; sharing would mean making the screen people open
   // every day carry a month of history it never renders.
-  const logsQuery = useQuery({
-    queryKey: habitKeys.logsSince(userId, from),
-    queryFn: () => fetchLogsSince(userId, from),
-    enabled,
-  })
+  const logsQuery = useQuery(habitQueries.logsSince(userId, from))
 
   const insights =
     habitsQuery.data && logsQuery.data
