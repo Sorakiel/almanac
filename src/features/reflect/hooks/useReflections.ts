@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { fetchReflections } from '@/features/reflect/api/reflections.api'
 import type { Reflection } from '@/features/reflect/types'
+import { reflectKeys } from '@/features/reflect/hooks/queryKeys'
 
 interface UseReflectionsResult {
   reflections: Reflection[]
@@ -16,7 +17,7 @@ export function useReflections(): UseReflectionsResult {
   const userId = user?.id ?? ''
 
   const query = useQuery({
-    queryKey: ['reflections', userId],
+    queryKey: reflectKeys.all(userId),
     queryFn: () => fetchReflections(userId),
     enabled: Boolean(userId),
   })

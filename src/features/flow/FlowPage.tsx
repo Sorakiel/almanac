@@ -22,6 +22,7 @@ import { useModulesStore } from '@/stores/modules'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
 import { useNow } from '@/hooks/useNow'
+import { habitKeys } from '@/features/habits/hooks/queryKeys'
 
 const DURATIONS_MIN = [15, 25, 45]
 type Mode = 'habit' | 'book' | 'custom'
@@ -77,7 +78,7 @@ function FlowPage() {
           date: dateKey,
           count: dailyTarget(habit),
         })
-        void queryClient.invalidateQueries({ queryKey: ['habitHistory', habit.id] })
+        void queryClient.invalidateQueries({ queryKey: habitKeys.history(habit.id) })
         void queryClient.invalidateQueries({ queryKey: ['habits'] })
         void queryClient.invalidateQueries({ queryKey: ['habitLogs'] })
       } catch (error) {

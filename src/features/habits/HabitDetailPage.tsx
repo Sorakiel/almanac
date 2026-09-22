@@ -29,6 +29,7 @@ import { useUiStore } from '@/stores/ui'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { habitKeys } from '@/features/habits/hooks/queryKeys'
 
 function HabitDetailPage() {
   const { t } = useT()
@@ -65,7 +66,7 @@ function HabitDetailPage() {
         count: done && habit ? dailyTarget(habit) : 0,
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['habitHistory', id] })
+      void queryClient.invalidateQueries({ queryKey: habitKeys.history(id) })
       void queryClient.invalidateQueries({ queryKey: ['habitLogs'] })
     },
     onError: (error) =>

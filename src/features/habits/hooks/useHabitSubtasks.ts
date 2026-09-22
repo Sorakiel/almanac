@@ -46,7 +46,7 @@ export function useHabitSubtasks(habit: Habit) {
       date: dateKey,
       count: allChecked ? dailyTarget(habit) : 0,
     }).then(() => {
-      void queryClient.invalidateQueries({ queryKey: ['habitHistory', habitId] })
+      void queryClient.invalidateQueries({ queryKey: habitKeys.history(habitId) })
       void queryClient.invalidateQueries({ queryKey: ['habitLogs'] })
     })
   }

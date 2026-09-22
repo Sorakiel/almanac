@@ -45,6 +45,9 @@ import type { Reflection } from '@/features/reflect/types'
 import { submitFeedback } from '@/features/modules/api/feedback.api'
 import { updateOwnProfile, type Profile } from '@/features/settings/api/profiles.api'
 import type { Database } from '@/types/database.generated'
+import { readingKeys } from '@/features/reading/hooks/queryKeys'
+import { reflectKeys } from '@/features/reflect/hooks/queryKeys'
+import { workoutKeys } from '@/features/workouts/hooks/queryKeys'
 
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
 
@@ -306,14 +309,14 @@ export function registerOfflineMutations(client: QueryClient): void {
   register(
     OFFLINE_MUTATION_KEYS.editSet,
     ({ id, patch }) => updateSet(id, patch),
-    ({ workoutId }) => [['workoutSession', workoutId]],
+    ({ workoutId }) => [workoutKeys.session(workoutId)],
   )
 
   register(
     OFFLINE_MUTATION_KEYS.toggleFreeze,
     ({ userId, habitId, date, freeze }) =>
       freeze ? addFreeze(userId, habitId, date) : removeFreeze(habitId, date),
-    ({ userId, habitId }) => [habitKeys.freezesRoot(userId), ['habitFreezes', habitId]],
+    ({ userId, habitId }) => [habitKeys.freezesRoot(userId), habitKeys.freezesOf(habitId)],
   )
 
   // Only the checklist write itself is guaranteed here — the follow-up sync
@@ -331,7 +334,7 @@ export function registerOfflineMutations(client: QueryClient): void {
 
   const habitLists = ({ userId }: { userId: string }): QueryKey[] => [
     habitKeys.all(userId),
-    ['habit'],
+    habitKeys.detailRoot(),
   ]
   register(
     OFFLINE_MUTATION_KEYS.createHabit,
@@ -357,7 +360,7 @@ export function registerOfflineMutations(client: QueryClient): void {
     ({ habitId }) => [habitKeys.subtasks(habitId)],
   )
 
-  const workoutList = ({ userId }: { userId: string }): QueryKey[] => [['workouts', userId]]
+  const workoutList = ({ userId }: { userId: string }): QueryKey[] => [workoutKeys.all(userId)]
   register(
     OFFLINE_MUTATION_KEYS.createWorkout,
     ({ input, userId }) => createWorkout({ ...input, user_id: userId }),
@@ -376,13 +379,10 @@ export function registerOfflineMutations(client: QueryClient): void {
   register(
     OFFLINE_MUTATION_KEYS.toggleWorkoutComplete,
     ({ id, done }) => updateWorkout(id, { completed_at: done ? new Date().toISOString() : null }),
-    ({ id, userId }) => [
-      ['workout', id],
-      ['workouts', userId],
-    ],
+    ({ id, userId }) => [workoutKeys.detail(id), workoutKeys.all(userId)],
   )
 
-  const reflectionList = ({ userId }: { userId: string }): QueryKey[] => [['reflections', userId]]
+  const reflectionList = ({ userId }: { userId: string }): QueryKey[] => [reflectKeys.all(userId)]
   register(
     OFFLINE_MUTATION_KEYS.saveReflection,
     ({ id, date, body, quoteId, mood, energy, dayRating, userId }) =>
@@ -436,9 +436,9 @@ export function registerOfflineMutations(client: QueryClient): void {
       }
     },
     ({ book, userId }) => [
-      ['books', userId],
-      ['book', book.id],
-      ['readingSessions', book.id],
+      readingKeys.books(userId),
+      readingKeys.book(book.id),
+      readingKeys.sessions(book.id),
     ],
   )
 
@@ -455,41 +455,35 @@ export function registerOfflineMutations(client: QueryClient): void {
         })
       }
     },
-    ({ book, userId }) => [
-      ['books', userId],
-      ['book', book.id],
-    ],
+    ({ book, userId }) => [readingKeys.books(userId), readingKeys.book(book.id)],
   )
 
   register(
     OFFLINE_MUTATION_KEYS.createBook,
     ({ input, userId }) => createBook({ ...input, user_id: userId }),
-    ({ userId }) => [['books', userId]],
+    ({ userId }) => [readingKeys.books(userId)],
   )
   register(
     OFFLINE_MUTATION_KEYS.updateBook,
     ({ id, patch }) => updateBook(id, patch),
-    ({ id, userId }) => [
-      ['books', userId],
-      ['book', id],
-    ],
+    ({ id, userId }) => [readingKeys.books(userId), readingKeys.book(id)],
   )
   register(
     OFFLINE_MUTATION_KEYS.deleteBook,
     ({ id }) => deleteBook(id),
-    ({ userId }) => [['books', userId]],
+    ({ userId }) => [readingKeys.books(userId)],
   )
 
   register(
     OFFLINE_MUTATION_KEYS.createBookNote,
     ({ userId, bookId, body, page }) =>
       createBookNote({ user_id: userId, book_id: bookId, body, page }),
-    ({ bookId }) => [['bookNotes', bookId]],
+    ({ bookId }) => [readingKeys.notes(bookId)],
   )
   register(
     OFFLINE_MUTATION_KEYS.deleteBookNote,
     ({ id }) => deleteBookNote(id),
-    ({ bookId }) => [['bookNotes', bookId]],
+    ({ bookId }) => [readingKeys.notes(bookId)],
   )
 
   register(

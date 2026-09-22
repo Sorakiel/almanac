@@ -9,6 +9,7 @@ import {
   type WorkoutDraft,
 } from '@/features/workouts/lib/draft'
 import type { SessionExercise } from '@/features/workouts/types'
+import { workoutKeys } from '@/features/workouts/hooks/queryKeys'
 
 /** A library exercise being added or swapped into the draft. */
 export interface LibraryPick {
@@ -179,9 +180,9 @@ export function useWorkoutDraft(workoutId: string, name: string, exercises: Sess
   const save = useMutation({
     mutationFn: () => commitDraft(workoutId, original, state.draft),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['workoutSession', workoutId] })
-      void queryClient.invalidateQueries({ queryKey: ['workout', workoutId] })
-      void queryClient.invalidateQueries({ queryKey: ['workouts', user?.id ?? ''] })
+      void queryClient.invalidateQueries({ queryKey: workoutKeys.session(workoutId) })
+      void queryClient.invalidateQueries({ queryKey: workoutKeys.detail(workoutId) })
+      void queryClient.invalidateQueries({ queryKey: workoutKeys.all(user?.id ?? '') })
     },
   })
 

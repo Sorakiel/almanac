@@ -10,6 +10,7 @@ import {
 import { dailyTarget, intervalDays } from '@/features/habits/lib/frequency'
 import { completionRate, computeDayCells, type DayCell } from '@/features/habits/lib/schedule'
 import type { Habit } from '@/features/habits/types'
+import { habitKeys } from '@/features/habits/hooks/queryKeys'
 
 const HEATMAP_DAYS = 371 // 53 weeks
 
@@ -139,17 +140,17 @@ export function useHabitDetail(habitId: string): UseHabitDetailResult {
   const windowKeys = lastNDateKeys(dateKey, HEATMAP_DAYS)
 
   const habitQuery = useQuery({
-    queryKey: ['habit', habitId],
+    queryKey: habitKeys.detail(habitId),
     queryFn: () => fetchHabitById(habitId),
   })
 
   const historyQuery = useQuery({
-    queryKey: ['habitHistory', habitId, dateKey],
+    queryKey: habitKeys.history(habitId, dateKey),
     queryFn: () => fetchHabitHistory(habitId, windowKeys[0]!),
   })
 
   const freezesQuery = useQuery({
-    queryKey: ['habitFreezes', habitId, dateKey],
+    queryKey: habitKeys.freezesOf(habitId, dateKey),
     queryFn: () => fetchHabitFreezes(habitId, windowKeys[0]!),
   })
 

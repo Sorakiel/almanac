@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchWorkoutById } from '@/features/workouts/api/workouts.api'
 import { fetchSessionExercises } from '@/features/workouts/api/session.api'
 import type { SessionExercise, Workout } from '@/features/workouts/types'
+import { workoutKeys } from '@/features/workouts/hooks/queryKeys'
 
 interface UseWorkoutDetailResult {
   workout: Workout | undefined
@@ -14,13 +15,13 @@ interface UseWorkoutDetailResult {
 /** One workout's header row plus its exercises and set logs. */
 export function useWorkoutDetail(id: string): UseWorkoutDetailResult {
   const workoutQuery = useQuery({
-    queryKey: ['workout', id],
+    queryKey: workoutKeys.detail(id),
     queryFn: () => fetchWorkoutById(id),
     enabled: Boolean(id),
   })
 
   const sessionQuery = useQuery({
-    queryKey: ['workoutSession', id],
+    queryKey: workoutKeys.session(id),
     queryFn: () => fetchSessionExercises(id),
     enabled: Boolean(id),
   })

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { fetchWorkouts } from '@/features/workouts/api/workouts.api'
 import type { Workout, WorkoutView } from '@/features/workouts/types'
+import { workoutKeys } from '@/features/workouts/hooks/queryKeys'
 
 interface UseWorkoutsResult {
   workouts: WorkoutView[]
@@ -26,7 +27,7 @@ export function useWorkouts(): UseWorkoutsResult {
   const userId = user?.id ?? ''
 
   const query = useQuery({
-    queryKey: ['workouts', userId],
+    queryKey: workoutKeys.all(userId),
     queryFn: () => fetchWorkouts(userId),
     enabled: Boolean(userId),
   })

@@ -4,6 +4,7 @@ import { useOfflineMutation } from '@/hooks/useOfflineMutation'
 import { patchQueryData, rollbackQueryData } from '@/lib/optimistic'
 import { OFFLINE_MUTATION_KEYS } from '@/lib/offlineMutations'
 import type { Workout, WorkoutRecurrence } from '@/features/workouts/types'
+import { workoutKeys } from '@/features/workouts/hooks/queryKeys'
 
 export interface WorkoutFormInput {
   name: string
@@ -18,7 +19,7 @@ export function useWorkoutMutations() {
   const queryClient = useQueryClient()
   const { user } = useSession()
   const userId = user?.id ?? ''
-  const key = ['workouts', userId]
+  const key = workoutKeys.all(userId)
 
   const create = useOfflineMutation(
     OFFLINE_MUTATION_KEYS.createWorkout,

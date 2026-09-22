@@ -6,6 +6,7 @@ import { trackEvent } from '@/lib/analytics'
 import { patchQueryData, rollbackQueryData } from '@/lib/optimistic'
 import { OFFLINE_MUTATION_KEYS, type EditSetVariables } from '@/lib/offlineMutations'
 import type { SessionExercise, Workout } from '@/features/workouts/types'
+import { workoutKeys } from '@/features/workouts/hooks/queryKeys'
 
 /** Every logged set is done and there's at least one — the session is finished. */
 function allSetsDone(exercises: SessionExercise[]): boolean {
@@ -20,7 +21,7 @@ export function useSessionMutations(workoutId: string) {
   const userId = user?.id ?? ''
   const [celebrate, setCelebrate] = useState(false)
 
-  const sessionKey = ['workoutSession', workoutId]
+  const sessionKey = workoutKeys.session(workoutId)
 
   // Shares its key with useWorkoutMutations' toggleComplete — same underlying
   // write, two call sites.
@@ -53,7 +54,7 @@ export function useSessionMutations(workoutId: string) {
         // Ticking the last remaining set auto-completes the workout + celebrates.
         if (patch.done === true) {
           const session = queryClient.getQueryData<SessionExercise[]>(sessionKey)
-          const workout = queryClient.getQueryData<Workout>(['workout', workoutId])
+          const workout = queryClient.getQueryData<Workout>(workoutKeys.detail(workoutId))
           if (session && allSetsDone(session) && workout && !workout.completed_at) {
             setCompleted.mutate(true)
             setCelebrate(true)
