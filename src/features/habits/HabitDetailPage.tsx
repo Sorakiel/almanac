@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, Loader2, MoreHorizontal, Pencil, Snowflake, Trash2 } from 'lucide-react'
+import { ArrowLeft, Check, MoreHorizontal, Pencil, Snowflake, Trash2 } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { IconTile } from '@/components/common/IconTile'
@@ -72,12 +73,7 @@ function HabitDetailPage() {
   })
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('habits.loadingOne')}</span>
-      </div>
-    )
+    return <LoadingState label={t('habits.loadingOne')} />
   }
 
   if (isError || !habit || !stats) {

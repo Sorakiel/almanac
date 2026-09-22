@@ -16,7 +16,8 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { Loader2, Plus, Timer, X } from 'lucide-react'
+import { Plus, Timer, X } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { EmptyState } from '@/components/common/EmptyState'
@@ -279,12 +280,7 @@ function WorkoutEditPage() {
   useBreadcrumbLeaf(workout ? `Edit ${workout.name}` : undefined)
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('workouts.loadingOne')}</span>
-      </div>
-    )
+    return <LoadingState label={t('workouts.loadingOne')} />
   }
 
   if (isError || !workout) {

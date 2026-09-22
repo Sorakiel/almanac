@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BarChart3, Loader2, Plus, RefreshCw } from 'lucide-react'
+import { BarChart3, Plus } from 'lucide-react'
+import { ErrorState } from '@/components/common/ErrorState'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Cascade } from '@/components/common/Cascade'
 import { YearStrip } from '@/components/common/YearStrip'
@@ -49,27 +51,11 @@ function InsightsPage() {
   const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   if (isLoading || woLoading || rdLoading || rfLoading || fcLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('insights.loading')}</span>
-      </div>
-    )
+    return <LoadingState label={t('insights.loading')} />
   }
 
   if (isError || !insights) {
-    return (
-      <EmptyState
-        icon={RefreshCw}
-        title={t('insights.loadFailed')}
-        description={t('insights.loadFailedHint')}
-        action={
-          <Button size="sm" variant="surface" onClick={refetch}>
-            {t('insights.tryAgain')}
-          </Button>
-        }
-      />
-    )
+    return <ErrorState title={t('insights.loadFailed')} onRetry={refetch} />
   }
 
   const habitHasData = insights.hasData

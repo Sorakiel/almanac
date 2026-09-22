@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArrowLeft, Loader2, ShieldMinus, ShieldPlus, Trash2 } from 'lucide-react'
+import { ArrowLeft, ShieldMinus, ShieldPlus, Trash2 } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Tag } from '@/components/common/Tag'
 import { SectionLabel } from '@/components/common/SectionLabel'
@@ -52,12 +53,7 @@ function AdminUserPage() {
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   if (profileLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading…</span>
-      </div>
-    )
+    return <LoadingState />
   }
   if (!isAdmin) return <Navigate to="/" replace />
 
@@ -72,10 +68,7 @@ function AdminUserPage() {
         }
       />
     ) : (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading user…</span>
-      </div>
+      <LoadingState label="Loading user…" />
     )
   }
 

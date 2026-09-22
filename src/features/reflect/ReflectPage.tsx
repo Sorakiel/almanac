@@ -1,8 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Loader2, RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { EmptyState } from '@/components/common/EmptyState'
+import { ErrorState } from '@/components/common/ErrorState'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Rail } from '@/components/common/desktop/rail'
 import { fetchQuotes, type Quote } from '@/features/dashboard/api/quotes.api'
 import { ReflectTicker } from '@/features/reflect/components/ReflectTicker'
@@ -38,27 +37,11 @@ function ReflectPage() {
   const past = useMemo(() => reflections.filter((r) => r.date !== dateKey), [reflections, dateKey])
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('reflect.loading')}</span>
-      </div>
-    )
+    return <LoadingState label={t('reflect.loading')} />
   }
 
   if (isError) {
-    return (
-      <EmptyState
-        icon={RefreshCw}
-        title={t('reflect.loadFailed')}
-        description={t('reflect.loadFailedHint')}
-        action={
-          <Button size="sm" variant="surface" onClick={refetch}>
-            {t('reflect.tryAgain')}
-          </Button>
-        }
-      />
-    )
+    return <ErrorState title={t('reflect.loadFailed')} onRetry={refetch} />
   }
 
   if (isDesktop) {

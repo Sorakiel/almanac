@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Loader2, Pencil, Timer } from 'lucide-react'
+import { ArrowLeft, Pencil, Timer } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
@@ -34,19 +35,14 @@ function BookDetailPage() {
   const [editOpen, setEditOpen] = useState(false)
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('reading.loadingBook')}</span>
-      </div>
-    )
+    return <LoadingState label={t('reading.loadingBook')} />
   }
 
   if (isError || !book) {
     return (
       <EmptyState
         title={t('reading.notFound')}
-        description="{t('reading.notFoundHint')}"
+        description={t('reading.notFoundHint')}
         action={
           <Button size="sm" variant="surface" onClick={() => navigate('/reading')}>
             {t('reading.backToLibrary')}

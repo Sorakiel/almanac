@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { BottomNav } from '@/components/common/BottomNav'
 import { CelebrationHost } from '@/components/common/CelebrationHost'
 import { OfflineBanner } from '@/components/common/OfflineBanner'
@@ -50,12 +50,7 @@ export function AppLayout() {
   // flashes the welcome screen; the local flag is a fast-path for the device
   // that just finished (covers the gap before the row refetches).
   if (!profile && !locallyOnboarded) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading…</span>
-      </div>
-    )
+    return <LoadingState fullScreen />
   }
   if (!profile?.onboarded && !locallyOnboarded) return <Navigate to="/welcome" replace />
 

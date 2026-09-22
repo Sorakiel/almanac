@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, Dumbbell, Loader2, Pencil, Play, SlidersHorizontal } from 'lucide-react'
+import { ArrowLeft, Check, Dumbbell, Pencil, Play, SlidersHorizontal } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { IconTile } from '@/components/common/IconTile'
 import { Tag } from '@/components/common/Tag'
@@ -41,12 +42,7 @@ function WorkoutDetailPage() {
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('workouts.loadingOne')}</span>
-      </div>
-    )
+    return <LoadingState label={t('workouts.loadingOne')} />
   }
 
   if (isError || !workout) {

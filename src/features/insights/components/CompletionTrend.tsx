@@ -44,7 +44,7 @@ export function CompletionTrend({ weekly, height = 170 }: CompletionTrendProps) 
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
         preserveAspectRatio="none"
         role="img"
-        aria-label="{t('insights.trendTitle')}"
+        aria-label={t('insights.trendTitle')}
       >
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">

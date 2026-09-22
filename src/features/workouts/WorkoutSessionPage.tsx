@@ -1,17 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import {
-  Ban,
-  Check,
-  ChevronLeft,
-  EllipsisVertical,
-  Flag,
-  Loader2,
-  Pause,
-  Play,
-  Timer,
-} from 'lucide-react'
+import { Ban, Check, ChevronLeft, EllipsisVertical, Flag, Pause, Play, Timer } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { EmptyState } from '@/components/common/EmptyState'
@@ -59,12 +50,7 @@ function WorkoutSessionPage() {
   }, [id, start])
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('workouts.loadingSession')}</span>
-      </div>
-    )
+    return <LoadingState label={t('workouts.loadingSession')} fullScreen />
   }
 
   if (isError || !workout) {
@@ -201,8 +187,8 @@ function WorkoutSessionPage() {
           {exercises.length === 0 ? (
             <div className="mt-10">
               <EmptyState
-                title="{t('workouts.session.noExercises')}"
-                description="{t('workouts.planFirst')}"
+                title={t('workouts.session.noExercises')}
+                description={t('workouts.planFirst')}
                 action={
                   <Button size="sm" onClick={leave}>
                     {t('workouts.planThisWorkout')}

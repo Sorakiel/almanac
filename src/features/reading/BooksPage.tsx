@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { BookOpen, Loader2, Plus, RefreshCw } from 'lucide-react'
+import { BookOpen, Plus } from 'lucide-react'
+import { ErrorState } from '@/components/common/ErrorState'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Rail } from '@/components/common/desktop/rail'
@@ -49,21 +51,9 @@ function BooksPage() {
       </header>
 
       {isLoading ? (
-        <div className="flex justify-center py-16" role="status" aria-live="polite">
-          <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-          <span className="sr-only">{t('reading.loading')}</span>
-        </div>
+        <LoadingState label={t('reading.loading')} className="py-16" />
       ) : isError ? (
-        <EmptyState
-          icon={RefreshCw}
-          title={t('reading.loadFailed')}
-          description={t('reading.loadFailedHint')}
-          action={
-            <Button size="sm" variant="surface" onClick={refetch}>
-              {t('reading.tryAgain')}
-            </Button>
-          }
-        />
+        <ErrorState title={t('reading.loadFailed')} onRetry={refetch} />
       ) : books.length === 0 ? (
         <EmptyState
           icon={BookOpen}

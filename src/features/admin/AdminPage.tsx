@@ -1,5 +1,6 @@
 import { Navigate, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Loader2, RefreshCw } from 'lucide-react'
+import { ArrowLeft, RefreshCw } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Rail } from '@/components/common/desktop/rail'
@@ -14,15 +15,6 @@ import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
-
-function Spinner({ label }: { label: string }) {
-  return (
-    <div className="flex justify-center py-24" role="status" aria-live="polite">
-      <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-      <span className="sr-only">{label}</span>
-    </div>
-  )
-}
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
@@ -47,7 +39,7 @@ function AdminPage() {
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const { dateKey } = useToday()
 
-  if (profileLoading) return <Spinner label="Loading…" />
+  if (profileLoading) return <LoadingState />
   if (!isAdmin) return <Navigate to="/" replace />
   if (isLoading || !data) {
     return isError ? (
@@ -62,7 +54,7 @@ function AdminPage() {
         }
       />
     ) : (
-      <Spinner label="Loading console…" />
+      <LoadingState label="Loading console…" />
     )
   }
 
