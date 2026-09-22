@@ -3,6 +3,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { ArrowLeft, ShieldMinus, ShieldPlus, Trash2 } from 'lucide-react'
 import { LoadingState } from '@/components/common/LoadingState'
+import { AdminStat } from '@/features/admin/components/AdminStat'
 import { Button } from '@/components/ui/button'
 import { Tag } from '@/components/common/Tag'
 import { SectionLabel } from '@/components/common/SectionLabel'
@@ -25,17 +26,6 @@ const ROLE_TONE: Record<UserRole, 'accent' | 'muted' | 'teal'> = {
   owner: 'teal',
   admin: 'accent',
   user: 'muted',
-}
-
-function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div className="flex-1 rounded-2xl border bg-panel px-4 py-3.5">
-      <p className="font-mono text-[9.5px] uppercase tracking-label text-muted-strong">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold tabular-nums ${accent ? 'text-accent' : ''}`}>
-        {value}
-      </p>
-    </div>
-  )
 }
 
 /** Admin/owner view of one user: stats, habits, feedback + role/delete actions. */
@@ -146,10 +136,10 @@ function AdminUserPage() {
         </header>
 
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Stat label="habits" value={String(data.stats.habits)} accent />
-          <Stat label="active · 30d" value={`${data.stats.activeDays30}d`} />
-          <Stat label="completion" value={`${data.stats.completionPct}%`} />
-          <Stat label="logs · 30d" value={String(data.stats.logs)} />
+          <AdminStat label="habits" value={String(data.stats.habits)} accent />
+          <AdminStat label="active · 30d" value={`${data.stats.activeDays30}d`} />
+          <AdminStat label="completion" value={`${data.stats.completionPct}%`} />
+          <AdminStat label="logs · 30d" value={String(data.stats.logs)} />
         </div>
 
         <section className="flex flex-col gap-3">

@@ -1,6 +1,7 @@
 import { Navigate, useNavigate } from 'react-router-dom'
 import { ArrowLeft, RefreshCw } from 'lucide-react'
 import { LoadingState } from '@/components/common/LoadingState'
+import { AdminStat } from '@/features/admin/components/AdminStat'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Rail } from '@/components/common/desktop/rail'
@@ -15,17 +16,6 @@ import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
-
-function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div className="flex-1 rounded-2xl border bg-panel px-4 py-3.5">
-      <p className="font-mono text-[9.5px] uppercase tracking-label text-muted-strong">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold tabular-nums ${accent ? 'text-accent' : ''}`}>
-        {value}
-      </p>
-    </div>
-  )
-}
 
 /** Admin-only console. Gated by profile role; non-admins are bounced home. */
 function AdminPage() {
@@ -93,10 +83,10 @@ function AdminPage() {
       </header>
 
       <div className="grid grid-cols-2 gap-3">
-        <Stat label="members" value={String(overview.totalMembers)} accent />
-        <Stat label="active today" value={String(overview.activeToday)} />
-        <Stat label="habits" value={String(overview.totalHabits)} />
-        <Stat label="logs" value={String(overview.totalLogs)} />
+        <AdminStat label="members" value={String(overview.totalMembers)} accent />
+        <AdminStat label="active today" value={String(overview.activeToday)} />
+        <AdminStat label="habits" value={String(overview.totalHabits)} />
+        <AdminStat label="logs" value={String(overview.totalLogs)} />
       </div>
 
       <div>
