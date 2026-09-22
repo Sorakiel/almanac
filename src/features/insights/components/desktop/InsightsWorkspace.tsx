@@ -3,13 +3,13 @@ import { YearStrip } from '@/components/common/YearStrip'
 import { useYearActivity } from '@/features/insights/hooks/useYearActivity'
 import { useToday } from '@/hooks/useToday'
 import { CompletionTrend } from '@/features/insights/components/CompletionTrend'
-import { InsightStat } from '@/features/insights/components/InsightStat'
+import { HabitInsightStats } from '@/features/insights/components/HabitInsightStats'
 import { RangeToggle } from '@/features/insights/components/RangeToggle'
 import { WorkoutInsightsSection } from '@/features/insights/components/WorkoutInsightsSection'
 import { ReadingInsightsSection } from '@/features/insights/components/ReadingInsightsSection'
 import { ReflectInsightsSection } from '@/features/insights/components/ReflectInsightsSection'
 import { FocusInsightsSection } from '@/features/insights/components/FocusInsightsSection'
-import { insightRangeLabel, insightRangeSuffix } from '@/features/insights/lib/insightRange'
+import { insightRangeLabel } from '@/features/insights/lib/insightRange'
 import { useT } from '@/hooks/useT'
 import type {
   FocusInsights,
@@ -43,8 +43,6 @@ export function InsightsWorkspace({
   const { t } = useT()
   const { days: yearDays } = useYearActivity()
   const { dateKey } = useToday()
-  const completionPct = Math.round(insights.completionRate * 100)
-
   return (
     <div className="mx-auto max-w-[900px]">
       <header className="flex items-start justify-between">
@@ -64,23 +62,7 @@ export function InsightsWorkspace({
         {insights.hasData ? (
           <>
             <section className="mt-4 flex gap-3.5">
-              <InsightStat
-                label={t('insights.completion')}
-                value={String(completionPct)}
-                unit="%"
-                delta={insights.completionDelta}
-                deltaSuffix={t('insights.vsPrev')}
-              />
-              <InsightStat
-                label={t('insights.bestStreak')}
-                value={t('units.daysShort', { count: insights.bestStreak })}
-                accent
-              />
-              <InsightStat label={t('insights.active')} value={String(insights.activeHabits)} />
-              <InsightStat
-                label={`${t('insights.doneLower')} · ${insightRangeSuffix(range, t)}`}
-                value={String(insights.totalDone)}
-              />
+              <HabitInsightStats insights={insights} range={range} />
             </section>
 
             <p className="label-mono mb-3 mt-8">{t('insights.completionOverTime')}</p>

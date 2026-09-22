@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/common/EmptyState'
 import { Rail } from '@/components/common/desktop/rail'
 import { CompletionTrend } from '@/features/insights/components/CompletionTrend'
 import { HabitRateList } from '@/features/insights/components/HabitRateList'
-import { InsightStat } from '@/features/insights/components/InsightStat'
+import { HabitInsightStats } from '@/features/insights/components/HabitInsightStats'
 import { RangeToggle } from '@/features/insights/components/RangeToggle'
 import { WorkoutInsightsSection } from '@/features/insights/components/WorkoutInsightsSection'
 import { ReadingInsightsSection } from '@/features/insights/components/ReadingInsightsSection'
@@ -19,7 +19,7 @@ import { FocusInsightsSection } from '@/features/insights/components/FocusInsigh
 import { InsightsTicker } from '@/features/insights/components/InsightsTicker'
 import { InsightsWorkspace } from '@/features/insights/components/desktop/InsightsWorkspace'
 import { InsightsRail } from '@/features/insights/components/desktop/InsightsRail'
-import { insightRangeLabel, insightRangeSuffix } from '@/features/insights/lib/insightRange'
+import { insightRangeLabel } from '@/features/insights/lib/insightRange'
 import type { InsightRange } from '@/features/insights/types'
 import { useInsights } from '@/features/insights/hooks/useInsights'
 import { useYearActivity } from '@/features/insights/hooks/useYearActivity'
@@ -104,8 +104,6 @@ function InsightsPage() {
     )
   }
 
-  const completionPct = Math.round(insights.completionRate * 100)
-
   return (
     <section className="flex flex-col gap-6">
       <header className="flex items-start justify-between gap-3">
@@ -124,23 +122,7 @@ function InsightsPage() {
         {habitHasData ? (
           <div className="flex flex-col gap-5">
             <div className="grid grid-cols-2 gap-3">
-              <InsightStat
-                label={t('insights.completion')}
-                value={String(completionPct)}
-                unit="%"
-                delta={insights.completionDelta}
-                deltaSuffix={t('insights.vsPrev')}
-              />
-              <InsightStat
-                label={t('insights.bestStreak')}
-                value={t('units.daysShort', { count: insights.bestStreak })}
-                accent
-              />
-              <InsightStat label={t('insights.active')} value={String(insights.activeHabits)} />
-              <InsightStat
-                label={`${t('insights.doneLower')} · ${insightRangeSuffix(range, t)}`}
-                value={String(insights.totalDone)}
-              />
+              <HabitInsightStats insights={insights} range={range} />
             </div>
 
             <div>
