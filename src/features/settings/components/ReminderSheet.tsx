@@ -2,19 +2,24 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
-import { Switch } from '@/components/ui/switch'
+import { ChoiceChip } from '@/components/common/ChoiceChip'
+import { SwitchRow } from '@/components/common/SwitchRow'
+import { TimeField } from '@/features/settings/components/TimeField'
 import { useUpdateProfile } from '@/features/settings/hooks/useUpdateProfile'
 import {
   REMINDER_PRESETS,
   reminderPresetLabel,
   reminderTimeLabel,
 } from '@/features/settings/lib/reminder'
-import { clearScheduledReminders, requestNotifyPermission } from '@/lib/notify'
+import {
+  clearScheduledReminders,
+  isCapacitor,
+  isTauri,
+  requestNotifyPermission,
+} from '@/lib/notify'
 import { disablePush, enablePush, pushSupported } from '@/lib/push'
-import { isCapacitor, isTauri } from '@/lib/notify'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
-import { cn } from '@/lib/utils'
 
 interface ReminderSheetProps {
   open: boolean
@@ -52,15 +57,9 @@ export function ReminderSheet({
   const [selectedMinute, setSelectedMinute] = useState(minute)
 
   const dirty = on !== enabled || selectedHour !== hour || selectedMinute !== minute
-  const timeValue = reminderTimeLabel(selectedHour, selectedMinute)
-
-  const onTimeChange = (value: string) => {
-    // Native time input yields "HH:MM"; ignore an empty clear.
-    const [h, m] = value.split(':').map(Number)
-    if (Number.isFinite(h) && Number.isFinite(m)) {
-      setSelectedHour(h as number)
-      setSelectedMinute(m as number)
-    }
+  const setTime = (h: number, m: number) => {
+    setSelectedHour(h)
+    setSelectedMinute(m)
   }
 
   const save = async () => {
@@ -107,26 +106,22 @@ export function ReminderSheet({
       description={t('settings.reminderDescription')}
     >
       <div className="flex flex-col gap-5">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0">
-            <p className="text-sm font-medium">{t('settings.reminderToggleLabel')}</p>
-            <p className="text-xs text-muted">{t('settings.reminderToggleHint')}</p>
-          </div>
-          <Switch checked={on} onCheckedChange={setOn} aria-label={t('settings.reminderTitle')} />
-        </div>
+        <SwitchRow
+          title={t('settings.reminderToggleLabel')}
+          hint={t('settings.reminderToggleHint')}
+          checked={on}
+          onCheckedChange={setOn}
+          aria-label={t('settings.reminderTitle')}
+        />
 
         <div className="flex flex-col gap-2.5">
-          <label className="flex flex-col gap-1.5">
-            <span className="label-mono">{t('settings.reminderTime')}</span>
-            <input
-              type="time"
-              value={timeValue}
-              onChange={(event) => onTimeChange(event.target.value)}
-              disabled={!on}
-              aria-label={t('settings.reminderTime')}
-              className="w-full rounded-tile border bg-surface px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
-            />
-          </label>
+          <TimeField
+            label={t('settings.reminderTime')}
+            hour={selectedHour}
+            minute={selectedMinute}
+            onChange={setTime}
+            disabled={!on}
+          />
           <div
             className="flex flex-wrap gap-2"
             role="group"
@@ -135,25 +130,14 @@ export function ReminderSheet({
             {REMINDER_PRESETS.map((preset) => {
               const active = selectedHour === preset.hour && selectedMinute === preset.minute
               return (
-                <button
+                <ChoiceChip
                   key={preset.key}
-                  type="button"
+                  active={active}
                   disabled={!on}
-                  aria-pressed={active}
-                  onClick={() => {
-                    setSelectedHour(preset.hour)
-                    setSelectedMinute(preset.minute)
-                  }}
-                  className={cn(
-                    'rounded-tile border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-                    active
-                      ? 'border-transparent bg-accent-solid text-on-accent-solid'
-                      : 'border-border text-muted hover:text-foreground',
-                  )}
+                  onClick={() => setTime(preset.hour, preset.minute)}
                 >
                   {reminderPresetLabel(preset, t)} · {reminderTimeLabel(preset.hour, preset.minute)}
-                </button>
+                </ChoiceChip>
               )
             })}
           </div>

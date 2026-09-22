@@ -1,7 +1,7 @@
 import { AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Sheet } from '@/components/ui/sheet'
-import { Switch } from '@/components/ui/switch'
+import { SwitchRow } from '@/components/common/SwitchRow'
 import { applyRunInBackground } from '@/lib/desktop'
 import { useDesktopStore } from '@/stores/desktop'
 import { useT } from '@/hooks/useT'
@@ -36,17 +36,13 @@ export function BackgroundSheet({ open, onOpenChange }: BackgroundSheetProps) {
       description="Keep Almanac in the tray so reminders fire even when the window is closed."
     >
       <div className="flex flex-col gap-5">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0">
-            <p className="text-sm font-medium">Stay in the tray</p>
-            <p className="text-xs text-muted">Also launches Almanac at login.</p>
-          </div>
-          <Switch
-            checked={runInBackground}
-            onCheckedChange={(v) => void toggle(v)}
-            aria-label={t('a11y.keepRunning')}
-          />
-        </div>
+        <SwitchRow
+          title="Stay in the tray"
+          hint="Also launches Almanac at login."
+          checked={runInBackground}
+          onCheckedChange={(v) => void toggle(v)}
+          aria-label={t('a11y.keepRunning')}
+        />
 
         {!runInBackground ? (
           <div className="flex gap-3 rounded-tile border border-amber/30 bg-amber/10 px-3.5 py-3">
