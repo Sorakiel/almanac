@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ChevronDown, Minus, Plus } from 'lucide-react'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sheet } from '@/components/ui/sheet'
+import { CountStepper } from '@/features/habits/components/CountStepper'
+import { InlineSelect } from '@/features/habits/components/InlineSelect'
 import { HabitChecklistDraftEditor } from '@/features/habits/components/HabitChecklistDraftEditor'
 import { HabitChecklistEditor } from '@/features/habits/components/HabitChecklistEditor'
 import { createSubtasksBulk } from '@/features/habits/api/habits.api'
@@ -303,14 +304,14 @@ export function HabitFormSheet() {
               {unit !== 'per_week' ? (
                 <span className="text-sm font-medium">{t('habits.form.every')}</span>
               ) : null}
-              <Stepper
+              <CountStepper
                 value={values.target_count}
                 onChange={(n) => setValue('target_count', n)}
                 min={UNIT_RANGE[unit].min}
                 max={UNIT_RANGE[unit].max}
               />
               <div className="ml-auto">
-                <Dropdown
+                <InlineSelect
                   ariaLabel={t('habits.form.intervalUnit')}
                   value={unit}
                   onChange={selectUnit}
@@ -325,7 +326,7 @@ export function HabitFormSheet() {
 
           <div className="flex items-center justify-between border-t border-border/60 pt-4">
             <span className="label-mono normal-case">{t('habits.form.timeOfDay')}</span>
-            <Dropdown
+            <InlineSelect
               ariaLabel={t('habits.form.timeOfDay')}
               value={values.time_of_day}
               onChange={(next) => setValue('time_of_day', next)}
@@ -372,68 +373,5 @@ export function HabitFormSheet() {
         ) : null}
       </form>
     </Sheet>
-  )
-}
-
-interface StepperProps {
-  value: number
-  onChange: (value: number) => void
-  min: number
-  max: number
-}
-
-function Stepper({ value, onChange, min, max }: StepperProps) {
-  const { t } = useT()
-  return (
-    <div className="flex items-center gap-1 rounded-xl bg-surface px-1.5 py-1">
-      <button
-        type="button"
-        aria-label={t('habits.form.decrease')}
-        onClick={() => onChange(Math.max(min, value - 1))}
-        className="flex h-7 w-7 items-center justify-center rounded-lg text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-      >
-        <Minus className="h-4 w-4" aria-hidden="true" />
-      </button>
-      <span className="w-7 text-center font-mono tabular-nums">{value}</span>
-      <button
-        type="button"
-        aria-label={t('habits.form.increase')}
-        onClick={() => onChange(Math.min(max, value + 1))}
-        className="flex h-7 w-7 items-center justify-center rounded-lg text-accent transition-colors hover:text-accent-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-      >
-        <Plus className="h-4 w-4" aria-hidden="true" />
-      </button>
-    </div>
-  )
-}
-
-interface DropdownProps<T extends string> {
-  value: T
-  onChange: (value: T) => void
-  options: { value: T; label: string }[]
-  ariaLabel: string
-}
-
-/** Small native-select dropdown styled to the spec-board "value ▾" look. */
-function Dropdown<T extends string>({ value, onChange, options, ariaLabel }: DropdownProps<T>) {
-  return (
-    <div className="relative inline-flex items-center">
-      <select
-        aria-label={ariaLabel}
-        value={value}
-        onChange={(event) => onChange(event.target.value as T)}
-        className="appearance-none rounded-lg bg-transparent pr-6 text-sm font-medium text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value} className="bg-surface text-foreground">
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown
-        className="pointer-events-none absolute right-0 h-4 w-4 text-muted"
-        aria-hidden="true"
-      />
-    </div>
   )
 }
