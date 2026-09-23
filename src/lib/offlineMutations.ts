@@ -143,6 +143,8 @@ export interface DeleteSubtaskVariables {
 export interface CreateWorkoutVariables {
   input: WorkoutFormInput
   userId: string
+  /** Client-chosen, as for habits; optional for writes queued by an older build. */
+  id?: string
 }
 
 export interface UpdateWorkoutVariables {
@@ -195,6 +197,8 @@ export interface RateBookVariables {
 export interface CreateBookVariables {
   input: Omit<BookInsert, 'user_id'>
   userId: string
+  /** Client-chosen, as for habits; optional for writes queued by an older build. */
+  id?: string
 }
 
 export interface UpdateBookVariables {
@@ -422,15 +426,20 @@ export function registerOfflineMutations(client: QueryClient): void {
   )
 
   const workoutList = ({ userId }: { userId: string }): QueryKey[] => [workoutKeys.all(userId)]
+  // A workout can now exist before the server has it, so its edit, its
+  // completion and its sets must not overtake the insert.
+  const WORKOUTS = { id: 'workouts' }
   register(
     OFFLINE_MUTATION_KEYS.createWorkout,
-    ({ input, userId }) => createWorkout({ ...input, user_id: userId }),
+    ({ input, userId, id }) => createWorkout({ ...input, id, user_id: userId }),
     workoutList,
+    WORKOUTS,
   )
   register(
     OFFLINE_MUTATION_KEYS.updateWorkout,
     ({ id, input }) => updateWorkout(id, input),
     workoutList,
+    WORKOUTS,
   )
   register(OFFLINE_MUTATION_KEYS.deleteWorkout, ({ id }) => deleteWorkout(id), workoutList)
 
@@ -441,6 +450,7 @@ export function registerOfflineMutations(client: QueryClient): void {
     OFFLINE_MUTATION_KEYS.toggleWorkoutComplete,
     ({ id, done }) => updateWorkout(id, { completed_at: done ? new Date().toISOString() : null }),
     ({ id, userId }) => [workoutKeys.detail(id), workoutKeys.all(userId)],
+    WORKOUTS,
   )
 
   const reflectionList = ({ userId }: { userId: string }): QueryKey[] => [reflectKeys.all(userId)]
@@ -462,6 +472,9 @@ export function registerOfflineMutations(client: QueryClient): void {
   )
   register(OFFLINE_MUTATION_KEYS.deleteReflection, ({ id }) => deleteReflection(id), reflectionList)
 
+  // Same reason as habits and workouts: a book created offline must reach the
+  // server before the progress, ratings and notes that reference it.
+  const BOOKS = { id: 'books' }
   register(
     OFFLINE_MUTATION_KEYS.logReadingProgress,
     async ({ book, nextUnit, minutes, userId, dateKey }) => {
@@ -501,6 +514,7 @@ export function registerOfflineMutations(client: QueryClient): void {
       readingKeys.book(book.id),
       readingKeys.sessions(book.id),
     ],
+    BOOKS,
   )
 
   register(
@@ -517,17 +531,20 @@ export function registerOfflineMutations(client: QueryClient): void {
       }
     },
     ({ book, userId }) => [readingKeys.books(userId), readingKeys.book(book.id)],
+    BOOKS,
   )
 
   register(
     OFFLINE_MUTATION_KEYS.createBook,
-    ({ input, userId }) => createBook({ ...input, user_id: userId }),
+    ({ input, userId, id }) => createBook({ ...input, id, user_id: userId }),
     ({ userId }) => [readingKeys.books(userId)],
+    BOOKS,
   )
   register(
     OFFLINE_MUTATION_KEYS.updateBook,
     ({ id, patch }) => updateBook(id, patch),
     ({ id, userId }) => [readingKeys.books(userId), readingKeys.book(id)],
+    BOOKS,
   )
   register(
     OFFLINE_MUTATION_KEYS.deleteBook,
@@ -540,6 +557,7 @@ export function registerOfflineMutations(client: QueryClient): void {
     ({ userId, bookId, body, page }) =>
       createBookNote({ user_id: userId, book_id: bookId, body, page }),
     ({ bookId }) => [readingKeys.notes(bookId)],
+    BOOKS,
   )
   register(
     OFFLINE_MUTATION_KEYS.deleteBookNote,

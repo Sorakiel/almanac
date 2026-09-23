@@ -1,3 +1,4 @@
+import { isUniqueViolation } from '@/lib/pgErrors'
 import { supabase } from '@/lib/supabase'
 import type {
   Habit,
@@ -90,9 +91,6 @@ export async function fetchHabitHistory(habitId: string, fromDate: string): Prom
   return data
 }
 
-/** Postgres unique_violation. */
-const UNIQUE_VIOLATION = '23505'
-
 /**
  * Insert a habit. The id is chosen on the client, so a retry of an insert
  * whose first response was lost hits the primary key instead of creating a
@@ -100,7 +98,7 @@ const UNIQUE_VIOLATION = '23505'
  */
 export async function createHabit(input: HabitInsert): Promise<Habit> {
   const { data, error } = await supabase.from('habits').insert(input).select().single()
-  if (error?.code === UNIQUE_VIOLATION && input.id) return fetchHabitById(input.id)
+  if (isUniqueViolation(error) && input.id) return fetchHabitById(input.id)
   if (error) throw error
   return data
 }

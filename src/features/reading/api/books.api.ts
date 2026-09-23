@@ -1,3 +1,4 @@
+import { isUniqueViolation } from '@/lib/pgErrors'
 import { supabase } from '@/lib/supabase'
 import type { Book, BookInsert } from '@/features/reading/types'
 
@@ -18,8 +19,10 @@ export async function fetchBookById(id: string): Promise<Book> {
   return data
 }
 
+/** Insert a book; with a client id a retried insert resolves to the saved row, not a twin. */
 export async function createBook(input: BookInsert): Promise<Book> {
   const { data, error } = await supabase.from('books').insert(input).select().single()
+  if (isUniqueViolation(error) && input.id) return fetchBookById(input.id)
   if (error) throw error
   return data
 }

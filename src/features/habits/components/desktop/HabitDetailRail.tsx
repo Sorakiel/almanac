@@ -26,7 +26,6 @@ interface HabitDetailRailProps {
   stats: HabitDetailStats
   onMarkDone: (done: boolean) => void
   onToggleFreeze: (freeze: boolean) => void
-  freezePending: boolean
 }
 
 /** Desktop habit-detail rail: notes, recent history, and the mark-done CTA. */
@@ -35,7 +34,6 @@ export function HabitDetailRail({
   stats,
   onMarkDone,
   onToggleFreeze,
-  freezePending,
 }: HabitDetailRailProps) {
   const { t, locale } = useT()
   // Newest-first, last five days of the window.
@@ -95,7 +93,6 @@ export function HabitDetailRail({
             size="lg"
             variant={stats.todayFrozen ? 'primary' : 'surface'}
             className="w-full"
-            disabled={freezePending}
             onClick={() => onToggleFreeze(!stats.todayFrozen)}
           >
             <Snowflake className="h-4 w-4" />

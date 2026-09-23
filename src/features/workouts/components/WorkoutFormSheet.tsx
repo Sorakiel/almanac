@@ -69,7 +69,7 @@ export function WorkoutFormSheet({
   const dateLabel =
     recur.recurrence === 'every_n_days' ? t('workouts.form.startDate') : t('workouts.form.date')
 
-  const onSubmit = handleSubmit(async (values) => {
+  const onSubmit = handleSubmit((values) => {
     if (recur.recurrence === 'weekdays' && recur.days.length === 0) {
       toast.error('workouts.form.pickWeekday')
       return
@@ -94,18 +94,18 @@ export function WorkoutFormSheet({
       recurrence_interval: recur.recurrence === 'every_n_days' ? recur.interval : null,
     }
 
-    try {
-      if (workout) {
-        await update.mutateAsync({ id: workout.id, input })
-        toast.success(t('workouts.form.updated'))
-      } else {
-        await create.mutateAsync(input)
-        toast.success(t('workouts.form.added'))
-      }
-      onOpenChange(false)
-    } catch (error) {
+    // Not awaited: the cache already shows the result and offline the write
+    // queues, so the sheet closes on the same tap.
+    const onSaveError = (error: Error) =>
       toast.error(error instanceof Error ? error.message : t('workouts.form.saveFailed'))
+    if (workout) {
+      update.mutate({ id: workout.id, input }, { onError: onSaveError })
+      toast.success(t('workouts.form.updated'))
+    } else {
+      create.mutate(input, { onError: onSaveError })
+      toast.success(t('workouts.form.added'))
     }
+    onOpenChange(false)
   })
 
   const onDelete = async () => {
@@ -120,8 +120,6 @@ export function WorkoutFormSheet({
       toast.error(error instanceof Error ? error.message : t('workouts.form.removeFailed'))
     }
   }
-
-  const pending = create.isPending || update.isPending
 
   return (
     <>
@@ -158,12 +156,8 @@ export function WorkoutFormSheet({
             </label>
           ) : null}
 
-          <Button type="submit" size="lg" disabled={pending}>
-            {pending
-              ? t('workouts.form.saving')
-              : isEdit
-                ? t('workouts.form.save')
-                : t('workouts.form.create')}
+          <Button type="submit" size="lg">
+            {isEdit ? t('workouts.form.save') : t('workouts.form.create')}
           </Button>
 
           {isEdit ? (

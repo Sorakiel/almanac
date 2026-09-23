@@ -145,7 +145,6 @@ function HabitDetailPage() {
                 },
               )
             }
-            freezePending={toggleFreeze.isPending}
           />
         </Rail>
         {overlays}
@@ -211,7 +210,6 @@ function HabitDetailPage() {
             size="lg"
             variant={stats.todayFrozen ? 'primary' : 'surface'}
             className="w-full"
-            disabled={toggleFreeze.isPending}
             onClick={() =>
               toggleFreeze.mutate(
                 { habitId: id, freeze: !stats.todayFrozen },

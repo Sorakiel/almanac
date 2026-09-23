@@ -53,7 +53,12 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
     },
   })
 
-  const onSubmit = handleSubmit(async (values) => {
+  const onSaveError = (error: Error) =>
+    toast.error(error instanceof Error ? error.message : t('reading.form.saveFailed'))
+
+  // Not awaited: the cache already shows the result and offline the write
+  // queues, so the sheet closes on the same tap.
+  const onSubmit = handleSubmit((values) => {
     const parsed = values.total ? Number.parseInt(values.total, 10) : NaN
     const total_units = Number.isFinite(parsed) && parsed > 0 ? parsed : null
     const parsedGoal = values.dailyGoal ? Number.parseInt(values.dailyGoal, 10) : NaN
@@ -66,18 +71,14 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
       daily_goal,
     }
 
-    try {
-      if (book) {
-        await update.mutateAsync({ id: book.id, patch: fields })
-        toast.success(t('reading.form.updated'))
-      } else {
-        await create.mutateAsync(fields)
-        toast.success(t('reading.form.added'))
-      }
-      onOpenChange(false)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('reading.form.saveFailed'))
+    if (book) {
+      update.mutate({ id: book.id, patch: fields }, { onError: onSaveError })
+      toast.success(t('reading.form.updated'))
+    } else {
+      create.mutate(fields, { onError: onSaveError })
+      toast.success(t('reading.form.added'))
     }
+    onOpenChange(false)
   })
 
   const onDelete = async () => {
@@ -92,8 +93,6 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
       toast.error(error instanceof Error ? error.message : t('reading.form.removeFailed'))
     }
   }
-
-  const pending = create.isPending || update.isPending
 
   return (
     <>
@@ -158,12 +157,8 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
             />
           </label>
 
-          <Button type="submit" size="lg" disabled={pending}>
-            {pending
-              ? t('reading.form.saving')
-              : isEdit
-                ? t('reading.form.save')
-                : t('reading.form.create')}
+          <Button type="submit" size="lg">
+            {isEdit ? t('reading.form.save') : t('reading.form.create')}
           </Button>
 
           {isEdit ? (
