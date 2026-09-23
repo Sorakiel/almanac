@@ -41,11 +41,16 @@
          spinners. Colours mirror src/styles/tokens.css — they must work before
          that file has loaded. -->
     <style>
+      /* The canvas and the UA's own defaults (scrollbars, form controls, the
+         blank page WebKit shows between documents) follow the app theme, not
+         the OS — color-scheme is what decides that before any CSS arrives. */
       html {
         background: #1b1b1d;
+        color-scheme: dark;
       }
       html[data-theme='coffee'] {
         background: #f4ecdd;
+        color-scheme: light;
       }
       .boot {
         --boot-block: rgba(236, 231, 216, 0.07);

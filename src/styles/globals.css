@@ -154,9 +154,18 @@
    nav links); theme switches wipe in as a circle growing from the toggle —
    driven by --vt-x/--vt-y/--vt-r and `.theme-vt` on <html> (lib/viewTransition).
    Gated on no-preference so reduced-motion users get an instant swap. */
+/* The transition layer sits above the page; paint it in the canvas colour so
+   nothing behind the snapshots — WebKit shows white there — can come through. */
+::view-transition {
+  background-color: rgb(var(--color-bg));
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  /* The old page stays fully opaque while the new one fades in over it. A
+     fade-out of the old running against a fade-in of the new dipped both
+     below full opacity mid-way, showing whatever was underneath. */
   ::view-transition-old(root) {
-    animation: vt-fade-out 0.16s ease both;
+    animation: none;
   }
   ::view-transition-new(root) {
     animation: vt-fade-in 0.24s ease both;
@@ -168,12 +177,6 @@
   }
   html.theme-vt::view-transition-new(root) {
     animation: theme-wipe 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-}
-
-@keyframes vt-fade-out {
-  to {
-    opacity: 0;
   }
 }
 
