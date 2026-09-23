@@ -47,6 +47,12 @@ async function rowExists(table: 'habits' | 'books' | 'workouts' | 'reflections',
   return data !== null
 }
 
+async function archivedAt(id: string): Promise<string | null | undefined> {
+  const db = await e2eClient()
+  const { data } = await db.from('habits').select('archived_at').eq('id', id).maybeSingle()
+  return data?.archived_at
+}
+
 const undo = (page: Page) => page.getByRole('button', { name: /^undo$/i })
 
 test('a deleted reflection disappears at once and Undo brings it back', async ({ page }) => {
@@ -91,7 +97,9 @@ test('a habit archives with Undo, and deletes for good only after a confirm', as
   await page.getByRole('button', { name: /archive habit/i }).click()
   await expect(page).toHaveURL(/\/habits$/)
   await undo(page).click()
-  await expect(page.getByRole('link', { name: HABIT_NAME })).toBeVisible()
+  // On the phone layout a list row opens through a button, not a link.
+  await expect(page.getByRole('button', { name: `Open ${HABIT_NAME}` })).toBeVisible()
+  await expect.poll(() => archivedAt(id), { timeout: 15_000 }).toBeNull()
 
   await page.goto(`/habits/${id}`)
   await expect(page.getByRole('heading', { name: HABIT_NAME })).toBeVisible({ timeout: 20_000 })
