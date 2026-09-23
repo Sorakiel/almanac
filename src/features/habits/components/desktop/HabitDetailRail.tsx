@@ -25,7 +25,6 @@ interface HabitDetailRailProps {
   habit: Habit
   stats: HabitDetailStats
   onMarkDone: (done: boolean) => void
-  markPending: boolean
   onToggleFreeze: (freeze: boolean) => void
   freezePending: boolean
 }
@@ -35,7 +34,6 @@ export function HabitDetailRail({
   habit,
   stats,
   onMarkDone,
-  markPending,
   onToggleFreeze,
   freezePending,
 }: HabitDetailRailProps) {
@@ -109,7 +107,6 @@ export function HabitDetailRail({
           size="lg"
           variant={stats.todayDone ? 'surface' : 'primary'}
           className={cn('w-full', !stats.todayDone && !stats.todayFrozen && 'shadow-glow')}
-          disabled={markPending}
           onClick={() => onMarkDone(!stats.todayDone)}
         >
           <Check className="h-4 w-4" />

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { ArrowLeft, Check, MoreHorizontal, Pencil, Snowflake, Trash2 } from 'lucide-react'
 import { LoadingState } from '@/components/common/LoadingState'
@@ -18,60 +17,48 @@ import { HabitDetailWorkspace } from '@/features/habits/components/desktop/Habit
 import { HabitDetailRail } from '@/features/habits/components/desktop/HabitDetailRail'
 import { useHabitDetail } from '@/features/habits/hooks/useHabitDetail'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
+import { useMarkHabitDone } from '@/features/habits/hooks/useMarkHabitDone'
 import { useToggleFreeze } from '@/features/habits/hooks/useToggleFreeze'
-import { setHabitCount } from '@/features/habits/api/habits.api'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
-import { dailyTarget, frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
+import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { useSession } from '@/hooks/useSession'
-import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
+import { toastWithUndo } from '@/lib/undoToast'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
-import { habitKeys } from '@/features/habits/hooks/queryKeys'
 
 function HabitDetailPage() {
   const { t } = useT()
   const { id = '' } = useParams()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const { user } = useSession()
-  const { dateKey } = useToday()
   const openEditHabit = useUiStore((s) => s.openEditHabit)
   const { habit, stats, isLoading, isError } = useHabitDetail(id)
   useBreadcrumbLeaf(habit?.name)
-  const { archive } = useHabitMutations()
+  const { archive, restore } = useHabitMutations()
   const toggleFreeze = useToggleFreeze()
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const isDesktop = useMediaQuery('(min-width: 1024px)')
 
-  const handleDelete = async () => {
-    try {
-      await archive.mutateAsync(id)
-      toast.success(t('habits.deleted'))
-      navigate('/habits')
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('habits.deleteFailed'))
-    }
+  // Never awaited: offline the archive queues, and the page is already gone.
+  const handleDelete = () => {
+    if (!habit) return
+    archive.mutate(id, {
+      onError: (error) =>
+        toast.error(error instanceof Error ? error.message : t('habits.deleteFailed')),
+    })
+    toastWithUndo(t('habits.deleted'), t('common.undo'), () => restore.mutate(habit))
+    setConfirmDelete(false)
+    navigate('/habits')
   }
 
-  const markDone = useMutation({
-    mutationFn: (done: boolean) =>
-      setHabitCount({
-        userId: user?.id ?? '',
-        habitId: id,
-        date: dateKey,
-        count: done && habit ? dailyTarget(habit) : 0,
-      }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: habitKeys.history(id) })
-      void queryClient.invalidateQueries({ queryKey: ['habitLogs'] })
-    },
-    onError: (error) =>
-      toast.error(error instanceof Error ? error.message : t('habits.updateFailed')),
-  })
+  const markDone = useMarkHabitDone(habit)
+  const setDone = (done: boolean) =>
+    markDone.mutate(done, {
+      onError: (error) =>
+        toast.error(error instanceof Error ? error.message : t('habits.updateFailed')),
+    })
 
   if (isLoading) {
     return <LoadingState label={t('habits.loadingOne')} />
@@ -130,7 +117,6 @@ function HabitDetailPage() {
         title={t('habits.confirmDeleteTitle')}
         description={t('habits.confirmDeleteBody', { name: habit.name })}
         confirmLabel={t('habits.deleteHabit')}
-        pending={archive.isPending}
         onConfirm={handleDelete}
       />
     </>
@@ -149,8 +135,7 @@ function HabitDetailPage() {
           <HabitDetailRail
             habit={habit}
             stats={stats}
-            onMarkDone={(done) => markDone.mutate(done)}
-            markPending={markDone.isPending}
+            onMarkDone={setDone}
             onToggleFreeze={(freeze) =>
               toggleFreeze.mutate(
                 { habitId: id, freeze },
@@ -245,8 +230,7 @@ function HabitDetailPage() {
           size="lg"
           variant={stats.todayDone ? 'surface' : 'primary'}
           className={cn('w-full', !stats.todayDone && !stats.todayFrozen && 'shadow-glow')}
-          disabled={markDone.isPending}
-          onClick={() => markDone.mutate(!stats.todayDone)}
+          onClick={() => setDone(!stats.todayDone)}
         >
           <Check className="h-4 w-4" />
           {stats.todayDone ? t('habits.completedToday') : t('habits.markDone')}

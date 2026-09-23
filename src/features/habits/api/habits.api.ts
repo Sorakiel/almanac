@@ -90,8 +90,17 @@ export async function fetchHabitHistory(habitId: string, fromDate: string): Prom
   return data
 }
 
+/** Postgres unique_violation. */
+const UNIQUE_VIOLATION = '23505'
+
+/**
+ * Insert a habit. The id is chosen on the client, so a retry of an insert
+ * whose first response was lost hits the primary key instead of creating a
+ * twin — and that conflict just means "already saved".
+ */
 export async function createHabit(input: HabitInsert): Promise<Habit> {
   const { data, error } = await supabase.from('habits').insert(input).select().single()
+  if (error?.code === UNIQUE_VIOLATION && input.id) return fetchHabitById(input.id)
   if (error) throw error
   return data
 }
@@ -113,6 +122,12 @@ export async function updateHabitOrder(
   )
   const failed = results.find((r) => r.error)
   if (failed?.error) throw failed.error
+}
+
+/** Bring an archived habit back — the Undo of `archiveHabit`. */
+export async function restoreHabit(id: string): Promise<void> {
+  const { error } = await supabase.from('habits').update({ archived_at: null }).eq('id', id)
+  if (error) throw error
 }
 
 /** Soft-delete a habit by archiving it. */
@@ -156,21 +171,31 @@ export async function deleteSubtask(id: string): Promise<void> {
   if (error) throw error
 }
 
-/** Create a habit's checklist in one shot — used for a just-created habit. */
+export interface ChecklistDraftItem {
+  id: string
+  title: string
+}
+
+/**
+ * Create a just-created habit's checklist in one shot. Ids come from the
+ * client and duplicates are ignored, so a retried write adds nothing twice.
+ */
 export async function createSubtasksBulk(
   userId: string,
   habitId: string,
-  titles: string[],
-): Promise<HabitSubtask[]> {
-  const rows = titles.map((title, sort_order) => ({
+  items: ChecklistDraftItem[],
+): Promise<void> {
+  const rows = items.map(({ id, title }, sort_order) => ({
+    id,
     user_id: userId,
     habit_id: habitId,
     title,
     sort_order,
   }))
-  const { data, error } = await supabase.from('habit_subtasks').insert(rows).select()
+  const { error } = await supabase
+    .from('habit_subtasks')
+    .upsert(rows, { onConflict: 'id', ignoreDuplicates: true })
   if (error) throw error
-  return data
 }
 
 /** Overwrite a subtask's checked-date list (the caller adds/removes today's key). */

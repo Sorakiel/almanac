@@ -4,12 +4,15 @@ import {
   archiveHabit,
   createHabit,
   createSubtask,
+  createSubtasksBulk,
   deleteSubtask,
   removeFreeze,
+  restoreHabit,
   setHabitCount,
   setSubtaskCompletedDates,
   updateHabit,
   updateHabitOrder,
+  type ChecklistDraftItem,
 } from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
 import type { Habit, HabitSubtask, HabitWithTodayLog } from '@/features/habits/types'
@@ -88,6 +91,13 @@ export interface ToggleSubtaskVariables {
 export interface CreateHabitVariables {
   input: HabitFormInput
   userId: string
+  /**
+   * Chosen on the client so the habit exists in the cache — and can be
+   * undone, toggled, opened — before the server has seen it. Optional only
+   * because a write queued by an older build may still be persisted.
+   */
+  id?: string
+  checklist?: ChecklistDraftItem[]
 }
 
 export interface UpdateHabitVariables {
@@ -99,6 +109,18 @@ export interface UpdateHabitVariables {
 export interface ArchiveHabitVariables {
   id: string
   userId: string
+}
+
+export interface RestoreHabitVariables {
+  habit: Habit
+  userId: string
+}
+
+export interface SetHabitCountVariables {
+  userId: string
+  habitId: string
+  date: string
+  count: number
 }
 
 export interface ReorderHabitsVariables {
@@ -244,6 +266,8 @@ export const OFFLINE_MUTATION_KEYS = {
   createHabit: offlineKey<Habit, CreateHabitVariables>('createHabit'),
   updateHabit: offlineKey<Habit, UpdateHabitVariables>('updateHabit'),
   archiveHabit: offlineKey<void, ArchiveHabitVariables>('archiveHabit'),
+  restoreHabit: offlineKey<void, RestoreHabitVariables>('restoreHabit'),
+  setHabitCount: offlineKey<void, SetHabitCountVariables>('setHabitCount'),
   reorderHabits: offlineKey<void, ReorderHabitsVariables>('reorderHabits'),
   createSubtask: offlineKey<HabitSubtask, CreateSubtaskVariables>('createSubtask'),
   deleteSubtask: offlineKey<void, DeleteSubtaskVariables>('deleteSubtask'),
@@ -288,14 +312,23 @@ export function registerOfflineMutations(client: QueryClient): void {
     key: OfflineKey<TData, TVariables>,
     mutationFn: (variables: TVariables) => Promise<TData>,
     invalidates: (variables: TVariables) => QueryKey[] = () => [],
+    scope?: { id: string },
   ): void => {
     client.setMutationDefaults(key, {
       mutationFn,
+      scope,
       onSettled: (_data, _error, variables: TVariables) => {
         for (const queryKey of invalidates(variables)) void client.invalidateQueries({ queryKey })
       },
     })
   }
+
+  // Habit writes run one at a time, in the order they were made. A habit can
+  // now be created, ticked and undone while offline, and unordered those
+  // writes land nonsensically: the tick before the habit exists (a foreign-key
+  // error), or the Undo's archive before the insert it was meant to cancel.
+  // The scope is dehydrated with the mutation, so the order survives a reload.
+  const HABITS = { id: 'habits' }
 
   register(
     OFFLINE_MUTATION_KEYS.toggleHabit,
@@ -304,6 +337,13 @@ export function registerOfflineMutations(client: QueryClient): void {
       return setHabitCount({ userId, habitId: habit.id, date, count: nextCount })
     },
     ({ userId }) => [habitKeys.logsRoot(userId)],
+    HABITS,
+  )
+  register(
+    OFFLINE_MUTATION_KEYS.setHabitCount,
+    (variables) => setHabitCount(variables),
+    ({ userId, habitId }) => [habitKeys.logsRoot(userId), habitKeys.history(habitId)],
+    HABITS,
   )
 
   register(
@@ -317,6 +357,7 @@ export function registerOfflineMutations(client: QueryClient): void {
     ({ userId, habitId, date, freeze }) =>
       freeze ? addFreeze(userId, habitId, date) : removeFreeze(habitId, date),
     ({ userId, habitId }) => [habitKeys.freezesRoot(userId), habitKeys.freezesOf(habitId)],
+    HABITS,
   )
 
   // Only the checklist write itself is guaranteed here — the follow-up sync
@@ -330,6 +371,7 @@ export function registerOfflineMutations(client: QueryClient): void {
     OFFLINE_MUTATION_KEYS.toggleSubtask,
     ({ subtaskId, dates }) => setSubtaskCompletedDates(subtaskId, dates),
     ({ habitId }) => [habitKeys.subtasks(habitId)],
+    HABITS,
   )
 
   const habitLists = ({ userId }: { userId: string }): QueryKey[] => [
@@ -338,26 +380,45 @@ export function registerOfflineMutations(client: QueryClient): void {
   ]
   register(
     OFFLINE_MUTATION_KEYS.createHabit,
-    ({ input, userId }) => createHabit({ ...input, user_id: userId }),
-    habitLists,
+    async ({ input, userId, id, checklist = [] }) => {
+      const habit = await createHabit({ ...input, id, user_id: userId })
+      if (checklist.length > 0) await createSubtasksBulk(userId, habit.id, checklist)
+      return habit
+    },
+    ({ userId, id }) => [...habitLists({ userId }), ...(id ? [habitKeys.subtasks(id)] : [])],
+    HABITS,
   )
-  register(OFFLINE_MUTATION_KEYS.updateHabit, ({ id, input }) => updateHabit(id, input), habitLists)
-  register(OFFLINE_MUTATION_KEYS.archiveHabit, ({ id }) => archiveHabit(id), habitLists)
+  register(
+    OFFLINE_MUTATION_KEYS.updateHabit,
+    ({ id, input }) => updateHabit(id, input),
+    habitLists,
+    HABITS,
+  )
+  register(OFFLINE_MUTATION_KEYS.archiveHabit, ({ id }) => archiveHabit(id), habitLists, HABITS)
+  register(
+    OFFLINE_MUTATION_KEYS.restoreHabit,
+    ({ habit }) => restoreHabit(habit.id),
+    habitLists,
+    HABITS,
+  )
   register(
     OFFLINE_MUTATION_KEYS.reorderHabits,
     ({ ordered }) => updateHabitOrder(ordered),
     ({ userId }) => [habitKeys.all(userId)],
+    HABITS,
   )
 
   register(
     OFFLINE_MUTATION_KEYS.createSubtask,
     ({ userId, habitId, title, sortOrder }) => createSubtask(userId, habitId, title, sortOrder),
     ({ habitId }) => [habitKeys.subtasks(habitId)],
+    HABITS,
   )
   register(
     OFFLINE_MUTATION_KEYS.deleteSubtask,
     ({ id }) => deleteSubtask(id),
     ({ habitId }) => [habitKeys.subtasks(habitId)],
+    HABITS,
   )
 
   const workoutList = ({ userId }: { userId: string }): QueryKey[] => [workoutKeys.all(userId)]
