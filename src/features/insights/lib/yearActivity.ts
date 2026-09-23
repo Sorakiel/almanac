@@ -1,5 +1,6 @@
 import { computeDayCells } from '@/features/habits/lib/schedule'
 import type { Habit } from '@/features/habits/types'
+import { addDaysToKey, weekdayOfKey } from '@/lib/date'
 
 export interface YearDay {
   date: string
@@ -59,4 +60,61 @@ export function buildYearActivity(
     }
     return { date, done, due, ratio: due === 0 ? null : done / due }
   })
+}
+
+const MONDAY = 1
+
+export interface YearWeek {
+  /** First and last date key of the week, clamped to the calendar year. */
+  start: string
+  end: string
+  done: number
+  due: number
+  /** Same meaning as `YearDay.ratio`: `null` when the whole week asked for nothing. */
+  ratio: number | null
+  /** The week lies entirely after today — drawn as an empty slot, not a zero. */
+  future: boolean
+  containsToday: boolean
+}
+
+/**
+ * Fold the year's days into Monday-started weeks covering the *whole* calendar
+ * year, not just the days so far.
+ *
+ * A bar per day is 365 hairlines — unreadable on a phone and noise on a desktop.
+ * Weeks give ~53 bars that each carry a legible share. Padding out to December
+ * keeps the ruler fixed: in January the strip is mostly empty slots instead of
+ * three fat bars stretched across the card.
+ */
+export function groupYearByWeek(days: YearDay[], todayKey: string): YearWeek[] {
+  const first = days[0]
+  if (!first) return []
+  const year = first.date.slice(0, 4)
+  const byDate = new Map(days.map((d) => [d.date, d]))
+
+  const weeks: YearWeek[] = []
+  let current: YearWeek | null = null
+  for (let key = `${year}-01-01`; key.startsWith(year); key = addDaysToKey(key, 1)) {
+    if (current === null || weekdayOfKey(key) === MONDAY) {
+      current = {
+        start: key,
+        end: key,
+        done: 0,
+        due: 0,
+        ratio: null,
+        future: key > todayKey,
+        containsToday: false,
+      }
+      weeks.push(current)
+    }
+    current.end = key
+    if (key === todayKey) current.containsToday = true
+    const day = byDate.get(key)
+    if (day) {
+      current.done += day.done
+      current.due += day.due
+    }
+  }
+  for (const week of weeks) week.ratio = week.due === 0 ? null : week.done / week.due
+  return weeks
 }

@@ -1,5 +1,6 @@
 import { dateFromKey, daysBetween } from '@/lib/date'
 import type { Locale } from '@/i18n'
+import { intlLocale } from '@/lib/dateLocale'
 import type { FeedItem, FriendProfile } from '@/features/social/types'
 import type { TFunction } from '@/hooks/useT'
 
@@ -15,7 +16,7 @@ export function feedDayLabel(
   const date = dateFromKey(eventDate)
   if (Number.isNaN(date.getTime())) return eventDate
   // The key was parsed at UTC midnight, so format it in UTC too or it slips a day west.
-  return new Intl.DateTimeFormat(locale, {
+  return new Intl.DateTimeFormat(intlLocale(locale), {
     day: 'numeric',
     month: 'short',
     timeZone: 'UTC',
