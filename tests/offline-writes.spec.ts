@@ -152,6 +152,9 @@ test('a habit created and ticked offline lands, in order, after a reload', async
   const errors = watchConsole(page)
   const shell = await recordOfflineShell(context)
   await signIn(page)
+  // The dashboard must have loaded before the network goes: offline, a query
+  // that never finished just pauses and the page has nothing to offer.
+  await expect(page.getByRole('button', { name: /add habit/i }).first()).toBeVisible()
 
   await shell.offline()
   await createHabit(page, OFFLINE_CREATED)
