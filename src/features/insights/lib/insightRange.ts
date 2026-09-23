@@ -1,12 +1,8 @@
 import type { TFunction } from '@/hooks/useT'
 import type { InsightRange } from '@/features/insights/types'
 
-/** The range pills. Values only — the label is the range's own short form. */
-export const INSIGHT_RANGE_OPTIONS: { value: InsightRange; label: string }[] = [
-  { value: '7d', label: '7D' },
-  { value: '30d', label: '30D' },
-  { value: 'all', label: 'ALL' },
-]
+/** The range pills, in order; labels come from `insights.rangePill.<range>`. */
+export const INSIGHT_RANGES: InsightRange[] = ['7d', '30d', 'all']
 
 /**
  * Header comment label, e.g. "// последние 30 дней". Takes `t` as a parameter

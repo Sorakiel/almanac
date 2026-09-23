@@ -673,6 +673,11 @@ export const ru: Translations = {
     heatmapLess: 'меньше',
     heatmapMore: 'больше',
     focusDay: '{date} · {count} мин',
+    rangePill: {
+      '7d': '7Д',
+      '30d': '30Д',
+      all: 'ВСЁ',
+    },
   },
   reading: {
     title: 'Чтение',
