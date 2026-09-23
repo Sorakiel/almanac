@@ -23,7 +23,7 @@
      bright raw token for the handful of spots that must stay pinned to one
      shade regardless of theme (the brand-mark gradient's first stop). */
   --color-accent: 239 136 87; /* #EF8857 */
-  --color-accent-deep: 194 86 42; /* #C2562A — also always-invariant (2nd gradient stop, danger bg) */
+  --color-accent-deep: 194 86 42; /* #C2562A — also always-invariant (2nd gradient stop) */
   --color-accent-bright: 239 136 87; /* #EF8857 — invariant */
   --color-on-accent: 14 14 16; /* ink for a bg-accent fill: dark ink pairs with the bright shade */
   --color-on-accent-deep: 244 236 221; /* #F4ECDD — ink for a bg-accent-deep fill: light ink pairs with the deep shade, always */
@@ -36,7 +36,11 @@
   --color-border: 255 255 255; /* used at low opacity for hairlines */
   --color-teal: 42 157 143; /* #2A9D8F */
   --color-amber: 199 154 58; /* #C79A3A */
-  --color-danger: 229 84 74; /* #E5544A — weak-password red, distinct from accent orange */
+  /* Red is destructive + errors only — never the accent (handoff §0 #4). Bright
+     enough on dark to clear AA as text on surface (5.4:1); dark ink on the
+     fill (6.9:1), since white on this red fails. */
+  --color-danger: 255 107 94; /* #FF6B5E */
+  --color-on-danger: 14 14 16; /* #0E0E10 */
   --color-success: 63 158 106; /* #3F9E6A — green for high ratings */
 
   /* Desktop shell surfaces (spec board "Almanac — Desktop"). Chrome is the
@@ -66,7 +70,7 @@
   --color-muted: 110 95 78; /* #6E5F4E */
   --color-muted-strong: 138 122 102; /* darker mute for AA on light */
   --color-accent: 194 86 42; /* #C2562A — deep; bright #EF8857 washes out on warm paper */
-  --color-accent-deep: 194 86 42; /* #C2562A — invariant (2nd gradient stop, danger bg) */
+  --color-accent-deep: 194 86 42; /* #C2562A — invariant (2nd gradient stop) */
   --color-accent-bright: 239 136 87; /* #EF8857 — invariant raw bright, for brand-gradient stops */
   --color-on-accent: 244 236 221; /* #F4ECDD — light ink pairs with the deep shade */
   --color-on-accent-deep: 244 236 221; /* #F4ECDD — ink for a bg-accent-deep fill, always light */
@@ -78,7 +82,11 @@
   --color-border: 42 32 24; /* espresso hairline on light */
   --color-teal: 42 157 143;
   --color-amber: 199 154 58;
-  --color-danger: 190 52 42; /* #BE342A — deeper red for AA on the warm canvas */
+  /* A step deeper than the handoff's #C8372C, which reads 4.1:1 on the card
+     surface: this one clears AA as text on canvas and cards alike (5.2 / 4.7:1)
+     and carries the paper-colored ink on its fill (5.2:1). */
+  --color-danger: 182 50 40; /* #B63228 */
+  --color-on-danger: 244 236 221; /* #F4ECDD */
   --color-success: 46 122 82; /* #2E7A52 — deeper green for AA on the warm canvas */
 
   /* Coffee shell surfaces: chrome is a touch deeper than the canvas, panel is
