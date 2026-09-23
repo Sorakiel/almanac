@@ -1,6 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { useSession } from '@/hooks/useSession'
 import { useOfflineMutation } from '@/hooks/useOfflineMutation'
+import { useT } from '@/hooks/useT'
 import { patchQueryData, rollbackQueryData } from '@/lib/optimistic'
 import type { BookPatch } from '@/features/reading/api/books.api'
 import { readingKeys } from '@/features/reading/hooks/queryKeys'
@@ -30,10 +32,11 @@ function draftBook(id: string, userId: string, input: NewBookInput): Book {
 
 /**
  * Create / edit / delete books, invalidating the library and detail on settle.
- * Create and edit patch the cache first, so the form can close without
- * waiting — offline the write queues behind it.
+ * Each patches the cache first, so the form can close without waiting —
+ * offline the write queues behind it.
  */
 export function useBookMutations() {
+  const { t } = useT()
   const queryClient = useQueryClient()
   const { user } = useSession()
   const userId = user?.id ?? ''
@@ -75,10 +78,21 @@ export function useBookMutations() {
       },
     },
   )
-  const remove = useOfflineMutation(OFFLINE_MUTATION_KEYS.deleteBook, (id: string) => ({
-    id,
-    userId,
-  }))
+  const remove = useOfflineMutation(
+    OFFLINE_MUTATION_KEYS.deleteBook,
+    (id: string) => ({ id, userId }),
+    {
+      onMutate: ({ id }) =>
+        patchQueryData<Book[]>(queryClient, key, (previous) =>
+          previous?.filter((b) => b.id !== id),
+        ),
+      // Toasted here: the sheet that fired it has already closed and navigated away.
+      onError: (error, _vars, context) => {
+        rollbackQueryData(queryClient, key, context)
+        toast.error(error instanceof Error ? error.message : t('reading.form.removeFailed'))
+      },
+    },
+  )
 
   return { create, update, remove }
 }

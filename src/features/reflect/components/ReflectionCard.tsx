@@ -1,5 +1,4 @@
 import { ChevronDown, Trash2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
 import { RatingBars } from '@/components/common/RatingBars'
 import { reflectionDateLabel } from '@/features/reflect/lib/format'
@@ -8,6 +7,7 @@ import type { Quote } from '@/features/dashboard/api/quotes.api'
 import type { Reflection } from '@/features/reflect/types'
 import { useT } from '@/hooks/useT'
 import { intlLocale } from '@/lib/dateLocale'
+import { toastWithUndo } from '@/lib/undoToast'
 
 interface ReflectionCardProps {
   reflection: Reflection
@@ -26,14 +26,14 @@ const RATING_LABELS: { key: 'mood' | 'energy' | 'day_rating' }[] = [
 export function ReflectionCard({ reflection, quote }: ReflectionCardProps) {
   const { t, locale } = useT()
   const dateLocale = intlLocale(locale)
-  const { remove } = useReflectionMutations()
+  const { remove, restore } = useReflectionMutations()
   const ratings = RATING_LABELS.filter((r) => reflection[r.key] !== null)
 
+  // One tap, no confirm: the card leaves at once and Undo puts the same row
+  // back. Never awaited — offline the delete queues behind the list.
   const handleDelete = () => {
-    remove.mutate(reflection.id, {
-      onError: (error) =>
-        toast.error(error instanceof Error ? error.message : t('reflect.deleteFailed')),
-    })
+    remove.mutate(reflection.id)
+    toastWithUndo(t('reflect.deleted'), t('common.undo'), () => restore.mutate(reflection))
   }
 
   return (
@@ -45,11 +45,10 @@ export function ReflectionCard({ reflection, quote }: ReflectionCardProps) {
         <button
           type="button"
           onClick={handleDelete}
-          disabled={remove.isPending}
           aria-label={t('reflect.deleteAria', {
             date: reflectionDateLabel(reflection.date, dateLocale),
           })}
-          className="flex-none text-muted-strong transition-colors hover:text-foreground disabled:opacity-50"
+          className="-m-3 flex h-11 w-11 flex-none items-center justify-center text-muted-strong transition-colors hover:text-danger"
         >
           <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
         </button>

@@ -108,17 +108,15 @@ export function WorkoutFormSheet({
     onOpenChange(false)
   })
 
-  const onDelete = async () => {
+  // Irreversible (its exercises and sets go with it), hence the red confirm —
+  // but once confirmed, never awaited: offline the delete queues and we leave now.
+  const onDelete = () => {
     if (!workout) return
-    try {
-      await remove.mutateAsync(workout.id)
-      toast.success(t('workouts.form.removed'))
-      setConfirmDelete(false)
-      onOpenChange(false)
-      onDeleted?.()
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('workouts.form.removeFailed'))
-    }
+    remove.mutate(workout.id)
+    toast.success(t('workouts.form.removed'))
+    setConfirmDelete(false)
+    onOpenChange(false)
+    onDeleted?.()
   }
 
   return (
@@ -165,7 +163,7 @@ export function WorkoutFormSheet({
               type="button"
               variant="ghost"
               size="lg"
-              className="text-accent"
+              className="text-danger"
               onClick={() => setConfirmDelete(true)}
             >
               <Trash2 className="h-4 w-4" />
@@ -180,8 +178,7 @@ export function WorkoutFormSheet({
         onOpenChange={setConfirmDelete}
         title={t('workouts.form.removeConfirm')}
         description={workout ? t('workouts.removeBody', { name: workout.name }) : undefined}
-        confirmLabel={remove.isPending ? t('workouts.form.removing') : t('workouts.form.remove')}
-        pending={remove.isPending}
+        confirmLabel={t('workouts.form.remove')}
         onConfirm={onDelete}
       />
     </>

@@ -1,7 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { useSession } from '@/hooks/useSession'
 import { useOfflineMutation } from '@/hooks/useOfflineMutation'
 import { useToday } from '@/hooks/useToday'
+import { useT } from '@/hooks/useT'
 import { trackEvent } from '@/lib/analytics'
 import { patchQueryData, rollbackQueryData } from '@/lib/optimistic'
 import { OFFLINE_MUTATION_KEYS } from '@/lib/offlineMutations'
@@ -37,11 +39,12 @@ export interface NewHabitInput extends HabitFormInput {
 type HabitOrder = { id: string; sort_order: number }[]
 
 /**
- * Create / edit / archive / restore / reorder habits. Every one patches the
+ * Create / edit / archive / restore / delete / reorder habits. Every one patches the
  * cache first and never needs awaiting — offline the write queues and the
  * screen already shows its result.
  */
 export function useHabitMutations() {
+  const { t } = useT()
   const queryClient = useQueryClient()
   const { user } = useSession()
   const { dateKey } = useToday()
@@ -115,6 +118,25 @@ export function useHabitMutations() {
     },
   )
 
+  /** For good — no Undo exists for this one, so the UI confirms before calling it. */
+  const remove = useOfflineMutation(
+    OFFLINE_MUTATION_KEYS.deleteHabit,
+    (id: string) => ({ id, userId }),
+    {
+      onMutate: async ({ id }) => {
+        await cancelList()
+        const previous = findHabit(queryClient, userId, id)
+        dropHabit(queryClient, userId, id)
+        return { previous }
+      },
+      // Toasted here: the page that fired it has already navigated away.
+      onError: (error, _vars, context) => {
+        if (context?.previous) putHabit(queryClient, userId, context.previous)
+        toast.error(error instanceof Error ? error.message : t('habits.deleteFailed'))
+      },
+    },
+  )
+
   // Optimistic: the list snaps to the new order instantly, rolls back on error.
   const reorder = useOfflineMutation(
     OFFLINE_MUTATION_KEYS.reorderHabits,
@@ -132,5 +154,5 @@ export function useHabitMutations() {
     },
   )
 
-  return { create, update, archive, restore, reorder }
+  return { create, update, archive, restore, remove, reorder }
 }

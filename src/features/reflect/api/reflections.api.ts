@@ -36,3 +36,12 @@ export async function deleteReflection(id: string): Promise<void> {
   const { error } = await supabase.from('reflections').delete().eq('id', id)
   if (error) throw error
 }
+
+/**
+ * The Undo of `deleteReflection`: put the very row back — same id, date and
+ * timestamp — so it returns to its place in the history rather than as a new entry.
+ */
+export async function restoreReflection(reflection: Reflection): Promise<void> {
+  const { error } = await supabase.from('reflections').insert(reflection)
+  if (error) throw error
+}

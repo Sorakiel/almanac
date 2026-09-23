@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, MoreHorizontal, Pencil, Snowflake, Trash2 } from 'lucide-react'
+import { Archive, ArrowLeft, Check, MoreHorizontal, Pencil, Snowflake, Trash2 } from 'lucide-react'
 import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
@@ -35,20 +35,29 @@ function HabitDetailPage() {
   const openEditHabit = useUiStore((s) => s.openEditHabit)
   const { habit, stats, isLoading, isError } = useHabitDetail(id)
   useBreadcrumbLeaf(habit?.name)
-  const { archive, restore } = useHabitMutations()
+  const { archive, restore, remove } = useHabitMutations()
   const toggleFreeze = useToggleFreeze()
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const isDesktop = useMediaQuery('(min-width: 1024px)')
 
-  // Never awaited: offline the archive queues, and the page is already gone.
-  const handleDelete = () => {
+  // Neither is awaited: offline the write queues, and the page is already gone.
+  // Archive is reversible, so it goes at once with an Undo; delete erases the
+  // history too, so it waits for the red confirm and has no way back.
+  const handleArchive = () => {
     if (!habit) return
+    setMenuOpen(false)
     archive.mutate(id, {
       onError: (error) =>
-        toast.error(error instanceof Error ? error.message : t('habits.deleteFailed')),
+        toast.error(error instanceof Error ? error.message : t('habits.archiveFailed')),
     })
-    toastWithUndo(t('habits.deleted'), t('common.undo'), () => restore.mutate(habit))
+    toastWithUndo(t('habits.archived'), t('common.undo'), () => restore.mutate(habit))
+    navigate('/habits')
+  }
+
+  const handleDelete = () => {
+    remove.mutate(id)
+    toast.success(t('habits.deleted'))
     setConfirmDelete(false)
     navigate('/habits')
   }
@@ -99,11 +108,19 @@ function HabitDetailPage() {
           </button>
           <button
             type="button"
+            onClick={handleArchive}
+            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium hover:bg-surface"
+          >
+            <Archive className="h-4 w-4 text-muted" aria-hidden="true" />
+            {t('habits.archiveHabit')}
+          </button>
+          <button
+            type="button"
             onClick={() => {
               setMenuOpen(false)
               setConfirmDelete(true)
             }}
-            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-accent hover:bg-surface"
+            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-danger hover:bg-surface"
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
             {t('habits.deleteHabit')}
@@ -116,7 +133,7 @@ function HabitDetailPage() {
         onOpenChange={setConfirmDelete}
         title={t('habits.confirmDeleteTitle')}
         description={t('habits.confirmDeleteBody', { name: habit.name })}
-        confirmLabel={t('habits.deleteHabit')}
+        confirmLabel={t('habits.deleteForever')}
         onConfirm={handleDelete}
       />
     </>
@@ -129,6 +146,7 @@ function HabitDetailPage() {
           habit={habit}
           stats={stats}
           onEdit={() => openEditHabit(habit.id)}
+          onArchive={handleArchive}
           onDelete={() => setConfirmDelete(true)}
         />
         <Rail>

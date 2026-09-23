@@ -5,6 +5,7 @@ import {
   createHabit,
   createSubtask,
   createSubtasksBulk,
+  deleteHabit,
   deleteSubtask,
   removeFreeze,
   restoreHabit,
@@ -24,6 +25,7 @@ import type { SetLog, Workout } from '@/features/workouts/types'
 import {
   createReflection,
   deleteReflection,
+  restoreReflection,
   updateReflection,
 } from '@/features/reflect/api/reflections.api'
 import {
@@ -116,6 +118,11 @@ export interface RestoreHabitVariables {
   userId: string
 }
 
+export interface DeleteHabitVariables {
+  id: string
+  userId: string
+}
+
 export interface SetHabitCountVariables {
   userId: string
   habitId: string
@@ -177,6 +184,12 @@ export interface SaveReflectionVariables {
 
 export interface DeleteReflectionVariables {
   id: string
+  userId: string
+}
+
+export interface RestoreReflectionVariables {
+  /** The whole row, so the Undo can put it back before the server answers. */
+  reflection: Reflection
   userId: string
 }
 
@@ -271,6 +284,7 @@ export const OFFLINE_MUTATION_KEYS = {
   updateHabit: offlineKey<Habit, UpdateHabitVariables>('updateHabit'),
   archiveHabit: offlineKey<void, ArchiveHabitVariables>('archiveHabit'),
   restoreHabit: offlineKey<void, RestoreHabitVariables>('restoreHabit'),
+  deleteHabit: offlineKey<void, DeleteHabitVariables>('deleteHabit'),
   setHabitCount: offlineKey<void, SetHabitCountVariables>('setHabitCount'),
   reorderHabits: offlineKey<void, ReorderHabitsVariables>('reorderHabits'),
   createSubtask: offlineKey<HabitSubtask, CreateSubtaskVariables>('createSubtask'),
@@ -283,6 +297,7 @@ export const OFFLINE_MUTATION_KEYS = {
   ),
   saveReflection: offlineKey<Reflection, SaveReflectionVariables>('saveReflection'),
   deleteReflection: offlineKey<void, DeleteReflectionVariables>('deleteReflection'),
+  restoreReflection: offlineKey<void, RestoreReflectionVariables>('restoreReflection'),
   logReadingProgress: offlineKey<void, LogReadingProgressVariables>('logReadingProgress'),
   rateBook: offlineKey<void, RateBookVariables>('rateBook'),
   createBook: offlineKey<Book, CreateBookVariables>('createBook'),
@@ -405,6 +420,17 @@ export function registerOfflineMutations(client: QueryClient): void {
     habitLists,
     HABITS,
   )
+  // For good: the logs and freezes it takes with it leave every window stale.
+  register(
+    OFFLINE_MUTATION_KEYS.deleteHabit,
+    ({ id }) => deleteHabit(id),
+    ({ userId }) => [
+      ...habitLists({ userId }),
+      habitKeys.logsRoot(userId),
+      habitKeys.freezesRoot(userId),
+    ],
+    HABITS,
+  )
   register(
     OFFLINE_MUTATION_KEYS.reorderHabits,
     ({ ordered }) => updateHabitOrder(ordered),
@@ -441,7 +467,12 @@ export function registerOfflineMutations(client: QueryClient): void {
     workoutList,
     WORKOUTS,
   )
-  register(OFFLINE_MUTATION_KEYS.deleteWorkout, ({ id }) => deleteWorkout(id), workoutList)
+  register(
+    OFFLINE_MUTATION_KEYS.deleteWorkout,
+    ({ id }) => deleteWorkout(id),
+    workoutList,
+    WORKOUTS,
+  )
 
   // Shared by useWorkoutMutations' toggleComplete (list view) and
   // useSessionMutations' setCompleted (in-session finish button) — same
@@ -454,6 +485,9 @@ export function registerOfflineMutations(client: QueryClient): void {
   )
 
   const reflectionList = ({ userId }: { userId: string }): QueryKey[] => [reflectKeys.all(userId)]
+  // A delete and its Undo re-insert the same id: unordered, the insert can
+  // land first and the delete then erases the entry the user just brought back.
+  const REFLECTIONS = { id: 'reflections' }
   register(
     OFFLINE_MUTATION_KEYS.saveReflection,
     ({ id, date, body, quoteId, mood, energy, dayRating, userId }) =>
@@ -469,8 +503,20 @@ export function registerOfflineMutations(client: QueryClient): void {
             day_rating: dayRating,
           }),
     reflectionList,
+    REFLECTIONS,
   )
-  register(OFFLINE_MUTATION_KEYS.deleteReflection, ({ id }) => deleteReflection(id), reflectionList)
+  register(
+    OFFLINE_MUTATION_KEYS.deleteReflection,
+    ({ id }) => deleteReflection(id),
+    reflectionList,
+    REFLECTIONS,
+  )
+  register(
+    OFFLINE_MUTATION_KEYS.restoreReflection,
+    ({ reflection }) => restoreReflection(reflection),
+    reflectionList,
+    REFLECTIONS,
+  )
 
   // Same reason as habits and workouts: a book created offline must reach the
   // server before the progress, ratings and notes that reference it.
@@ -550,6 +596,7 @@ export function registerOfflineMutations(client: QueryClient): void {
     OFFLINE_MUTATION_KEYS.deleteBook,
     ({ id }) => deleteBook(id),
     ({ userId }) => [readingKeys.books(userId)],
+    BOOKS,
   )
 
   register(
@@ -563,6 +610,7 @@ export function registerOfflineMutations(client: QueryClient): void {
     OFFLINE_MUTATION_KEYS.deleteBookNote,
     ({ id }) => deleteBookNote(id),
     ({ bookId }) => [readingKeys.notes(bookId)],
+    BOOKS,
   )
 
   register(

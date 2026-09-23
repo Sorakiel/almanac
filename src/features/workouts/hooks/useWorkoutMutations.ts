@@ -1,6 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { useSession } from '@/hooks/useSession'
 import { useOfflineMutation } from '@/hooks/useOfflineMutation'
+import { useT } from '@/hooks/useT'
 import { patchQueryData, rollbackQueryData } from '@/lib/optimistic'
 import { OFFLINE_MUTATION_KEYS } from '@/lib/offlineMutations'
 import type { Workout, WorkoutRecurrence } from '@/features/workouts/types'
@@ -26,10 +28,11 @@ function draftWorkout(id: string, userId: string, input: WorkoutFormInput): Work
 
 /**
  * Create / edit / complete / delete workouts, invalidating the list on settle.
- * Create and edit patch the cache first, so the form can close without
- * waiting — offline the write queues behind it.
+ * Each patches the cache first, so the form can close without waiting —
+ * offline the write queues behind it.
  */
 export function useWorkoutMutations() {
+  const { t } = useT()
   const queryClient = useQueryClient()
   const { user } = useSession()
   const userId = user?.id ?? ''
@@ -69,10 +72,21 @@ export function useWorkoutMutations() {
       },
     },
   )
-  const remove = useOfflineMutation(OFFLINE_MUTATION_KEYS.deleteWorkout, (id: string) => ({
-    id,
-    userId,
-  }))
+  const remove = useOfflineMutation(
+    OFFLINE_MUTATION_KEYS.deleteWorkout,
+    (id: string) => ({ id, userId }),
+    {
+      onMutate: ({ id }) =>
+        patchQueryData<Workout[]>(queryClient, key, (previous) =>
+          previous?.filter((w) => w.id !== id),
+        ),
+      // Toasted here: the sheet that fired it has already closed and navigated away.
+      onError: (error, _vars, context) => {
+        rollbackQueryData(queryClient, key, context)
+        toast.error(error instanceof Error ? error.message : t('workouts.form.removeFailed'))
+      },
+    },
+  )
 
   // Optimistic: completing a session flips its badge instantly, rolls back on error.
   const toggleComplete = useOfflineMutation(

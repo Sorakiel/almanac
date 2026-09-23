@@ -81,17 +81,15 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
     onOpenChange(false)
   })
 
-  const onDelete = async () => {
+  // Irreversible (notes and sessions go with it), hence the red confirm — but
+  // once confirmed, never awaited: offline the delete queues and we leave now.
+  const onDelete = () => {
     if (!book) return
-    try {
-      await remove.mutateAsync(book.id)
-      toast.success(t('reading.form.removed'))
-      setConfirmDelete(false)
-      onOpenChange(false)
-      onDeleted?.()
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('reading.form.removeFailed'))
-    }
+    remove.mutate(book.id)
+    toast.success(t('reading.form.removed'))
+    setConfirmDelete(false)
+    onOpenChange(false)
+    onDeleted?.()
   }
 
   return (
@@ -166,7 +164,7 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
               type="button"
               variant="ghost"
               size="lg"
-              className="text-accent"
+              className="text-danger"
               onClick={() => setConfirmDelete(true)}
             >
               <Trash2 className="h-4 w-4" />
@@ -181,8 +179,7 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
         onOpenChange={setConfirmDelete}
         title={t('reading.form.removeConfirm')}
         description={book ? t('reading.removeBookDescription', { title: book.title }) : undefined}
-        confirmLabel={remove.isPending ? t('reading.form.removing') : t('reading.form.remove')}
-        pending={remove.isPending}
+        confirmLabel={t('reading.form.remove')}
         onConfirm={onDelete}
       />
     </>

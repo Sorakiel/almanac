@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from 'lucide-react'
+import { Archive, Pencil, Trash2 } from 'lucide-react'
 import { IconTile } from '@/components/common/IconTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { HabitChecklist } from '@/features/habits/components/HabitChecklist'
@@ -13,6 +13,7 @@ interface HabitDetailWorkspaceProps {
   habit: Habit
   stats: HabitDetailStats
   onEdit: () => void
+  onArchive: () => void
   onDelete: () => void
 }
 
@@ -34,6 +35,7 @@ export function HabitDetailWorkspace({
   habit,
   stats,
   onEdit,
+  onArchive,
   onDelete,
 }: HabitDetailWorkspaceProps) {
   const { t } = useT()
@@ -67,9 +69,19 @@ export function HabitDetailWorkspace({
         </button>
         <button
           type="button"
+          onClick={onArchive}
+          aria-label={t('habits.archiveHabit')}
+          title={t('habits.archiveHabit')}
+          className="rounded-[11px] border p-[11px] text-muted-strong transition-colors hover:text-foreground"
+        >
+          <Archive className="h-4 w-4" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
           onClick={onDelete}
           aria-label={t('habits.deleteHabit')}
-          className="rounded-[11px] border p-[11px] text-muted-strong transition-colors hover:border-accent/40 hover:text-accent"
+          title={t('habits.deleteHabit')}
+          className="rounded-[11px] border p-[11px] text-muted-strong transition-colors hover:border-danger/40 hover:text-danger"
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
         </button>
