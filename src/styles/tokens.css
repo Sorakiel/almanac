@@ -42,6 +42,8 @@
   --color-danger: 255 107 94; /* #FF6B5E */
   --color-on-danger: 14 14 16; /* #0E0E10 */
   --color-success: 63 158 106; /* #3F9E6A — green for high ratings */
+  /* "At risk" (a streak about to break) — amber, never red and never accent. */
+  --color-warning: 224 170 69; /* #E0AA45 */
 
   /* Desktop shell surfaces (spec board "Almanac — Desktop"). Chrome is the
      nav rail / top bar / context rail; panel is a workspace card sitting on
@@ -68,12 +70,12 @@
 }
 
 :root[data-theme='coffee'] {
-  /* Measured off the desktop handoff: the workspace frame is the lighter paper
-     (#F4ECDD) and cards/panels sit a step darker (#ECE3D2) — the inverse of a
-     dark theme. Getting these two the same made panels vanish into the canvas. */
-  --color-bg: 244 236 221; /* #F4ECDD canvas / workspace frame */
+  /* v0.6 redesign: cards are *lighter* than the canvas (#FFFBF3 on #F2EADB),
+     the way paper cards sit on a desk — the old darker-card inversion read as
+     grey slabs. Depth comes from the soft shadow, not from a darker fill. */
+  --color-bg: 242 234 219; /* #F2EADB canvas / workspace frame */
   --color-bg-deep: 224 210 188; /* #E0D2BC deep panel */
-  --color-surface: 236 227 210; /* #ECE3D2 cards / inputs (a step below canvas) */
+  --color-surface: 255 251 243; /* #FFFBF3 cards / inputs (lighter than canvas) */
   --color-foreground: 42 32 24; /* #2A2018 espresso */
   --color-muted: 110 95 78; /* #6E5F4E */
   --color-muted-strong: 138 122 102; /* darker mute for AA on light */
@@ -96,14 +98,15 @@
   --color-danger: 182 50 40; /* #B63228 */
   --color-on-danger: 244 236 221; /* #F4ECDD */
   --color-success: 46 122 82; /* #2E7A52 — deeper green for AA on the warm canvas */
+  --color-warning: 162 110 20; /* #A26E14 — the prototype's amber, dark enough for AA on paper */
 
   /* Coffee shell surfaces: chrome is a touch deeper than the canvas, panel is
-     the warm card that sits on the #F4ECDD workspace. */
-  --color-chrome: 239 230 212; /* #EFE6D4 */
-  --color-panel: 236 227 210; /* #ECE3D2 */
+     the warm card that sits on the #F2EADB workspace. */
+  --color-chrome: 246 238 223; /* #F6EEDF — the prototype's second card tone */
+  --color-panel: 255 251 243; /* #FFFBF3 */
 
   /* Coffee mobile glow — warm peach rising from the top into the paper canvas
-     (spec board phone). Desktop stays flat #F4ECDD (globals.css drops it at lg). */
+     (spec board phone). Desktop stays flat #F2EADB (globals.css drops it at lg). */
   --bg-gradient: radial-gradient(120% 80% at 50% 0%, #f6ddc7 0%, rgb(var(--color-bg)) 48%);
   --bg-veil: linear-gradient(180deg, #f6ddc7 0%, rgb(var(--color-bg)) 22%);
 

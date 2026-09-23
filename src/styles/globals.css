@@ -23,7 +23,7 @@
     background-attachment: fixed;
   }
 
-  /* Desktop workspace stays a flat paper frame (measured #F4ECDD / #1B1B1D):
+  /* Desktop workspace stays a flat paper frame (#F2EADB / #1B1B1D):
      the phone's radial glow is dropped at lg. What replaces it is `--bg-veil`,
      a 22%-tall wash of the same daylight colour — weak enough that panels keep
      their edge against the canvas, present enough that the room changes over a
@@ -105,8 +105,18 @@
 
   /* Mono micro-label: uppercase, wide tracking — used for section headers,
      numbers, tags and timestamps per the design system. */
+  /* Section / field label. Despite the name it is no longer mono: labels are
+     words, and mono is for numbers (handoff §0.3). Sentence case, sans, the
+     footnote size. The name stays so 127 call sites move in one place. */
   .label-mono {
-    @apply font-mono text-xs uppercase tracking-label text-muted;
+    @apply font-sans text-footnote font-medium text-muted;
+  }
+
+  /* Numbers: counts, streaks, percentages, times. Mono with tabular figures so
+     a changing value does not jitter the layout. */
+  .num {
+    @apply font-mono;
+    font-variant-numeric: tabular-nums;
   }
 
   /* Scrollable but chromeless — the heatmap still pans, minus the scrollbar. */

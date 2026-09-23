@@ -15,11 +15,14 @@ import { e2eClient, e2eUserId } from './helpers/supabase'
 
 const OUT = 'screenshots'
 
+// The project's review standard: every PR with UI is looked at in Russian, at
+// phone and desktop width, in both themes — four shots per screen. English is
+// covered by every other spec, which all run in it.
 const VARIANTS = [
-  { name: 'phone-dark-en', width: 390, height: 844, theme: 'dark', locale: 'en' },
+  { name: 'phone-dark-ru', width: 390, height: 844, theme: 'dark', locale: 'ru' },
   { name: 'phone-coffee-ru', width: 390, height: 844, theme: 'coffee', locale: 'ru' },
-  { name: 'desktop-coffee-en', width: 1440, height: 900, theme: 'coffee', locale: 'en' },
   { name: 'desktop-dark-ru', width: 1440, height: 900, theme: 'dark', locale: 'ru' },
+  { name: 'desktop-coffee-ru', width: 1440, height: 900, theme: 'coffee', locale: 'ru' },
 ] as const
 
 const SCREENS = ['/', '/insights', '/flow', '/settings', '/social', '/habits'] as const

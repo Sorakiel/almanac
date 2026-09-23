@@ -15,7 +15,7 @@ const TICK_MS = 10 * 60 * 1000
  * that slept from morning to evening otherwise wakes up still showing dawn.
  */
 export function useDaylight(): void {
-  const theme = useThemeStore((s) => s.theme)
+  const theme = useThemeStore((s) => s.resolved)
 
   useEffect(() => {
     const apply = () => {

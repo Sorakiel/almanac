@@ -138,7 +138,7 @@ All user-owned tables carry `user_id` and are protected by RLS. Use `timestamptz
 
 ## 6. Design system
 
-Mirror the _Almanac_ spec board. All colors are **CSS variables** referenced through Tailwind — **no hard-coded hex in components.** Theme is set via `data-theme` on `<html>` (`dark` default, `coffee` light).
+Mirror the _Almanac_ spec board. All colors are **CSS variables** referenced through Tailwind — **no hard-coded hex in components.** Theme is set via `data-theme` on `<html>` (`dark` default, `coffee` light). The saved choice can also be `system` ("Как в системе"), which follows `prefers-color-scheme`; the store keeps the choice (`theme`) and what is painted (`resolved`) apart — branch styling on `resolved`. `index.html` repeats the resolution in an inline script so the first frame is already right.
 
 **Dark theme**
 
@@ -148,7 +148,7 @@ Mirror the _Almanac_ spec board. All colors are **CSS variables** referenced thr
 
 **Coffee theme (warm light)**
 
-- Canvas `#F4ECDD` · cards/surface `#ECE3D2` (a step darker than canvas — the inverse of dark) · deep panel `#E0D2BC`
+- Canvas `#F2EADB` · cards/surface `#FFFBF3` (**lighter** than the canvas, like paper on a desk — v0.6 redesign) · second card tone / chrome `#F6EEDF` · deep panel `#E0D2BC`
 - Text: espresso `#2A2018` · muted `#6E5F4E`
 - Accent is **theme-adaptive**, not identical: dark reads the bright shade
   (`#EF8857`) as its accent, coffee reads the deep shade (`#C2562A`) — bright
@@ -162,6 +162,8 @@ Mirror the _Almanac_ spec board. All colors are **CSS variables** referenced thr
 
 **Shared category colors:** teal `#2A9D8F`, amber `#C79A3A`.
 
+**Semantic colors:** `danger` (destructive, errors), `warning` (amber — "at risk"), `success`. Orange is brand, primary action and progress only.
+
 **Red is destructive + errors only, never the accent.** `--color-danger` is
 `#FF6B5E` on dark and `#B63228` on coffee (a step deeper than the handoff's
 `#C8372C`, which misses AA on the card surface), with `--color-on-danger` as the
@@ -170,13 +172,14 @@ toast instead of a confirm; an irreversible one gets the red `ConfirmSheet`.
 
 **Typography**
 
-- UI + body: **Inter** (or SF Pro on Apple).
-- Micro-labels, numbers, timestamps, tags, `// section` comments: **JetBrains Mono**, uppercase, letter-spacing ≈ 0.12–0.16em.
-- Titles: large, tight tracking (≈ −0.02em), semibold.
+- UI, labels, sections, tags, nav: system sans (`-apple-system, "SF Pro Text", Inter, system-ui`), sentence case. `.label-mono` keeps its name for history but is sans now.
+- **Mono is for numbers only** — counts, streaks, percentages, times: the `.num` utility (JetBrains Mono + `tabular-nums`).
+- Type scale by role: `text-large-title` 34 · `text-title` 28 · `text-headline` 22 · `text-body` 17 · `text-callout` 15 · `text-footnote` 13 · `text-caption` 11. Nothing below 11. Arbitrary sizes (`text-[13px]`) are an ESLint warning.
 
 **Shape & motifs**
 
-- Radius: cards 20–28px, sheets/frames up to 36–46px. Shadows: soft, large, low-opacity.
+- Radius: `rounded-sheet` 28 (sheets, containers) · `rounded-card` 20 (cards, groups) · `rounded-control` 14 (controls) · `rounded-inner` 10. Shadows: soft, large, low-opacity.
+- Glass (`.lg`) is for the navigation layer only — tab bar, "+", toasts, the sync capsule — never on content and never glass on glass; `prefers-reduced-transparency` gets a solid fill.
 - Bottom nav: glassmorphism (backdrop-blur) with a central "+" action.
 - Signature motifs: block progress bars (`▓▓▓▓░░░░`), pill tags with thin borders, mono section labels, dotted pagination.
 - The `◇` glyph is **decorative only** — no "AI/auto-plan" meaning (that was the reference app, not ours).
