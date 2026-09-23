@@ -40,7 +40,7 @@ export function DraftExerciseRow({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: exercise.id,
   })
-  const chip = setsChip(exercise)
+  const chip = setsChip(exercise, t)
 
   return (
     <li
@@ -68,7 +68,7 @@ export function DraftExerciseRow({
         <button type="button" onClick={onToggle} className="min-w-0 flex-1 text-left">
           <p className="truncate font-semibold">{exercise.name}</p>
           <p className="truncate font-mono text-[11px] text-muted-strong">
-            {exerciseSubtitle(exercise)}
+            {exerciseSubtitle(exercise, t)}
           </p>
         </button>
 

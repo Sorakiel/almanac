@@ -1,6 +1,6 @@
 import { toast } from 'sonner'
-import { Input } from '@/components/ui/input'
 import { Segmented } from '@/components/ui/segmented'
+import { DateField } from '@/components/common/DateField'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { StarRating } from '@/components/common/StarRating'
 import { useBookMutations } from '@/features/reading/hooks/useBookMutations'
@@ -62,18 +62,16 @@ export function BookStatusControls({ book }: { book: Book }) {
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1.5">
           <span className="label-mono">{t('reading.started')}</span>
-          <Input
-            type="date"
+          <DateField
             value={book.started_on ?? ''}
-            onChange={(event) => patch({ started_on: event.target.value || null })}
+            onChange={(value) => patch({ started_on: value || null })}
           />
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="label-mono">{t('reading.finishedOn')}</span>
-          <Input
-            type="date"
+          <DateField
             value={book.finished_on ?? ''}
-            onChange={(event) => patch({ finished_on: event.target.value || null })}
+            onChange={(value) => patch({ finished_on: value || null })}
           />
         </label>
       </div>

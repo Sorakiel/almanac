@@ -18,12 +18,12 @@ import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutatio
 import { useWorkoutSessionStore } from '@/features/workouts/stores/workoutSession'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import { dateFromKey } from '@/lib/date'
-import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
+import { intlLocale } from '@/lib/dateLocale'
 import { useT } from '@/hooks/useT'
 
 /** Friendly label for a `YYYY-MM-DD` date, UTC-safe. */
-function formatDate(dateKey: string): string {
-  return new Intl.DateTimeFormat('en-GB', {
+function formatDate(dateKey: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -31,11 +31,10 @@ function formatDate(dateKey: string): string {
 }
 
 function WorkoutDetailPage() {
-  const { t } = useT()
+  const { t, locale } = useT()
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
-  useBreadcrumbLeaf(workout?.name)
   const mutations = useSessionMutations(id)
   const startSessionClock = useWorkoutSessionStore((s) => s.start)
   const hasActiveSession = useWorkoutSessionStore((s) => Boolean(s.sessions[id]))
@@ -62,7 +61,9 @@ function WorkoutDetailPage() {
   const hasExercises = exercises.length > 0
   const subtitle =
     recurrenceLabel(workout, t) ??
-    (workout.scheduled_date ? formatDate(workout.scheduled_date) : t('workouts.noDateSet'))
+    (workout.scheduled_date
+      ? formatDate(workout.scheduled_date, intlLocale(locale))
+      : t('workouts.noDateSet'))
 
   const toggleComplete = () =>
     mutations.setCompleted.mutate(!done, {

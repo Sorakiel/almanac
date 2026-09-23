@@ -6,7 +6,6 @@ import { BootSkeleton } from '@/app/shell/BootSkeleton'
 import { SyncCapsule } from '@/app/shell/SyncCapsule'
 import { ReinstallBanner } from '@/app/shell/ReinstallBanner'
 import { Sidebar } from '@/app/shell/Sidebar'
-import { TopBar } from '@/app/shell/TopBar'
 import { RailActive } from '@/app/shell/RailActive'
 import { ErrorState } from '@/components/common/ErrorState'
 import { RailTargetProvider } from '@/components/rail/Rail'
@@ -78,9 +77,6 @@ export function AppLayout() {
     <RailTargetProvider target={railEl}>
       <div className="flex min-h-dvh flex-col lg:h-dvh lg:overflow-hidden">
         <ReinstallBanner />
-        <div className="hidden lg:block">
-          <TopBar />
-        </div>
 
         <div className="flex flex-1 lg:min-h-0">
           <div className="hidden lg:flex">

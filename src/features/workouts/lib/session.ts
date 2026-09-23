@@ -1,4 +1,5 @@
 import type { SessionExercise, SetLog } from '@/features/workouts/types'
+import type { TFunction } from '@/hooks/useT'
 
 /** Default rest between sets, in seconds (matches the spec-board session). */
 export const DEFAULT_REST_SECONDS = 90
@@ -75,14 +76,14 @@ export function currentSet(exercise: SessionExercise): SetLog | null {
 }
 
 /** Human target line for an exercise, e.g. "4 × 8 · 60 kg", or null if unset. */
-export function exerciseTargetLabel(exercise: SessionExercise): string | null {
+export function exerciseTargetLabel(exercise: SessionExercise, t: TFunction): string | null {
   const parts: string[] = []
   if (exercise.targetSets && exercise.targetReps) {
     parts.push(`${exercise.targetSets} × ${exercise.targetReps}`)
   } else if (exercise.targetReps) {
-    parts.push(`${exercise.targetReps} reps`)
+    parts.push(t('workouts.repsCount', { count: exercise.targetReps }))
   }
-  if (exercise.targetWeight) parts.push(`${exercise.targetWeight} kg`)
+  if (exercise.targetWeight) parts.push(t('units.kgValue', { value: exercise.targetWeight }))
   return parts.length ? parts.join(' · ') : null
 }
 

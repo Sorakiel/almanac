@@ -5,9 +5,10 @@ import { IconTile } from '@/components/common/IconTile'
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useWorkoutSessionStore } from '@/features/workouts/stores/workoutSession'
 import { estimateMinutes, plannedVolume } from '@/features/workouts/lib/session'
+import { muscleLabel } from '@/features/workouts/lib/muscles'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import type { SessionExercise, WorkoutView } from '@/features/workouts/types'
-import { useT } from '@/hooks/useT'
+import { useT, type TFunction } from '@/hooks/useT'
 import { intlLocale } from '@/lib/dateLocale'
 
 interface TodaySessionCardProps {
@@ -19,9 +20,14 @@ interface TodaySessionCardProps {
 }
 
 /** Unique muscle groups across the session, e.g. "CHEST · SHOULDERS". */
-function muscleSummary(exercises: SessionExercise[]): string | null {
+function muscleSummary(exercises: SessionExercise[], t: TFunction): string | null {
   const groups = [...new Set(exercises.map((e) => e.muscleGroup).filter(Boolean))]
-  return groups.length ? groups.join(' · ').toUpperCase() : null
+  return groups.length
+    ? groups
+        .map((g) => muscleLabel(g as string, t))
+        .join(' · ')
+        .toUpperCase()
+    : null
 }
 
 function Meta({ icon: Icon, children }: { icon: typeof Layers; children: string }) {
@@ -35,7 +41,14 @@ function Meta({ icon: Icon, children }: { icon: typeof Layers; children: string 
 
 /** Right-aligned status tag for a non-today day. */
 function DayStatus({ dayState, done }: { dayState: 'past' | 'future'; done: boolean }) {
-  const text = done ? 'completed' : dayState === 'future' ? 'scheduled' : 'missed'
+  const { t } = useT()
+  const text = t(
+    done
+      ? 'workouts.statuses.completed'
+      : dayState === 'future'
+        ? 'workouts.statuses.scheduled'
+        : 'workouts.dayMissed',
+  )
   const tone = done ? 'text-teal' : dayState === 'future' ? 'text-muted' : 'text-muted-strong'
   return <span className={`font-mono text-[10px] uppercase tracking-label ${tone}`}>{text}</span>
 }
@@ -50,7 +63,7 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
   const hasPlan = exercises.length > 0
   const volume = plannedVolume(exercises)
   const overline =
-    muscleSummary(exercises) ??
+    muscleSummary(exercises, t) ??
     recurrenceLabel(workout, t)?.toUpperCase() ??
     t('workouts.session.title').toUpperCase()
   const isToday = dayState === 'today'
