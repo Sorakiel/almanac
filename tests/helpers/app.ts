@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test'
+import { expect, type BrowserContext, type Page } from '@playwright/test'
 import { E2E_EMAIL, E2E_PASSWORD } from './supabase'
 
 /**
@@ -37,4 +37,52 @@ export function watchConsole(page: Page): string[] {
   })
   page.on('pageerror', (err) => errors.push(err.message))
   return errors
+}
+
+export interface OfflineShell {
+  /** Cut the network, keep serving the app shell from what was recorded. */
+  offline(): Promise<void>
+  online(): Promise<void>
+}
+
+/**
+ * Stand-in for the production service worker, which does not run under the
+ * dev server: every app-shell response is recorded while online and replayed
+ * once `offline()` is called, so `page.reload()` works with the network off.
+ * Supabase is not routed — its requests fail for real, which is the point.
+ */
+export async function recordOfflineShell(context: BrowserContext): Promise<OfflineShell> {
+  const recorded = new Map<
+    string,
+    { status: number; headers: Record<string, string>; body: Buffer }
+  >()
+  let offline = false
+  await context.route(
+    (url) => url.hostname === 'localhost',
+    async (route) => {
+      const url = route.request().url()
+      if (offline) {
+        const hit = recorded.get(url)
+        return hit ? route.fulfill(hit) : route.abort('internetdisconnected')
+      }
+      const response = await route.fetch()
+      const entry = {
+        status: response.status(),
+        headers: response.headers(),
+        body: await response.body(),
+      }
+      recorded.set(url, entry)
+      return route.fulfill(entry)
+    },
+  )
+  return {
+    offline: async () => {
+      offline = true
+      await context.setOffline(true)
+    },
+    online: async () => {
+      await context.setOffline(false)
+      offline = false
+    },
+  }
 }
