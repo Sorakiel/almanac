@@ -7,6 +7,7 @@ import { patchQueryData, rollbackQueryData } from '@/lib/optimistic'
 import { OFFLINE_MUTATION_KEYS } from '@/lib/offlineMutations'
 import type { Workout, WorkoutRecurrence } from '@/features/workouts/types'
 import { workoutKeys } from '@/features/workouts/hooks/queryKeys'
+import { toUserError } from '@/lib/userError'
 
 export interface WorkoutFormInput {
   name: string
@@ -83,7 +84,7 @@ export function useWorkoutMutations() {
       // Toasted here: the sheet that fired it has already closed and navigated away.
       onError: (error, _vars, context) => {
         rollbackQueryData(queryClient, key, context)
-        toast.error(error instanceof Error ? error.message : t('workouts.form.removeFailed'))
+        toast.error(toUserError(error, t, 'workouts.form.removeFailed'))
       },
     },
   )

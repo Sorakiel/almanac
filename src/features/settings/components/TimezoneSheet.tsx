@@ -5,6 +5,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { useUpdateProfile } from '@/features/settings/hooks/useUpdateProfile'
 import { browserTimezone, listTimezones, timezoneOffsetLabel } from '@/lib/date'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface TimezoneSheetProps {
   open: boolean
@@ -26,11 +27,11 @@ export function TimezoneSheet({ open, onOpenChange, current }: TimezoneSheetProp
 
   const save = async () => {
     try {
+      // The new zone shows in the settings row itself — no toast needed.
       await update({ timezone: selected })
-      toast.success(t('settings.timezoneUpdated'))
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('settings.timezoneUpdateFailed'))
+      toast.error(toUserError(error, t, 'settings.timezoneUpdateFailed'))
     }
   }
 

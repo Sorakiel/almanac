@@ -24,6 +24,7 @@ import {
 } from '@/features/workouts/lib/session'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 /** Focused live-session runner (no app shell) — spec-board screen 08. */
 function WorkoutSessionPage() {
@@ -82,8 +83,7 @@ function WorkoutSessionPage() {
     mutations.editSet.mutate(
       { id: currentSet.id, patch: { done: true } },
       {
-        onError: (e) =>
-          toast.error(e instanceof Error ? e.message : t('workouts.session.logFailed')),
+        onError: (e) => toast.error(toUserError(e, t, 'workouts.session.logFailed')),
       },
     )
     startRest()
@@ -98,8 +98,7 @@ function WorkoutSessionPage() {
     setMenuOpen(false)
     mutations.setCompleted.mutate(true, {
       onSuccess: () => setFinishing(true),
-      onError: (e) =>
-        toast.error(e instanceof Error ? e.message : t('workouts.session.finishFailed')),
+      onError: (e) => toast.error(toUserError(e, t, 'workouts.session.finishFailed')),
     })
   }
 

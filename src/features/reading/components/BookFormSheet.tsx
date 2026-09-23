@@ -13,6 +13,7 @@ import { useBookMutations } from '@/features/reading/hooks/useBookMutations'
 import type { Book, BookProgressMode } from '@/features/reading/types'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'
+import { toUserError } from '@/lib/userError'
 
 const schema = z.object({
   title: z.string().trim().min(1, 'reading.form.titleRequired').max(160),
@@ -54,7 +55,7 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
   })
 
   const onSaveError = (error: Error) =>
-    toast.error(error instanceof Error ? error.message : t('reading.form.saveFailed'))
+    toast.error(toUserError(error, t, 'reading.form.saveFailed'))
 
   // Not awaited: the cache already shows the result and offline the write
   // queues, so the sheet closes on the same tap.
@@ -72,8 +73,8 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
     }
 
     if (book) {
+      // No "saved" toast: the new title is on screen the moment the sheet closes.
       update.mutate({ id: book.id, patch: fields }, { onError: onSaveError })
-      toast.success(t('reading.form.updated'))
     } else {
       create.mutate(fields, { onError: onSaveError })
       toast.success(t('reading.form.added'))

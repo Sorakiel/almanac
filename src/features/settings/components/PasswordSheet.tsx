@@ -10,6 +10,7 @@ import { PasswordStrengthMeter } from '@/features/auth/components/PasswordStreng
 import { useAccountActions } from '@/features/settings/hooks/useAccountActions'
 import type { TranslationKey } from '@/i18n/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 /** Same floor as sign-up, so a changed password is never weaker than a new one. */
 const PASSWORD_MIN = 6
@@ -50,7 +51,7 @@ export function PasswordSheet({ open, onOpenChange }: PasswordSheetProps) {
       toast.success(t('settings.passwordSaved'))
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('settings.passwordFailed'))
+      toast.error(toUserError(error, t, 'settings.passwordFailed'))
     }
   })
 

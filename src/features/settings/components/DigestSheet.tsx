@@ -11,6 +11,7 @@ import { requestNotifyPermission } from '@/lib/platform/notify'
 import { disablePush, enablePush, pushSupported } from '@/lib/platform/push'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface DigestSheetProps {
   open: boolean
@@ -84,7 +85,7 @@ export function DigestSheet({
       toast.success(on ? t('settings.digestOn') : t('settings.digestOff'))
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('settings.digestSaveFailed'))
+      toast.error(toUserError(error, t, 'settings.digestSaveFailed'))
     }
   }
 

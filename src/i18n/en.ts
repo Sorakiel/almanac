@@ -1450,6 +1450,18 @@ export const en = {
   errors: {
     notSignedIn: 'You are not signed in',
     signOut: 'Could not sign out',
+    network: 'No connection to the server. Check your internet and try again.',
+    duplicate: 'Already saved',
+    forbidden: 'You don’t have access to this',
+    sessionExpired: 'Your session has expired — sign in again',
+    rateLimited: 'Too many attempts — wait a minute and try again',
+    invalidCredentials: 'Wrong email or password',
+    emailNotConfirmed: 'Confirm your email first — the link is in your inbox',
+    emailTaken: 'This email is already registered',
+    weakPassword: 'This password is too easy to guess',
+    samePassword: 'The new password must differ from the current one',
+    passkeyCancelled: 'Passkey sign-in was cancelled',
+    passkeyUnavailable: 'Passkey sign-in isn’t available yet',
   },
   shell: {
     reminderBody: 'Time to log your habits for today.',

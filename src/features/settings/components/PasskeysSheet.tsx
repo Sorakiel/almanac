@@ -6,6 +6,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { usePasskeys } from '@/features/settings/hooks/usePasskeys'
 import { passkeysSupported } from '@/lib/platform/webauthn'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface PasskeysSheetProps {
   open: boolean
@@ -29,7 +30,7 @@ export function PasskeysSheet({ open, onOpenChange }: PasskeysSheetProps) {
       await register.mutateAsync()
       toast.success(t('settings.passkeyAdded'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('settings.passkeyAddFailed'))
+      toast.error(toUserError(error, t, 'settings.passkeyAddFailed'))
     }
   }
 
@@ -43,7 +44,7 @@ export function PasskeysSheet({ open, onOpenChange }: PasskeysSheetProps) {
       await rename.mutateAsync({ id, name: draftName.trim() || t('settings.passkeyDefaultName') })
       setRenamingId(null)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('settings.passkeyRenameFailed'))
+      toast.error(toUserError(error, t, 'settings.passkeyRenameFailed'))
     }
   }
 
@@ -52,7 +53,7 @@ export function PasskeysSheet({ open, onOpenChange }: PasskeysSheetProps) {
       await remove.mutateAsync(id)
       toast.success(t('settings.passkeyDeleted'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('settings.passkeyDeleteFailed'))
+      toast.error(toUserError(error, t, 'settings.passkeyDeleteFailed'))
     }
   }
 

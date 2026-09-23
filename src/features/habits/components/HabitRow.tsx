@@ -8,6 +8,7 @@ import { frequencyLabel } from '@/features/habits/lib/frequency'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface HabitRowProps {
   habit: HabitWithTodayLog
@@ -22,8 +23,7 @@ export function HabitRow({ habit }: HabitRowProps) {
     toggle.mutate(
       { habit },
       {
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('habits.updateFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'habits.updateFailed')),
       },
     )
   }

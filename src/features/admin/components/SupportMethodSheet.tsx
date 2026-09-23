@@ -14,6 +14,7 @@ import { useSupportAdmin } from '@/features/admin/hooks/useSupportAdmin'
 import type { SupportKind, SupportMethod } from '@/features/settings/lib/support'
 import type { TranslationKey } from '@/i18n/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 const schema = z.object({
   label: z.string().trim().min(1, 'admin.methodNameRequired').max(40),
@@ -79,7 +80,7 @@ export function SupportMethodSheet({ open, onOpenChange, method }: SupportMethod
       }
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('admin.methodSaveFailed'))
+      toast.error(toUserError(error, t, 'admin.methodSaveFailed'))
     }
   })
 
@@ -91,7 +92,7 @@ export function SupportMethodSheet({ open, onOpenChange, method }: SupportMethod
       setConfirmDelete(false)
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('admin.methodRemoveFailed'))
+      toast.error(toUserError(error, t, 'admin.methodRemoveFailed'))
     }
   }
 

@@ -17,6 +17,7 @@ import { setRememberMe } from '@/lib/supabase'
 import { passkeysSupported } from '@/lib/platform/webauthn'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'
+import { toUserError } from '@/lib/userError'
 
 const schema = z.object({
   // Optional in both modes: signup falls back to the email prefix when blank.
@@ -70,7 +71,7 @@ function AuthPage() {
       await magicLink.mutateAsync(email)
       toast.success(t('auth.magicLinkToast'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('auth.magicLinkFailed'))
+      toast.error(toUserError(error, t, 'auth.magicLinkFailed'))
     }
   }
 
@@ -93,7 +94,7 @@ function AuthPage() {
         await signIn.mutateAsync({ email: values.email, password: values.password })
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('auth.genericError'))
+      toast.error(toUserError(error, t, 'auth.genericError'))
     }
   })
 
@@ -102,7 +103,7 @@ function AuthPage() {
       setRememberMe(remember)
       await passkeySignIn.mutateAsync()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('auth.passkeyFailed'))
+      toast.error(toUserError(error, t, 'auth.passkeyFailed'))
     }
   }
 
@@ -117,7 +118,7 @@ function AuthPage() {
       setForgot(true)
       toast.success(t('auth.resetSent'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('auth.resetFailed'))
+      toast.error(toUserError(error, t, 'auth.resetFailed'))
     }
   }
 

@@ -8,6 +8,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { useAccountActions } from '@/features/settings/hooks/useAccountActions'
 import type { TranslationKey } from '@/i18n/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 const NAME_MAX = 40
 
@@ -35,11 +36,11 @@ export function DisplayNameSheet({ open, onOpenChange, current }: DisplayNameShe
 
   const onSubmit = handleSubmit(async ({ name }) => {
     try {
+      // The new name shows in the settings row itself — no toast needed.
       await rename.mutateAsync(name)
-      toast.success(t('settings.nameSaved'))
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('settings.nameFailed'))
+      toast.error(toUserError(error, t, 'settings.nameFailed'))
     }
   })
 

@@ -8,6 +8,7 @@ import { frequencyLabel } from '@/features/habits/lib/frequency'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 type Tone = 'accent' | 'teal' | 'amber' | 'muted'
 const TONES: Tone[] = ['accent', 'teal', 'amber', 'muted']
@@ -25,8 +26,7 @@ export function DesktopHabitTile({ habit }: { habit: HabitWithTodayLog }) {
     toggle.mutate(
       { habit },
       {
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('dashboard.habitUpdateFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'dashboard.habitUpdateFailed')),
       },
     )
   }

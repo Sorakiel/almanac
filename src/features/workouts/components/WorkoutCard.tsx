@@ -12,6 +12,7 @@ import { dateFromKey } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
 import { intlLocale } from '@/lib/dateLocale'
+import { toUserError } from '@/lib/userError'
 
 interface WorkoutCardProps {
   workout: WorkoutView
@@ -48,8 +49,7 @@ export function WorkoutCard({ workout }: WorkoutCardProps) {
     toggleComplete.mutate(
       { id: workout.id, done: !done },
       {
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('workouts.updateFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'workouts.updateFailed')),
       },
     )
   }

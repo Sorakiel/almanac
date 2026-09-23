@@ -12,6 +12,7 @@ import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import { useModulesStore } from '@/stores/modules'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 function Row({ item }: { item: DueWorkout }) {
   const { toggleComplete } = useWorkoutMutations()
@@ -23,8 +24,7 @@ function Row({ item }: { item: DueWorkout }) {
     toggleComplete.mutate(
       { id: workout.id, done: !doneToday },
       {
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('dashboard.workoutUpdateFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'dashboard.workoutUpdateFailed')),
       },
     )
 

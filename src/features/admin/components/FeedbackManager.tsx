@@ -10,6 +10,7 @@ import { RoleTag } from '@/features/admin/components/RoleTag'
 import { useJoinedLabel } from '@/features/admin/hooks/useJoinedLabel'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 /** Bodies longer than this collapse behind a Show more/less toggle. */
 const CLAMP_AT = 220
@@ -59,7 +60,7 @@ function FeedbackCard({ item, todayKey, hideAuthor }: FeedbackCardProps) {
       await setStatus({ id: item.id, status })
       toast.success(label)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('admin.feedbackUpdateFailed'))
+      toast.error(toUserError(error, t, 'admin.feedbackUpdateFailed'))
     }
   }
 
@@ -69,7 +70,7 @@ function FeedbackCard({ item, todayKey, hideAuthor }: FeedbackCardProps) {
       setConfirmDelete(false)
       toast.success(t('admin.feedbackDeleted'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('admin.feedbackDeleteFailed'))
+      toast.error(toUserError(error, t, 'admin.feedbackDeleteFailed'))
     }
   }
 

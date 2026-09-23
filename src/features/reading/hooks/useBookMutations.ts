@@ -8,6 +8,7 @@ import type { BookPatch } from '@/features/reading/api/books.api'
 import { readingKeys } from '@/features/reading/hooks/queryKeys'
 import { OFFLINE_MUTATION_KEYS } from '@/lib/offlineMutations'
 import type { Book, BookInsert } from '@/features/reading/types'
+import { toUserError } from '@/lib/userError'
 
 type NewBookInput = Omit<BookInsert, 'user_id'>
 
@@ -89,7 +90,7 @@ export function useBookMutations() {
       // Toasted here: the sheet that fired it has already closed and navigated away.
       onError: (error, _vars, context) => {
         rollbackQueryData(queryClient, key, context)
-        toast.error(error instanceof Error ? error.message : t('reading.form.removeFailed'))
+        toast.error(toUserError(error, t, 'reading.form.removeFailed'))
       },
     },
   )

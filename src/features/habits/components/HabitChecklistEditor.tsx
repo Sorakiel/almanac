@@ -3,6 +3,7 @@ import { ChecklistEditorShell } from '@/features/habits/components/ChecklistEdit
 import { useHabitSubtasks } from '@/features/habits/hooks/useHabitSubtasks'
 import type { Habit } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface HabitChecklistEditorProps {
   habit: Habit
@@ -20,14 +21,12 @@ export function HabitChecklistEditor({ habit }: HabitChecklistEditorProps) {
       addPending={add.isPending}
       onAdd={(title) =>
         add.mutate(title, {
-          onError: (error) =>
-            toast.error(error instanceof Error ? error.message : t('habits.itemAddFailed')),
+          onError: (error) => toast.error(toUserError(error, t, 'habits.itemAddFailed')),
         })
       }
       onRemove={(id) =>
         remove.mutate(id, {
-          onError: (error) =>
-            toast.error(error instanceof Error ? error.message : t('habits.itemRemoveFailed')),
+          onError: (error) => toast.error(toUserError(error, t, 'habits.itemRemoveFailed')),
         })
       }
     />

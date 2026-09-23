@@ -20,6 +20,7 @@ import {
 import { disablePush, enablePush, pushSupported } from '@/lib/platform/push'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface ReminderSheetProps {
   open: boolean
@@ -94,7 +95,7 @@ export function ReminderSheet({
       toast.success(on ? t('settings.reminderOn') : t('settings.reminderOff'))
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('settings.reminderSaveFailed'))
+      toast.error(toUserError(error, t, 'settings.reminderSaveFailed'))
     }
   }
 

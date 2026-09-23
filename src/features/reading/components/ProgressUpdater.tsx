@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 import { useToday } from '@/hooks/useToday'
 import type { Book, ReadingSession } from '@/features/reading/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface ProgressUpdaterProps {
   book: Book
@@ -51,8 +52,7 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
       { book, nextUnit },
       {
         onSuccess: () => onDone?.(),
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('reading.progressFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'reading.progressFailed')),
       },
     )
   }

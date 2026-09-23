@@ -1563,6 +1563,18 @@ export const ru: Translations = {
   errors: {
     notSignedIn: 'Вы не вошли в аккаунт',
     signOut: 'Не удалось выйти',
+    network: 'Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.',
+    duplicate: 'Уже сохранено',
+    forbidden: 'Нет доступа',
+    sessionExpired: 'Сессия истекла — войдите снова',
+    rateLimited: 'Слишком много попыток — подождите минуту',
+    invalidCredentials: 'Неверная почта или пароль',
+    emailNotConfirmed: 'Сначала подтвердите почту — ссылка во входящих',
+    emailTaken: 'Эта почта уже зарегистрирована',
+    weakPassword: 'Слишком простой пароль',
+    samePassword: 'Новый пароль должен отличаться от текущего',
+    passkeyCancelled: 'Вход по ключу отменён',
+    passkeyUnavailable: 'Вход по ключу пока недоступен',
   },
   shell: {
     reminderBody: 'Пора отметить привычки на сегодня.',
