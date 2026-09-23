@@ -26,7 +26,7 @@ const PHONE_BOTTOM = 104
 const CAPSULE_CLEARANCE = 52
 
 export function AppToaster() {
-  const theme = useThemeStore((s) => s.theme)
+  const theme = useThemeStore((s) => s.resolved)
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   // On a phone the sync capsule sits where toasts do; stack them above it.
   const capsule = useUiStore((s) => s.syncCapsuleVisible)
