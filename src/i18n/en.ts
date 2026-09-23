@@ -1454,6 +1454,11 @@ export const en = {
     ready: 'Export ready',
     failed: 'Could not export your data',
   },
+  badges: {
+    new: 'New badge: {name}',
+    view: 'View',
+    unseen: 'New badge — not seen yet',
+  },
   sync: {
     offline: 'Offline · changes will be saved',
     offlinePending: {

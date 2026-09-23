@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useAchievements } from '@/features/achievements/hooks/useAchievements'
 import { crossedMilestones } from '@/features/habits/lib/milestones'
@@ -6,10 +8,13 @@ import { useToday } from '@/hooks/useToday'
 import { celebrate } from '@/lib/celebration'
 import type { EvaluatedAchievement } from '@/features/achievements/types'
 import { useT } from '@/hooks/useT'
-import { achievementDescription, achievementTitle } from '@/features/achievements/lib/text'
+import { achievementTitle } from '@/features/achievements/lib/text'
+import { useBadgesStore } from '@/stores/badges'
 
 const PERFECT_KEY = 'almanac:perfect-day' // last celebrated calendar date
 const SEEN_ACH_KEY = 'almanac:seen-achievements' // JSON array of unlocked signatures
+/** Long enough to read a badge name and reach for the action. */
+const BADGE_TOAST_MS = 5000
 
 const achSignature = (a: EvaluatedAchievement): string => `${a.def.id}:${a.tierIndex}`
 
@@ -25,6 +30,8 @@ export function useCelebrationWatchers(): void {
   const { t } = useT()
   const { dateKey } = useToday()
   const { achievements } = useAchievements()
+  const navigate = useNavigate()
+  const markUnseen = useBadgesStore((s) => s.markUnseen)
 
   // ── Perfect day ──────────────────────────────────────────────────────────
   const due = habits.filter((h) => h.dueToday || h.isComplete)
@@ -76,13 +83,14 @@ export function useCelebrationWatchers(): void {
     const fresh = unlocked.filter((a) => !seen.has(achSignature(a)))
     if (fresh.length === 0) return
     const top = fresh[0]!
-    celebrate({
-      kind: 'achievement',
-      title: achievementTitle(t, top.def, top.displayTitle),
-      message: achievementDescription(t, top.def),
-      icon: top.def.icon,
-      modal: true,
+    // A quiet toast and a dot on the profile, not a modal: an unlock usually
+    // lands the moment the user ticks a habit, and a scene in front of the
+    // list interrupts exactly the five-second loop the app is built around.
+    markUnseen()
+    toast.info(t('badges.new', { name: achievementTitle(t, top.def, top.displayTitle) }), {
+      duration: BADGE_TOAST_MS,
+      action: { label: t('badges.view'), onClick: () => navigate('/achievements') },
     })
     localStorage.setItem(SEEN_ACH_KEY, JSON.stringify([...seen, ...unlocked.map(achSignature)]))
-  }, [achievements, t])
+  }, [achievements, t, navigate, markUnseen])
 }
