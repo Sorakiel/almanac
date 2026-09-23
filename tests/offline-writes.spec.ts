@@ -87,6 +87,11 @@ test('a habit tapped offline lands on the server once the connection returns', a
   await completeButton(page).click()
   await expect(doneButton(page)).toBeVisible()
 
+  // And the capsule tells the truth: the change is kept, not lost.
+  const capsule = page.getByRole('status').filter({ hasText: /offline|sending|saved/i })
+  await expect(capsule).toHaveText('Offline · 1 change waiting')
+  await expect(page.getByTitle('Waiting to sync')).toHaveCount(1)
+
   // Give the mutation a moment to actually reach paused state before
   // reconnecting — otherwise this races the retryer's own pause.
   await page.waitForTimeout(300)
@@ -94,6 +99,8 @@ test('a habit tapped offline lands on the server once the connection returns', a
   const write = logWrite(page)
   await context.setOffline(false)
   await write
+  await expect(capsule).toHaveText('All saved')
+  await expect(page.getByTitle('Waiting to sync')).toHaveCount(0)
 
   await expectLoggedOnServer()
   expectNoRealErrors(errors)

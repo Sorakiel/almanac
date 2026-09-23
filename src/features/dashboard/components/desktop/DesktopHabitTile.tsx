@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
+import { PendingSyncMark } from '@/components/common/PendingSyncMark'
 import { Tag } from '@/components/common/Tag'
 import { CheckToggle } from '@/features/habits/components/HabitCard'
 import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
@@ -44,6 +45,7 @@ export function DesktopHabitTile({ habit }: { habit: HabitWithTodayLog }) {
       >
         {habit.name}
       </Link>
+      <PendingSyncMark habitId={habit.id} />
       {resting ? (
         <Tag tone="muted">
           {habit.dueInDays > 0

@@ -3,7 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { LoadingState } from '@/components/common/LoadingState'
 import { BottomNav } from '@/app/shell/BottomNav'
 import { CelebrationHost } from '@/app/shell/CelebrationHost'
-import { OfflineBanner } from '@/app/shell/OfflineBanner'
+import { SyncCapsule } from '@/app/shell/SyncCapsule'
 import { ReinstallBanner } from '@/app/shell/ReinstallBanner'
 import { Sidebar } from '@/app/shell/Sidebar'
 import { TopBar } from '@/app/shell/TopBar'
@@ -61,7 +61,6 @@ export function AppLayout() {
   return (
     <RailTargetProvider target={railEl}>
       <div className="flex min-h-dvh flex-col lg:h-dvh lg:overflow-hidden">
-        <OfflineBanner />
         <ReinstallBanner />
         <div className="hidden lg:block">
           <TopBar />
@@ -104,6 +103,7 @@ export function AppLayout() {
           </div>
         )}
         <HabitFormSheet />
+        <SyncCapsule />
         <CelebrationHost />
       </div>
     </RailTargetProvider>

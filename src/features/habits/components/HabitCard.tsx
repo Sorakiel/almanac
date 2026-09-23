@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Snowflake } from 'lucide-react'
+import { PendingSyncMark } from '@/components/common/PendingSyncMark'
 import { Card } from '@/components/ui/card'
 import { CompletionToggle } from '@/components/common/CompletionToggle'
 import { IconTile } from '@/components/common/IconTile'
@@ -73,6 +74,7 @@ export function HabitCard({ habit }: HabitCardProps) {
           </p>
           <p className="truncate text-sm text-muted">{subtitle}</p>
         </div>
+        <PendingSyncMark habitId={habit.id} />
         <div className="relative z-10">
           <CheckToggle habit={habit} onToggle={handleToggle} />
         </div>

@@ -53,6 +53,14 @@
 
   --border-opacity: 0.08;
   color-scheme: dark;
+
+  /* Liquid-glass material for the navigation layer only (capsules, bars) —
+     values ported from the redesign prototype's .lg. Full rgba, not channels:
+     these are never used with an opacity modifier. */
+  --glass-tint: rgba(36, 36, 40, 0.42);
+  --glass-edge: rgba(255, 255, 255, 0.22);
+  --glass-shade: rgba(0, 0, 0, 0.35);
+  --glass-highlight: rgba(255, 255, 255, 0.35);
 }
 
 :root[data-theme='coffee'] {
@@ -93,4 +101,9 @@
 
   --border-opacity: 0.12;
   color-scheme: light;
+
+  --glass-tint: rgba(255, 251, 243, 0.5);
+  --glass-edge: rgba(255, 255, 255, 0.85);
+  --glass-shade: rgba(90, 60, 30, 0.18);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
 }

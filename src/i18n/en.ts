@@ -1424,9 +1424,16 @@ export const en = {
     ready: 'Export ready',
     failed: 'Could not export your data',
   },
-  offline: {
-    title: 'Offline.',
-    body: 'Your saved data is here to read. Anything you change now won’t be saved — log it again once you’re back.',
+  sync: {
+    offline: 'Offline · changes will be saved',
+    offlinePending: {
+      one: 'Offline · {count} change waiting',
+      other: 'Offline · {count} changes waiting',
+    },
+    sending: 'Sending {count}…',
+    saved: 'All saved',
+    backOnline: 'Back online',
+    pendingMark: 'Waiting to sync',
   },
   status: {
     online: 'online',

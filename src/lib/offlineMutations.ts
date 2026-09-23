@@ -590,3 +590,28 @@ export function registerOfflineMutations(client: QueryClient): void {
 
   register(OFFLINE_MUTATION_KEYS.sendFeedback, ({ userId, body }) => submitFeedback(userId, body))
 }
+
+/** Writes whose `id` variable is the habit's own id (the rest carry `habit` or `habitId`). */
+const HABIT_ROW_WRITES = new Set(['createHabit', 'updateHabit', 'archiveHabit'])
+
+/**
+ * The habit a queued write touches, if any — so its row can show that
+ * something about it has not reached the server yet.
+ */
+export function habitIdOfWrite(
+  mutationKey: readonly unknown[] | undefined,
+  variables: unknown,
+): string | null {
+  if (
+    mutationKey?.[0] !== OFFLINE_MUTATION_ROOT ||
+    typeof variables !== 'object' ||
+    variables === null
+  ) {
+    return null
+  }
+  const v = variables as { habit?: { id?: unknown }; habitId?: unknown; id?: unknown }
+  if (typeof v.habit?.id === 'string') return v.habit.id
+  if (typeof v.habitId === 'string') return v.habitId
+  if (HABIT_ROW_WRITES.has(String(mutationKey[1])) && typeof v.id === 'string') return v.id
+  return null
+}
