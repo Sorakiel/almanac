@@ -325,6 +325,23 @@ describe('offline mutation resume', () => {
     expect(scopeOf(create)).toBe(scope)
   })
 
+  it('a habit delete never refetches the deleted habit', async () => {
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    const refetched: unknown[] = []
+    const invalidate = client.invalidateQueries.bind(client)
+    client.invalidateQueries = (filters, options) => {
+      refetched.push(filters?.queryKey)
+      return invalidate(filters, options)
+    }
+    await client
+      .getMutationCache()
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.deleteHabit })
+      .execute({ id: 'h1', userId: 'u1' })
+    expect(refetched).toContainEqual(['habits', 'u1'])
+    expect(refetched).not.toContainEqual(['habit'])
+  })
+
   it('resumes a shared toggleWorkoutComplete write from either call site', async () => {
     onlineManager.setOnline(false)
     const client = new QueryClient()
