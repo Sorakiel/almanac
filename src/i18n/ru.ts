@@ -404,6 +404,8 @@ export const ru: Translations = {
   },
   common: {
     loadFailedHint: 'Что-то пошло не так при обращении к серверу.',
+    startFailed: 'Альманах не может связаться с сервером',
+    startOffline: 'Нет сети, а на этом устройстве ещё ничего не сохранено',
     tryAgain: 'Попробовать снова',
     close: 'Закрыть',
     cancel: 'Отмена',

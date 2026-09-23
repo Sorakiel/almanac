@@ -140,7 +140,12 @@ export function useHabits(): UseHabitsResult {
   return {
     habits,
     isLoading: habitsQuery.isLoading || logsQuery.isLoading,
-    isError: habitsQuery.isError || logsQuery.isError,
+    // A failed background refetch must not replace a day already on screen:
+    // with the API down (or offline) the cached habits are the right answer.
+    // Only a load with nothing to show is an error.
+    isError:
+      (habitsQuery.isError && habitsQuery.data === undefined) ||
+      (logsQuery.isError && logsQuery.data === undefined),
     refetch: () => {
       void habitsQuery.refetch()
       void logsQuery.refetch()

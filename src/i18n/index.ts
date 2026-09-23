@@ -1,5 +1,4 @@
 import { en } from '@/i18n/en'
-import { ru } from '@/i18n/ru'
 import type { Leaf, PluralForm, TranslationKey, Translations, Vars } from '@/i18n/types'
 
 export type Locale = 'en' | 'ru'
@@ -9,7 +8,32 @@ export const LOCALES: { value: Locale; label: string }[] = [
   { value: 'ru', label: 'Русский' },
 ]
 
-const DICTIONARIES: Record<Locale, Translations> = { en, ru }
+/**
+ * English is the source and the fallback, so it ships in the main bundle; every
+ * other language is a chunk fetched on demand (`loadLocale`) — nobody reading
+ * Russian should download English twice, and nobody reading English Russian.
+ */
+const DICTIONARIES: Partial<Record<Locale, Translations>> = { en }
+
+const LOADERS: Record<Exclude<Locale, 'en'>, () => Promise<Translations>> = {
+  ru: () => import('@/i18n/ru').then((m) => m.ru),
+}
+
+/** Make `locale` available to `translate`. Resolves at once when it already is. */
+export async function loadLocale(locale: Locale): Promise<void> {
+  if (locale === 'en' || DICTIONARIES[locale]) return
+  DICTIONARIES[locale] = await LOADERS[locale]()
+}
+
+/** The language to start in on a device that has never chosen one. */
+export function detectLocale(languages: readonly string[] = navigator.languages ?? []): Locale {
+  for (const tag of languages) {
+    const base = tag.toLowerCase().split('-')[0]
+    if (base === 'ru') return 'ru'
+    if (base === 'en') return 'en'
+  }
+  return 'en'
+}
 
 function lookup(dict: Translations, key: string): Leaf | undefined {
   let node: unknown = dict
@@ -48,7 +72,8 @@ function interpolate(template: string, vars: Vars | undefined): string {
  * better than `settings.exportData`.
  */
 export function translate(locale: Locale, key: TranslationKey, vars?: Vars): string {
-  const leaf = lookup(DICTIONARIES[locale], key) ?? lookup(en, key)
+  const dict = DICTIONARIES[locale]
+  const leaf = (dict && lookup(dict, key)) ?? lookup(en, key)
   if (leaf === undefined) return key
   const count = vars?.count
   const template =
