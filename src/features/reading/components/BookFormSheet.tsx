@@ -9,7 +9,11 @@ import { Input } from '@/components/ui/input'
 import { Segmented } from '@/components/ui/segmented'
 import { Sheet } from '@/components/ui/sheet'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
+import { BookEditExtras } from '@/features/reading/components/BookEditExtras'
 import { useBookMutations } from '@/features/reading/hooks/useBookMutations'
+import { useRateBook } from '@/features/reading/hooks/useRateBook'
+import { useReadingProgress } from '@/features/reading/hooks/useReadingProgress'
+import { extrasOf, type BookExtras } from '@/features/reading/lib/bookExtras'
 import type { Book, BookProgressMode } from '@/features/reading/types'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'
@@ -36,6 +40,9 @@ interface BookFormSheetProps {
 export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormSheetProps) {
   const { t } = useT()
   const { create, update, remove } = useBookMutations()
+  const logProgress = useReadingProgress()
+  const rate = useRateBook()
+  const [extras, setExtras] = useState<BookExtras | null>(book ? extrasOf(book) : null)
   const [mode, setMode] = useState<BookProgressMode>(book?.progress_mode ?? 'pages')
   const [confirmDelete, setConfirmDelete] = useState(false)
   const isEdit = Boolean(book)
@@ -72,9 +79,28 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
       daily_goal,
     }
 
-    if (book) {
+    if (book && extras) {
       // No "saved" toast: the new title is on screen the moment the sheet closes.
-      update.mutate({ id: book.id, patch: fields }, { onError: onSaveError })
+      const patch = {
+        ...fields,
+        started_on: extras.startedOn || null,
+        finished_on: extras.finishedOn || null,
+      }
+      update.mutate({ id: book.id, patch }, { onError: onSaveError })
+      // All three share the books queue, so they land after the edit above.
+      const nextUnit = Number.parseInt(extras.current, 10)
+      if (Number.isFinite(nextUnit) && nextUnit >= 0 && nextUnit !== book.current_unit) {
+        logProgress.mutate(
+          { book: { ...book, ...patch }, nextUnit },
+          { onError: (error) => toast.error(toUserError(error, t, 'reading.progressFailed')) },
+        )
+      }
+      if (extras.rating !== book.rating) {
+        rate.mutate(
+          { book, rating: extras.rating },
+          { onError: (error) => toast.error(toUserError(error, t, 'reading.ratingFailed')) },
+        )
+      }
     } else {
       create.mutate(fields, { onError: onSaveError })
       toast.success(t('reading.form.added'))
@@ -106,7 +132,7 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
             <span className="label-mono">{t('reading.form.titleLabel')}</span>
             <Input
               placeholder={t('reading.form.titlePlaceholder')}
-              autoFocus
+              autoFocus={!isEdit}
               {...register('title')}
             />
             {errors.title ? (
@@ -155,6 +181,8 @@ export function BookFormSheet({ open, onOpenChange, book, onDeleted }: BookFormS
               {...register('dailyGoal')}
             />
           </label>
+
+          {extras ? <BookEditExtras mode={mode} value={extras} onChange={setExtras} /> : null}
 
           <Button type="submit" size="lg">
             {isEdit ? t('reading.form.save') : t('reading.form.create')}

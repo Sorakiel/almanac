@@ -37,7 +37,7 @@ import {
 import { createBookNote, deleteBookNote } from '@/features/reading/api/notes.api'
 import { logBookRatingEvent } from '@/features/reading/api/ratings.api'
 import { createReadingSession } from '@/features/reading/api/sessions.api'
-import { statusForProgress } from '@/features/reading/lib/progress'
+import { progressPatch } from '@/features/reading/lib/progress'
 import {
   acceptFriendRequest,
   emitActivity,
@@ -526,17 +526,7 @@ export function registerOfflineMutations(client: QueryClient): void {
   register(
     OFFLINE_MUTATION_KEYS.logReadingProgress,
     async ({ book, nextUnit, minutes, userId, dateKey }) => {
-      const capped =
-        book.total_units && book.total_units > 0
-          ? Math.min(nextUnit, book.total_units)
-          : Math.max(0, nextUnit)
-      const delta = Math.max(0, capped - book.current_unit)
-      const status = statusForProgress(book, capped)
-
-      const patch: BookPatch = { current_unit: capped, status }
-      if (status === 'reading' && !book.started_on) patch.started_on = dateKey
-      if (status === 'finished' && !book.finished_on) patch.finished_on = dateKey
-
+      const { patch, delta } = progressPatch(book, nextUnit, dateKey)
       await updateBook(book.id, patch)
       if (delta > 0 || minutes > 0) {
         await createReadingSession({

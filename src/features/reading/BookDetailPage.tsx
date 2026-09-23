@@ -14,11 +14,13 @@ import { unitCount } from '@/features/reading/lib/progress'
 import { useFocusStore } from '@/stores/focus'
 import { BookStatusTag } from '@/features/reading/components/BookStatusTag'
 import { useT } from '@/hooks/useT'
+import { dateFromKey } from '@/lib/date'
+import { intlLocale } from '@/lib/dateLocale'
 
 const READING_SESSION_MIN = 25
 
 function BookDetailPage() {
-  const { t } = useT()
+  const { t, locale } = useT()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const startFocus = useFocusStore((s) => s.start)
@@ -43,13 +45,21 @@ function BookDetailPage() {
     )
   }
 
+  // "23 сент." rather than ISO — a date is words, not a number.
+  const sessionDay = (key: string) =>
+    new Intl.DateTimeFormat(intlLocale(locale), {
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'UTC',
+    }).format(dateFromKey(key))
+
   const readInFlow = () => {
     startFocus(READING_SESSION_MIN, book.title, { bookId: book.id })
     navigate('/flow')
   }
 
   return (
-    <div className="mx-auto flex max-w-[720px] flex-col gap-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <div>
         <Link
           to="/reading"
@@ -61,7 +71,7 @@ function BookDetailPage() {
 
         <div className="mt-3 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-2xl tracking-title lg:text-[32px]">{book.title}</h1>
+            <h1 className="text-title lg:text-large-title">{book.title}</h1>
             <p className="mt-1 text-muted">{book.author ?? t('reading.unknownAuthor')}</p>
             <div className="mt-2 flex items-center gap-2">
               <BookStatusTag status={book.status} />
@@ -93,9 +103,9 @@ function BookDetailPage() {
             {sessions.slice(0, 8).map((session) => (
               <div
                 key={session.id}
-                className="flex items-center justify-between gap-3 border-b px-4 py-2.5 text-[13px] last:border-b-0"
+                className="flex items-center justify-between gap-3 border-b px-4 py-2.5 text-footnote last:border-b-0"
               >
-                <span className="font-mono text-muted-strong">{session.date}</span>
+                <span className="text-muted-strong">{sessionDay(session.date)}</span>
                 <span className="text-muted">
                   {session.minutes > 0 ? t('units.minutes', { count: session.minutes }) : '—'}
                   {session.units_read > 0
@@ -108,12 +118,16 @@ function BookDetailPage() {
         </section>
       ) : null}
 
-      <BookFormSheet
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        book={book}
-        onDeleted={() => navigate('/reading')}
-      />
+      {/* Mounted per opening, so the form starts from the book as it is now —
+          progress logged since the last edit included. */}
+      {editOpen ? (
+        <BookFormSheet
+          open
+          onOpenChange={setEditOpen}
+          book={book}
+          onDeleted={() => navigate('/reading')}
+        />
+      ) : null}
     </div>
   )
 }

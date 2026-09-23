@@ -90,7 +90,7 @@ export function NotesSection({ book, notes }: { book: Book; notes: BookNote[] })
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
               </div>
-              <p className="whitespace-pre-wrap text-[14px] leading-relaxed">{note.body}</p>
+              <p className="whitespace-pre-wrap text-callout">{note.body}</p>
             </Card>
           ))
         : null}
