@@ -353,6 +353,8 @@ export const en = {
   },
   common: {
     loadFailedHint: 'Something went wrong reaching the server.',
+    startFailed: 'Almanac could not reach its server',
+    startOffline: 'You are offline, and this device has nothing saved yet',
     tryAgain: 'Try again',
     close: 'Close',
     cancel: 'Cancel',

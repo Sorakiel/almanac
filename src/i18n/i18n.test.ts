@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { translate } from '@/i18n'
+import { detectLocale, translate } from '@/i18n'
 import { en } from '@/i18n/en'
 import { ru } from '@/i18n/ru'
 
@@ -56,5 +56,15 @@ describe('dictionaries', () => {
     const branch = (paths: string[]) =>
       new Set(paths.map((p) => p.split('.').slice(0, 2).join('.')))
     expect(branch(keys(ru))).toEqual(branch(keys(en)))
+  })
+})
+
+describe('detectLocale', () => {
+  it('starts a Russian browser in Russian, anything else in English', () => {
+    expect(detectLocale(['ru-RU', 'en-US'])).toBe('ru')
+    expect(detectLocale(['de-DE', 'ru'])).toBe('ru')
+    expect(detectLocale(['en-GB'])).toBe('en')
+    expect(detectLocale(['fr-FR'])).toBe('en')
+    expect(detectLocale([])).toBe('en')
   })
 })

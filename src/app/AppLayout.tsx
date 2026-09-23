@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { LoadingState } from '@/components/common/LoadingState'
 import { BottomNav } from '@/app/shell/BottomNav'
 import { CelebrationHost } from '@/app/shell/CelebrationHost'
+import { BootSkeleton } from '@/app/shell/BootSkeleton'
 import { SyncCapsule } from '@/app/shell/SyncCapsule'
 import { ReinstallBanner } from '@/app/shell/ReinstallBanner'
 import { Sidebar } from '@/app/shell/Sidebar'
 import { TopBar } from '@/app/shell/TopBar'
 import { RailActive } from '@/app/shell/RailActive'
+import { ErrorState } from '@/components/common/ErrorState'
 import { RailTargetProvider } from '@/components/rail/Rail'
 import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
 import { useCelebrationWatchers } from '@/app/hooks/useCelebrationWatchers'
@@ -16,6 +17,7 @@ import { useNativeWidgetSync } from '@/app/hooks/useNativeWidgetSync'
 import { useSession } from '@/hooks/useSession'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useOnboardingStore } from '@/stores/onboarding'
+import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
 
 /**
@@ -29,7 +31,8 @@ import { cn } from '@/lib/utils'
 export function AppLayout() {
   const { pathname } = useLocation()
   const [railEl, setRailEl] = useState<HTMLDivElement | null>(null)
-  const { profile } = useProfile()
+  const { profile, isError: profileFailed, isPaused: profilePaused, refetch } = useProfile()
+  const { t } = useT()
   const { user } = useSession()
   const dismissedFor = useOnboardingStore((s) => s.dismissedFor)
   // Only trust the device-local fast-path for the account that actually set it.
@@ -49,8 +52,21 @@ export function AppLayout() {
   // Wait for the profile before deciding, so an already-onboarded user never
   // flashes the welcome screen; the local flag is a fast-path for the device
   // that just finished (covers the gap before the row refetches).
+  // Nothing to render without the profile, but say so rather than keep the
+  // skeleton up for ever: the API is down, or this device is offline and has
+  // never cached the account.
   if (!profile && !locallyOnboarded) {
-    return <LoadingState fullScreen />
+    if (profileFailed || profilePaused) {
+      return (
+        <div className="flex min-h-dvh items-center justify-center px-5">
+          <ErrorState
+            title={profilePaused ? t('common.startOffline') : t('common.startFailed')}
+            onRetry={refetch}
+          />
+        </div>
+      )
+    }
+    return <BootSkeleton />
   }
   if (!profile?.onboarded && !locallyOnboarded) return <Navigate to="/welcome" replace />
 

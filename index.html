@@ -20,9 +20,159 @@
       content="Almanac — a personal command-center for habits, workouts, and self-discipline."
     />
     <title>Almanac</title>
+    <!-- Before first paint: apply the saved theme, so a coffee user never sees a
+         dark frame first. Mirrors applyTheme in src/stores/theme.ts (same key,
+         same colours); any failure leaves the dark default in place. -->
+    <script>
+      ;(function () {
+        try {
+          var saved = JSON.parse(localStorage.getItem('almanac-theme') || 'null')
+          var theme = saved && saved.state && saved.state.theme === 'coffee' ? 'coffee' : 'dark'
+          document.documentElement.setAttribute('data-theme', theme)
+          var meta = document.querySelector('meta[name="theme-color"]')
+          if (meta) meta.setAttribute('content', theme === 'coffee' ? '#F4ECDD' : '#1B1B1D')
+        } catch (e) {}
+      })()
+    </script>
+    <!-- The boot skeleton: a CSS-only outline of Today, painted in the first
+         frame before any script or stylesheet arrives. React replaces it on
+         mount and reuses these classes (BootSkeleton) while the session and
+         profile resolve, so the whole start is one skeleton, not three
+         spinners. Colours mirror src/styles/tokens.css — they must work before
+         that file has loaded. -->
+    <style>
+      html {
+        background: #1b1b1d;
+      }
+      html[data-theme='coffee'] {
+        background: #f4ecdd;
+      }
+      .boot {
+        --boot-block: rgba(236, 231, 216, 0.07);
+        --boot-line: rgba(236, 231, 216, 0.08);
+        --boot-sheen: rgba(236, 231, 216, 0.05);
+        display: flex;
+        min-height: 100dvh;
+      }
+      html[data-theme='coffee'] .boot {
+        --boot-block: rgba(42, 32, 24, 0.07);
+        --boot-line: rgba(42, 32, 24, 0.1);
+        --boot-sheen: rgba(255, 255, 255, 0.45);
+      }
+      .boot-side,
+      .boot-rail {
+        display: none;
+      }
+      .boot-main {
+        flex: 1;
+        max-width: 28rem;
+        margin: 0 auto;
+        padding: max(env(safe-area-inset-top), 1.5rem) 1.25rem 7rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .boot-b {
+        position: relative;
+        overflow: hidden;
+        border-radius: 14px;
+        background: var(--boot-block);
+      }
+      .boot-b::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(90deg, transparent, var(--boot-sheen), transparent);
+        animation: boot-sheen 1.3s infinite;
+      }
+      .boot-eyebrow {
+        height: 0.75rem;
+        width: 40%;
+      }
+      .boot-title {
+        height: 2rem;
+        width: 70%;
+        margin-bottom: 0.75rem;
+      }
+      .boot-card {
+        height: 6.5rem;
+        border-radius: 24px;
+        margin-bottom: 0.75rem;
+      }
+      .boot-row {
+        height: 2.75rem;
+      }
+      .boot-nav {
+        position: fixed;
+        left: 1rem;
+        right: 1rem;
+        bottom: max(env(safe-area-inset-bottom), 0.75rem);
+        height: 4rem;
+        max-width: 26rem;
+        margin: 0 auto;
+        border-radius: 9999px;
+        background: var(--boot-block);
+      }
+      @media (min-width: 1024px) {
+        .boot-side {
+          display: block;
+          width: 250px;
+          flex: none;
+          border-right: 1px solid var(--boot-line);
+        }
+        .boot-rail {
+          display: block;
+          width: 340px;
+          flex: none;
+          border-left: 1px solid var(--boot-line);
+        }
+        .boot-main {
+          max-width: none;
+          margin: 0;
+          padding: 2rem 2.5rem;
+        }
+        .boot-title {
+          height: 3rem;
+          width: 45%;
+        }
+        .boot-row {
+          max-width: 48rem;
+        }
+        .boot-nav {
+          display: none;
+        }
+      }
+      @keyframes boot-sheen {
+        to {
+          transform: translateX(100%);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot-b::after {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="boot" aria-hidden="true">
+        <div class="boot-side"></div>
+        <div class="boot-main">
+          <div class="boot-b boot-eyebrow"></div>
+          <div class="boot-b boot-title"></div>
+          <div class="boot-b boot-card"></div>
+          <div class="boot-b boot-row"></div>
+          <div class="boot-b boot-row"></div>
+          <div class="boot-b boot-row"></div>
+          <div class="boot-b boot-row"></div>
+          <div class="boot-b boot-row"></div>
+        </div>
+        <div class="boot-rail"></div>
+        <div class="boot-nav"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

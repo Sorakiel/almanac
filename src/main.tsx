@@ -2,9 +2,11 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from '@/app/App.tsx'
 import { router } from '@/app/router'
+import { loadLocale } from '@/i18n'
 import { initAnalytics, trackError, trackPageView } from '@/lib/analytics'
 import { registerServiceWorker } from '@/lib/platform/serviceWorker'
 import { initPointerTracking } from '@/lib/viewTransition'
+import { useLocaleStore } from '@/stores/locale'
 import '@fontsource/inter/400.css'
 import '@fontsource/inter/500.css'
 import '@fontsource/inter/600.css'
@@ -29,8 +31,15 @@ router.subscribe((state) => trackPageView(state.location.pathname))
 window.addEventListener('error', (e) => trackError(e.error ?? e.message, 'window.onerror'))
 window.addEventListener('unhandledrejection', (e) => trackError(e.reason, 'unhandledrejection'))
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+// The stored language's dictionary is a lazy chunk; render once it is here so
+// the first frame after the static skeleton is already in the right language.
+// A load failure renders anyway — English fills any gap.
+void loadLocale(useLocaleStore.getState().locale)
+  .catch(() => undefined)
+  .then(() => {
+    createRoot(document.getElementById('root')!).render(
+      <StrictMode>
+        <App />
+      </StrictMode>,
+    )
+  })

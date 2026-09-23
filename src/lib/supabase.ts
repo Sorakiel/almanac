@@ -13,6 +13,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const REMEMBER_FLAG = 'almanac.remember'
 
+/** Longest a single database request may hang before it fails. */
+const REQUEST_TIMEOUT_MS = 10_000
+
 /**
  * "Remember me" support: supabase-js still owns the session — we only choose
  * which bucket it persists to. Opting out routes tokens to sessionStorage, so
@@ -52,4 +55,16 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     // project's Relying Party is configured in the Supabase dashboard.
     experimental: { passkey: true },
   },
+  // A hung connection (API up at the TCP level, not answering) otherwise spins
+  // for as long as the browser allows; this turns it into an error React Query
+  // can show or retry.
+  db: { timeout: REQUEST_TIMEOUT_MS },
 })
+
+// postgrest-js retries a failed GET three more times on its own (1 s + 2 s +
+// 4 s), and React Query's retry sits on top: with the API down a screen spun
+// for ~16 s before admitting it. React Query owns retries here. supabase-js
+// (2.110) does not forward a `retry` option to its PostgrestClient, so it is
+// switched off on the client directly; every builder reads it from there.
+const rest = (supabase as unknown as { rest?: { retry?: boolean } }).rest
+if (rest) rest.retry = false

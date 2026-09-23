@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Locale } from '@/i18n'
+import { detectLocale, loadLocale, type Locale } from '@/i18n'
 
 interface LocaleState {
   locale: Locale
@@ -17,18 +17,27 @@ function applyLocale(locale: Locale): void {
  * of where you are reading, not of who you are, and it must apply before any
  * network round-trip.
  *
- * The default stays **English** even for a Russian browser. Russian is landing
- * screen by screen, and auto-detecting would hand every existing user a
- * half-translated interface without asking. The default flips once coverage is
- * complete.
+ * A device that has never chosen starts in the browser's language (Russian or
+ * English, English otherwise). A saved choice always wins, so this never
+ * switches anyone who already picked.
+ *
+ * The dictionary is a lazy chunk: `setLocale` loads it first, so the screen
+ * never re-renders half in the old language. The stored locale is loaded
+ * before the first render in main.tsx.
  */
 export const useLocaleStore = create<LocaleState>()(
   persist(
     (set) => ({
-      locale: 'en',
+      locale: typeof navigator === 'undefined' ? 'en' : detectLocale(),
       setLocale: (locale) => {
-        applyLocale(locale)
-        set({ locale })
+        // A failed chunk load (offline, never cached) still switches: missing
+        // keys fall back to English rather than the tap doing nothing.
+        void loadLocale(locale)
+          .catch(() => undefined)
+          .then(() => {
+            applyLocale(locale)
+            set({ locale })
+          })
       },
     }),
     {

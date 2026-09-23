@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import type { PostHog } from 'posthog-js'
 import { usePrefsStore } from '@/stores/prefs'
 
 const KEY = import.meta.env.VITE_POSTHOG_KEY as string | undefined
@@ -26,6 +26,28 @@ export type AnalyticsEvent =
 type EventProps = Record<string, number | boolean | string | undefined>
 
 let started = false
+let client: PostHog | null = null
+
+/** Calls made before the SDK arrives. Capped: a long offline spell must not grow it forever. */
+const queue: ((posthog: PostHog) => void)[] = []
+const MAX_QUEUED = 100
+/** Give the first paint priority; start anyway after this if the page never idles. */
+const IDLE_TIMEOUT_MS = 4000
+
+/** Run against the SDK now, or once it has loaded. */
+function withClient(fn: (posthog: PostHog) => void): void {
+  if (!started) return
+  if (client) fn(client)
+  else if (queue.length < MAX_QUEUED) queue.push(fn)
+}
+
+function whenIdle(task: () => void): void {
+  if (typeof window.requestIdleCallback === 'function') {
+    window.requestIdleCallback(task, { timeout: IDLE_TIMEOUT_MS })
+  } else {
+    setTimeout(task, 1)
+  }
+}
 
 /** Whether analytics may run at all: configured, opted in, and not DNT. */
 function allowed(): boolean {
@@ -44,16 +66,31 @@ function allowed(): boolean {
 export function initAnalytics(): void {
   if (started || !allowed()) return
   started = true
-  posthog.init(KEY!, {
-    api_host: HOST,
-    autocapture: false,
-    disable_session_recording: true,
-    disable_surveys: true,
-    capture_pageview: false, // routed manually — see trackPageView
-    capture_pageleave: true,
-    person_profiles: 'identified_only',
-    persistence: 'localStorage',
-    sanitize_properties: sanitizeProperties,
+  // ~70 KB gzipped that the first screen has no use for: fetched when the
+  // browser is idle, with every call made meanwhile replayed in order.
+  whenIdle(() => {
+    import('posthog-js')
+      .then(({ default: posthog }) => {
+        posthog.init(KEY!, {
+          api_host: HOST,
+          autocapture: false,
+          disable_session_recording: true,
+          disable_surveys: true,
+          capture_pageview: false, // routed manually — see trackPageView
+          capture_pageleave: true,
+          person_profiles: 'identified_only',
+          persistence: 'localStorage',
+          sanitize_properties: sanitizeProperties,
+        })
+        client = posthog
+        for (const fn of queue.splice(0)) fn(posthog)
+      })
+      .catch(() => {
+        // The chunk could not load (offline before it was ever cached). Analytics
+        // is optional by design; stand down rather than queue for ever.
+        started = false
+        queue.length = 0
+      })
   })
 }
 
@@ -93,14 +130,12 @@ function normaliseUrl(value: string): string {
 
 /** Tie events to a Supabase user id. No email, no display name. */
 export function identifyUser(userId: string): void {
-  if (!started) return
-  posthog.identify(userId)
+  withClient((posthog) => posthog.identify(userId))
 }
 
 /** Forget the user on sign-out so a shared device doesn't merge two people. */
 export function resetAnalytics(): void {
-  if (!started) return
-  posthog.reset()
+  withClient((posthog) => posthog.reset())
 }
 
 /**
@@ -117,19 +152,20 @@ export function trackPageView(pathname: string): void {
   // navigations, so the same path arrives several times per move.
   if (path === lastPath) return
   lastPath = path
-  posthog.capture('$pageview', { $current_url: path })
+  withClient((posthog) => posthog.capture('$pageview', { $current_url: path }))
 }
 
 export function trackEvent(event: AnalyticsEvent, props?: EventProps): void {
-  if (!started) return
-  posthog.capture(event, props)
+  withClient((posthog) => posthog.capture(event, props))
 }
 
 /** Report a crash. Called by the error boundary and the global handlers. */
 export function trackError(error: unknown, context?: string): void {
   if (!started) return
   const err = error instanceof Error ? error : new Error(String(error))
-  posthog.captureException(err, context !== undefined ? { context } : undefined)
+  withClient((posthog) =>
+    posthog.captureException(err, context !== undefined ? { context } : undefined),
+  )
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -151,6 +187,8 @@ export function setAnalyticsEnabled(enabled: boolean): void {
     if (enabled) initAnalytics()
     return
   }
-  if (enabled) posthog.opt_in_capturing()
-  else posthog.opt_out_capturing()
+  withClient((posthog) => {
+    if (enabled) posthog.opt_in_capturing()
+    else posthog.opt_out_capturing()
+  })
 }
