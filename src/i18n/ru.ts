@@ -409,6 +409,7 @@ export const ru: Translations = {
     startFailed: 'Альманах не может связаться с сервером',
     startOffline: 'Нет сети, а на этом устройстве ещё ничего не сохранено',
     tryAgain: 'Попробовать снова',
+    notifications: 'Уведомления',
     close: 'Закрыть',
     cancel: 'Отмена',
     undo: 'Отменить',

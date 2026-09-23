@@ -40,10 +40,10 @@ export function SyncCapsule() {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 bottom-[104px] z-50 flex justify-center px-4 lg:bottom-6"
+      className="pointer-events-none fixed inset-x-0 bottom-nav-clearance z-50 flex justify-center px-4 lg:bottom-6"
     >
       {visible ? (
-        <div className="lg flex min-h-11 max-w-full items-center gap-2.5 rounded-full px-4 text-[14.5px] font-medium text-foreground motion-safe:animate-capsule-in">
+        <div className="lg flex min-h-11 max-w-full items-center gap-2.5 rounded-full px-4 text-callout font-medium text-foreground motion-safe:animate-capsule-in">
           <span aria-hidden="true" className={cn('h-2 w-2 shrink-0 rounded-full', DOT[phase])} />
           <span className="truncate">{text}</span>
         </div>

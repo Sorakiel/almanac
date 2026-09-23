@@ -65,6 +65,36 @@
 }
 
 @layer components {
+  /* A toast: one glass capsule, sans, 44px tall (the redesign's .p-toast). */
+  .toast-capsule {
+    @apply relative mx-auto flex min-h-11 w-fit items-center gap-2.5 overflow-hidden rounded-pill py-1.5 pl-4 pr-4 text-callout font-medium text-foreground;
+    max-width: calc(100vw - 2rem);
+  }
+
+  .toast-capsule:has([data-button]) {
+    @apply pr-1.5;
+  }
+
+  /* Undo's countdown: a hairline draining for the 5 s the action stays
+     offered (UNDO_WINDOW_MS). Sonner pauses the timer while the stack is
+     hovered, so the bar does too. */
+  .toast-undo::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    bottom: 3px;
+    height: 2px;
+    border-radius: 2px;
+    background: rgb(var(--color-foreground) / 0.2);
+    transform-origin: left;
+    animation: toast-timer 5s linear forwards;
+  }
+
+  [data-sonner-toaster]:hover .toast-undo::before {
+    animation-play-state: paused;
+  }
+
   /* Glass for the navigation layer only — never on content, never on glass.
      Ported from the redesign prototype; Phase 3 adds refraction on top. */
   .lg {
@@ -202,5 +232,42 @@
   }
   to {
     clip-path: circle(var(--vt-r) at var(--vt-x) var(--vt-y));
+  }
+}
+
+@keyframes toast-timer {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Where toasts sit, by breakpoint, in CSS rather than a JS media query: clear
+   of the bottom nav wherever it shows (below lg), at the bottom centre on
+   desktop — and lifted over the sync capsule while it is up. !important beats
+   the inline offsets sonner writes from its own props. */
+[data-sonner-toaster][data-y-position='bottom'] {
+  --toast-bottom: theme('spacing.nav-clearance');
+  bottom: calc(var(--toast-bottom) + var(--toast-lift, 0px)) !important;
+  /* Full-width lane, each capsule centred in it. Sonner's own phone rule
+     (left offset + width: 100%) pushed the lane past the right edge. */
+  left: 0 !important;
+  right: 0 !important;
+  width: auto !important;
+  transform: none !important;
+}
+
+[data-sonner-toaster] [data-sonner-toast].toast-capsule {
+  left: 0 !important;
+  right: 0 !important;
+  width: fit-content !important;
+}
+
+[data-sonner-toaster].toaster-lifted {
+  --toast-lift: theme('spacing.capsule-clearance');
+}
+
+@media (min-width: 1024px) {
+  [data-sonner-toaster][data-y-position='bottom'] {
+    --toast-bottom: theme('spacing.6');
   }
 }
