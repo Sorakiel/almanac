@@ -8,6 +8,7 @@ import { useBook } from '@/features/reading/hooks/useBook'
 import { useReadingProgress } from '@/features/reading/hooks/useReadingProgress'
 import { unitNoun } from '@/features/reading/lib/progress'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface FlowReadingRunnerProps {
   bookId: string
@@ -43,8 +44,7 @@ export function FlowReadingRunner({ bookId, minutes, onFinish }: FlowReadingRunn
           toast.success(t('flow.readingLogged'))
           onFinish()
         },
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('flow.readingFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'flow.readingFailed')),
       },
     )
   }

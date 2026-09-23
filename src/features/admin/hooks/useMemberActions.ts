@@ -2,6 +2,7 @@ import { toast } from 'sonner'
 import { useUserManagement } from '@/features/admin/hooks/useUserManagement'
 import type { UserRole } from '@/features/admin/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface Member {
   id: string
@@ -42,7 +43,7 @@ export function useMemberActions(
         toast.success(t(next === 'admin' ? 'admin.nowAdmin' : 'admin.nowMember', vars))
         onDone?.()
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : t('admin.roleFailed'))
+        toast.error(toUserError(error, t, 'admin.roleFailed'))
       }
     },
     remove: async (onDone) => {
@@ -51,7 +52,7 @@ export function useMemberActions(
         toast.success(t('admin.deleted', vars))
         onDone?.()
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : t('admin.deleteFailed'))
+        toast.error(toUserError(error, t, 'admin.deleteFailed'))
       }
     },
     isSettingRole,

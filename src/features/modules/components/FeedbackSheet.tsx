@@ -9,6 +9,7 @@ import { OFFLINE_MUTATION_KEYS } from '@/lib/offlineMutations'
 import { useOfflineMutation } from '@/hooks/useOfflineMutation'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 const schema = z.object({
   body: z.string().trim().min(4, 'modulesPage.feedback.tooShort').max(1000),
@@ -41,8 +42,7 @@ export function FeedbackSheet({ open, onOpenChange }: FeedbackSheetProps) {
         reset()
         onOpenChange(false)
       },
-      onError: (error) =>
-        toast.error(error instanceof Error ? error.message : t('modulesPage.feedback.failed')),
+      onError: (error) => toast.error(toUserError(error, t, 'modulesPage.feedback.failed')),
     },
   )
 

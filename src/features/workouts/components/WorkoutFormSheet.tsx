@@ -18,6 +18,7 @@ import { useToday } from '@/hooks/useToday'
 import type { Workout } from '@/features/workouts/types'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'
+import { toUserError } from '@/lib/userError'
 
 const schema = z.object({
   name: z.string().trim().min(1, 'workouts.form.nameRequired').max(80),
@@ -73,11 +74,11 @@ export function WorkoutFormSheet({
 
   const onSubmit = handleSubmit((values) => {
     if (recur.recurrence === 'weekdays' && recur.days.length === 0) {
-      toast.error('workouts.form.pickWeekday')
+      toast.error(t('workouts.form.pickWeekday'))
       return
     }
     if (recur.recurrence === 'every_n_days' && (!recur.interval || recur.interval < 1)) {
-      toast.error('workouts.form.setInterval')
+      toast.error(t('workouts.form.setInterval'))
       return
     }
 
@@ -99,10 +100,10 @@ export function WorkoutFormSheet({
     // Not awaited: the cache already shows the result and offline the write
     // queues, so the sheet closes on the same tap.
     const onSaveError = (error: Error) =>
-      toast.error(error instanceof Error ? error.message : t('workouts.form.saveFailed'))
+      toast.error(toUserError(error, t, 'workouts.form.saveFailed'))
     if (workout) {
+      // No "saved" toast: the change is on screen the moment the sheet closes.
       update.mutate({ id: workout.id, input }, { onError: onSaveError })
-      toast.success(t('workouts.form.updated'))
     } else {
       create.mutate(input, { onError: onSaveError })
       toast.success(t('workouts.form.added'))

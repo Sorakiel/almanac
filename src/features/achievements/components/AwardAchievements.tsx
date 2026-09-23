@@ -7,6 +7,7 @@ import { useUserGrants } from '@/features/achievements/hooks/useUserGrants'
 import type { AchievementTone } from '@/features/achievements/types'
 import { useT } from '@/hooks/useT'
 import { achievementDescription, achievementTitle } from '@/features/achievements/lib/text'
+import { toUserError } from '@/lib/userError'
 
 const TONE: Record<AchievementTone, string> = {
   accent: 'bg-accent/15 text-accent',
@@ -25,8 +26,7 @@ export function AwardAchievements({ userId, userName }: { userId: string; userNa
       {
         onSuccess: () =>
           toast.success(t(on ? 'achievements.awarded' : 'achievements.revoked', { title })),
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('achievements.awardFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'achievements.awardFailed')),
       },
     )
 

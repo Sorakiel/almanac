@@ -7,6 +7,7 @@ import { saveFile } from '@/features/settings/lib/download'
 import { APP_VERSION } from '@/lib/version'
 import { trackEvent } from '@/lib/analytics'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 export type ExportFormat = 'json' | 'csv'
 
@@ -59,7 +60,7 @@ export function useExportData(): UseMutationResult<void, Error, ExportFormat> {
       toast.success(t('settings.exportReady'))
     },
     onError: (error) => {
-      toast.error(error.message || t('settings.exportFailed'))
+      toast.error(toUserError(error, t, 'settings.exportFailed'))
     },
   })
 }

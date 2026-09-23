@@ -13,6 +13,7 @@ import {
 } from '@/features/settings/lib/support'
 import { LoadingState } from '@/components/common/LoadingState'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 /**
  * Owner-only console block: flip whether users see the Support section at all,
@@ -29,7 +30,7 @@ export function SupportManager() {
       await setEnabled(next)
       toast.success(next ? t('admin.supportShown') : t('admin.supportHidden'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('admin.updateFailed'))
+      toast.error(toUserError(error, t, 'admin.updateFailed'))
     }
   }
 
@@ -95,7 +96,7 @@ function MethodRow({ method, onEdit }: MethodRowProps) {
     try {
       await update({ id: method.id, patch: { enabled: next } })
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('admin.updateFailed'))
+      toast.error(toUserError(error, t, 'admin.updateFailed'))
     }
   }
 

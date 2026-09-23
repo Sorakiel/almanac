@@ -17,6 +17,7 @@ import { useSession } from '@/hooks/useSession'
 import { browserTimezone } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 const STEP_COUNT = 4
 
@@ -83,8 +84,7 @@ function OnboardingPage() {
       // one. Not awaited: each shows up at once and queues if offline.
       for (const tpl of chosen) {
         create.mutate(toInput(tpl, t(`onboarding.suggestions.${tpl.key}`)), {
-          onError: (error) =>
-            toast.error(error instanceof Error ? error.message : t('onboarding.createFailed')),
+          onError: (error) => toast.error(toUserError(error, t, 'onboarding.createFailed')),
         })
       }
       toast.success(t('onboarding.habitsAdded', { count: chosen.length }))

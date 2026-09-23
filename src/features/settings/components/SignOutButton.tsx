@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface SignOutButtonProps {
   className?: string
@@ -29,7 +30,7 @@ export function SignOutButton({ className }: SignOutButtonProps) {
     try {
       await logOut.mutateAsync()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('errors.signOut'))
+      toast.error(toUserError(error, t, 'errors.signOut'))
     }
   }
 

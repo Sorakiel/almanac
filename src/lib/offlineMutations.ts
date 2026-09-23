@@ -421,11 +421,13 @@ export function registerOfflineMutations(client: QueryClient): void {
     HABITS,
   )
   // For good: the logs and freezes it takes with it leave every window stale.
+  // Not `detailRoot`, though — refetching the deleted habit's own page would
+  // only ask the server for a row that is gone (a 406 from `.single()`).
   register(
     OFFLINE_MUTATION_KEYS.deleteHabit,
     ({ id }) => deleteHabit(id),
     ({ userId }) => [
-      ...habitLists({ userId }),
+      habitKeys.all(userId),
       habitKeys.logsRoot(userId),
       habitKeys.freezesRoot(userId),
     ],

@@ -13,6 +13,7 @@ import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface HabitCardProps {
   habit: HabitWithTodayLog
@@ -45,8 +46,7 @@ export function HabitCard({ habit }: HabitCardProps) {
     toggle.mutate(
       { habit },
       {
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('habits.updateFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'habits.updateFailed')),
       },
     )
   }

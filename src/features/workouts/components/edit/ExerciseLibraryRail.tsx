@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
 import { intlLocale } from '@/lib/dateLocale'
 import { workoutKeys } from '@/features/workouts/hooks/queryKeys'
+import { toUserError } from '@/lib/userError'
 
 interface ExerciseLibraryRailProps {
   draft: WorkoutDraft
@@ -57,7 +58,7 @@ export function ExerciseLibraryRail({
       setNewName('')
       setCreating(false)
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : t('workouts.editor.createFailed')),
+    onError: (e) => toast.error(toUserError(e, t, 'workouts.editor.createFailed')),
   })
 
   const summary = draftSummary(draft)

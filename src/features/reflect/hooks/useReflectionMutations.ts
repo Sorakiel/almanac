@@ -8,6 +8,7 @@ import { patchQueryData, rollbackQueryData } from '@/lib/optimistic'
 import { OFFLINE_MUTATION_KEYS, type SaveReflectionVariables } from '@/lib/offlineMutations'
 import { reflectKeys } from '@/features/reflect/hooks/queryKeys'
 import type { Reflection } from '@/features/reflect/types'
+import { toUserError } from '@/lib/userError'
 
 /** Newest calendar day first, as `fetchReflections` orders them. */
 function byDateDesc(a: Reflection, b: Reflection): number {
@@ -43,7 +44,7 @@ export function useReflectionMutations() {
         ),
       onError: (error, _vars, context) => {
         rollbackQueryData(queryClient, key, context)
-        toast.error(error instanceof Error ? error.message : t('reflect.deleteFailed'))
+        toast.error(toUserError(error, t, 'reflect.deleteFailed'))
       },
     },
   )
@@ -60,7 +61,7 @@ export function useReflectionMutations() {
         ),
       onError: (error, _vars, context) => {
         rollbackQueryData(queryClient, key, context)
-        toast.error(error instanceof Error ? error.message : t('reflect.restoreFailed'))
+        toast.error(toUserError(error, t, 'reflect.restoreFailed'))
       },
     },
   )

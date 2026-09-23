@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 const schema = z.object({
   password: z.string().min(6, 'auth.passwordTooShort'),
@@ -35,7 +36,7 @@ function ResetPasswordPage() {
       toast.success(t('auth.reset.updated'))
       navigate('/', { replace: true })
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('auth.reset.failed'))
+      toast.error(toUserError(error, t, 'auth.reset.failed'))
     }
   })
 

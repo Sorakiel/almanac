@@ -9,6 +9,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { useAccountActions } from '@/features/settings/hooks/useAccountActions'
 import type { TranslationKey } from '@/i18n/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface EmailSheetProps {
   open: boolean
@@ -47,7 +48,7 @@ export function EmailSheet({ open, onOpenChange, current }: EmailSheetProps) {
       toast.success(t('settings.emailSent', { email: pending ?? email }))
       onOpenChange(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('settings.emailFailed'))
+      toast.error(toUserError(error, t, 'settings.emailFailed'))
     }
   })
 

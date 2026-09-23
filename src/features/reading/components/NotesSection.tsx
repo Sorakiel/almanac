@@ -9,6 +9,7 @@ import { SectionLabel } from '@/components/common/SectionLabel'
 import { useNoteMutations } from '@/features/reading/hooks/useNoteMutations'
 import type { Book, BookNote } from '@/features/reading/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 /** Book notes: a composer (body + optional page) and the note history. */
 export function NotesSection({ book, notes }: { book: Book; notes: BookNote[] }) {
@@ -28,16 +29,14 @@ export function NotesSection({ book, notes }: { book: Book; notes: BookNote[] })
           setBody('')
           setPage('')
         },
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('reading.noteAddFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'reading.noteAddFailed')),
       },
     )
   }
 
   const onDelete = (id: string) => {
     remove.mutate(id, {
-      onError: (error) =>
-        toast.error(error instanceof Error ? error.message : t('reading.noteDeleteFailed')),
+      onError: (error) => toast.error(toUserError(error, t, 'reading.noteDeleteFailed')),
     })
   }
 

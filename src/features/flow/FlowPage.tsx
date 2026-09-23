@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
 import { useNow } from '@/hooks/useNow'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
+import { toUserError } from '@/lib/userError'
 
 type Mode = 'habit' | 'book' | 'custom'
 
@@ -82,7 +83,7 @@ function FlowPage() {
         void queryClient.invalidateQueries({ queryKey: ['habits'] })
         void queryClient.invalidateQueries({ queryKey: ['habitLogs'] })
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : t('flow.completeFailed'))
+        toast.error(toUserError(error, t, 'flow.completeFailed'))
         return
       }
     }

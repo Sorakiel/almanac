@@ -18,6 +18,7 @@ import {
 } from '@/features/habits/hooks/habitCache'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
 import type { Habit, HabitInsert } from '@/features/habits/types'
+import { toUserError } from '@/lib/userError'
 
 export interface HabitFormInput {
   name: string
@@ -129,10 +130,21 @@ export function useHabitMutations() {
         dropHabit(queryClient, userId, id)
         return { previous }
       },
+      // Its own queries now describe a row that no longer exists.
+      onSuccess: (_data, { id }) => {
+        for (const queryKey of [
+          habitKeys.detail(id),
+          habitKeys.history(id),
+          habitKeys.freezesOf(id),
+          habitKeys.subtasks(id),
+        ]) {
+          queryClient.removeQueries({ queryKey })
+        }
+      },
       // Toasted here: the page that fired it has already navigated away.
       onError: (error, _vars, context) => {
         if (context?.previous) putHabit(queryClient, userId, context.previous)
-        toast.error(error instanceof Error ? error.message : t('habits.deleteFailed'))
+        toast.error(toUserError(error, t, 'habits.deleteFailed'))
       },
     },
   )

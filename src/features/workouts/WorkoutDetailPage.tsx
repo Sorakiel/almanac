@@ -20,6 +20,7 @@ import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import { dateFromKey } from '@/lib/date'
 import { intlLocale } from '@/lib/dateLocale'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 /** Friendly label for a `YYYY-MM-DD` date, UTC-safe. */
 function formatDate(dateKey: string, locale: string): string {
@@ -67,7 +68,7 @@ function WorkoutDetailPage() {
 
   const toggleComplete = () =>
     mutations.setCompleted.mutate(!done, {
-      onError: (e) => toast.error(e instanceof Error ? e.message : t('workouts.updateFailed')),
+      onError: (e) => toast.error(toUserError(e, t, 'workouts.updateFailed')),
     })
 
   const startSession = () => {

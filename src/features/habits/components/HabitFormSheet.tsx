@@ -26,6 +26,7 @@ import { toastWithUndo } from '@/lib/undoToast'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'
+import { toUserError } from '@/lib/userError'
 
 const schema = z.object({
   // The message is a translation key: zod runs outside React, so the sheet
@@ -153,8 +154,7 @@ export function HabitFormSheet() {
     setValue('target_count', clamp(values.target_count, UNIT_RANGE[next].min, UNIT_RANGE[next].max))
   }
 
-  const onSaveError = (error: Error) =>
-    toast.error(error instanceof Error ? error.message : t('habits.saveFailed'))
+  const onSaveError = (error: Error) => toast.error(toUserError(error, t, 'habits.saveFailed'))
 
   // Nothing here is awaited: the write queues (offline too), the cache
   // already shows the result, and the sheet closes on the same tap.
@@ -171,8 +171,8 @@ export function HabitFormSheet() {
       time_of_day: v.time_of_day,
     }
     if (editing) {
+      // No "saved" toast: the change is on screen the moment the sheet closes.
       update.mutate({ id: editing.id, input }, { onError: onSaveError })
-      toast.success(t('habits.updated'))
     } else {
       const id = crypto.randomUUID()
       const checklist = draftChecklist.map((title) => ({ id: crypto.randomUUID(), title }))
@@ -184,8 +184,7 @@ export function HabitFormSheet() {
 
   const onArchive = (habit: Habit) => {
     archive.mutate(habit.id, {
-      onError: (error) =>
-        toast.error(error instanceof Error ? error.message : t('habits.archiveFailed')),
+      onError: (error) => toast.error(toUserError(error, t, 'habits.archiveFailed')),
     })
     toastWithUndo(t('habits.archived'), t('common.undo'), () => restore.mutate(habit))
     closeHabitForm()

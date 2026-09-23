@@ -8,6 +8,7 @@ import { useDailyQuote } from '@/features/dashboard/hooks/useDailyQuote'
 import { useReflectionMutations } from '@/features/reflect/hooks/useReflectionMutations'
 import type { Reflection } from '@/features/reflect/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface ReflectionComposerProps {
   /** The user's local date key — the day this entry belongs to. */
@@ -52,8 +53,7 @@ export function ReflectionComposer({ dateKey, today }: ReflectionComposerProps) 
         dayRating: day,
       },
       {
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('reflect.saveFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'reflect.saveFailed')),
       },
     )
   }

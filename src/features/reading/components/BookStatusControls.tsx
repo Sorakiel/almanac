@@ -9,6 +9,7 @@ import { type BookPatch } from '@/features/reading/api/books.api'
 import { useToday } from '@/hooks/useToday'
 import type { Book, BookStatus } from '@/features/reading/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 /** Status (with auto start/finish dates), editable dates, and a live rating. */
 export function BookStatusControls({ book }: { book: Book }) {
@@ -21,8 +22,7 @@ export function BookStatusControls({ book }: { book: Book }) {
     update.mutate(
       { id: book.id, patch: fields },
       {
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('reading.updateFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'reading.updateFailed')),
       },
     )
 
@@ -30,8 +30,7 @@ export function BookStatusControls({ book }: { book: Book }) {
     rate.mutate(
       { book, rating },
       {
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('reading.ratingFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'reading.ratingFailed')),
       },
     )
 

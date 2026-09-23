@@ -26,6 +26,7 @@ import { useUiStore } from '@/stores/ui'
 import { toastWithUndo } from '@/lib/undoToast'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 function HabitDetailPage() {
   const { t } = useT()
@@ -46,8 +47,7 @@ function HabitDetailPage() {
     if (!habit) return
     setMenuOpen(false)
     archive.mutate(id, {
-      onError: (error) =>
-        toast.error(error instanceof Error ? error.message : t('habits.archiveFailed')),
+      onError: (error) => toast.error(toUserError(error, t, 'habits.archiveFailed')),
     })
     toastWithUndo(t('habits.archived'), t('common.undo'), () => restore.mutate(habit))
     navigate('/habits')
@@ -63,8 +63,7 @@ function HabitDetailPage() {
   const markDone = useMarkHabitDone(habit)
   const setDone = (done: boolean) =>
     markDone.mutate(done, {
-      onError: (error) =>
-        toast.error(error instanceof Error ? error.message : t('habits.updateFailed')),
+      onError: (error) => toast.error(toUserError(error, t, 'habits.updateFailed')),
     })
 
   if (isLoading) {
@@ -156,8 +155,7 @@ function HabitDetailPage() {
               toggleFreeze.mutate(
                 { habitId: id, freeze },
                 {
-                  onError: (error) =>
-                    toast.error(error instanceof Error ? error.message : t('habits.freezeFailed')),
+                  onError: (error) => toast.error(toUserError(error, t, 'habits.freezeFailed')),
                 },
               )
             }
@@ -230,8 +228,7 @@ function HabitDetailPage() {
               toggleFreeze.mutate(
                 { habitId: id, freeze: !stats.todayFrozen },
                 {
-                  onError: (error) =>
-                    toast.error(error instanceof Error ? error.message : t('habits.freezeFailed')),
+                  onError: (error) => toast.error(toUserError(error, t, 'habits.freezeFailed')),
                 },
               )
             }

@@ -2,6 +2,7 @@ import { toast } from 'sonner'
 import { useSession } from '@/hooks/useSession'
 import { useOfflineMutation } from '@/hooks/useOfflineMutation'
 import { OFFLINE_MUTATION_KEYS } from '@/lib/offlineMutations'
+import { toUserError } from '@/lib/userError'
 import { useT } from '@/hooks/useT'
 
 /** Send / accept / remove friend requests; refresh the friends list on settle. */
@@ -15,7 +16,7 @@ export function useFriendMutations() {
     (addresseeId: string) => ({ requesterId: userId, addresseeId }),
     {
       onSuccess: () => toast.success(t('social.requestSent')),
-      onError: () => toast.error(t('social.requestFailed')),
+      onError: (error) => toast.error(toUserError(error, t, 'social.requestFailed')),
     },
   )
   const accept = useOfflineMutation(
@@ -23,13 +24,13 @@ export function useFriendMutations() {
     (friendshipId: string) => ({ friendshipId, userId }),
     {
       onSuccess: () => toast.success(t('social.nowFriends')),
-      onError: () => toast.error(t('social.acceptFailed')),
+      onError: (error) => toast.error(toUserError(error, t, 'social.acceptFailed')),
     },
   )
   const remove = useOfflineMutation(
     OFFLINE_MUTATION_KEYS.removeFriendship,
     (friendshipId: string) => ({ friendshipId, userId }),
-    { onError: () => toast.error(t('social.genericError')) },
+    { onError: (error) => toast.error(toUserError(error, t, 'social.genericError')) },
   )
 
   return { send, accept, remove }

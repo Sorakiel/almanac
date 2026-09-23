@@ -4,6 +4,7 @@ import { useHabitSubtasks } from '@/features/habits/hooks/useHabitSubtasks'
 import type { Habit } from '@/features/habits/types'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface HabitChecklistProps {
   habit: Habit
@@ -38,10 +39,7 @@ export function HabitChecklist({ habit, className }: HabitChecklistProps) {
             toggleToday.mutate(
               { subtask, checked: !checked },
               {
-                onError: (error) =>
-                  toast.error(
-                    error instanceof Error ? error.message : t('habits.itemUpdateFailed'),
-                  ),
+                onError: (error) => toast.error(toUserError(error, t, 'habits.itemUpdateFailed')),
               },
             )
           return (

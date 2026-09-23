@@ -23,6 +23,7 @@ import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
+import { toUserError } from '@/lib/userError'
 
 interface SortableHabitListProps {
   habits: HabitWithTodayLog[]
@@ -47,8 +48,7 @@ export function SortableHabitList({ habits }: SortableHabitListProps) {
     reorder.mutate(
       next.map((h, index) => ({ id: h.id, sort_order: index })),
       {
-        onError: (error) =>
-          toast.error(error instanceof Error ? error.message : t('habits.reorderFailed')),
+        onError: (error) => toast.error(toUserError(error, t, 'habits.reorderFailed')),
       },
     )
   }
