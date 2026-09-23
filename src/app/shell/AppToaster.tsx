@@ -1,6 +1,7 @@
 import { Toaster } from 'sonner'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useThemeStore } from '@/stores/theme'
+import { useUiStore } from '@/stores/ui'
 
 /**
  * The app's toasts, in the app's voice.
@@ -19,9 +20,17 @@ import { useThemeStore } from '@/stores/theme'
  *
  * Every one of the ~116 `toast.*` call sites is untouched by this.
  */
+/** Clear of the glass bottom nav on a phone. */
+const PHONE_BOTTOM = 104
+/** The capsule's 44px height plus a gap. */
+const CAPSULE_CLEARANCE = 52
+
 export function AppToaster() {
   const theme = useThemeStore((s) => s.theme)
   const isDesktop = useMediaQuery('(min-width: 1024px)')
+  // On a phone the sync capsule sits where toasts do; stack them above it.
+  const capsule = useUiStore((s) => s.syncCapsuleVisible)
+  const phoneBottom = capsule ? PHONE_BOTTOM + CAPSULE_CLEARANCE : PHONE_BOTTOM
 
   return (
     <Toaster
@@ -30,8 +39,8 @@ export function AppToaster() {
       // Clear of the glass bottom nav (and its safe-area padding) on a phone.
       // `mobileOffset` is separate in sonner 2 and wins under its own
       // breakpoint, so setting only `offset` left the toast under the nav.
-      offset={isDesktop ? 16 : 104}
-      mobileOffset={{ bottom: 104, left: 16, right: 16 }}
+      offset={isDesktop ? 16 : phoneBottom}
+      mobileOffset={{ bottom: phoneBottom, left: 16, right: 16 }}
       icons={{
         success: (
           <span aria-hidden="true" className="font-mono text-[13px] font-bold text-teal">

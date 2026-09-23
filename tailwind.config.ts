@@ -61,6 +61,11 @@ export default {
         nav: '20px',
       },
       keyframes: {
+        // The sync capsule rising in with a little overshoot, as in the prototype.
+        'capsule-in': {
+          '0%': { transform: 'translateY(12px) scale(0.96)', opacity: '0' },
+          '100%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+        },
         // Bouncy one-shot scale — completion toggles, badges, icons.
         pop: {
           '0%': { transform: 'scale(0.7)' },
@@ -136,6 +141,7 @@ export default {
         },
       },
       animation: {
+        'capsule-in': 'capsule-in 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) both',
         pop: 'pop 0.4s ease-out',
         ripple: 'ripple 0.6s ease-out',
         shimmer: 'shimmer 1.6s ease-in-out infinite',

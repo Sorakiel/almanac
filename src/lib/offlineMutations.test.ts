@@ -12,7 +12,11 @@ import { createReflection, updateReflection } from '@/features/reflect/api/refle
 import { updateBook } from '@/features/reading/api/books.api'
 import { createReadingSession } from '@/features/reading/api/sessions.api'
 import { sendFriendRequest } from '@/features/social/api/social.api'
-import { OFFLINE_MUTATION_KEYS, registerOfflineMutations } from '@/lib/offlineMutations'
+import {
+  OFFLINE_MUTATION_KEYS,
+  habitIdOfWrite,
+  registerOfflineMutations,
+} from '@/lib/offlineMutations'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import type { Book } from '@/features/reading/types'
 
@@ -367,5 +371,19 @@ describe('offline mutation resume', () => {
         { ...client.getMutationCache().build(client, {}).state, isPaused: true },
       )
     expect(shouldDehydrateMutation(mutation)).toBe(false)
+  })
+})
+
+describe('habitIdOfWrite', () => {
+  it('finds the habit behind every habit write shape', () => {
+    expect(habitIdOfWrite(OFFLINE_MUTATION_KEYS.toggleHabit, { habit })).toBe('h1')
+    expect(habitIdOfWrite(OFFLINE_MUTATION_KEYS.toggleFreeze, { habitId: 'h2' })).toBe('h2')
+    expect(habitIdOfWrite(OFFLINE_MUTATION_KEYS.createHabit, { id: 'h3', userId: 'u1' })).toBe('h3')
+  })
+
+  it("ignores other entities' ids and non-offline writes", () => {
+    expect(habitIdOfWrite(OFFLINE_MUTATION_KEYS.deleteWorkout, { id: 'w1' })).toBeNull()
+    expect(habitIdOfWrite(['auth', 'signIn'], { habitId: 'h1' })).toBeNull()
+    expect(habitIdOfWrite(OFFLINE_MUTATION_KEYS.toggleHabit, null)).toBeNull()
   })
 })
