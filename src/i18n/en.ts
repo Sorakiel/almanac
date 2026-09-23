@@ -609,6 +609,11 @@ export const en = {
     heatmapLess: 'less',
     heatmapMore: 'more',
     focusDay: '{date} · {count} min',
+    rangePill: {
+      '7d': '7D',
+      '30d': '30D',
+      all: 'ALL',
+    },
   },
   reading: {
     title: 'Reading',

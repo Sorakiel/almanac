@@ -1,4 +1,4 @@
-import { INSIGHT_RANGE_OPTIONS } from '@/features/insights/lib/insightRange'
+import { INSIGHT_RANGES } from '@/features/insights/lib/insightRange'
 import type { InsightRange } from '@/features/insights/types'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
@@ -21,22 +21,22 @@ export function RangeToggle({ value, onChange, className }: RangeToggleProps) {
         className,
       )}
     >
-      {INSIGHT_RANGE_OPTIONS.map((option) => {
-        const active = option.value === value
+      {INSIGHT_RANGES.map((range) => {
+        const active = range === value
         return (
           <button
-            key={option.value}
+            key={range}
             type="button"
             role="tab"
             aria-selected={active}
-            onClick={() => onChange(option.value)}
+            onClick={() => onChange(range)}
             className={cn(
               'rounded-[9px] px-2.5 py-1.5 transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
               active ? 'bg-surface text-foreground' : 'hover:text-foreground',
             )}
           >
-            {option.label}
+            {t(`insights.rangePill.${range}`)}
           </button>
         )
       })}
