@@ -358,6 +358,7 @@ export const en = {
     startFailed: 'Almanac could not reach its server',
     startOffline: 'You are offline, and this device has nothing saved yet',
     tryAgain: 'Try again',
+    notifications: 'Notifications',
     close: 'Close',
     cancel: 'Cancel',
     undo: 'Undo',

@@ -1,80 +1,54 @@
 import { Toaster } from 'sonner'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useT } from '@/hooks/useT'
 import { useThemeStore } from '@/stores/theme'
 import { useUiStore } from '@/stores/ui'
 
-/**
- * The app's toasts, in the app's voice.
- *
- * Sonner's `richColors` painted every success a stock green and every error a
- * stock red — the only two saturated colours in the product that came from
- * somewhere other than the token layer, dropped on top of a warm palette. This
- * is fully unstyled instead: surface card, mono type, and a single coloured
- * left rule carrying the status, using the same teal/danger/accent the rest of
- * the app uses. The glyphs are the terminal's, not a stock icon set.
- *
- * Position is the other half. `top-center` sat over the page header on a
- * phone — exactly where the title and the date are — so mobile drops it to the
- * bottom, offset clear of the nav bar. Desktop has nothing at the top to hide
- * and keeps it there.
- *
- * Every one of the ~116 `toast.*` call sites is untouched by this.
- */
-/** Clear of the glass bottom nav on a phone. */
-const PHONE_BOTTOM = 104
-/** The capsule's 44px height plus a gap. */
-const CAPSULE_CLEARANCE = 52
+const dot = (tone: string) => (
+  <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${tone}`} />
+)
 
+/**
+ * The app's toasts: one glass capsule above the tab bar, as in the redesign
+ * prototype (`.p-toast`). A coloured dot carries the status — accent for
+ * news, teal for done, danger for a failure — and an Undo toast shows a thin
+ * countdown under its text (globals.css), so the 5 s window is visible.
+ *
+ * Placement is CSS, not a media query in JS: the phone and tablet shells keep
+ * the toast clear of the bottom nav, desktop sits it at the bottom centre, and
+ * both lift it over the sync capsule when that is on screen (`.toaster-lifted`).
+ *
+ * Every `toast.*` call site is untouched by this.
+ */
 export function AppToaster() {
+  const { t } = useT()
   const theme = useThemeStore((s) => s.resolved)
-  const isDesktop = useMediaQuery('(min-width: 1024px)')
-  // On a phone the sync capsule sits where toasts do; stack them above it.
   const capsule = useUiStore((s) => s.syncCapsuleVisible)
-  const phoneBottom = capsule ? PHONE_BOTTOM + CAPSULE_CLEARANCE : PHONE_BOTTOM
 
   return (
     <Toaster
       theme={theme === 'coffee' ? 'light' : 'dark'}
-      position={isDesktop ? 'top-center' : 'bottom-center'}
-      // Clear of the glass bottom nav (and its safe-area padding) on a phone.
-      // `mobileOffset` is separate in sonner 2 and wins under its own
-      // breakpoint, so setting only `offset` left the toast under the nav.
-      offset={isDesktop ? 16 : phoneBottom}
-      mobileOffset={{ bottom: phoneBottom, left: 16, right: 16 }}
+      position="bottom-center"
+      className={capsule ? 'toaster-lifted' : undefined}
+      containerAriaLabel={t('common.notifications')}
+      gap={6}
       icons={{
-        success: (
-          <span aria-hidden="true" className="font-mono text-[13px] font-bold text-teal">
-            ✓
-          </span>
-        ),
-        error: (
-          <span aria-hidden="true" className="font-mono text-[13px] font-bold text-danger">
-            !
-          </span>
-        ),
-        loading: (
-          <span aria-hidden="true" className="font-mono text-[13px] font-bold text-accent">
-            ◇
-          </span>
-        ),
+        success: dot('bg-teal'),
+        info: dot('bg-accent'),
+        warning: dot('bg-warning'),
+        error: dot('bg-danger'),
+        loading: dot('bg-accent motion-safe:animate-pulse'),
       }}
       toastOptions={{
         unstyled: true,
         duration: 2800,
         classNames: {
-          // No default left-border colour here on purpose: a base colour and a
-          // per-type one are the same utility at the same specificity, so which
-          // wins would depend on stylesheet order rather than intent.
-          toast:
-            'flex w-full items-start gap-2.5 rounded-card border border-l-2 bg-surface/95 px-4 py-3 shadow-card backdrop-blur-nav',
-          title: 'font-mono text-[12.5px] leading-snug text-foreground',
-          description: 'mt-0.5 font-sans text-[12px] leading-snug text-muted',
-          // Undo and friends: a real button, not a stray line of body text.
+          toast: 'toast-capsule lg motion-safe:animate-capsule-in',
+          icon: 'flex shrink-0 items-center',
+          content: 'min-w-0',
+          title: 'truncate',
+          description: 'truncate text-footnote font-normal text-muted',
           actionButton:
-            '-my-1 ml-auto shrink-0 self-center rounded-full px-3 py-1.5 font-sans text-[13px] font-semibold text-accent transition-colors hover:bg-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-          success: 'border-l-teal',
-          error: 'border-l-danger',
-          loading: 'border-l-accent',
+            'shrink-0 rounded-pill bg-accent/20 px-3 py-1.5 text-callout font-semibold text-accent transition-colors hover:bg-accent/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
         },
       }}
     />

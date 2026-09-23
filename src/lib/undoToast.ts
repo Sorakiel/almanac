@@ -7,6 +7,8 @@ export const UNDO_WINDOW_MS = 5000
 export function toastWithUndo(message: string, undoLabel: string, onUndo: () => void): void {
   toast.success(message, {
     duration: UNDO_WINDOW_MS,
+    // Draws the countdown bar (globals.css), which runs for exactly this long.
+    className: 'toast-undo',
     action: { label: undoLabel, onClick: onUndo },
   })
 }

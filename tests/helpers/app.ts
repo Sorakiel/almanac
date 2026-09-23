@@ -72,15 +72,22 @@ export async function recordOfflineShell(context: BrowserContext): Promise<Offli
           recorded.get(url) ?? (route.request().isNavigationRequest() ? shellDocument : undefined)
         return hit ? route.fulfill(hit) : route.abort('internetdisconnected')
       }
-      const response = await route.fetch()
-      const entry = {
-        status: response.status(),
-        headers: response.headers(),
-        body: await response.body(),
+      try {
+        const response = await route.fetch()
+        const entry = {
+          status: response.status(),
+          headers: response.headers(),
+          body: await response.body(),
+        }
+        recorded.set(url, entry)
+        if (route.request().isNavigationRequest()) shellDocument = entry
+        return await route.fulfill(entry)
+      } catch {
+        // The page navigated away (a reload) while this request was in flight,
+        // or the dev server dropped it: nobody is waiting for the answer. Letting
+        // the handler throw failed the whole test — a flake, not an app bug.
+        return route.abort().catch(() => undefined)
       }
-      recorded.set(url, entry)
-      if (route.request().isNavigationRequest()) shellDocument = entry
-      return route.fulfill(entry)
     },
   )
   return {

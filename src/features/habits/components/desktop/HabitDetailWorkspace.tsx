@@ -72,7 +72,7 @@ export function HabitDetailWorkspace({
           onClick={onArchive}
           aria-label={t('habits.archiveHabit')}
           title={t('habits.archiveHabit')}
-          className="rounded-[11px] border p-[11px] text-muted-strong transition-colors hover:text-foreground"
+          className="rounded-inner border p-2.5 text-muted-strong transition-colors hover:text-foreground"
         >
           <Archive className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -81,7 +81,7 @@ export function HabitDetailWorkspace({
           onClick={onDelete}
           aria-label={t('habits.deleteHabit')}
           title={t('habits.deleteHabit')}
-          className="rounded-[11px] border p-[11px] text-muted-strong transition-colors hover:border-danger/40 hover:text-danger"
+          className="rounded-inner border p-2.5 text-muted-strong transition-colors hover:border-danger/40 hover:text-danger"
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
         </button>
