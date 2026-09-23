@@ -373,6 +373,8 @@ export const en = {
     newHabit: 'New habit',
     adminConsole: 'Admin console',
     almanacWatches: 'The Almanac watches your day',
+    updateDownloading: 'Update {version} — downloading…',
+    updateInstalled: 'Update installed — restarting…',
   },
   achievements: {
     title: 'Achievements',

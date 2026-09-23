@@ -1,4 +1,6 @@
 import { toast } from 'sonner'
+import { translate } from '@/i18n'
+import { useLocaleStore } from '@/stores/locale'
 
 // Auto-update for the Tauri desktop build. In the browser / Vercel build this is
 // a no-op: the plugins only exist inside the native shell, so we feature-detect
@@ -13,7 +15,11 @@ export async function checkForDesktopUpdate(): Promise<void> {
     const update = await check()
     if (!update) return
 
-    const dismiss = toast.loading(`Обновление ${update.version} — загрузка…`)
+    // Runs outside React, so read the current language straight from the store.
+    const { locale } = useLocaleStore.getState()
+    const dismiss = toast.loading(
+      translate(locale, 'common.updateDownloading', { version: update.version }),
+    )
     await update.downloadAndInstall()
     toast.dismiss(dismiss)
 
@@ -21,7 +27,7 @@ export async function checkForDesktopUpdate(): Promise<void> {
     // latter spawns the bundle's raw binary and the app never reappears. The
     // Rust side reopens through LaunchServices on macOS, plain restart elsewhere.
     const { invoke } = await import('@tauri-apps/api/core')
-    toast.success('Обновление установлено — перезапуск…')
+    toast.success(translate(locale, 'common.updateInstalled'))
     await invoke('restart_app')
   } catch (err) {
     // Non-fatal: offline, no release published yet, or signature mismatch.
