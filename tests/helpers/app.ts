@@ -45,24 +45,31 @@ export interface OfflineShell {
   online(): Promise<void>
 }
 
+interface RecordedResponse {
+  status: number
+  headers: Record<string, string>
+  body: Buffer
+}
+
 /**
  * Stand-in for the production service worker, which does not run under the
  * dev server: every app-shell response is recorded while online and replayed
  * once `offline()` is called, so `page.reload()` works with the network off.
- * Supabase is not routed — its requests fail for real, which is the point.
+ * Like the real worker, any navigation falls back to the recorded shell — the
+ * SPA reaches `/` by client-side routing after sign-in, so that exact document
+ * was never fetched. Supabase is not routed: its requests fail for real.
  */
 export async function recordOfflineShell(context: BrowserContext): Promise<OfflineShell> {
-  const recorded = new Map<
-    string,
-    { status: number; headers: Record<string, string>; body: Buffer }
-  >()
+  const recorded = new Map<string, RecordedResponse>()
+  let shellDocument: RecordedResponse | undefined
   let offline = false
   await context.route(
     (url) => url.hostname === 'localhost',
     async (route) => {
       const url = route.request().url()
       if (offline) {
-        const hit = recorded.get(url)
+        const hit =
+          recorded.get(url) ?? (route.request().isNavigationRequest() ? shellDocument : undefined)
         return hit ? route.fulfill(hit) : route.abort('internetdisconnected')
       }
       const response = await route.fetch()
@@ -72,6 +79,7 @@ export async function recordOfflineShell(context: BrowserContext): Promise<Offli
         body: await response.body(),
       }
       recorded.set(url, entry)
+      if (route.request().isNavigationRequest()) shellDocument = entry
       return route.fulfill(entry)
     },
   )
