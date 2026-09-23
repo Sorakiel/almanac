@@ -4,6 +4,7 @@ import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
 import { Rail } from '@/components/rail/Rail'
 import { fetchQuotes, type Quote } from '@/features/dashboard/api/quotes.api'
+import { localizeQuotes } from '@/features/dashboard/lib/quotes'
 import { ReflectTicker } from '@/features/reflect/components/ReflectTicker'
 import { ReflectTimeline } from '@/features/reflect/components/ReflectTimeline'
 import { ReflectWorkspace } from '@/features/reflect/components/desktop/ReflectWorkspace'
@@ -14,7 +15,7 @@ import { useToday } from '@/hooks/useToday'
 import { useT } from '@/hooks/useT'
 
 function ReflectPage() {
-  const { t } = useT()
+  const { t, locale } = useT()
   const { reflections, isLoading, isError, refetch } = useReflections()
   const { dateKey } = useToday()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
@@ -26,8 +27,8 @@ function ReflectPage() {
     staleTime: 1000 * 60 * 60,
   })
   const quoteById = useMemo(
-    () => new Map<string, Quote>((quotes ?? []).map((q) => [q.id, q])),
-    [quotes],
+    () => new Map<string, Quote>(localizeQuotes(quotes ?? [], locale).map((q) => [q.id, q])),
+    [quotes, locale],
   )
 
   const today = useMemo(

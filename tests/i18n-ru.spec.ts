@@ -40,32 +40,19 @@ interface AccountData {
 /** The account's own words, plus one detail route per entity that has rows. */
 async function readAccount(): Promise<AccountData> {
   const db = await e2eClient()
-  const [
-    habits,
-    workouts,
-    exercises,
-    books,
-    notes,
-    reflections,
-    focus,
-    subtasks,
-    profiles,
-    feed,
-    quotes,
-  ] = await Promise.all([
-    db.from('habits').select('id, name, description').is('archived_at', null),
-    db.from('workouts').select('id, name'),
-    db.from('exercises').select('name, muscle_group'),
-    db.from('books').select('id, title, author'),
-    db.from('book_notes').select('body'),
-    db.from('reflections').select('body'),
-    db.from('focus_sessions').select('label'),
-    db.from('habit_subtasks').select('title'),
-    db.from('profiles').select('display_name'),
-    db.from('activity_events').select('subject'),
-    // Quotes are content, and still English-only until they carry a Russian text.
-    db.from('quotes').select('text, author'),
-  ])
+  const [habits, workouts, exercises, books, notes, reflections, focus, subtasks, profiles, feed] =
+    await Promise.all([
+      db.from('habits').select('id, name, description').is('archived_at', null),
+      db.from('workouts').select('id, name'),
+      db.from('exercises').select('name, muscle_group'),
+      db.from('books').select('id, title, author'),
+      db.from('book_notes').select('body'),
+      db.from('reflections').select('body'),
+      db.from('focus_sessions').select('label'),
+      db.from('habit_subtasks').select('title'),
+      db.from('profiles').select('display_name'),
+      db.from('activity_events').select('subject'),
+    ])
   const words = wordsOf([
     ...(habits.data ?? []).flatMap((r) => [r.name, r.description]),
     ...(workouts.data ?? []).map((r) => r.name),
@@ -77,7 +64,6 @@ async function readAccount(): Promise<AccountData> {
     ...(subtasks.data ?? []).map((r) => r.title),
     ...(profiles.data ?? []).map((r) => r.display_name),
     ...(feed.data ?? []).map((r) => r.subject),
-    ...(quotes.data ?? []).flatMap((r) => [r.text, r.author]),
   ])
   const routes = [...STATIC_ROUTES]
   const habit = habits.data?.[0]

@@ -555,18 +555,24 @@ export type Database = {
       quotes: {
         Row: {
           author: string | null
+          author_ru: string | null
           id: string
           text: string
+          text_ru: string | null
         }
         Insert: {
           author?: string | null
+          author_ru?: string | null
           id?: string
           text: string
+          text_ru?: string | null
         }
         Update: {
           author?: string | null
+          author_ru?: string | null
           id?: string
           text?: string
+          text_ru?: string | null
         }
         Relationships: []
       }
