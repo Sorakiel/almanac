@@ -35,6 +35,7 @@ export default {
         teal: withOpacity('--color-teal'),
         amber: withOpacity('--color-amber'),
         danger: withOpacity('--color-danger'),
+        'on-danger': withOpacity('--color-on-danger'),
         success: withOpacity('--color-success'),
       },
       fontFamily: {

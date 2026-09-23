@@ -158,9 +158,15 @@ Mirror the _Almanac_ spec board. All colors are **CSS variables** referenced thr
   (`--color-accent-bright`) for the handful of spots pinned to one literal
   shade regardless of theme — the brand-mark gradient's first stop, mainly.
   `--color-accent-deep` (`#C2562A`) is likewise invariant (2nd gradient stop,
-  danger button, "deep" hover shade on dark).
+  "deep" hover shade on dark).
 
 **Shared category colors:** teal `#2A9D8F`, amber `#C79A3A`.
+
+**Red is destructive + errors only, never the accent.** `--color-danger` is
+`#FF6B5E` on dark and `#B63228` on coffee (a step deeper than the handoff's
+`#C8372C`, which misses AA on the card surface), with `--color-on-danger` as the
+ink on its fill. A reversible delete (archive, a reflection) gets a 5 s Undo
+toast instead of a confirm; an irreversible one gets the red `ConfirmSheet`.
 
 **Typography**
 

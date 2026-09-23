@@ -137,6 +137,15 @@ export async function archiveHabit(id: string): Promise<void> {
   if (error) throw error
 }
 
+/**
+ * Erase a habit for good. Its logs, freezes, checklist and friend-feed events
+ * go with it (`on delete cascade`) — there is no Undo, so the UI confirms first.
+ */
+export async function deleteHabit(id: string): Promise<void> {
+  const { error } = await supabase.from('habits').delete().eq('id', id)
+  if (error) throw error
+}
+
 /** A habit's checklist, in display order. */
 export async function fetchSubtasks(habitId: string): Promise<HabitSubtask[]> {
   const { data, error } = await supabase

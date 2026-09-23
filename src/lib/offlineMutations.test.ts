@@ -8,7 +8,12 @@ import {
   setHabitCount,
 } from '@/features/habits/api/habits.api'
 import { updateWorkout } from '@/features/workouts/api/workouts.api'
-import { createReflection, updateReflection } from '@/features/reflect/api/reflections.api'
+import {
+  createReflection,
+  deleteReflection,
+  restoreReflection,
+  updateReflection,
+} from '@/features/reflect/api/reflections.api'
 import { updateBook } from '@/features/reading/api/books.api'
 import { createReadingSession } from '@/features/reading/api/sessions.api'
 import { sendFriendRequest } from '@/features/social/api/social.api'
@@ -19,6 +24,7 @@ import {
 } from '@/lib/offlineMutations'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import type { Book } from '@/features/reading/types'
+import type { Reflection } from '@/features/reflect/types'
 
 vi.mock('@/features/habits/api/habits.api', () => ({
   setHabitCount: vi.fn(async () => undefined),
@@ -28,6 +34,7 @@ vi.mock('@/features/habits/api/habits.api', () => ({
   updateHabit: vi.fn(async () => undefined),
   archiveHabit: vi.fn(async () => undefined),
   restoreHabit: vi.fn(async () => undefined),
+  deleteHabit: vi.fn(async () => undefined),
   createSubtasksBulk: vi.fn(async () => undefined),
   updateHabitOrder: vi.fn(async () => undefined),
   createSubtask: vi.fn(async () => ({ id: 'new-subtask' })),
@@ -46,6 +53,7 @@ vi.mock('@/features/reflect/api/reflections.api', () => ({
   createReflection: vi.fn(async () => ({ id: 'new-reflection' })),
   updateReflection: vi.fn(async () => ({ id: 'r1' })),
   deleteReflection: vi.fn(async () => undefined),
+  restoreReflection: vi.fn(async () => undefined),
 }))
 vi.mock('@/features/reading/api/books.api', () => ({
   createBook: vi.fn(async () => ({ id: 'new-book' })),
@@ -259,6 +267,62 @@ describe('offline mutation resume', () => {
     finishCreate()
     await Promise.all([created, archived])
     expect(order).toEqual(['create', 'archive'])
+  })
+
+  it('runs a reflection delete before its Undo, so the restore is not erased', async () => {
+    onlineManager.setOnline(false)
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    const order: string[] = []
+    let finishDelete: () => void = () => undefined
+    vi.mocked(deleteReflection).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishDelete = () => {
+            order.push('delete')
+            resolve()
+          }
+        }),
+    )
+    vi.mocked(restoreReflection).mockImplementationOnce(async () => {
+      order.push('restore')
+    })
+    const reflection = { id: 'r1', date: '2026-09-01' } as Reflection
+    const cache = client.getMutationCache()
+    const deleted = cache
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.deleteReflection })
+      .execute({ id: 'r1', userId: 'u1' })
+    const restored = cache
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.restoreReflection })
+      .execute({ reflection, userId: 'u1' })
+    await new Promise((r) => setTimeout(r, 10))
+
+    onlineManager.setOnline(true)
+    void client.resumePausedMutations()
+    await new Promise((r) => setTimeout(r, 10))
+    expect(restoreReflection).not.toHaveBeenCalled()
+
+    finishDelete()
+    await Promise.all([deleted, restored])
+    expect(order).toEqual(['delete', 'restore'])
+    expect(restoreReflection).toHaveBeenCalledWith(reflection)
+  })
+
+  // A delete outside its entity's scope can overtake the offline create it
+  // targets, delete nothing, and let the create resurrect the row.
+  it.each([
+    ['deleteHabit', 'createHabit', 'habits'],
+    ['deleteWorkout', 'createWorkout', 'workouts'],
+    ['deleteBook', 'createBook', 'books'],
+    ['deleteBookNote', 'createBookNote', 'books'],
+    ['deleteReflection', 'saveReflection', 'reflections'],
+  ] as const)('%s shares a scope with %s', (del, create, scope) => {
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    const scopeOf = (name: keyof typeof OFFLINE_MUTATION_KEYS) =>
+      client.getMutationDefaults(OFFLINE_MUTATION_KEYS[name]).scope?.id
+    expect(scopeOf(del)).toBe(scope)
+    expect(scopeOf(create)).toBe(scope)
   })
 
   it('resumes a shared toggleWorkoutComplete write from either call site', async () => {
