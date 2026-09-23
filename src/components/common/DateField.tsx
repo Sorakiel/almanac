@@ -25,11 +25,13 @@ interface DateFieldProps {
 export const DateField = forwardRef<HTMLInputElement, DateFieldProps>(
   ({ value, onChange, onBlur, name, className }, ref) => {
     const { t, locale } = useT()
+    // The year only when it isn't this one — "3 сентября 2026 г." wraps in a half-width field.
+    const sameYear = value.slice(0, 4) === String(new Date().getFullYear())
     const label = value
       ? new Intl.DateTimeFormat(intlLocale(locale), {
           day: 'numeric',
           month: 'long',
-          year: 'numeric',
+          year: sameYear ? undefined : 'numeric',
           timeZone: 'UTC',
         }).format(dateFromKey(value))
       : t('common.noDate')
@@ -37,15 +39,15 @@ export const DateField = forwardRef<HTMLInputElement, DateFieldProps>(
     return (
       <div
         className={cn(
-          'relative flex h-12 w-full items-center justify-between rounded-[13px] border bg-surface px-4 text-sm',
+          'relative flex h-12 w-full items-center justify-between gap-2 rounded-[13px] border bg-surface px-4 text-sm',
           'focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2 focus-within:ring-offset-bg',
           className,
         )}
       >
-        <span aria-hidden="true" className={cn(!value && 'text-muted-strong')}>
+        <span aria-hidden="true" className={cn('min-w-0 truncate', !value && 'text-muted-strong')}>
           {label}
         </span>
-        <CalendarDays aria-hidden="true" className="h-4 w-4 text-muted-strong" />
+        <CalendarDays aria-hidden="true" className="h-4 w-4 flex-none text-muted-strong" />
         <input
           ref={ref}
           type="date"
