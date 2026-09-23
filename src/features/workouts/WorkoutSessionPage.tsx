@@ -74,8 +74,11 @@ function WorkoutSessionPage() {
   const currentSet = currentExercise ? firstUndoneSet(currentExercise) : null
   const exerciseLabel =
     exercises.length > 0
-      ? `exercise ${Math.min(currentIndex + 1, exercises.length)} / ${exercises.length}`
-      : 'no exercises'
+      ? t('workouts.exerciseOf', {
+          n: Math.min(currentIndex + 1, exercises.length),
+          total: exercises.length,
+        })
+      : t('workouts.noExercisesShort')
 
   const completeCurrentSet = () => {
     if (!currentSet) return

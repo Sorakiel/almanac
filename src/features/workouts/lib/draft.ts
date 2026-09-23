@@ -1,4 +1,6 @@
+import { muscleLabel } from '@/features/workouts/lib/muscles'
 import type { SessionExercise } from '@/features/workouts/types'
+import type { TFunction } from '@/hooks/useT'
 
 /** Common preset rest intervals surfaced in the set editor (seconds). */
 export const REST_PRESETS = [0, 30, 45, 60, 90, 120, 150, 180]
@@ -78,20 +80,20 @@ export function exerciseSummary(ex: DraftExercise): ExerciseSummary {
 }
 
 /** "3 × 10" style chip, or null when there are no sets / reps. */
-export function setsChip(ex: DraftExercise): string | null {
+export function setsChip(ex: DraftExercise, t: TFunction): string | null {
   const { setCount, reps } = exerciseSummary(ex)
   if (setCount === 0) return null
-  return reps != null ? `${setCount} × ${reps}` : `${setCount} sets`
+  return reps != null ? `${setCount} × ${reps}` : t('workouts.setsCount', { count: setCount })
 }
 
-/** "dumbbell · 3 sets · 10 reps · 22 kg" subtitle parts, joined. */
-export function exerciseSubtitle(ex: DraftExercise): string {
+/** "chest · 3 sets · 10 reps · 22 kg" subtitle parts, joined. */
+export function exerciseSubtitle(ex: DraftExercise, t: TFunction): string {
   const { setCount, reps, weight } = exerciseSummary(ex)
   const parts: string[] = []
-  if (ex.muscleGroup) parts.push(ex.muscleGroup)
-  parts.push(`${setCount} ${setCount === 1 ? 'set' : 'sets'}`)
-  if (reps != null) parts.push(`${reps} reps`)
-  if (weight != null) parts.push(`${weight} kg`)
+  if (ex.muscleGroup) parts.push(muscleLabel(ex.muscleGroup, t))
+  parts.push(t('workouts.setsCount', { count: setCount }))
+  if (reps != null) parts.push(t('workouts.repsCount', { count: reps }))
+  if (weight != null) parts.push(t('units.kgValue', { value: weight }))
   return parts.join(' · ')
 }
 
@@ -112,16 +114,27 @@ export function draftSummary(draft: WorkoutDraft): DraftSummary {
   return { exercises: draft.exercises.length, sets, volume }
 }
 
-/** "8.2t" / "820 kg" compact volume label. */
-export function volumeLabel(kg: number): string {
-  if (kg >= 1000) return `${(kg / 1000).toFixed(1)}t`
-  return `${Math.round(kg)} kg`
+/** "8.2t" / "820 kg" compact volume label, decimals in the reader's convention. */
+export function volumeLabel(kg: number, t: TFunction, intl: string): string {
+  if (kg >= 1000) {
+    const tonnes = (kg / 1000).toLocaleString(intl, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })
+    return t('workouts.tonnes', { value: tonnes })
+  }
+  return t('units.kgValue', { value: Math.round(kg) })
 }
 
 /** Unique muscle groups across the draft, e.g. "CHEST · SHOULDERS". */
-export function muscleSummary(draft: WorkoutDraft): string | null {
+export function muscleSummary(draft: WorkoutDraft, t: TFunction): string | null {
   const groups = [...new Set(draft.exercises.map((e) => e.muscleGroup).filter(Boolean))]
-  return groups.length ? groups.join(' · ').toUpperCase() : null
+  return groups.length
+    ? groups
+        .map((g) => muscleLabel(g as string, t))
+        .join(' · ')
+        .toUpperCase()
+    : null
 }
 
 /** Rough session length in minutes (~2.5 min per set). */
@@ -130,6 +143,6 @@ export function estimateMinutes(draft: WorkoutDraft): number {
 }
 
 /** Human rest label, e.g. "90s" or "—" when unset/zero. */
-export function restLabel(seconds: number | null): string {
-  return seconds && seconds > 0 ? `${seconds}s` : '—'
+export function restLabel(seconds: number | null, t: TFunction): string {
+  return seconds && seconds > 0 ? t('workouts.restSeconds', { count: seconds }) : '—'
 }

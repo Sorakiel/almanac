@@ -54,6 +54,7 @@ function DraftEditor({
   const [swappingId, setSwappingId] = useState<string | null>(null)
   const [libraryOpen, setLibraryOpen] = useState(false)
   const [discardOpen, setDiscardOpen] = useState(false)
+  const muscles = muscleSummary(draft, t)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -167,9 +168,9 @@ function DraftEditor({
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            {muscleSummary(draft) ? (
+            {muscles ? (
               <span className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-label text-accent">
-                {muscleSummary(draft)}
+                {muscles}
               </span>
             ) : null}
             <span className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[11px] tabular-nums text-muted">

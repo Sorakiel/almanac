@@ -13,6 +13,11 @@ import {
   type WorkoutDraft,
 } from '@/features/workouts/lib/draft'
 import type { SessionExercise, SetLog } from '@/features/workouts/types'
+import { translate } from '@/i18n'
+import type { TFunction } from '@/hooks/useT'
+
+const en: TFunction = (key, vars) => translate('en', key, vars)
+const ru: TFunction = (key, vars) => translate('ru', key, vars)
 
 let setId = 0
 function makeSet(overrides: Partial<SetLog> = {}): SetLog {
@@ -92,12 +97,14 @@ describe('summaries', () => {
   })
 
   it('setsChip and subtitle use the first set', () => {
-    expect(setsChip(draft.exercises[0]!)).toBe('2 × 8')
-    expect(exerciseSubtitle(draft.exercises[0]!)).toBe('chest · 2 sets · 8 reps · 60 kg')
+    expect(setsChip(draft.exercises[0]!, en)).toBe('2 × 8')
+    expect(exerciseSubtitle(draft.exercises[0]!, en)).toBe('chest · 2 sets · 8 reps · 60 kg')
+    expect(exerciseSubtitle(draft.exercises[0]!, ru)).toBe('грудь · 2 подхода · 8 повторов · 60 кг')
   })
 
   it('muscleSummary is unique + uppercased', () => {
-    expect(muscleSummary(draft)).toBe('CHEST · SHOULDERS')
+    expect(muscleSummary(draft, en)).toBe('CHEST · SHOULDERS')
+    expect(muscleSummary(draft, ru)).toBe('ГРУДЬ · ПЛЕЧИ')
   })
 
   it('estimateMinutes scales with set count', () => {
@@ -107,14 +114,16 @@ describe('summaries', () => {
 
 describe('labels', () => {
   it('volumeLabel switches to tonnes past 1000kg', () => {
-    expect(volumeLabel(820)).toBe('820 kg')
-    expect(volumeLabel(8200)).toBe('8.2t')
+    expect(volumeLabel(820, en, 'en-GB')).toBe('820 kg')
+    expect(volumeLabel(8200, en, 'en-GB')).toBe('8.2t')
+    expect(volumeLabel(8200, ru, 'ru-RU')).toBe('8,2 т')
   })
 
   it('restLabel shows seconds or a dash', () => {
-    expect(restLabel(90)).toBe('90s')
-    expect(restLabel(0)).toBe('—')
-    expect(restLabel(null)).toBe('—')
+    expect(restLabel(90, en)).toBe('90s')
+    expect(restLabel(90, ru)).toBe('90 с')
+    expect(restLabel(0, en)).toBe('—')
+    expect(restLabel(null, en)).toBe('—')
   })
 
   it('isTempId only matches placeholders', () => {

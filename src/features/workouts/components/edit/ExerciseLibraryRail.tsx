@@ -8,9 +8,11 @@ import { useSession } from '@/hooks/useSession'
 import { useExerciseLibrary } from '@/features/workouts/hooks/useExerciseLibrary'
 import { createExercise } from '@/features/workouts/api/session.api'
 import { draftSummary, volumeLabel, type WorkoutDraft } from '@/features/workouts/lib/draft'
+import { muscleLabel } from '@/features/workouts/lib/muscles'
 import type { LibraryPick } from '@/features/workouts/hooks/useWorkoutDraft'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { intlLocale } from '@/lib/dateLocale'
 import { workoutKeys } from '@/features/workouts/hooks/queryKeys'
 
 interface ExerciseLibraryRailProps {
@@ -28,7 +30,7 @@ export function ExerciseLibraryRail({
   swapName,
   onCancelSwap,
 }: ExerciseLibraryRailProps) {
-  const { t } = useT()
+  const { t, locale } = useT()
   const { user } = useSession()
   const queryClient = useQueryClient()
   const { exercises } = useExerciseLibrary()
@@ -114,7 +116,7 @@ export function ExerciseLibraryRail({
                     : 'text-muted hover:text-foreground',
                 )}
               >
-                {m}
+                {muscleLabel(m, t)}
               </button>
             )
           })}
@@ -133,7 +135,7 @@ export function ExerciseLibraryRail({
                 <p className="truncate text-[14px] font-semibold">{e.name}</p>
                 {e.muscle_group ? (
                   <p className="truncate font-mono text-[10px] uppercase tracking-label text-muted-strong">
-                    {e.muscle_group}
+                    {muscleLabel(e.muscle_group, t)}
                   </p>
                 ) : null}
               </div>
@@ -198,7 +200,10 @@ export function ExerciseLibraryRail({
         <div className="mt-2 flex items-baseline gap-5">
           <SummaryStat value={String(summary.exercises)} label={t('workouts.exercisesLower')} />
           <SummaryStat value={String(summary.sets)} label={t('workouts.sets')} />
-          <SummaryStat value={volumeLabel(summary.volume)} label={t('workouts.volume')} />
+          <SummaryStat
+            value={volumeLabel(summary.volume, t, intlLocale(locale))}
+            label={t('workouts.volume')}
+          />
         </div>
       </div>
     </div>
