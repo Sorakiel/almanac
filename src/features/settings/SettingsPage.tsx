@@ -2,54 +2,52 @@ import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import {
   AlarmClock,
+  AtSign,
   BarChart3,
   Bell,
-  ChevronRight,
   Clock,
   Coffee,
   Download,
-  Languages,
   Heart,
   KeyRound,
+  Languages,
   Laptop,
+  Lock,
   Moon,
   Newspaper,
   ShieldCheck,
   Trophy,
+  UserRound,
   Volume2,
-  type LucideIcon,
 } from 'lucide-react'
 import { Segmented } from '@/components/ui/segmented'
-import { Switch } from '@/components/ui/switch'
-import { Avatar } from '@/components/common/Avatar'
-import { SectionLabel } from '@/components/common/SectionLabel'
-import { Tag } from '@/components/common/Tag'
 import { Rail } from '@/components/rail/Rail'
 import { SettingsRail } from '@/features/settings/components/SettingsRail'
-import { TimezoneSheet } from '@/features/settings/components/TimezoneSheet'
-import { ReminderSheet } from '@/features/settings/components/ReminderSheet'
-import { DigestSheet } from '@/features/settings/components/DigestSheet'
-import { PasskeysSheet } from '@/features/settings/components/PasskeysSheet'
-import { BackgroundSheet } from '@/features/settings/components/BackgroundSheet'
-import { SupportSheet } from '@/features/settings/components/SupportSheet'
-import { LanguageSheet } from '@/features/settings/components/LanguageSheet'
+import { SettingsSheets, type SettingsSheetId } from '@/features/settings/components/SettingsSheets'
+import { ProfileHeader } from '@/features/settings/components/ProfileHeader'
+import { SettingsSection } from '@/features/settings/components/SettingsSection'
+import { SettingsRow } from '@/features/settings/components/SettingsRow'
+import { SettingsToggleRow } from '@/features/settings/components/SettingsToggleRow'
 import { SignOutButton } from '@/features/settings/components/SignOutButton'
-import { ExportSheet } from '@/features/settings/components/ExportSheet'
 import { reminderTimeLabel } from '@/features/settings/lib/reminder'
+import { useProfile } from '@/features/settings/hooks/useProfile'
+import { useSupportConfig } from '@/features/settings/hooks/useSupportConfig'
+import { LOCALES } from '@/i18n'
+import { setAnalyticsEnabled } from '@/lib/analytics'
+import { browserTimezone, daysBetween } from '@/lib/date'
 import { isDesktopApp } from '@/lib/platform/desktop'
 import { APP_VERSION } from '@/lib/version'
-import { LOCALES } from '@/i18n'
 import { useDesktopStore } from '@/stores/desktop'
-import { setAnalyticsEnabled } from '@/lib/analytics'
 import { usePrefsStore } from '@/stores/prefs'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
 import { useTheme } from '@/hooks/useTheme'
 import { useToday } from '@/hooks/useToday'
-import { useProfile } from '@/features/settings/hooks/useProfile'
-import { useSupportConfig } from '@/features/settings/hooks/useSupportConfig'
-import { browserTimezone } from '@/lib/date'
 
+/**
+ * Settings, grouped by what you came to change: who you are, how you sign in,
+ * how it looks, when it pings you, what it keeps — then the extras.
+ */
 function SettingsPage() {
   const navigate = useNavigate()
   const { user, status } = useSession()
@@ -62,190 +60,153 @@ function SettingsPage() {
   const { profile } = useProfile()
   const { config: supportConfig } = useSupportConfig()
   const { dateKey } = useToday()
-  const [timezoneOpen, setTimezoneOpen] = useState(false)
-  const [reminderOpen, setReminderOpen] = useState(false)
-  const [digestOpen, setDigestOpen] = useState(false)
-  const [passkeysOpen, setPasskeysOpen] = useState(false)
-  const [backgroundOpen, setBackgroundOpen] = useState(false)
-  const [supportOpen, setSupportOpen] = useState(false)
-  const [exportOpen, setExportOpen] = useState(false)
-  const [languageOpen, setLanguageOpen] = useState(false)
   const runInBackground = useDesktopStore((s) => s.runInBackground)
-  const showDesktop = isDesktopApp()
+  const [sheet, setSheet] = useState<SettingsSheetId | null>(null)
 
   if (status === 'anonymous') return <Navigate to="/auth" replace />
 
-  const name = (user?.user_metadata.display_name as string | undefined) ?? t('social.anonymous')
+  const metaName = user?.user_metadata.display_name as string | undefined
+  const name = profile?.display_name || metaName || t('social.anonymous')
   const email = user?.email ?? ''
+  const pendingEmail = user?.new_email
   const joinedDays = user?.created_at
-    ? Math.max(
-        1,
-        Math.floor(
-          (new Date(dateKey).getTime() - new Date(user.created_at).getTime()) / 86_400_000,
-        ),
-      )
+    ? Math.max(1, daysBetween(user.created_at.slice(0, 10), dateKey))
     : 0
   const supportVisible = Boolean(supportConfig?.enabled && supportConfig.methods.length > 0)
   const reminderEnabled = profile?.reminder_enabled ?? false
-  const reminderHour = profile?.reminder_hour ?? 8
-  const reminderMinute = profile?.reminder_minute ?? 0
   const digestEnabled = profile?.digest_enabled ?? false
-  const digestDay = profile?.digest_day ?? 0
-  const digestHour = profile?.digest_hour ?? 18
-  const digestMinute = profile?.digest_minute ?? 0
-
-  const handleAnalyticsChange = (on: boolean) => {
-    setAnalytics(on)
-    setAnalyticsEnabled(on)
-  }
+  const isStaff = profile?.role === 'admin' || profile?.role === 'owner'
+  const open = (id: SettingsSheetId) => () => setSheet(id)
 
   return (
     <>
       <div className="flex flex-col gap-6 lg:mx-auto lg:max-w-[760px]">
-        <header className="flex items-center gap-4">
-          <Avatar name={name} size="lg" />
-          <div className="min-w-0">
-            <h1 className="truncate text-xl">{name}</h1>
-            <p className="truncate text-sm text-muted">{email}</p>
-            <Tag tone="accent" className="mt-1.5">
-              ◇ {profile?.role && profile.role !== 'user' ? profile.role : t('settings.member')} ·{' '}
-              {t('settings.joined', { count: joinedDays })}
-            </Tag>
-          </div>
-        </header>
+        <ProfileHeader name={name} email={email} role={profile?.role} joinedDays={joinedDays} />
 
-        <section className="flex flex-col gap-3">
-          <SectionLabel>{t('settings.appearance')}</SectionLabel>
-          <Segmented
-            aria-label={t('settings.theme')}
-            value={theme}
-            onChange={setTheme}
-            options={[
-              { value: 'dark', label: t('settings.dark'), icon: Moon },
-              { value: 'coffee', label: t('settings.coffee'), icon: Coffee },
-            ]}
+        <SettingsSection label={t('settings.profile')}>
+          <SettingsRow
+            icon={UserRound}
+            label={t('settings.displayName')}
+            value={name}
+            onClick={open('name')}
           />
-          <label className="flex items-center justify-between rounded-tile border bg-surface px-4 py-3">
-            <span className="flex items-center gap-3">
-              <Volume2 className="h-[18px] w-[18px] text-muted-strong" aria-hidden="true" />
-              <span className="text-[15px]">{t('settings.soundEffects')}</span>
-            </span>
-            <Switch
-              checked={sound}
-              onCheckedChange={setSound}
-              aria-label={t('settings.soundEffects')}
-            />
-          </label>
-        </section>
+          <SettingsRow
+            icon={AtSign}
+            label={t('settings.email')}
+            value={pendingEmail ? t('settings.emailPending', { email: pendingEmail }) : email}
+            onClick={open('email')}
+          />
+          <SettingsRow
+            icon={Clock}
+            label={t('settings.timezone')}
+            value={(profile?.timezone ?? browserTimezone()).replace(/_/g, ' ')}
+            onClick={open('timezone')}
+          />
+        </SettingsSection>
 
-        <section className="flex flex-col gap-3">
-          <SectionLabel>{t('settings.privacy')}</SectionLabel>
-          <label className="flex items-center justify-between gap-4 rounded-tile border bg-surface px-4 py-3">
-            <span className="flex items-start gap-3">
-              <BarChart3
-                className="mt-0.5 h-[18px] w-[18px] flex-none text-muted-strong"
-                aria-hidden="true"
-              />
-              <span className="flex flex-col">
-                <span className="text-[15px]">{t('settings.usageAnalytics')}</span>
-                <span className="text-xs text-muted">{t('settings.usageAnalyticsHint')}</span>
-              </span>
-            </span>
-            <Switch
-              checked={analytics}
-              onCheckedChange={handleAnalyticsChange}
-              aria-label={t('settings.usageAnalytics')}
-            />
-          </label>
-        </section>
+        <SettingsSection label={t('settings.security')}>
+          <SettingsRow
+            icon={Lock}
+            label={t('settings.password')}
+            value={t('settings.change')}
+            onClick={open('password')}
+          />
+          <SettingsRow icon={KeyRound} label={t('settings.passkeys')} onClick={open('passkeys')} />
+        </SettingsSection>
 
-        <section className="flex flex-col gap-2">
-          <SectionLabel>{t('settings.you')}</SectionLabel>
-          <div className="flex flex-col">
-            <Row
-              icon={Trophy}
-              label={t('settings.achievements')}
-              onClick={() => navigate('/achievements')}
-            />
-            {supportVisible ? (
-              <Row
-                icon={Heart}
-                label={t('settings.support')}
-                onClick={() => setSupportOpen(true)}
-              />
-            ) : null}
-          </div>
-        </section>
-
-        <section className="flex flex-col gap-2">
-          <SectionLabel>{t('settings.account')}</SectionLabel>
-          <div className="flex flex-col">
-            <Row
-              icon={Clock}
-              label={t('settings.timezone')}
-              value={(profile?.timezone ?? browserTimezone()).replace(/_/g, ' ')}
-              onClick={() => setTimezoneOpen(true)}
-            />
-            <Row
-              icon={KeyRound}
-              label={t('settings.passkeys')}
-              onClick={() => setPasskeysOpen(true)}
-            />
-            <Row
-              icon={reminderEnabled ? AlarmClock : Bell}
-              label={t('settings.dailyReminder')}
-              value={
-                reminderEnabled
-                  ? reminderTimeLabel(reminderHour, reminderMinute)
-                  : t('settings.off')
-              }
-              onClick={() => setReminderOpen(true)}
-            />
-            <Row
-              icon={Newspaper}
-              label={t('settings.weeklyDigest')}
-              value={
-                digestEnabled ? reminderTimeLabel(digestHour, digestMinute) : t('settings.off')
-              }
-              onClick={() => setDigestOpen(true)}
-            />
-            <Row
-              icon={Languages}
-              label={t('settings.language')}
-              value={LOCALES.find((l) => l.value === locale)?.label}
-              onClick={() => setLanguageOpen(true)}
-            />
-            <Row
-              icon={Download}
-              label={t('settings.exportData')}
-              onClick={() => setExportOpen(true)}
+        <SettingsSection label={t('settings.appearance')}>
+          <div className="py-3">
+            <Segmented
+              aria-label={t('settings.theme')}
+              value={theme}
+              onChange={setTheme}
+              options={[
+                { value: 'dark', label: t('settings.dark'), icon: Moon },
+                { value: 'coffee', label: t('settings.coffee'), icon: Coffee },
+              ]}
             />
           </div>
-        </section>
+          <SettingsRow
+            icon={Languages}
+            label={t('settings.language')}
+            value={LOCALES.find((l) => l.value === locale)?.label}
+            onClick={open('language')}
+          />
+          <SettingsToggleRow
+            icon={Volume2}
+            label={t('settings.soundEffects')}
+            checked={sound}
+            onCheckedChange={setSound}
+          />
+        </SettingsSection>
 
-        {showDesktop ? (
-          <section className="flex flex-col gap-2">
-            <SectionLabel>{t('settings.desktop')}</SectionLabel>
-            <div className="flex flex-col">
-              <Row
-                icon={Laptop}
-                label={t('settings.runInBackground')}
-                value={runInBackground ? t('settings.on') : t('settings.off')}
-                onClick={() => setBackgroundOpen(true)}
-              />
-            </div>
-          </section>
+        <SettingsSection label={t('settings.notifications')}>
+          <SettingsRow
+            icon={reminderEnabled ? AlarmClock : Bell}
+            label={t('settings.dailyReminder')}
+            value={
+              reminderEnabled
+                ? reminderTimeLabel(profile?.reminder_hour ?? 8, profile?.reminder_minute ?? 0)
+                : t('settings.off')
+            }
+            onClick={open('reminder')}
+          />
+          <SettingsRow
+            icon={Newspaper}
+            label={t('settings.weeklyDigest')}
+            value={
+              digestEnabled
+                ? reminderTimeLabel(profile?.digest_hour ?? 18, profile?.digest_minute ?? 0)
+                : t('settings.off')
+            }
+            onClick={open('digest')}
+          />
+        </SettingsSection>
+
+        <SettingsSection label={t('settings.dataPrivacy')}>
+          <SettingsToggleRow
+            icon={BarChart3}
+            label={t('settings.usageAnalytics')}
+            hint={t('settings.usageAnalyticsHint')}
+            checked={analytics}
+            onCheckedChange={(on) => {
+              setAnalytics(on)
+              setAnalyticsEnabled(on)
+            }}
+          />
+          <SettingsRow icon={Download} label={t('settings.exportData')} onClick={open('export')} />
+        </SettingsSection>
+
+        <SettingsSection label={t('settings.more')}>
+          <SettingsRow
+            icon={Trophy}
+            label={t('settings.achievements')}
+            onClick={() => navigate('/achievements')}
+          />
+          {supportVisible ? (
+            <SettingsRow icon={Heart} label={t('settings.support')} onClick={open('support')} />
+          ) : null}
+        </SettingsSection>
+
+        {isDesktopApp() ? (
+          <SettingsSection label={t('settings.desktop')}>
+            <SettingsRow
+              icon={Laptop}
+              label={t('settings.runInBackground')}
+              value={runInBackground ? t('settings.on') : t('settings.off')}
+              onClick={open('background')}
+            />
+          </SettingsSection>
         ) : null}
 
-        {profile?.role === 'admin' || profile?.role === 'owner' ? (
-          <section className="flex flex-col gap-1">
-            <SectionLabel className="mb-2">{t('settings.admin')}</SectionLabel>
-            <Row
+        {isStaff ? (
+          <SettingsSection label={t('settings.admin')}>
+            <SettingsRow
               icon={ShieldCheck}
               label={t('settings.adminConsole')}
               onClick={() => navigate('/admin')}
             />
-          </section>
+          </SettingsSection>
         ) : null}
 
         <SignOutButton className="w-full lg:hidden" />
@@ -257,62 +218,14 @@ function SettingsPage() {
       <Rail>
         <SettingsRail />
       </Rail>
-      {timezoneOpen ? (
-        <TimezoneSheet
-          open
-          onOpenChange={setTimezoneOpen}
-          current={profile?.timezone ?? browserTimezone()}
-        />
-      ) : null}
-      {reminderOpen ? (
-        <ReminderSheet
-          open
-          onOpenChange={setReminderOpen}
-          enabled={reminderEnabled}
-          hour={reminderHour}
-          minute={reminderMinute}
-          digestEnabled={digestEnabled}
-        />
-      ) : null}
-      {digestOpen ? (
-        <DigestSheet
-          open
-          onOpenChange={setDigestOpen}
-          enabled={digestEnabled}
-          day={digestDay}
-          hour={digestHour}
-          minute={digestMinute}
-          reminderEnabled={reminderEnabled}
-        />
-      ) : null}
-      {passkeysOpen ? <PasskeysSheet open onOpenChange={setPasskeysOpen} /> : null}
-      {backgroundOpen ? <BackgroundSheet open onOpenChange={setBackgroundOpen} /> : null}
-      {supportOpen ? <SupportSheet open onOpenChange={setSupportOpen} /> : null}
-      {exportOpen ? <ExportSheet open onOpenChange={setExportOpen} /> : null}
-      {languageOpen ? <LanguageSheet open onOpenChange={setLanguageOpen} /> : null}
+      <SettingsSheets
+        open={sheet}
+        onClose={() => setSheet(null)}
+        profile={profile}
+        name={name}
+        email={email}
+      />
     </>
-  )
-}
-
-interface RowProps {
-  icon: LucideIcon
-  label: string
-  value?: string
-  onClick: () => void
-}
-
-function Row({ icon: Icon, label, value, onClick }: RowProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex items-center gap-3 border-t border-border/10 px-1 py-3.5 text-left transition-colors first:border-t-0 hover:text-accent"
-    >
-      <Icon className="h-4 w-4 text-muted" aria-hidden="true" />
-      <span className="flex-1 text-sm font-medium">{label}</span>
-      {value ? <span className="label-mono normal-case tracking-normal">{value}</span> : null}
-      <ChevronRight className="h-4 w-4 text-muted-strong" aria-hidden="true" />
-    </button>
   )
 }
 

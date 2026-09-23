@@ -34,7 +34,10 @@ export function SettingsRail() {
       <RailCard label={t('rail.account')}>
         <RailRow label={t('rail.role')} value={role} />
         <RailRow label={t('rail.joined')} value={joined} />
-        <RailRow label={t('rail.timezone')} value={browserTimezone()} />
+        <RailRow
+          label={t('rail.timezone')}
+          value={(profile?.timezone ?? browserTimezone()).replace(/_/g, ' ')}
+        />
       </RailCard>
 
       <p className="px-1 text-[13px] italic leading-relaxed text-muted">{t('rail.motto')}</p>
