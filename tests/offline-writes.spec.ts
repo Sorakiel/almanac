@@ -54,10 +54,15 @@ const logWrite = (page: Page) =>
     timeout: 15_000,
   })
 
-// Forcing the browser offline necessarily fails any in-flight resource load
-// with this error — expected noise from the test setup, not the app.
+// Forcing the browser offline necessarily fails any in-flight resource load,
+// and Vite's dev-only HMR socket to localhost with it — expected noise from
+// the test setup, not the app.
 function expectNoRealErrors(errors: string[]): void {
-  const real = errors.filter((e) => !e.includes('ERR_INTERNET_DISCONNECTED'))
+  const real = errors.filter(
+    (e) =>
+      !e.includes('ERR_INTERNET_DISCONNECTED') &&
+      !e.includes("WebSocket connection to 'ws://localhost"),
+  )
   expect(real, `console errors:\n${real.join('\n')}`).toEqual([])
 }
 
