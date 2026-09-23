@@ -60,6 +60,9 @@ export function AppToaster() {
             'flex w-full items-start gap-2.5 rounded-card border border-l-2 bg-surface/95 px-4 py-3 shadow-card backdrop-blur-nav',
           title: 'font-mono text-[12.5px] leading-snug text-foreground',
           description: 'mt-0.5 font-sans text-[12px] leading-snug text-muted',
+          // Undo and friends: a real button, not a stray line of body text.
+          actionButton:
+            '-my-1 ml-auto shrink-0 self-center rounded-full px-3 py-1.5 font-sans text-[13px] font-semibold text-accent transition-colors hover:bg-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
           success: 'border-l-teal',
           error: 'border-l-danger',
           loading: 'border-l-accent',

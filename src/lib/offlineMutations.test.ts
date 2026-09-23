@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, onlineManager, dehydrate, hydrate } from '@tanstack/react-query'
-import { addFreeze, createHabit, setHabitCount } from '@/features/habits/api/habits.api'
+import {
+  addFreeze,
+  archiveHabit,
+  createHabit,
+  createSubtasksBulk,
+  setHabitCount,
+} from '@/features/habits/api/habits.api'
 import { updateWorkout } from '@/features/workouts/api/workouts.api'
 import { createReflection, updateReflection } from '@/features/reflect/api/reflections.api'
 import { updateBook } from '@/features/reading/api/books.api'
@@ -17,6 +23,8 @@ vi.mock('@/features/habits/api/habits.api', () => ({
   createHabit: vi.fn(async () => ({ id: 'new-habit', frequency: 'daily' })),
   updateHabit: vi.fn(async () => undefined),
   archiveHabit: vi.fn(async () => undefined),
+  restoreHabit: vi.fn(async () => undefined),
+  createSubtasksBulk: vi.fn(async () => undefined),
   updateHabitOrder: vi.fn(async () => undefined),
   createSubtask: vi.fn(async () => ({ id: 'new-subtask' })),
   deleteSubtask: vi.fn(async () => undefined),
@@ -180,6 +188,73 @@ describe('offline mutation resume', () => {
       expect.objectContaining({ name: 'Read', user_id: 'u1' }),
     )
     expect(result).toEqual({ id: 'new-habit', frequency: 'daily' })
+  })
+
+  it('creates a habit under the client-chosen id, then its checklist', async () => {
+    onlineManager.setOnline(false)
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    const checklist = [{ id: 's1', title: 'Water' }]
+    const pending = client
+      .getMutationCache()
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.createHabit })
+      .execute({
+        userId: 'u1',
+        id: 'client-id',
+        checklist,
+        input: { name: 'Read', frequency: 'daily', target_count: 1, time_of_day: null },
+      })
+    await new Promise((r) => setTimeout(r, 10))
+
+    onlineManager.setOnline(true)
+    await client.resumePausedMutations()
+    await pending
+
+    expect(createHabit).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'client-id', user_id: 'u1' }),
+    )
+    expect(createSubtasksBulk).toHaveBeenCalledWith('u1', 'new-habit', checklist)
+  })
+
+  it('runs habit writes in order: an Undo never lands before the create it cancels', async () => {
+    onlineManager.setOnline(false)
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    const order: string[] = []
+    let finishCreate: () => void = () => undefined
+    vi.mocked(createHabit).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishCreate = () => {
+            order.push('create')
+            resolve({ id: 'client-id' } as never)
+          }
+        }),
+    )
+    vi.mocked(archiveHabit).mockImplementationOnce(async () => {
+      order.push('archive')
+    })
+    const cache = client.getMutationCache()
+    const created = cache
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.createHabit })
+      .execute({
+        userId: 'u1',
+        id: 'client-id',
+        input: { name: 'Read', frequency: 'daily', target_count: 1, time_of_day: null },
+      })
+    const archived = cache
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.archiveHabit })
+      .execute({ id: 'client-id', userId: 'u1' })
+    await new Promise((r) => setTimeout(r, 10))
+
+    onlineManager.setOnline(true)
+    void client.resumePausedMutations()
+    await new Promise((r) => setTimeout(r, 10))
+    expect(archiveHabit).not.toHaveBeenCalled()
+
+    finishCreate()
+    await Promise.all([created, archived])
+    expect(order).toEqual(['create', 'archive'])
   })
 
   it('resumes a shared toggleWorkoutComplete write from either call site', async () => {

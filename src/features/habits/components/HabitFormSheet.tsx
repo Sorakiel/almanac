@@ -10,7 +10,6 @@ import { CountStepper } from '@/features/habits/components/CountStepper'
 import { InlineSelect } from '@/features/habits/components/InlineSelect'
 import { HabitChecklistDraftEditor } from '@/features/habits/components/HabitChecklistDraftEditor'
 import { HabitChecklistEditor } from '@/features/habits/components/HabitChecklistEditor'
-import { createSubtasksBulk } from '@/features/habits/api/habits.api'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
 import {
@@ -21,8 +20,9 @@ import {
   type HabitColor,
   type HabitIcon,
 } from '@/features/habits/lib/habitVisuals'
-import type { HabitFrequency, HabitTimeOfDay } from '@/features/habits/types'
+import type { Habit, HabitFrequency, HabitTimeOfDay } from '@/features/habits/types'
 import { useUiStore } from '@/stores/ui'
+import { toastWithUndo } from '@/lib/undoToast'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'
@@ -95,7 +95,7 @@ export function HabitFormSheet() {
   const habitForm = useUiStore((s) => s.habitForm)
   const closeHabitForm = useUiStore((s) => s.closeHabitForm)
   const { habits } = useHabits()
-  const { create, update, archive } = useHabitMutations()
+  const { create, update, archive, restore } = useHabitMutations()
 
   const editing = habitForm && habitForm !== 'new' ? habits.find((h) => h.id === habitForm) : null
   const open = habitForm !== null
@@ -105,7 +105,6 @@ export function HabitFormSheet() {
     defaultValues: DEFAULTS,
   })
   const values = useWatch({ control }) as FormValues
-  const pending = create.isPending || update.isPending
   const [draftChecklist, setDraftChecklist] = useState<string[]>([])
 
   const preset = presetOf(values.frequency)
@@ -154,7 +153,12 @@ export function HabitFormSheet() {
     setValue('target_count', clamp(values.target_count, UNIT_RANGE[next].min, UNIT_RANGE[next].max))
   }
 
-  const onSubmit = handleSubmit(async (v) => {
+  const onSaveError = (error: Error) =>
+    toast.error(error instanceof Error ? error.message : t('habits.saveFailed'))
+
+  // Nothing here is awaited: the write queues (offline too), the cache
+  // already shows the result, and the sheet closes on the same tap.
+  const onSubmit = handleSubmit((v) => {
     // Only the Custom cadences carry a meaningful count; presets are once-per.
     const isCustom = presetOf(v.frequency) === 'custom'
     const input = {
@@ -166,26 +170,26 @@ export function HabitFormSheet() {
       target_count: isCustom ? v.target_count : 1,
       time_of_day: v.time_of_day,
     }
-    try {
-      if (editing) {
-        await update.mutateAsync({ id: editing.id, input })
-        toast.success(t('habits.updated'))
-      } else {
-        const created = await create.mutateAsync(input)
-        if (draftChecklist.length > 0) {
-          try {
-            await createSubtasksBulk(created.user_id, created.id, draftChecklist)
-          } catch (error) {
-            toast.error(error instanceof Error ? error.message : t('habits.createdChecklistFailed'))
-          }
-        }
-        toast.success(t('habits.created'))
-      }
-      closeHabitForm()
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('habits.saveFailed'))
+    if (editing) {
+      update.mutate({ id: editing.id, input }, { onError: onSaveError })
+      toast.success(t('habits.updated'))
+    } else {
+      const id = crypto.randomUUID()
+      const checklist = draftChecklist.map((title) => ({ id: crypto.randomUUID(), title }))
+      create.mutate({ ...input, id, checklist }, { onError: onSaveError })
+      toastWithUndo(t('habits.created'), t('common.undo'), () => archive.mutate(id))
     }
+    closeHabitForm()
   })
+
+  const onArchive = (habit: Habit) => {
+    archive.mutate(habit.id, {
+      onError: (error) =>
+        toast.error(error instanceof Error ? error.message : t('habits.archiveFailed')),
+    })
+    toastWithUndo(t('habits.archived'), t('common.undo'), () => restore.mutate(habit))
+    closeHabitForm()
+  }
 
   return (
     <Sheet
@@ -344,12 +348,8 @@ export function HabitFormSheet() {
           <HabitChecklistDraftEditor items={draftChecklist} onChange={setDraftChecklist} />
         )}
 
-        <Button type="submit" size="lg" disabled={pending} className="mt-1">
-          {pending
-            ? t('habits.form.saving')
-            : editing
-              ? t('habits.form.save')
-              : t('habits.form.create')}
+        <Button type="submit" size="lg" className="mt-1">
+          {editing ? t('habits.form.save') : t('habits.form.create')}
         </Button>
 
         {editing ? (
@@ -357,16 +357,7 @@ export function HabitFormSheet() {
             type="button"
             variant="ghost"
             className="text-accent"
-            disabled={archive.isPending}
-            onClick={async () => {
-              try {
-                await archive.mutateAsync(editing.id)
-                toast.success(t('habits.archived'))
-                closeHabitForm()
-              } catch (error) {
-                toast.error(error instanceof Error ? error.message : t('habits.archiveFailed'))
-              }
-            }}
+            onClick={() => onArchive(editing)}
           >
             {t('habits.archiveHabit')}
           </Button>

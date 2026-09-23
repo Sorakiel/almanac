@@ -3,6 +3,7 @@ import { recordOfflineShell, signIn, watchConsole } from './helpers/app'
 import { e2eClient, e2eUserId } from './helpers/supabase'
 
 const HABIT_NAME = 'E2E offline tap'
+const OFFLINE_CREATED = 'E2E offline create'
 
 const completeButton = (page: Page) =>
   page.getByRole('button', { name: new RegExp(`^complete ${HABIT_NAME}$`, 'i') })
@@ -12,7 +13,11 @@ const doneButton = (page: Page) =>
 async function dropHabit(): Promise<void> {
   const db = await e2eClient()
   const userId = await e2eUserId(db)
-  const { error } = await db.from('habits').delete().eq('user_id', userId).eq('name', HABIT_NAME)
+  const { error } = await db
+    .from('habits')
+    .delete()
+    .eq('user_id', userId)
+    .in('name', [HABIT_NAME, OFFLINE_CREATED])
   if (error) throw new Error(`could not clear this spec's habit: ${error.message}`)
 }
 
@@ -21,14 +26,16 @@ async function dropHabit(): Promise<void> {
 test.beforeEach(dropHabit)
 test.afterEach(dropHabit)
 
-async function createHabit(page: Page): Promise<void> {
+async function createHabit(page: Page, name = HABIT_NAME): Promise<void> {
   await page
     .getByRole('button', { name: /add habit/i })
     .first()
     .click()
-  await page.getByLabel('Name').fill(HABIT_NAME)
+  await page.getByLabel('Name').fill(name)
   await page.getByRole('button', { name: /create habit/i }).click()
-  await expect(page.getByRole('link', { name: HABIT_NAME })).toBeVisible()
+  // The sheet closes on the tap itself — it must never wait on the network.
+  await expect(page.getByRole('dialog')).toBeHidden({ timeout: 3_000 })
+  await expect(page.getByRole('link', { name })).toBeVisible()
 }
 
 /** Confirm the tap actually persisted, not just that a request fired. */
@@ -135,5 +142,49 @@ test('a tap made after an offline cold start is kept, then synced', async ({ pag
   await write
 
   await expectLoggedOnServer()
+  expectNoRealErrors(errors)
+})
+
+test('a habit created and ticked offline lands, in order, after a reload', async ({
+  page,
+  context,
+}) => {
+  const errors = watchConsole(page)
+  const shell = await recordOfflineShell(context)
+  await signIn(page)
+  // The dashboard must have loaded before the network goes: offline, a query
+  // that never finished just pauses and the page has nothing to offer.
+  await expect(page.getByRole('button', { name: /add habit/i }).first()).toBeVisible()
+
+  await shell.offline()
+  await createHabit(page, OFFLINE_CREATED)
+  await page.getByRole('button', { name: new RegExp(`^complete ${OFFLINE_CREATED}$`, 'i') }).click()
+
+  // Both writes are queued behind each other; the reload must keep both, and
+  // the tick must not reach the server before the habit it belongs to.
+  await page.reload()
+  const done = page.getByRole('button', {
+    name: new RegExp(`mark ${OFFLINE_CREATED} incomplete`, 'i'),
+  })
+  await expect(done).toBeVisible({ timeout: 20_000 })
+
+  const write = logWrite(page)
+  await shell.online()
+  await write
+
+  const db = await e2eClient()
+  const userId = await e2eUserId(db)
+  const { data: habit } = await db
+    .from('habits')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('name', OFFLINE_CREATED)
+    .single()
+  const { data: log } = await db
+    .from('habit_logs')
+    .select('count')
+    .eq('habit_id', habit?.id ?? '')
+    .single()
+  expect(log?.count).toBe(1)
   expectNoRealErrors(errors)
 })
