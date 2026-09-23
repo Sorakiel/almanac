@@ -3,6 +3,7 @@ import { RequestsList } from '@/features/social/components/RequestsList'
 import { FriendsList } from '@/features/social/components/FriendsList'
 import type { FriendsData } from '@/features/social/types'
 import { useT } from '@/hooks/useT'
+import { RailIdentity } from '@/components/rail/RailIdentity'
 
 interface SocialRailProps {
   data: FriendsData
@@ -16,20 +17,11 @@ export function SocialRail({ data, onAccept, onRemove, busy }: SocialRailProps) 
   const { t } = useT()
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <span
-          aria-hidden="true"
-          className="flex h-[38px] w-[38px] items-center justify-center rounded-xl bg-accent/15 text-accent"
-        >
-          <Users className="h-[18px] w-[18px]" />
-        </span>
-        <div>
-          <p className="text-[15px] font-semibold">{t('social.yourCircle')}</p>
-          <p className="font-mono text-[10px] text-muted-strong">
-            {data.friends.length} friend{data.friends.length === 1 ? '' : 's'}
-          </p>
-        </div>
-      </div>
+      <RailIdentity
+        icon={Users}
+        title={t('social.yourCircle')}
+        subtitle={t('social.friendsCount', { count: data.friends.length })}
+      />
 
       <RequestsList
         incoming={data.incoming}

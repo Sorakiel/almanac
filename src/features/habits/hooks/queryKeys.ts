@@ -14,6 +14,15 @@ export const habitKeys = {
   freezesSince: (userId: string, from: string) => ['habitFreezes', userId, 'since', from] as const,
   /** Every freeze window for a user. */
   freezesRoot: (userId: string) => ['habitFreezes', userId] as const,
+  /** One habit's row — `detailRoot` invalidates every open detail page. */
+  detail: (habitId: string) => ['habit', habitId] as const,
+  detailRoot: () => ['habit'] as const,
+  /** One habit's log history; `dateKey` is part of the key so a new day refetches. */
+  history: (habitId: string, dateKey?: string) =>
+    (dateKey ? ['habitHistory', habitId, dateKey] : ['habitHistory', habitId]) as readonly string[],
+  /** One habit's freeze days. */
+  freezesOf: (habitId: string, dateKey?: string) =>
+    (dateKey ? ['habitFreezes', habitId, dateKey] : ['habitFreezes', habitId]) as readonly string[],
   /** A single habit's checklist. */
   subtasks: (habitId: string) => ['habitSubtasks', habitId] as const,
 }

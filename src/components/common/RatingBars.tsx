@@ -1,5 +1,6 @@
 import { ratingBarClass } from '@/lib/ratingColor'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface RatingBarsProps {
   value: number
@@ -14,12 +15,13 @@ interface RatingBarsProps {
  * red/orange/green by how high the rating is.
  */
 export function RatingBars({ value, max = 5, 'aria-label': ariaLabel }: RatingBarsProps) {
+  const { t } = useT()
   const fillClass = ratingBarClass(value, max)
   return (
     <span
       className="inline-flex h-3.5 items-end gap-[3px] align-middle"
       role="img"
-      aria-label={ariaLabel ?? `${value} of ${max}`}
+      aria-label={ariaLabel ?? t('a11y.valueOf', { value, max })}
     >
       {Array.from({ length: max }, (_, i) => (
         <span

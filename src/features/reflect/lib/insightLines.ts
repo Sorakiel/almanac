@@ -1,16 +1,8 @@
+import { daysBetween } from '@/lib/date'
 import type { ReflectInsights } from '@/features/insights/types'
 import type { Reflection } from '@/features/reflect/types'
 import type { TFunction } from '@/hooks/useT'
 import type { InsightLine } from '@/lib/insight'
-
-/** Whole days from `fromKey` to `toKey` (both `YYYY-MM-DD`), parsed as UTC. */
-function daysBetween(fromKey: string, toKey: string): number {
-  const [fy, fm, fd] = fromKey.split('-').map(Number)
-  const [ty, tm, td] = toKey.split('-').map(Number)
-  const from = Date.UTC(fy ?? 1970, (fm ?? 1) - 1, fd ?? 1)
-  const to = Date.UTC(ty ?? 1970, (tm ?? 1) - 1, td ?? 1)
-  return Math.round((to - from) / 86_400_000)
-}
 
 /**
  * Rule-based journaling observations derived from reflections + reflect insights,

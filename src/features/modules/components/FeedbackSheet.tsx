@@ -1,4 +1,3 @@
-import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -6,7 +5,8 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
-import { OFFLINE_MUTATION_KEYS, type SendFeedbackVariables } from '@/lib/offlineMutations'
+import { OFFLINE_MUTATION_KEYS } from '@/lib/offlineMutations'
+import { useOfflineMutation } from '@/hooks/useOfflineMutation'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
 
@@ -32,20 +32,19 @@ export function FeedbackSheet({ open, onOpenChange }: FeedbackSheetProps) {
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
-  const sendMutation = useMutation<void, Error, SendFeedbackVariables>({
-    mutationKey: OFFLINE_MUTATION_KEYS.sendFeedback,
-    onSuccess: () => {
-      toast.success(t('modulesPage.feedback.sent'))
-      reset()
-      onOpenChange(false)
+  const send = useOfflineMutation(
+    OFFLINE_MUTATION_KEYS.sendFeedback,
+    (body: string) => ({ userId: user?.id ?? '', body }),
+    {
+      onSuccess: () => {
+        toast.success(t('modulesPage.feedback.sent'))
+        reset()
+        onOpenChange(false)
+      },
+      onError: (error) =>
+        toast.error(error instanceof Error ? error.message : t('modulesPage.feedback.failed')),
     },
-    onError: (error) =>
-      toast.error(error instanceof Error ? error.message : t('modulesPage.feedback.failed')),
-  })
-  const send = {
-    ...sendMutation,
-    mutate: (body: string) => sendMutation.mutate({ userId: user?.id ?? '', body }),
-  }
+  )
 
   const onSubmit = handleSubmit((values) => send.mutate(values.body))
 

@@ -1,4 +1,4 @@
-import { authRedirectTo } from '@/lib/deepLink'
+import { authRedirectTo } from '@/lib/platform/deepLink'
 import { supabase } from '@/lib/supabase'
 
 interface Credentials {

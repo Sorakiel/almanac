@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
+import { useNow } from '@/hooks/useNow'
 import { DEFAULT_REST_SECONDS } from '@/features/workouts/lib/session'
-import { sessionElapsed, type SessionRecord } from '@/stores/workoutSession'
+import { sessionElapsed, type SessionRecord } from '@/features/workouts/stores/workoutSession'
 
 interface SessionClock {
   /** Milliseconds elapsed for the session (frozen while paused). */
@@ -21,13 +22,8 @@ interface SessionClock {
  * an optional rest countdown started when a set is ticked.
  */
 export function useSessionClock(record: SessionRecord | null | undefined): SessionClock {
-  const [now, setNow] = useState(() => Date.now())
+  const now = useNow()
   const [restEndsAt, setRestEndsAt] = useState<number | null>(null)
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(id)
-  }, [])
 
   const startRest = useCallback((seconds = DEFAULT_REST_SECONDS) => {
     setRestEndsAt(Date.now() + seconds * 1000)

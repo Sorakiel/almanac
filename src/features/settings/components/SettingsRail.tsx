@@ -2,18 +2,11 @@ import { useProfile } from '@/features/settings/hooks/useProfile'
 import { SignOutButton } from '@/features/settings/components/SignOutButton'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
+import { RailCard, RailRow } from '@/components/rail/RailCard'
+import { RailIdentity } from '@/components/rail/RailIdentity'
 import { intlLocale } from '@/lib/dateLocale'
 import { browserTimezone } from '@/lib/date'
 import { APP_VERSION } from '@/lib/version'
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3 pt-2.5 text-[13.5px] first:pt-0">
-      <span className="flex-none text-muted">{label}</span>
-      <span className="min-w-0 truncate text-right font-mono tabular-nums">{value}</span>
-    </div>
-  )
-}
 
 /** Desktop Settings context rail: Almanac identity + account meta. */
 export function SettingsRail() {
@@ -36,31 +29,16 @@ export function SettingsRail() {
 
   return (
     <div className="flex flex-1 flex-col gap-3.5">
-      <div className="flex items-center gap-3">
-        <span
-          aria-hidden="true"
-          className="flex h-[38px] w-[38px] items-center justify-center rounded-xl bg-accent/15 text-[17px] text-accent"
-        >
-          ◇
-        </span>
-        <div>
-          <p className="text-[15px] font-semibold">The Almanac</p>
-          <p className="font-mono text-[10px] text-muted-strong">
-            v{APP_VERSION} · {t('rail.commandCenter')}
-          </p>
-        </div>
-      </div>
+      <RailIdentity title="The Almanac" subtitle={`v${APP_VERSION} · ${t('rail.commandCenter')}`} />
 
-      <div className="rounded-[18px] border bg-surface p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-          {t('rail.account')}
-        </p>
-        <div className="mt-2 flex flex-col">
-          <Row label={t('rail.role')} value={role} />
-          <Row label={t('rail.joined')} value={joined} />
-          <Row label={t('rail.timezone')} value={browserTimezone()} />
-        </div>
-      </div>
+      <RailCard label={t('rail.account')}>
+        <RailRow label={t('rail.role')} value={role} />
+        <RailRow label={t('rail.joined')} value={joined} />
+        <RailRow
+          label={t('rail.timezone')}
+          value={(profile?.timezone ?? browserTimezone()).replace(/_/g, ' ')}
+        />
+      </RailCard>
 
       <p className="px-1 text-[13px] italic leading-relaxed text-muted">{t('rail.motto')}</p>
 

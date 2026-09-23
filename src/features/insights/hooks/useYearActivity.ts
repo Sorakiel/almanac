@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { fetchFreezesSince, fetchHabits, fetchLogsSince } from '@/features/habits/api/habits.api'
-import { habitKeys } from '@/features/habits/hooks/queryKeys'
+import { habitQueries } from '@/features/habits/hooks/habitQueries'
 import { buildYearActivity, type YearDay } from '@/features/insights/lib/yearActivity'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
@@ -38,29 +37,16 @@ export function useYearActivity(): UseYearActivityResult {
   const { user } = useSession()
   const { dateKey } = useToday()
   const userId = user?.id ?? ''
-  const enabled = Boolean(userId)
   const from = yearStartKey(dateKey)
 
-  const habitsQuery = useQuery({
-    queryKey: habitKeys.all(userId),
-    queryFn: () => fetchHabits(userId),
-    enabled,
-  })
+  const habitsQuery = useQuery(habitQueries.all(userId))
 
   // Deliberately the shared `logsSince`/`freezesSince` namespaces, keyed by the
   // window start: a private key would be missed by every write's invalidation,
   // which is exactly how the insights copy went stale before FND-7.
-  const logsQuery = useQuery({
-    queryKey: habitKeys.logsSince(userId, from),
-    queryFn: () => fetchLogsSince(userId, from),
-    enabled,
-  })
+  const logsQuery = useQuery(habitQueries.logsSince(userId, from))
 
-  const freezesQuery = useQuery({
-    queryKey: habitKeys.freezesSince(userId, from),
-    queryFn: () => fetchFreezesSince(userId, from),
-    enabled,
-  })
+  const freezesQuery = useQuery(habitQueries.freezesSince(userId, from))
 
   const habits = habitsQuery.data ?? []
   const completed = new Map<string, Set<string>>()

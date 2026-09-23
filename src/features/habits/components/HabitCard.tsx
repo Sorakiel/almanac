@@ -92,7 +92,7 @@ export function HabitCard({ habit }: HabitCardProps) {
             >
               <span aria-hidden="true">· </span>
               <Snowflake className="h-3 w-3" aria-hidden="true" />
-              <span className="sr-only">frozen today</span>
+              <span className="sr-only">{t('a11y.frozenToday')}</span>
             </span>
           ) : null}
         </span>

@@ -4,43 +4,29 @@ import type { Habit, HabitTimeOfDay } from '@/features/habits/types'
 
 type FreqHabit = Pick<Habit, 'frequency' | 'target_count'>
 
-/**
- * Human label for a habit's cadence, e.g. "daily" or "every 3 days".
- *
- * `t` is optional so the non-React callers (the admin console's pure
- * computeUserDetail) keep working in English. Anything rendered to a member
- * passes it.
- */
-export function frequencyLabel(habit: FreqHabit, t?: TFunction): string {
-  const n = habit.target_count
+/** Human label for a habit's cadence, e.g. "daily" or "every 3 days". */
+export function frequencyLabel(habit: FreqHabit, t: TFunction): string {
+  const count = habit.target_count
   switch (habit.frequency) {
     case 'weekly':
-      return t ? t('habits.freq.weekly') : 'weekly'
+      return t('habits.freq.weekly')
     case 'weekdays':
-      return t ? t('habits.freq.weekdays') : 'weekdays'
+      return t('habits.freq.weekdays')
     case 'x_per_week':
-      return t ? t('habits.freq.xPerWeek', { count: n }) : `${n}× / wk`
+      return t('habits.freq.xPerWeek', { count })
     case 'every_n_days':
-      return t ? t('habits.freq.everyNDays', { count: n }) : `every ${n} days`
+      return t('habits.freq.everyNDays', { count })
     case 'every_n_weeks':
-      return t ? t('habits.freq.everyNWeeks', { count: n }) : `every ${n} weeks`
+      return t('habits.freq.everyNWeeks', { count })
     case 'daily':
     default:
-      return t ? t('habits.freq.daily') : 'daily'
+      return t('habits.freq.daily')
   }
 }
 
-const TIME_OF_DAY_LABELS: Record<HabitTimeOfDay, string> = {
-  anytime: 'anytime',
-  morning: 'morning',
-  afternoon: 'afternoon',
-  evening: 'evening',
-}
-
 /** Human label for a time-of-day preference; null for the neutral "anytime". */
-export function timeOfDayLabel(value: HabitTimeOfDay, t?: TFunction): string | null {
-  if (value === 'anytime') return null
-  return t ? t(`habits.form.times.${value}`) : TIME_OF_DAY_LABELS[value]
+export function timeOfDayLabel(value: HabitTimeOfDay, t: TFunction): string | null {
+  return value === 'anytime' ? null : t(`habits.form.times.${value}`)
 }
 
 /**

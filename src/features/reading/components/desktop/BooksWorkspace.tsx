@@ -1,4 +1,6 @@
-import { BookOpen, Loader2, Plus, RefreshCw } from 'lucide-react'
+import { BookOpen, Plus } from 'lucide-react'
+import { ErrorState } from '@/components/common/ErrorState'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { BookShelf } from '@/features/reading/components/BookShelf'
@@ -20,7 +22,7 @@ export function BooksWorkspace({ books, isLoading, isError, refetch, onNew }: Bo
     <div className="mx-auto max-w-[900px]">
       <header className="flex items-start justify-between">
         <div>
-          <p className="label-mono">// your shelf</p>
+          <p className="label-mono">{t('reading.shelfLabel')}</p>
           <h1 className="mt-1.5 text-[44px] leading-none tracking-title">{t('reading.title')}</h1>
           <p className="mt-2 text-[15px] text-muted">{t('reading.subtitle')}</p>
         </div>
@@ -32,21 +34,9 @@ export function BooksWorkspace({ books, isLoading, isError, refetch, onNew }: Bo
 
       <div className="mt-7">
         {isLoading ? (
-          <div className="flex justify-center py-16" role="status" aria-live="polite">
-            <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-            <span className="sr-only">{t('reading.loading')}</span>
-          </div>
+          <LoadingState label={t('reading.loading')} className="py-16" />
         ) : isError ? (
-          <EmptyState
-            icon={RefreshCw}
-            title={t('reading.loadFailed')}
-            description={t('reading.loadFailedHint')}
-            action={
-              <Button size="sm" variant="surface" onClick={refetch}>
-                {t('reading.tryAgain')}
-              </Button>
-            }
-          />
+          <ErrorState title={t('reading.loadFailed')} onRetry={refetch} />
         ) : books.length === 0 ? (
           <EmptyState
             icon={BookOpen}

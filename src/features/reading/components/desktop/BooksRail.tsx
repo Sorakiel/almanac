@@ -4,15 +4,8 @@ import { libraryStats } from '@/features/reading/lib/library'
 import { useToday } from '@/hooks/useToday'
 import type { Book } from '@/features/reading/types'
 import { useT } from '@/hooks/useT'
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3 pt-2.5 text-[13.5px] first:pt-0">
-      <span className="text-muted">{label}</span>
-      <span className="font-mono tabular-nums">{value}</span>
-    </div>
-  )
-}
+import { RailCard, RailRow } from '@/components/rail/RailCard'
+import { RailIdentity } from '@/components/rail/RailIdentity'
 
 /** Desktop Reading context rail: identity + a library snapshot. */
 export function BooksRail({ books }: { books: Book[] }) {
@@ -23,28 +16,19 @@ export function BooksRail({ books }: { books: Book[] }) {
 
   return (
     <div className="flex flex-col gap-3.5">
-      <div className="flex items-center gap-3">
-        <span
-          aria-hidden="true"
-          className="flex h-[38px] w-[38px] items-center justify-center rounded-xl bg-amber/15 text-amber"
-        >
-          <BookOpen className="h-[18px] w-[18px]" />
-        </span>
-        <div>
-          <p className="text-[15px] font-semibold">{t('reading.library')}</p>
-          <p className="font-mono text-[10px] text-muted-strong">your shelf</p>
-        </div>
-      </div>
+      <RailIdentity
+        icon={BookOpen}
+        tone="bg-amber/15 text-amber"
+        title={t('reading.library')}
+        subtitle={t('reading.shelf')}
+      />
 
-      <div className="rounded-[18px] border bg-surface p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">snapshot</p>
-        <div className="mt-2 flex flex-col">
-          <Row label={t('reading.books')} value={String(stats.total)} />
-          <Row label={t('reading.readingLower')} value={String(stats.reading)} />
-          <Row label={t('reading.finishedLower')} value={String(stats.finished)} />
-          <Row label={`finished ${year}`} value={String(stats.finishedThisYear)} />
-        </div>
-      </div>
+      <RailCard label={t('reading.snapshot')}>
+        <RailRow label={t('reading.books')} value={String(stats.total)} />
+        <RailRow label={t('reading.readingLower')} value={String(stats.reading)} />
+        <RailRow label={t('reading.finishedLower')} value={String(stats.finished)} />
+        <RailRow label={t('reading.finishedIn', { year })} value={String(stats.finishedThisYear)} />
+      </RailCard>
 
       <BookTicker books={books} />
     </div>

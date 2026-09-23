@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { useNoteMutations } from '@/features/reading/hooks/useNoteMutations'
-import { unitNoun } from '@/features/reading/lib/progress'
 import type { Book, BookNote } from '@/features/reading/types'
 import { useT } from '@/hooks/useT'
 
@@ -17,7 +16,6 @@ export function NotesSection({ book, notes }: { book: Book; notes: BookNote[] })
   const { add, remove } = useNoteMutations(book.id)
   const [body, setBody] = useState('')
   const [page, setPage] = useState('')
-  const noun = unitNoun(book.progress_mode, t)
 
   const onAdd = () => {
     const trimmed = body.trim()
@@ -59,7 +57,7 @@ export function NotesSection({ book, notes }: { book: Book; notes: BookNote[] })
         />
         <div className="flex items-end gap-2">
           <label className="flex w-28 flex-col gap-1.5">
-            <span className="label-mono">{noun} (opt.)</span>
+            <span className="label-mono">{t(`reading.notePosition.${book.progress_mode}`)}</span>
             <Input
               type="number"
               inputMode="numeric"
@@ -79,7 +77,9 @@ export function NotesSection({ book, notes }: { book: Book; notes: BookNote[] })
             <Card key={note.id} className="flex flex-col gap-1.5 p-4">
               <div className="flex items-center justify-between gap-3">
                 <span className="label-mono text-muted-strong">
-                  {note.page !== null ? `${noun} ${note.page}` : 'note'}
+                  {note.page !== null
+                    ? t(`reading.noteAt.${book.progress_mode}`, { n: note.page })
+                    : t('reading.noteLabel')}
                 </span>
                 <button
                   type="button"

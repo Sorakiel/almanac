@@ -1,6 +1,7 @@
 import type { ReadingInsights } from '@/features/insights/types'
 import type { Book } from '@/features/reading/types'
 import type { InsightLine } from '@/lib/insight'
+import type { TFunction } from '@/hooks/useT'
 
 /**
  * Rule-based reading observations derived from the shelf + reading insights,
@@ -11,6 +12,8 @@ export function buildReadingLines(
   books: Book[],
   insights: ReadingInsights | null,
   dateKey: string,
+  t: TFunction,
+  locale: string,
 ): InsightLine[] {
   if (books.length === 0) return []
 
@@ -23,25 +26,29 @@ export function buildReadingLines(
   if (closest && (closest.pct ?? 0) >= 75) {
     lines.push({
       id: 'finish',
-      text: `So close — "${closest.title}" is ${closest.pct}% done. Finish it.`,
+      text: t('reading.lines.finish', { title: closest.title, pct: closest.pct ?? 0 }),
       tone: 'urgent',
     })
   } else if (reading.length > 1 && closest) {
     lines.push({
       id: 'furthest',
-      text: `${reading.length} books in progress — "${closest.title}" leads at ${closest.pct}%.`,
+      text: t('reading.lines.furthest', {
+        count: reading.length,
+        title: closest.title,
+        pct: closest.pct ?? 0,
+      }),
       tone: 'info',
     })
   } else if (closest) {
     lines.push({
       id: 'progress',
-      text: `You're ${closest.pct}% through "${closest.title}".`,
+      text: t('reading.lines.progress', { title: closest.title, pct: closest.pct ?? 0 }),
       tone: 'good',
     })
   } else if (reading.length > 0) {
     lines.push({
       id: 'reading',
-      text: `${reading.length} book${reading.length > 1 ? 's' : ''} on the go right now.`,
+      text: t('reading.lines.reading', { count: reading.length }),
       tone: 'info',
     })
   }
@@ -50,20 +57,23 @@ export function buildReadingLines(
     if (insights.pages30d > 0) {
       lines.push({
         id: 'pages',
-        text: `${insights.pages30d.toLocaleString('en-US')} pages read in the last 30 days.`,
+        text: t('reading.lines.pages', {
+          count: insights.pages30d,
+          value: insights.pages30d.toLocaleString(locale),
+        }),
         tone: 'good',
       })
     } else if (insights.minutes30d > 0) {
       lines.push({
         id: 'minutes',
-        text: `${insights.minutes30d} minutes of reading logged this month.`,
+        text: t('reading.lines.minutes', { count: insights.minutes30d }),
         tone: 'good',
       })
     }
     if (insights.sessions30d > 0) {
       lines.push({
         id: 'sessions',
-        text: `${insights.sessions30d} reading session${insights.sessions30d > 1 ? 's' : ''} this month.`,
+        text: t('reading.lines.sessions', { count: insights.sessions30d }),
         tone: 'info',
       })
     }
@@ -71,7 +81,7 @@ export function buildReadingLines(
       const year = dateKey.slice(0, 4)
       lines.push({
         id: 'finished-year',
-        text: `${insights.finishedThisYear} book${insights.finishedThisYear > 1 ? 's' : ''} finished in ${year}.`,
+        text: t('reading.lines.finishedYear', { count: insights.finishedThisYear, year }),
         tone: 'good',
       })
     }
@@ -80,7 +90,7 @@ export function buildReadingLines(
   if (lines.length === 0) {
     lines.push({
       id: 'shelf',
-      text: `${books.length} book${books.length > 1 ? 's' : ''} on your shelf. Pick one up.`,
+      text: t('reading.lines.shelf', { count: books.length }),
       tone: 'info',
     })
   }

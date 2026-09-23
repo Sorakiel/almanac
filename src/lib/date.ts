@@ -4,6 +4,9 @@
  * local date is always derived from an explicit IANA timezone.
  */
 
+/** One whole day in milliseconds — the unit every date-key calculation counts in. */
+const MS_PER_DAY = 86_400_000
+
 /** The user's local calendar date as `YYYY-MM-DD` for the given timezone. */
 export function localDateKey(timezone: string, instant: Date = new Date()): string {
   // en-CA formats as YYYY-MM-DD, which is exactly the key shape we store.
@@ -15,10 +18,38 @@ export function localDateKey(timezone: string, instant: Date = new Date()): stri
   }).format(instant)
 }
 
+/**
+ * A `YYYY-MM-DD` key as a UTC timestamp — the one place that parse lives.
+ *
+ * Every calendar-key calculation in the app is built on this: the key is a
+ * plain local date with no time and no zone, so it is read at UTC midnight and
+ * the arithmetic on top of it stays whole-day arithmetic. Re-implementing the
+ * parse at the call site is how a key silently becomes an instant in the
+ * caller's zone and a streak loses a day.
+ */
+export function utcFromKey(dateKey: string): number {
+  const [y, m, d] = dateKey.split('-').map(Number)
+  return Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)
+}
+
+/** The same parse as a `Date`, for the formatters that need one. */
+export function dateFromKey(dateKey: string): Date {
+  return new Date(utcFromKey(dateKey))
+}
+
+/** Whole days from `fromKey` to `toKey` (both `YYYY-MM-DD`), UTC math. */
+export function daysBetween(fromKey: string, toKey: string): number {
+  return Math.round((utcFromKey(toKey) - utcFromKey(fromKey)) / MS_PER_DAY)
+}
+
+/** Add whole days to a `YYYY-MM-DD` key, returning a key (no timezone drift). */
+export function addDaysToKey(dateKey: string, days: number): string {
+  return new Date(utcFromKey(dateKey) + days * MS_PER_DAY).toISOString().slice(0, 10)
+}
+
 /** Day of week for a `YYYY-MM-DD` key: 0 = Sunday … 6 = Saturday (UTC-safe). */
 export function weekdayOfKey(dateKey: string): number {
-  const [y, m, d] = dateKey.split('-').map(Number)
-  return new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)).getUTCDay()
+  return dateFromKey(dateKey).getUTCDay()
 }
 
 /** True when the date key falls on Saturday or Sunday. */
@@ -103,11 +134,7 @@ export function formatLongDate(
  * Operates on the `YYYY-MM-DD` string via UTC math to avoid timezone drift.
  */
 export function lastNDateKeys(endKey: string, n: number): string[] {
-  const [y, m, d] = endKey.split('-').map(Number)
-  const end = Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)
   const keys: string[] = []
-  for (let i = n - 1; i >= 0; i--) {
-    keys.push(new Date(end - i * 86_400_000).toISOString().slice(0, 10))
-  }
+  for (let i = n - 1; i >= 0; i--) keys.push(addDaysToKey(endKey, -i))
   return keys
 }

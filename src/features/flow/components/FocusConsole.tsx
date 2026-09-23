@@ -44,7 +44,7 @@ export function FocusConsole({
   pct,
   onEnd,
   onComplete,
-  completeLabel = 'Done',
+  completeLabel,
 }: FocusConsoleProps) {
   const { t } = useT()
   const ticks = useMemo(
@@ -82,7 +82,7 @@ export function FocusConsole({
 
       <div className="relative flex flex-col items-center gap-5">
         <p className="w-full font-mono text-[10px] uppercase tracking-label text-accent">
-          ▷ focus.session // active
+          {t('flow.consoleHeader')}
         </p>
 
         <div className="relative h-[220px] w-[220px]">
@@ -119,13 +119,13 @@ export function FocusConsole({
               fill="none"
               stroke="rgb(var(--color-accent) / 0.1)"
             />
-            {ticks.map((t, i) => (
+            {ticks.map((tick, i) => (
               <line
                 key={i}
-                x1={t.x1}
-                y1={t.y1}
-                x2={t.x2}
-                y2={t.y2}
+                x1={tick.x1}
+                y1={tick.y1}
+                x2={tick.x2}
+                y2={tick.y2}
                 strokeWidth={4}
                 stroke={i < filled ? 'rgb(var(--color-accent))' : 'rgb(var(--color-border) / 0.15)'}
                 className="transition-colors duration-500"
@@ -137,7 +137,7 @@ export function FocusConsole({
               {clock(msLeft)}
             </span>
             <span className="mt-1.5 font-mono text-[13px] uppercase tracking-label text-muted lg:text-sm">
-              {pct}% · {Math.max(0, Math.ceil(msLeft / 60_000))}m left
+              {t('flow.pctLeft', { pct, count: Math.max(0, Math.ceil(msLeft / 60_000)) })}
             </span>
           </div>
         </div>
@@ -145,11 +145,11 @@ export function FocusConsole({
         {/* Terminal readout. */}
         <div className="w-full space-y-1 rounded-[16px] border border-accent/15 bg-bg/50 p-4 font-mono text-[13px] leading-relaxed text-muted lg:p-5 lg:text-[15px]">
           <p className="truncate">
-            <span className="text-accent">$</span> target{' '}
+            <span className="text-accent">$</span> {t('flow.target')}{' '}
             <span className="text-foreground">{label}</span>
           </p>
           <p>
-            <span className="text-accent">$</span> elapsed{' '}
+            <span className="text-accent">$</span> {t('flow.elapsed')}{' '}
             <span className="tabular-nums text-foreground">{clock(elapsedMin * 60_000)}</span> /{' '}
             {String(durationMin).padStart(2, '0')}:00
           </p>
@@ -174,7 +174,7 @@ export function FocusConsole({
               className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-[11px] bg-accent-solid py-2.5 font-mono text-[11px] font-bold uppercase tracking-label text-on-accent-solid transition-colors hover:bg-accent-solid-hover hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
             >
               <Check className="h-3.5 w-3.5" aria-hidden="true" />
-              {completeLabel}
+              {completeLabel ?? t('flow.doneLabel')}
             </button>
           ) : null}
         </div>

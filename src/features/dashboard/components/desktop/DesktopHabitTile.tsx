@@ -45,7 +45,11 @@ export function DesktopHabitTile({ habit }: { habit: HabitWithTodayLog }) {
         {habit.name}
       </Link>
       {resting ? (
-        <Tag tone="muted">{habit.dueInDays > 0 ? `in ${habit.dueInDays}d` : 'rest'}</Tag>
+        <Tag tone="muted">
+          {habit.dueInDays > 0
+            ? t('habits.dueInDays', { count: habit.dueInDays })
+            : t('habits.restTag')}
+        </Tag>
       ) : (
         <Tag tone={toneFor(habit.color)}>{frequencyLabel(habit, t)}</Tag>
       )}

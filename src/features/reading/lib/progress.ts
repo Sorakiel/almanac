@@ -20,32 +20,23 @@ export function dailyGoalPct(readToday: number, goal: number): number {
 }
 
 /** Singular unit noun for the tracking mode ("page" / "chapter"). */
-export function unitNoun(mode: BookProgressMode, t?: TFunction): string {
-  if (t)
-    return mode === 'chapters'
-      ? t('reading.unitSingular.chapters')
-      : t('reading.unitSingular.pages')
-  return mode === 'chapters' ? 'chapter' : 'page'
+export function unitNoun(mode: BookProgressMode, t: TFunction): string {
+  return t(`reading.unitSingular.${mode}`)
 }
 
-/** Plural unit noun for the tracking mode ("pages" / "chapters"). */
-export function unitNounPlural(mode: BookProgressMode, t?: TFunction): string {
-  if (t) return mode === 'chapters' ? t('reading.form.chapters') : t('reading.form.pages')
-  return mode === 'chapters' ? 'chapters' : 'pages'
+/** Plural unit noun for the tracking mode ("pages" / "chapters"), for labels. */
+export function unitNounPlural(mode: BookProgressMode, t: TFunction): string {
+  return t(`reading.form.${mode}`)
 }
 
-const STATUS_LABELS: Record<BookStatus, string> = {
-  to_read: 'To read',
-  reading: 'Reading',
-  finished: 'Finished',
+/** A count with its unit, declined for the count: "1 page", "5 страниц". */
+export function unitCount(mode: BookProgressMode, count: number, t: TFunction): string {
+  return `${count} ${t(`reading.unitWord.${mode}`, { count })}`
 }
 
-/**
- * Shelf-status label. `t` is optional so non-React callers keep the English
- * literals; anything a member reads passes it.
- */
-export function statusLabel(status: BookStatus, t?: TFunction): string {
-  return t ? t(`reading.statuses.${status}`) : STATUS_LABELS[status]
+/** Shelf-status label. */
+export function statusLabel(status: BookStatus, t: TFunction): string {
+  return t(`reading.statuses.${status}`)
 }
 
 /**

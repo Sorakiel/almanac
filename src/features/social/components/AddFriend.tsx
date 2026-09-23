@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useUserSearch } from '@/features/social/hooks/useUserSearch'
 import type { FriendProfile } from '@/features/social/types'
+import { friendName } from '@/features/social/lib/format'
 import { useT } from '@/hooks/useT'
 
 interface AddFriendProps {
@@ -55,9 +56,9 @@ export function AddFriend({ connectedIds, selfId, onAdd, isAdding }: AddFriendPr
           ) : (
             shown.map((person: FriendProfile) => (
               <div key={person.id} className="flex items-center gap-3 rounded-xl px-1 py-1.5">
-                <Avatar name={person.displayName} size="sm" />
+                <Avatar name={friendName(person, t)} size="sm" />
                 <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                  {person.displayName}
+                  {friendName(person, t)}
                 </span>
                 <Button
                   size="sm"

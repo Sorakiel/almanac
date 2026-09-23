@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BarChart3, Loader2, Plus, RefreshCw } from 'lucide-react'
+import { BarChart3, Plus } from 'lucide-react'
+import { ErrorState } from '@/components/common/ErrorState'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Cascade } from '@/components/common/Cascade'
-import { YearStrip } from '@/components/common/YearStrip'
+import { YearStrip } from '@/features/insights/components/YearStrip'
 import { EmptyState } from '@/components/common/EmptyState'
-import { Rail } from '@/components/common/desktop/rail'
+import { Rail } from '@/components/rail/Rail'
 import { CompletionTrend } from '@/features/insights/components/CompletionTrend'
 import { HabitRateList } from '@/features/insights/components/HabitRateList'
-import { InsightStat } from '@/features/insights/components/InsightStat'
+import { HabitInsightStats } from '@/features/insights/components/HabitInsightStats'
 import { RangeToggle } from '@/features/insights/components/RangeToggle'
 import { WorkoutInsightsSection } from '@/features/insights/components/WorkoutInsightsSection'
 import { ReadingInsightsSection } from '@/features/insights/components/ReadingInsightsSection'
@@ -17,7 +19,7 @@ import { FocusInsightsSection } from '@/features/insights/components/FocusInsigh
 import { InsightsTicker } from '@/features/insights/components/InsightsTicker'
 import { InsightsWorkspace } from '@/features/insights/components/desktop/InsightsWorkspace'
 import { InsightsRail } from '@/features/insights/components/desktop/InsightsRail'
-import { insightRangeLabel, insightRangeSuffix } from '@/features/insights/lib/insightRange'
+import { insightRangeLabel } from '@/features/insights/lib/insightRange'
 import type { InsightRange } from '@/features/insights/types'
 import { useInsights } from '@/features/insights/hooks/useInsights'
 import { useYearActivity } from '@/features/insights/hooks/useYearActivity'
@@ -29,6 +31,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useToday } from '@/hooks/useToday'
 import { useUiStore } from '@/stores/ui'
 import { useT } from '@/hooks/useT'
+import { WeekdayReadout } from '@/features/insights/components/WeekdayReadout'
 
 function InsightsPage() {
   const { t } = useT()
@@ -49,27 +52,11 @@ function InsightsPage() {
   const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   if (isLoading || woLoading || rdLoading || rfLoading || fcLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('insights.loading')}</span>
-      </div>
-    )
+    return <LoadingState label={t('insights.loading')} />
   }
 
   if (isError || !insights) {
-    return (
-      <EmptyState
-        icon={RefreshCw}
-        title={t('insights.loadFailed')}
-        description={t('insights.loadFailedHint')}
-        action={
-          <Button size="sm" variant="surface" onClick={refetch}>
-            {t('insights.tryAgain')}
-          </Button>
-        }
-      />
-    )
+    return <ErrorState title={t('insights.loadFailed')} onRetry={refetch} />
   }
 
   const habitHasData = insights.hasData
@@ -118,8 +105,6 @@ function InsightsPage() {
     )
   }
 
-  const completionPct = Math.round(insights.completionRate * 100)
-
   return (
     <section className="flex flex-col gap-6">
       <header className="flex items-start justify-between gap-3">
@@ -138,23 +123,7 @@ function InsightsPage() {
         {habitHasData ? (
           <div className="flex flex-col gap-5">
             <div className="grid grid-cols-2 gap-3">
-              <InsightStat
-                label={t('insights.completion')}
-                value={String(completionPct)}
-                unit="%"
-                delta={insights.completionDelta}
-                deltaSuffix={t('insights.vsPrev')}
-              />
-              <InsightStat
-                label={t('insights.bestStreak')}
-                value={t('units.daysShort', { count: insights.bestStreak })}
-                accent
-              />
-              <InsightStat label={t('insights.active')} value={String(insights.activeHabits)} />
-              <InsightStat
-                label={`${t('insights.doneLower')} · ${insightRangeSuffix(range, t)}`}
-                value={String(insights.totalDone)}
-              />
+              <HabitInsightStats insights={insights} range={range} />
             </div>
 
             <div>
@@ -164,30 +133,15 @@ function InsightsPage() {
 
             {insights.byHabit.length > 0 ? (
               <div>
-                <p className="label-mono mb-3">// by habit</p>
+                <p className="label-mono mb-3">{t('insights.byHabit')}</p>
                 <div className="rounded-card border bg-surface p-4">
                   <HabitRateList habits={insights.byHabit} />
                 </div>
               </div>
             ) : null}
 
-            {insights.bestWeekday ? (
-              <div className="rounded-card border border-accent/25 bg-gradient-to-br from-accent/10 to-transparent p-4">
-                <p className="label-mono text-accent">read-out</p>
-                <p className="mt-2 text-sm leading-relaxed text-muted">
-                  You&rsquo;re most consistent on{' '}
-                  <span className="font-medium text-accent">{insights.bestWeekday}</span>
-                  {insights.worstWeekday ? (
-                    <>
-                      {' '}
-                      — <span className="text-foreground">{insights.worstWeekday}</span> is your
-                      weak point.
-                    </>
-                  ) : (
-                    '.'
-                  )}
-                </p>
-              </div>
+            {insights.bestWeekday !== null ? (
+              <WeekdayReadout best={insights.bestWeekday} worst={insights.worstWeekday} />
             ) : null}
           </div>
         ) : null}

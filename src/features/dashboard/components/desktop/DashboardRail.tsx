@@ -4,6 +4,7 @@ import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
 import { TodaySummary } from '@/features/dashboard/components/TodaySummary'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
+import { RailCard } from '@/components/rail/RailCard'
 
 interface DashboardRailProps {
   habits: HabitWithTodayLog[]
@@ -32,12 +33,9 @@ export function DashboardRail({ habits }: DashboardRailProps) {
       <QuoteCard />
 
       {habits.length > 0 ? (
-        <div className="rounded-[18px] border bg-surface p-[18px]">
-          <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-            {atRisk.length > 0 ? t('dashboard.attention') : t('dashboard.strongest')}
-          </p>
+        <RailCard label={atRisk.length > 0 ? t('dashboard.attention') : t('dashboard.strongest')}>
           {atRisk.length > 0 ? (
-            <ul className="mt-2.5 flex flex-col gap-2">
+            <ul className="flex flex-col gap-2">
               {atRisk.slice(0, 4).map((habit) => (
                 <li key={habit.id} className="flex items-center gap-2.5 text-[13.5px]">
                   <Flame className="h-3.5 w-3.5 flex-none text-accent" aria-hidden="true" />
@@ -50,14 +48,14 @@ export function DashboardRail({ habits }: DashboardRailProps) {
               ))}
             </ul>
           ) : strongest ? (
-            <div className="mt-2.5 flex items-baseline gap-2.5">
+            <div className="flex items-baseline gap-2.5">
               <span className="min-w-0 flex-1 truncate text-[13.5px]">{strongest.name}</span>
               <span className="flex-none font-mono text-[13.5px] font-semibold tabular-nums text-accent">
                 {Math.round(strongest.rate * 100)}%
               </span>
             </div>
           ) : null}
-        </div>
+        </RailCard>
       ) : null}
     </div>
   )

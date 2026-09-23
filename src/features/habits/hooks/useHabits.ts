@@ -2,8 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { lastNDateKeys, localDateKey } from '@/lib/date'
-import { fetchFreezesSince, fetchHabits, fetchLogsSince } from '@/features/habits/api/habits.api'
-import { habitKeys } from '@/features/habits/hooks/queryKeys'
+import { habitQueries } from '@/features/habits/hooks/habitQueries'
 import {
   dailyTarget,
   dueInDays,
@@ -123,28 +122,15 @@ export function useHabits(): UseHabitsResult {
   const { user } = useSession()
   const { dateKey, timezone } = useToday()
   const userId = user?.id ?? ''
-  const enabled = Boolean(userId)
   const windowKeys = lastNDateKeys(dateKey, FETCH_DAYS)
 
-  const habitsQuery = useQuery({
-    queryKey: habitKeys.all(userId),
-    queryFn: () => fetchHabits(userId),
-    enabled,
-  })
+  const habitsQuery = useQuery(habitQueries.all(userId))
 
   const from = windowKeys[0]!
 
-  const logsQuery = useQuery({
-    queryKey: habitKeys.logsSince(userId, from),
-    queryFn: () => fetchLogsSince(userId, from),
-    enabled,
-  })
+  const logsQuery = useQuery(habitQueries.logsSince(userId, from))
 
-  const freezesQuery = useQuery({
-    queryKey: habitKeys.freezesSince(userId, from),
-    queryFn: () => fetchFreezesSince(userId, from),
-    enabled,
-  })
+  const freezesQuery = useQuery(habitQueries.freezesSince(userId, from))
 
   const habits =
     habitsQuery.data && logsQuery.data

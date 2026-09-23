@@ -1,10 +1,10 @@
 import { lazy, Suspense, type ComponentType, type ReactElement } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { AppLayout } from '@/app/AppLayout'
 import { ProtectedRoute } from '@/app/ProtectedRoute'
-import { RouteFallback } from '@/components/common/RouteFallback'
-import { RouteError } from '@/components/common/RouteError'
+import { RouteFallback } from '@/app/shell/RouteFallback'
+import { RouteError } from '@/app/shell/RouteError'
 import AuthPage from '@/features/auth/AuthPage'
 
 const RELOAD_KEY = 'almanac:chunk-reloaded'
@@ -69,22 +69,7 @@ function suspend(element: ReactElement): ReactElement {
  * broken spanning the whole viewport with no nav rail around it.
  */
 function suspendFocused(element: ReactElement): ReactElement {
-  return (
-    <Suspense
-      fallback={
-        <div
-          className="flex min-h-dvh items-center justify-center bg-bg"
-          role="status"
-          aria-live="polite"
-        >
-          <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-          <span className="sr-only">Loading…</span>
-        </div>
-      }
-    >
-      {element}
-    </Suspense>
-  )
+  return <Suspense fallback={<LoadingState fullScreen className="bg-bg" />}>{element}</Suspense>
 }
 
 export const router = createBrowserRouter([

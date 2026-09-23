@@ -1,12 +1,15 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Check, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { BrandMark } from '@/components/common/BrandMark'
 import { useUpdateProfile } from '@/features/settings/hooks/useUpdateProfile'
-import { useHabitMutations, type HabitFormInput } from '@/features/habits/hooks/useHabitMutations'
-import { HABIT_ICONS, type HabitColor, type HabitIcon } from '@/features/habits/lib/habitVisuals'
+import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
+import { ModulesStep } from '@/features/onboarding/components/ModulesStep'
+import { ReadyStep } from '@/features/onboarding/components/ReadyStep'
+import { TemplatesStep } from '@/features/onboarding/components/TemplatesStep'
+import { WelcomeStep } from '@/features/onboarding/components/WelcomeStep'
+import { DEFAULT_PICKS, HABIT_TEMPLATES, toInput } from '@/features/onboarding/lib/templates'
 import { OPTIONAL_MODULES, useModulesStore, type ModuleKey } from '@/stores/modules'
 import { useOnboardingStore } from '@/stores/onboarding'
 import { useUiStore } from '@/stores/ui'
@@ -16,90 +19,6 @@ import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
 
 const STEP_COUNT = 4
-
-/** Curated first-run habits — one tap each, created on finish. */
-/** Keys match `onboarding.suggestions.*`, so a new template needs a dictionary entry. */
-type TemplateKey = 'water' | 'read' | 'move' | 'meditate' | 'sunlight' | 'sleep'
-
-interface HabitTemplate {
-  key: TemplateKey
-  name: string
-  icon: HabitIcon
-  color: HabitColor
-  frequency: HabitFormInput['frequency']
-  time_of_day: HabitFormInput['time_of_day']
-}
-
-/**
- * Starter habits. `name` is the English fallback identity — what the user sees
- * (and what gets saved) comes from `onboarding.suggestions.<key>`, so the habit
- * is created in the language they are reading.
- */
-const HABIT_TEMPLATES: HabitTemplate[] = [
-  {
-    key: 'water',
-    name: 'Drink water',
-    icon: 'droplet',
-    color: 'teal',
-    frequency: 'daily',
-    time_of_day: 'anytime',
-  },
-  {
-    key: 'read',
-    name: 'Read',
-    icon: 'book',
-    color: 'amber',
-    frequency: 'daily',
-    time_of_day: 'evening',
-  },
-  {
-    key: 'move',
-    name: 'Move my body',
-    icon: 'dumbbell',
-    color: 'accent',
-    frequency: 'weekdays',
-    time_of_day: 'anytime',
-  },
-  {
-    key: 'meditate',
-    name: 'Meditate',
-    icon: 'brain',
-    color: 'teal',
-    frequency: 'daily',
-    time_of_day: 'morning',
-  },
-  {
-    key: 'sunlight',
-    name: 'Morning sunlight',
-    icon: 'sun',
-    color: 'amber',
-    frequency: 'daily',
-    time_of_day: 'morning',
-  },
-  {
-    key: 'sleep',
-    name: 'Sleep by 23:00',
-    icon: 'moon',
-    color: 'muted',
-    frequency: 'daily',
-    time_of_day: 'evening',
-  },
-]
-
-/** Two templates pre-checked so the common path is a single tap. */
-const DEFAULT_PICKS = ['water', 'read']
-
-function toInput(template: HabitTemplate, name: string): HabitFormInput {
-  return {
-    name,
-    description: null,
-    icon: template.icon,
-    color: template.color,
-    frequency: template.frequency,
-    target_count: 1,
-    time_of_day: template.time_of_day,
-  }
-}
 
 /** First-run welcome flow (spec board 02): welcome → modules → habits → ready. */
 function OnboardingPage() {
@@ -167,7 +86,7 @@ function OnboardingPage() {
             create.mutateAsync(toInput(tpl, t(`onboarding.suggestions.${tpl.key}`))),
           ),
         )
-        toast.success(`${chosen.length} habit${chosen.length > 1 ? 's' : ''} added`)
+        toast.success(t('onboarding.habitsAdded', { count: chosen.length }))
       } catch (error) {
         toast.error(error instanceof Error ? error.message : t('onboarding.createFailed'))
         setSaving(false)
@@ -291,174 +210,6 @@ function OnboardingPage() {
         ) : null}
       </div>
     </main>
-  )
-}
-
-function WelcomeStep() {
-  const { t } = useT()
-  return (
-    <>
-      <BrandMark size="xl" glow className="mx-auto" />
-      <p className="mt-8 font-mono text-xs uppercase tracking-[0.18em] text-accent">
-        {t('onboarding.welcomeTo')}
-      </p>
-      <p className="mt-2.5 font-mono text-5xl font-bold tracking-[0.04em] sm:text-[58px]">
-        ALMANAC
-      </p>
-      <p className="mx-auto mt-4 max-w-[460px] text-lg leading-relaxed text-muted">
-        {t('onboarding.welcomeBlurb')}
-      </p>
-    </>
-  )
-}
-
-interface ModulesStepProps {
-  modules: Record<ModuleKey, boolean>
-  onToggle: (key: ModuleKey) => void
-}
-
-/** Step 2: pick which optional modules show in the nav. Core ones are pinned. */
-function ModulesStep({ modules, onToggle }: ModulesStepProps) {
-  const { t } = useT()
-  return (
-    <>
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-accent">
-        {t('onboarding.buildYourApp')}
-      </p>
-      <p className="mt-2.5 text-3xl font-semibold tracking-title">{t('onboarding.pickModules')}</p>
-      <p className="mx-auto mt-3 max-w-[420px] text-sm text-muted-strong">
-        Habits and Insights are always on. Add whatever else you want — you can change this any time
-        under More.
-      </p>
-      <div className="mt-8 grid grid-cols-2 gap-3 text-left">
-        {OPTIONAL_MODULES.map(({ key, label, icon: Icon }) => {
-          const on = modules[key]
-          return (
-            <SelectTile key={key} on={on} onClick={() => onToggle(key)}>
-              <span
-                className={cn(
-                  'flex h-10 w-10 flex-none items-center justify-center rounded-tile transition-colors',
-                  on ? 'bg-accent/15 text-accent' : 'bg-border/10 text-muted-strong',
-                )}
-              >
-                <Icon className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <span className="min-w-0 flex-1 font-semibold">{label}</span>
-            </SelectTile>
-          )
-        })}
-      </div>
-    </>
-  )
-}
-
-interface TemplatesStepProps {
-  picks: Set<string>
-  onToggle: (key: string) => void
-}
-
-/** Step 3: multi-select starter habits, created on finish. */
-function TemplatesStep({ picks, onToggle }: TemplatesStepProps) {
-  const { t } = useT()
-  return (
-    <>
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-accent">
-        {t('onboarding.startTracking')}
-      </p>
-      <p className="mt-2.5 text-3xl font-semibold tracking-title">{t('onboarding.addHabits')}</p>
-      <p className="mx-auto mt-3 max-w-[420px] text-sm text-muted-strong">
-        {t('onboarding.addHabitsHint')}
-      </p>
-      <div className="mt-8 grid grid-cols-2 gap-3 text-left">
-        {HABIT_TEMPLATES.map((tpl) => {
-          const Icon = HABIT_ICONS[tpl.icon]
-          const on = picks.has(tpl.key)
-          return (
-            <SelectTile key={tpl.key} on={on} onClick={() => onToggle(tpl.key)} compact>
-              <span
-                className={cn(
-                  'flex h-9 w-9 flex-none items-center justify-center rounded-tile transition-colors',
-                  on ? 'bg-accent/15 text-accent' : 'bg-border/10 text-muted-strong',
-                )}
-              >
-                <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
-              </span>
-              <span className="min-w-0 flex-1 text-sm font-semibold">
-                {t(`onboarding.suggestions.${tpl.key}`)}
-              </span>
-            </SelectTile>
-          )
-        })}
-      </div>
-    </>
-  )
-}
-
-interface SelectTileProps {
-  on: boolean
-  onClick: () => void
-  compact?: boolean
-  children: ReactNode
-}
-
-/** Shared multi-select tile: icon + label + a check that fills when selected. */
-function SelectTile({ on, onClick, compact, children }: SelectTileProps) {
-  return (
-    <button
-      type="button"
-      aria-pressed={on}
-      onClick={onClick}
-      className={cn(
-        'flex items-center gap-3 rounded-card border text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-        compact ? 'px-4 py-3.5' : 'px-4 py-4',
-        on
-          ? 'border-accent/60 bg-accent/[0.07]'
-          : 'border-border bg-surface/60 hover:border-accent/30',
-      )}
-    >
-      {children}
-      <span
-        aria-hidden="true"
-        className={cn(
-          'flex h-5 w-5 flex-none items-center justify-center rounded-full border transition-colors',
-          on ? 'border-accent bg-accent text-bg' : 'border-muted-strong/50 text-transparent',
-        )}
-      >
-        <Check className="h-3 w-3" />
-      </span>
-    </button>
-  )
-}
-
-function ReadyStep({ count }: { count: number }) {
-  const { t } = useT()
-  return (
-    <>
-      <span className="relative mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-[22px] bg-gradient-to-br from-accent-bright to-accent-deep shadow-glow">
-        {count > 0 ? (
-          <Check className="h-8 w-8 text-bg" aria-hidden="true" />
-        ) : (
-          <Plus className="h-7 w-7 text-bg" aria-hidden="true" />
-        )}
-      </span>
-      <p className="mt-8 font-mono text-xs uppercase tracking-[0.18em] text-accent">
-        {t('onboarding.youAreSet')}
-      </p>
-      <p className="mt-2.5 text-3xl font-semibold tracking-title">
-        {count > 0 ? t('onboarding.ready') : t('onboarding.startSingle')}
-      </p>
-      <div className="mt-6 rounded-card border border-dashed border-accent/40 bg-accent/[0.05] px-6 py-6">
-        <p className="text-2xl text-accent" aria-hidden="true">
-          ◇
-        </p>
-        <p className="mt-2 font-semibold">
-          {count > 0 ? t('onboarding.habitsReady', { count }) : t('onboarding.nothingYet')}
-        </p>
-        <p className="mt-1 text-sm text-muted-strong">
-          {count > 0 ? t('onboarding.startSingleHint') : t('onboarding.firstHabitHint')}
-        </p>
-      </div>
-    </>
   )
 }
 

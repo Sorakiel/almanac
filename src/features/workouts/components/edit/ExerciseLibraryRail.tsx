@@ -11,6 +11,7 @@ import { draftSummary, volumeLabel, type WorkoutDraft } from '@/features/workout
 import type { LibraryPick } from '@/features/workouts/hooks/useWorkoutDraft'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { workoutKeys } from '@/features/workouts/hooks/queryKeys'
 
 interface ExerciseLibraryRailProps {
   draft: WorkoutDraft
@@ -49,7 +50,7 @@ export function ExerciseLibraryRail({
   const create = useMutation({
     mutationFn: (name: string) => createExercise(user?.id ?? '', name, muscle),
     onSuccess: (exercise) => {
-      void queryClient.invalidateQueries({ queryKey: ['exerciseLibrary', user?.id ?? ''] })
+      void queryClient.invalidateQueries({ queryKey: workoutKeys.exerciseLibrary(user?.id ?? '') })
       onPick({ exerciseId: exercise.id, name: exercise.name, muscleGroup: exercise.muscle_group })
       setNewName('')
       setCreating(false)
@@ -171,7 +172,8 @@ export function ExerciseLibraryRail({
               disabled={!newName.trim() || create.isPending}
               onClick={() => create.mutate(newName.trim())}
             >
-              Create{muscle ? ` · ${muscle}` : ''}
+              {t('workouts.createExercise')}
+              {muscle ? ` · ${muscle}` : ''}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setCreating(false)}>
               {t('workouts.editor.cancel')}

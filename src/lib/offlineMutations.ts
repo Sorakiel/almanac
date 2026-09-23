@@ -1,4 +1,4 @@
-import type { QueryClient } from '@tanstack/react-query'
+import type { QueryClient, QueryKey } from '@tanstack/react-query'
 import {
   addFreeze,
   archiveHabit,
@@ -12,12 +12,12 @@ import {
   updateHabitOrder,
 } from '@/features/habits/api/habits.api'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
-import type { HabitWithTodayLog } from '@/features/habits/types'
+import type { Habit, HabitSubtask, HabitWithTodayLog } from '@/features/habits/types'
 import type { HabitFormInput } from '@/features/habits/hooks/useHabitMutations'
 import { updateSet } from '@/features/workouts/api/session.api'
 import { createWorkout, deleteWorkout, updateWorkout } from '@/features/workouts/api/workouts.api'
 import type { WorkoutFormInput } from '@/features/workouts/hooks/useWorkoutMutations'
-import type { SetLog } from '@/features/workouts/types'
+import type { SetLog, Workout } from '@/features/workouts/types'
 import {
   createReflection,
   deleteReflection,
@@ -40,10 +40,14 @@ import {
   sendFriendRequest,
 } from '@/features/social/api/social.api'
 import { socialKeys } from '@/features/social/hooks/queryKeys'
-import type { Book, BookInsert } from '@/features/reading/types'
+import type { Book, BookInsert, BookNote } from '@/features/reading/types'
+import type { Reflection } from '@/features/reflect/types'
 import { submitFeedback } from '@/features/modules/api/feedback.api'
-import { updateOwnProfile } from '@/features/settings/api/profiles.api'
+import { updateOwnProfile, type Profile } from '@/features/settings/api/profiles.api'
 import type { Database } from '@/types/database.generated'
+import { readingKeys } from '@/features/reading/hooks/queryKeys'
+import { reflectKeys } from '@/features/reflect/hooks/queryKeys'
+import { workoutKeys } from '@/features/workouts/hooks/queryKeys'
 
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
 
@@ -55,37 +59,6 @@ type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
  * the tap *and* shows an error. See `OFFLINE_MUTATION_ROOT`.
  */
 export const OFFLINE_MUTATION_ROOT = 'offline'
-
-export const OFFLINE_MUTATION_KEYS = {
-  toggleHabit: [OFFLINE_MUTATION_ROOT, 'toggleHabit'] as const,
-  editSet: [OFFLINE_MUTATION_ROOT, 'editSet'] as const,
-  toggleFreeze: [OFFLINE_MUTATION_ROOT, 'toggleFreeze'] as const,
-  toggleSubtask: [OFFLINE_MUTATION_ROOT, 'toggleSubtask'] as const,
-  createHabit: [OFFLINE_MUTATION_ROOT, 'createHabit'] as const,
-  updateHabit: [OFFLINE_MUTATION_ROOT, 'updateHabit'] as const,
-  archiveHabit: [OFFLINE_MUTATION_ROOT, 'archiveHabit'] as const,
-  reorderHabits: [OFFLINE_MUTATION_ROOT, 'reorderHabits'] as const,
-  createSubtask: [OFFLINE_MUTATION_ROOT, 'createSubtask'] as const,
-  deleteSubtask: [OFFLINE_MUTATION_ROOT, 'deleteSubtask'] as const,
-  createWorkout: [OFFLINE_MUTATION_ROOT, 'createWorkout'] as const,
-  updateWorkout: [OFFLINE_MUTATION_ROOT, 'updateWorkout'] as const,
-  deleteWorkout: [OFFLINE_MUTATION_ROOT, 'deleteWorkout'] as const,
-  toggleWorkoutComplete: [OFFLINE_MUTATION_ROOT, 'toggleWorkoutComplete'] as const,
-  saveReflection: [OFFLINE_MUTATION_ROOT, 'saveReflection'] as const,
-  deleteReflection: [OFFLINE_MUTATION_ROOT, 'deleteReflection'] as const,
-  logReadingProgress: [OFFLINE_MUTATION_ROOT, 'logReadingProgress'] as const,
-  rateBook: [OFFLINE_MUTATION_ROOT, 'rateBook'] as const,
-  createBook: [OFFLINE_MUTATION_ROOT, 'createBook'] as const,
-  updateBook: [OFFLINE_MUTATION_ROOT, 'updateBook'] as const,
-  deleteBook: [OFFLINE_MUTATION_ROOT, 'deleteBook'] as const,
-  createBookNote: [OFFLINE_MUTATION_ROOT, 'createBookNote'] as const,
-  deleteBookNote: [OFFLINE_MUTATION_ROOT, 'deleteBookNote'] as const,
-  sendFriendRequest: [OFFLINE_MUTATION_ROOT, 'sendFriendRequest'] as const,
-  acceptFriendRequest: [OFFLINE_MUTATION_ROOT, 'acceptFriendRequest'] as const,
-  removeFriendship: [OFFLINE_MUTATION_ROOT, 'removeFriendship'] as const,
-  updateProfile: [OFFLINE_MUTATION_ROOT, 'updateProfile'] as const,
-  sendFeedback: [OFFLINE_MUTATION_ROOT, 'sendFeedback'] as const,
-}
 
 export interface ToggleHabitVariables {
   habit: HabitWithTodayLog
@@ -251,6 +224,52 @@ export interface SendFeedbackVariables {
 }
 
 /**
+ * A mutation key that also carries its write's result and variables types, so
+ * the registered default and every hook using the key agree by construction —
+ * `useOfflineMutation` infers both from the key alone.
+ */
+export type OfflineKey<TData, TVariables> = readonly [typeof OFFLINE_MUTATION_ROOT, string] & {
+  readonly __types?: (variables: TVariables) => TData
+}
+
+function offlineKey<TData, TVariables>(name: string): OfflineKey<TData, TVariables> {
+  return [OFFLINE_MUTATION_ROOT, name] as OfflineKey<TData, TVariables>
+}
+
+export const OFFLINE_MUTATION_KEYS = {
+  toggleHabit: offlineKey<void, ToggleHabitVariables>('toggleHabit'),
+  editSet: offlineKey<void, EditSetVariables>('editSet'),
+  toggleFreeze: offlineKey<void, ToggleFreezeVariables>('toggleFreeze'),
+  toggleSubtask: offlineKey<void, ToggleSubtaskVariables>('toggleSubtask'),
+  createHabit: offlineKey<Habit, CreateHabitVariables>('createHabit'),
+  updateHabit: offlineKey<Habit, UpdateHabitVariables>('updateHabit'),
+  archiveHabit: offlineKey<void, ArchiveHabitVariables>('archiveHabit'),
+  reorderHabits: offlineKey<void, ReorderHabitsVariables>('reorderHabits'),
+  createSubtask: offlineKey<HabitSubtask, CreateSubtaskVariables>('createSubtask'),
+  deleteSubtask: offlineKey<void, DeleteSubtaskVariables>('deleteSubtask'),
+  createWorkout: offlineKey<Workout, CreateWorkoutVariables>('createWorkout'),
+  updateWorkout: offlineKey<Workout, UpdateWorkoutVariables>('updateWorkout'),
+  deleteWorkout: offlineKey<void, DeleteWorkoutVariables>('deleteWorkout'),
+  toggleWorkoutComplete: offlineKey<Workout, ToggleWorkoutCompleteVariables>(
+    'toggleWorkoutComplete',
+  ),
+  saveReflection: offlineKey<Reflection, SaveReflectionVariables>('saveReflection'),
+  deleteReflection: offlineKey<void, DeleteReflectionVariables>('deleteReflection'),
+  logReadingProgress: offlineKey<void, LogReadingProgressVariables>('logReadingProgress'),
+  rateBook: offlineKey<void, RateBookVariables>('rateBook'),
+  createBook: offlineKey<Book, CreateBookVariables>('createBook'),
+  updateBook: offlineKey<Book, UpdateBookVariables>('updateBook'),
+  deleteBook: offlineKey<void, DeleteBookVariables>('deleteBook'),
+  createBookNote: offlineKey<BookNote, CreateBookNoteVariables>('createBookNote'),
+  deleteBookNote: offlineKey<void, DeleteBookNoteVariables>('deleteBookNote'),
+  sendFriendRequest: offlineKey<void, SendFriendRequestVariables>('sendFriendRequest'),
+  acceptFriendRequest: offlineKey<void, AcceptFriendRequestVariables>('acceptFriendRequest'),
+  removeFriendship: offlineKey<void, RemoveFriendshipVariables>('removeFriendship'),
+  updateProfile: offlineKey<Profile, UpdateProfileVariables>('updateProfile'),
+  sendFeedback: offlineKey<void, SendFeedbackVariables>('sendFeedback'),
+}
+
+/**
  * Mutation defaults for every write that must survive a tap made offline.
  *
  * Registered once, synchronously, before the persisted cache restores (see
@@ -264,31 +283,41 @@ export interface SendFeedbackVariables {
  * implementations will drift.
  */
 export function registerOfflineMutations(client: QueryClient): void {
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.toggleHabit, {
-    mutationFn: ({ habit, userId, date }: ToggleHabitVariables) => {
+  /** Register `mutationFn` and the query keys it leaves stale once settled. */
+  const register = <TData, TVariables>(
+    key: OfflineKey<TData, TVariables>,
+    mutationFn: (variables: TVariables) => Promise<TData>,
+    invalidates: (variables: TVariables) => QueryKey[] = () => [],
+  ): void => {
+    client.setMutationDefaults(key, {
+      mutationFn,
+      onSettled: (_data, _error, variables: TVariables) => {
+        for (const queryKey of invalidates(variables)) void client.invalidateQueries({ queryKey })
+      },
+    })
+  }
+
+  register(
+    OFFLINE_MUTATION_KEYS.toggleHabit,
+    ({ habit, userId, date }) => {
       const nextCount = habit.isComplete ? 0 : habit.todayCount + 1
       return setHabitCount({ userId, habitId: habit.id, date, count: nextCount })
     },
-    onSettled: (_data, _error, { userId }: ToggleHabitVariables) => {
-      void client.invalidateQueries({ queryKey: habitKeys.logsRoot(userId) })
-    },
-  })
+    ({ userId }) => [habitKeys.logsRoot(userId)],
+  )
 
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.editSet, {
-    mutationFn: ({ id, patch }: EditSetVariables) => updateSet(id, patch),
-    onSettled: (_data, _error, { workoutId }: EditSetVariables) => {
-      void client.invalidateQueries({ queryKey: ['workoutSession', workoutId] })
-    },
-  })
+  register(
+    OFFLINE_MUTATION_KEYS.editSet,
+    ({ id, patch }) => updateSet(id, patch),
+    ({ workoutId }) => [workoutKeys.session(workoutId)],
+  )
 
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.toggleFreeze, {
-    mutationFn: ({ userId, habitId, date, freeze }: ToggleFreezeVariables) =>
+  register(
+    OFFLINE_MUTATION_KEYS.toggleFreeze,
+    ({ userId, habitId, date, freeze }) =>
       freeze ? addFreeze(userId, habitId, date) : removeFreeze(habitId, date),
-    onSettled: (_data, _error, { userId, habitId }: ToggleFreezeVariables) => {
-      void client.invalidateQueries({ queryKey: habitKeys.freezesRoot(userId) })
-      void client.invalidateQueries({ queryKey: ['habitFreezes', habitId] })
-    },
-  })
+    ({ userId, habitId }) => [habitKeys.freezesRoot(userId), habitKeys.freezesOf(habitId)],
+  )
 
   // Only the checklist write itself is guaranteed here — the follow-up sync
   // that rolls a fully-checked list into the habit's own count
@@ -297,106 +326,66 @@ export function registerOfflineMutations(client: QueryClient): void {
   // survives); it just won't run for a mutation resumed after a cold start,
   // which is an acceptable gap: the checklist state itself is never lost,
   // only the derived habit-count mirror, which the next toggle re-syncs.
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.toggleSubtask, {
-    mutationFn: ({ subtaskId, dates }: ToggleSubtaskVariables) =>
-      setSubtaskCompletedDates(subtaskId, dates),
-    onSettled: (_data, _error, { habitId }: ToggleSubtaskVariables) => {
-      void client.invalidateQueries({ queryKey: habitKeys.subtasks(habitId) })
-    },
-  })
+  register(
+    OFFLINE_MUTATION_KEYS.toggleSubtask,
+    ({ subtaskId, dates }) => setSubtaskCompletedDates(subtaskId, dates),
+    ({ habitId }) => [habitKeys.subtasks(habitId)],
+  )
 
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.createHabit, {
-    mutationFn: ({ input, userId }: CreateHabitVariables) =>
-      createHabit({ ...input, user_id: userId }),
-    onSettled: (_data, _error, { userId }: CreateHabitVariables) => {
-      void client.invalidateQueries({ queryKey: habitKeys.all(userId) })
-      void client.invalidateQueries({ queryKey: ['habit'] })
-    },
-  })
+  const habitLists = ({ userId }: { userId: string }): QueryKey[] => [
+    habitKeys.all(userId),
+    habitKeys.detailRoot(),
+  ]
+  register(
+    OFFLINE_MUTATION_KEYS.createHabit,
+    ({ input, userId }) => createHabit({ ...input, user_id: userId }),
+    habitLists,
+  )
+  register(OFFLINE_MUTATION_KEYS.updateHabit, ({ id, input }) => updateHabit(id, input), habitLists)
+  register(OFFLINE_MUTATION_KEYS.archiveHabit, ({ id }) => archiveHabit(id), habitLists)
+  register(
+    OFFLINE_MUTATION_KEYS.reorderHabits,
+    ({ ordered }) => updateHabitOrder(ordered),
+    ({ userId }) => [habitKeys.all(userId)],
+  )
 
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.updateHabit, {
-    mutationFn: ({ id, input }: UpdateHabitVariables) => updateHabit(id, input),
-    onSettled: (_data, _error, { userId }: UpdateHabitVariables) => {
-      void client.invalidateQueries({ queryKey: habitKeys.all(userId) })
-      void client.invalidateQueries({ queryKey: ['habit'] })
-    },
-  })
+  register(
+    OFFLINE_MUTATION_KEYS.createSubtask,
+    ({ userId, habitId, title, sortOrder }) => createSubtask(userId, habitId, title, sortOrder),
+    ({ habitId }) => [habitKeys.subtasks(habitId)],
+  )
+  register(
+    OFFLINE_MUTATION_KEYS.deleteSubtask,
+    ({ id }) => deleteSubtask(id),
+    ({ habitId }) => [habitKeys.subtasks(habitId)],
+  )
 
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.archiveHabit, {
-    mutationFn: ({ id }: ArchiveHabitVariables) => archiveHabit(id),
-    onSettled: (_data, _error, { userId }: ArchiveHabitVariables) => {
-      void client.invalidateQueries({ queryKey: habitKeys.all(userId) })
-      void client.invalidateQueries({ queryKey: ['habit'] })
-    },
-  })
-
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.reorderHabits, {
-    mutationFn: ({ ordered }: ReorderHabitsVariables) => updateHabitOrder(ordered),
-    onSettled: (_data, _error, { userId }: ReorderHabitsVariables) => {
-      void client.invalidateQueries({ queryKey: habitKeys.all(userId) })
-    },
-  })
-
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.createSubtask, {
-    mutationFn: ({ userId, habitId, title, sortOrder }: CreateSubtaskVariables) =>
-      createSubtask(userId, habitId, title, sortOrder),
-    onSettled: (_data, _error, { habitId }: CreateSubtaskVariables) => {
-      void client.invalidateQueries({ queryKey: habitKeys.subtasks(habitId) })
-    },
-  })
-
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.deleteSubtask, {
-    mutationFn: ({ id }: DeleteSubtaskVariables) => deleteSubtask(id),
-    onSettled: (_data, _error, { habitId }: DeleteSubtaskVariables) => {
-      void client.invalidateQueries({ queryKey: habitKeys.subtasks(habitId) })
-    },
-  })
-
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.createWorkout, {
-    mutationFn: ({ input, userId }: CreateWorkoutVariables) =>
-      createWorkout({ ...input, user_id: userId }),
-    onSettled: (_data, _error, { userId }: CreateWorkoutVariables) => {
-      void client.invalidateQueries({ queryKey: ['workouts', userId] })
-    },
-  })
-
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.updateWorkout, {
-    mutationFn: ({ id, input }: UpdateWorkoutVariables) => updateWorkout(id, input),
-    onSettled: (_data, _error, { userId }: UpdateWorkoutVariables) => {
-      void client.invalidateQueries({ queryKey: ['workouts', userId] })
-    },
-  })
-
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.deleteWorkout, {
-    mutationFn: ({ id }: DeleteWorkoutVariables) => deleteWorkout(id),
-    onSettled: (_data, _error, { userId }: DeleteWorkoutVariables) => {
-      void client.invalidateQueries({ queryKey: ['workouts', userId] })
-    },
-  })
+  const workoutList = ({ userId }: { userId: string }): QueryKey[] => [workoutKeys.all(userId)]
+  register(
+    OFFLINE_MUTATION_KEYS.createWorkout,
+    ({ input, userId }) => createWorkout({ ...input, user_id: userId }),
+    workoutList,
+  )
+  register(
+    OFFLINE_MUTATION_KEYS.updateWorkout,
+    ({ id, input }) => updateWorkout(id, input),
+    workoutList,
+  )
+  register(OFFLINE_MUTATION_KEYS.deleteWorkout, ({ id }) => deleteWorkout(id), workoutList)
 
   // Shared by useWorkoutMutations' toggleComplete (list view) and
   // useSessionMutations' setCompleted (in-session finish button) — same
   // underlying write, two call sites.
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.toggleWorkoutComplete, {
-    mutationFn: ({ id, done }: ToggleWorkoutCompleteVariables) =>
-      updateWorkout(id, { completed_at: done ? new Date().toISOString() : null }),
-    onSettled: (_data, _error, { id, userId }: ToggleWorkoutCompleteVariables) => {
-      void client.invalidateQueries({ queryKey: ['workout', id] })
-      void client.invalidateQueries({ queryKey: ['workouts', userId] })
-    },
-  })
+  register(
+    OFFLINE_MUTATION_KEYS.toggleWorkoutComplete,
+    ({ id, done }) => updateWorkout(id, { completed_at: done ? new Date().toISOString() : null }),
+    ({ id, userId }) => [workoutKeys.detail(id), workoutKeys.all(userId)],
+  )
 
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.saveReflection, {
-    mutationFn: ({
-      id,
-      date,
-      body,
-      quoteId,
-      mood,
-      energy,
-      dayRating,
-      userId,
-    }: SaveReflectionVariables) =>
+  const reflectionList = ({ userId }: { userId: string }): QueryKey[] => [reflectKeys.all(userId)]
+  register(
+    OFFLINE_MUTATION_KEYS.saveReflection,
+    ({ id, date, body, quoteId, mood, energy, dayRating, userId }) =>
       id
         ? updateReflection(id, { body, mood, energy, day_rating: dayRating })
         : createReflection({
@@ -408,26 +397,13 @@ export function registerOfflineMutations(client: QueryClient): void {
             energy,
             day_rating: dayRating,
           }),
-    onSettled: (_data, _error, { userId }: SaveReflectionVariables) => {
-      void client.invalidateQueries({ queryKey: ['reflections', userId] })
-    },
-  })
+    reflectionList,
+  )
+  register(OFFLINE_MUTATION_KEYS.deleteReflection, ({ id }) => deleteReflection(id), reflectionList)
 
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.deleteReflection, {
-    mutationFn: ({ id }: DeleteReflectionVariables) => deleteReflection(id),
-    onSettled: (_data, _error, { userId }: DeleteReflectionVariables) => {
-      void client.invalidateQueries({ queryKey: ['reflections', userId] })
-    },
-  })
-
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.logReadingProgress, {
-    mutationFn: async ({
-      book,
-      nextUnit,
-      minutes,
-      userId,
-      dateKey,
-    }: LogReadingProgressVariables) => {
+  register(
+    OFFLINE_MUTATION_KEYS.logReadingProgress,
+    async ({ book, nextUnit, minutes, userId, dateKey }) => {
       const capped =
         book.total_units && book.total_units > 0
           ? Math.min(nextUnit, book.total_units)
@@ -459,15 +435,16 @@ export function registerOfflineMutations(client: QueryClient): void {
         }).catch(() => undefined)
       }
     },
-    onSettled: (_data, _error, { book, userId }: LogReadingProgressVariables) => {
-      void client.invalidateQueries({ queryKey: ['books', userId] })
-      void client.invalidateQueries({ queryKey: ['book', book.id] })
-      void client.invalidateQueries({ queryKey: ['readingSessions', book.id] })
-    },
-  })
+    ({ book, userId }) => [
+      readingKeys.books(userId),
+      readingKeys.book(book.id),
+      readingKeys.sessions(book.id),
+    ],
+  )
 
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.rateBook, {
-    mutationFn: async ({ book, rating, userId }: RateBookVariables) => {
+  register(
+    OFFLINE_MUTATION_KEYS.rateBook,
+    async ({ book, rating, userId }) => {
       await updateBook(book.id, { rating })
       if (rating !== null) {
         await logBookRatingEvent({
@@ -478,73 +455,52 @@ export function registerOfflineMutations(client: QueryClient): void {
         })
       }
     },
-    onSettled: (_data, _error, { book, userId }: RateBookVariables) => {
-      void client.invalidateQueries({ queryKey: ['books', userId] })
-      void client.invalidateQueries({ queryKey: ['book', book.id] })
-      void client.invalidateQueries({ queryKey: ['bookRatingEvents', book.id] })
-    },
-  })
+    ({ book, userId }) => [readingKeys.books(userId), readingKeys.book(book.id)],
+  )
 
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.createBook, {
-    mutationFn: ({ input, userId }: CreateBookVariables) =>
-      createBook({ ...input, user_id: userId }),
-    onSettled: (_data, _error, { userId }: CreateBookVariables) => {
-      void client.invalidateQueries({ queryKey: ['books', userId] })
-    },
-  })
+  register(
+    OFFLINE_MUTATION_KEYS.createBook,
+    ({ input, userId }) => createBook({ ...input, user_id: userId }),
+    ({ userId }) => [readingKeys.books(userId)],
+  )
+  register(
+    OFFLINE_MUTATION_KEYS.updateBook,
+    ({ id, patch }) => updateBook(id, patch),
+    ({ id, userId }) => [readingKeys.books(userId), readingKeys.book(id)],
+  )
+  register(
+    OFFLINE_MUTATION_KEYS.deleteBook,
+    ({ id }) => deleteBook(id),
+    ({ userId }) => [readingKeys.books(userId)],
+  )
 
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.updateBook, {
-    mutationFn: ({ id, patch }: UpdateBookVariables) => updateBook(id, patch),
-    onSettled: (_data, _error, { id, userId }: UpdateBookVariables) => {
-      void client.invalidateQueries({ queryKey: ['books', userId] })
-      void client.invalidateQueries({ queryKey: ['book', id] })
-    },
-  })
-
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.deleteBook, {
-    mutationFn: ({ id }: DeleteBookVariables) => deleteBook(id),
-    onSettled: (_data, _error, { userId }: DeleteBookVariables) => {
-      void client.invalidateQueries({ queryKey: ['books', userId] })
-    },
-  })
-
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.createBookNote, {
-    mutationFn: ({ userId, bookId, body, page }: CreateBookNoteVariables) =>
+  register(
+    OFFLINE_MUTATION_KEYS.createBookNote,
+    ({ userId, bookId, body, page }) =>
       createBookNote({ user_id: userId, book_id: bookId, body, page }),
-    onSettled: (_data, _error, { bookId }: CreateBookNoteVariables) => {
-      void client.invalidateQueries({ queryKey: ['bookNotes', bookId] })
-    },
-  })
+    ({ bookId }) => [readingKeys.notes(bookId)],
+  )
+  register(
+    OFFLINE_MUTATION_KEYS.deleteBookNote,
+    ({ id }) => deleteBookNote(id),
+    ({ bookId }) => [readingKeys.notes(bookId)],
+  )
 
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.deleteBookNote, {
-    mutationFn: ({ id }: DeleteBookNoteVariables) => deleteBookNote(id),
-    onSettled: (_data, _error, { bookId }: DeleteBookNoteVariables) => {
-      void client.invalidateQueries({ queryKey: ['bookNotes', bookId] })
-    },
-  })
-
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.sendFriendRequest, {
-    mutationFn: ({ requesterId, addresseeId }: SendFriendRequestVariables) =>
-      sendFriendRequest(requesterId, addresseeId),
-    onSettled: (_data, _error, { requesterId }: SendFriendRequestVariables) => {
-      void client.invalidateQueries({ queryKey: socialKeys.friendships(requesterId) })
-    },
-  })
-
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.acceptFriendRequest, {
-    mutationFn: ({ friendshipId }: AcceptFriendRequestVariables) =>
-      acceptFriendRequest(friendshipId),
-    onSettled: (_data, _error, { userId }: AcceptFriendRequestVariables) => {
-      void client.invalidateQueries({ queryKey: socialKeys.friendships(userId) })
-    },
-  })
-
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.removeFriendship, {
-    mutationFn: ({ friendshipId }: RemoveFriendshipVariables) => removeFriendship(friendshipId),
-    onSettled: (_data, _error, { userId }: RemoveFriendshipVariables) => {
-      void client.invalidateQueries({ queryKey: socialKeys.friendships(userId) })
-    },
-  })
+  register(
+    OFFLINE_MUTATION_KEYS.sendFriendRequest,
+    ({ requesterId, addresseeId }) => sendFriendRequest(requesterId, addresseeId),
+    ({ requesterId }) => [socialKeys.friendships(requesterId)],
+  )
+  register(
+    OFFLINE_MUTATION_KEYS.acceptFriendRequest,
+    ({ friendshipId }) => acceptFriendRequest(friendshipId),
+    ({ userId }) => [socialKeys.friendships(userId)],
+  )
+  register(
+    OFFLINE_MUTATION_KEYS.removeFriendship,
+    ({ friendshipId }) => removeFriendship(friendshipId),
+    ({ userId }) => [socialKeys.friendships(userId)],
+  )
 
   client.setMutationDefaults(OFFLINE_MUTATION_KEYS.updateProfile, {
     mutationFn: ({ userId, patch }: UpdateProfileVariables) => updateOwnProfile(userId, patch),
@@ -553,7 +509,5 @@ export function registerOfflineMutations(client: QueryClient): void {
     },
   })
 
-  client.setMutationDefaults(OFFLINE_MUTATION_KEYS.sendFeedback, {
-    mutationFn: ({ userId, body }: SendFeedbackVariables) => submitFeedback(userId, body),
-  })
+  register(OFFLINE_MUTATION_KEYS.sendFeedback, ({ userId, body }) => submitFeedback(userId, body))
 }

@@ -29,13 +29,6 @@ const SPIKE_MS = 460
 /** Most samples one frame may advance, so a resumed tab doesn't flatten the strip. */
 const MAX_CATCHUP = 4
 
-const MODE_LABEL: Record<PulseMode, string> = {
-  working: 'under load',
-  recovery: 'recovering',
-  paused: 'paused',
-  complete: 'session complete',
-}
-
 /**
  * Baseline trace for a mode, in ±1 units of half-height.
  * `restRatio` is 1 at the top of a rest window and 0 when it runs out, so the
@@ -207,12 +200,12 @@ export function SessionPulse({
             dim ? 'text-muted-strong' : 'text-accent',
           )}
         >
-          ▷ session.pulse // {MODE_LABEL[mode]}
+          {t('workouts.pulseHeader', { mode: t(`workouts.pulseMode.${mode}`) })}
         </p>
         {/* Redundant with the rest chip in the action bar on narrow screens. */}
         {restMs !== null ? (
           <p className="hidden font-mono text-[10px] uppercase tabular-nums tracking-label text-accent sm:block">
-            rest {formatClock(restMs)}
+            {t('workouts.pulseRest', { time: formatClock(restMs) })}
           </p>
         ) : null}
       </div>
@@ -273,11 +266,13 @@ export function SessionPulse({
 
       <div className="relative flex items-center justify-between gap-3 px-4 pb-3.5 font-mono text-[10px] uppercase tracking-label text-muted-strong lg:px-6 lg:pb-5">
         <span className="tabular-nums">
-          sets {doneSets}/{totalSets}
+          {t('workouts.pulseSets', { done: doneSets, total: totalSets })}
         </span>
         {/* The top bar already carries the elapsed clock on narrow screens. */}
-        <span className="hidden tabular-nums sm:inline">elapsed {formatClock(elapsedMs)}</span>
-        <span className="tabular-nums">{tempo} / set</span>
+        <span className="hidden tabular-nums sm:inline">
+          {t('workouts.pulseElapsed', { time: formatClock(elapsedMs) })}
+        </span>
+        <span className="tabular-nums">{t('workouts.pulseTempo', { tempo })}</span>
       </div>
     </section>
   )

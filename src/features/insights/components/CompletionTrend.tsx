@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import type { WeekPoint } from '@/features/insights/types'
 import { useT } from '@/hooks/useT'
+import { weekdayLabels } from '@/lib/dateLocale'
 
 interface CompletionTrendProps {
   weekly: WeekPoint[]
@@ -13,7 +14,8 @@ const PAD_Y = 14
 
 /** Completion-over-time area chart — inline SVG, stretched to container width. */
 export function CompletionTrend({ weekly, height = 170 }: CompletionTrendProps) {
-  const { t } = useT()
+  const { t, locale } = useT()
+  const days = weekdayLabels(locale)
   const gradientId = useId()
 
   if (weekly.length < 2) {
@@ -44,7 +46,7 @@ export function CompletionTrend({ weekly, height = 170 }: CompletionTrendProps) 
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
         preserveAspectRatio="none"
         role="img"
-        aria-label="{t('insights.trendTitle')}"
+        aria-label={t('insights.trendTitle')}
       >
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -64,8 +66,12 @@ export function CompletionTrend({ weekly, height = 170 }: CompletionTrendProps) 
         />
       </svg>
       <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-strong">
-        {weekly.map((w) => (
-          <span key={w.label}>{w.label}</span>
+        {weekly.map((w, i) => (
+          <span key={i}>
+            {w.weekday !== undefined
+              ? days[w.weekday]
+              : t('insights.weekShort', { n: w.week ?? i + 1 })}
+          </span>
         ))}
       </div>
     </div>

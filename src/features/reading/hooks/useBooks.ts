@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { fetchBooks } from '@/features/reading/api/books.api'
 import type { Book } from '@/features/reading/types'
+import { readingKeys } from '@/features/reading/hooks/queryKeys'
 
 interface UseBooksResult {
   books: Book[]
@@ -16,7 +17,7 @@ export function useBooks(): UseBooksResult {
   const userId = user?.id ?? ''
 
   const query = useQuery({
-    queryKey: ['books', userId],
+    queryKey: readingKeys.books(userId),
     queryFn: () => fetchBooks(userId),
     enabled: Boolean(userId),
   })

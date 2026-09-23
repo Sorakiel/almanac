@@ -3,6 +3,7 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { PartyPopper } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Confetti } from '@/components/common/Confetti'
+import { useT } from '@/hooks/useT'
 
 interface CelebrationModalProps {
   open: boolean
@@ -23,8 +24,9 @@ export function CelebrationModal({
   title,
   message,
   icon: Icon = PartyPopper,
-  actionLabel = 'Nice',
+  actionLabel,
 }: CelebrationModalProps) {
+  const { t } = useT()
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -53,7 +55,7 @@ export function CelebrationModal({
               className="mt-2 w-full shadow-glow"
               onClick={() => onOpenChange(false)}
             >
-              {actionLabel}
+              {actionLabel ?? t('celebrate.nice')}
             </Button>
           </div>
         </Dialog.Content>

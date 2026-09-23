@@ -1,5 +1,5 @@
-import { format, getISOWeek, parseISO } from 'date-fns'
-import { weekdayOfKey } from '@/lib/date'
+import { getISOWeek, parseISO } from 'date-fns'
+import { addDaysToKey, weekdayOfKey } from '@/lib/date'
 import { isDoneOn, isDueOn } from '@/features/workouts/lib/recurrence'
 import type { WorkoutView } from '@/features/workouts/types'
 import type { TFunction } from '@/hooks/useT'
@@ -24,17 +24,8 @@ export interface WeekView {
   days: WeekDay[]
 }
 
-const WEEKDAY_SHORT = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
-/** Dictionary keys for the strip, Monday-first to match WEEKDAY_SHORT. */
+/** Dictionary keys for the strip, Monday-first. */
 const WEEKDAY_STRIP_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
-
-/** Add whole days to a `YYYY-MM-DD` key using UTC math (no tz drift). */
-function addDays(dateKey: string, days: number): string {
-  const [y, m, d] = dateKey.split('-').map(Number)
-  const base = Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)
-  const next = new Date(base + days * 86_400_000)
-  return next.toISOString().slice(0, 10)
-}
 
 /**
  * The Monday-anchored 7-day strip containing `todayKey`, each day carrying how
@@ -44,19 +35,19 @@ export function buildWeek(
   todayKey: string,
   workouts: WorkoutView[],
   timezone: string,
-  t?: TFunction,
-  locale = 'en-GB',
+  t: TFunction,
+  locale: string,
 ): WeekView {
   // weekdayOfKey is 0=Sun … 6=Sat; step back to this week's Monday.
   const mondayOffset = (weekdayOfKey(todayKey) + 6) % 7
-  const monday = addDays(todayKey, -mondayOffset)
+  const monday = addDaysToKey(todayKey, -mondayOffset)
 
-  const days: WeekDay[] = WEEKDAY_SHORT.map((weekday, i) => {
-    const dateKey = addDays(monday, i)
+  const days: WeekDay[] = WEEKDAY_STRIP_KEYS.map((weekday, i) => {
+    const dateKey = addDaysToKey(monday, i)
     const due = workouts.filter((w) => isDueOn(w, dateKey))
     return {
       dateKey,
-      weekday: t ? t(`workouts.weekdayStrip.${WEEKDAY_STRIP_KEYS[i]!}`) : weekday,
+      weekday: t(`workouts.weekdayStrip.${weekday}`),
       dayOfMonth: Number(dateKey.slice(8, 10)),
       isToday: dateKey === todayKey,
       dueCount: due.length,
@@ -65,11 +56,8 @@ export function buildWeek(
   })
 
   const monthDate = parseISO(`${monday}T00:00:00`)
-  const month = t
-    ? new Intl.DateTimeFormat(locale, { month: 'short' }).format(monthDate).toUpperCase()
-    : format(monthDate, 'MMM').toUpperCase()
-  const week = getISOWeek(monthDate)
-  const label = t ? t('workouts.weekLabel', { month, week }) : `${month} · WEEK ${week}`
+  const month = new Intl.DateTimeFormat(locale, { month: 'short' }).format(monthDate).toUpperCase()
+  const label = t('workouts.weekLabel', { month, week: getISOWeek(monthDate) })
 
   return { label, days }
 }

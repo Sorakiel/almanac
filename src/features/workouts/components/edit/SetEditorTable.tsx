@@ -34,7 +34,7 @@ export function SetEditorTable({
   return (
     <div className="mt-4">
       <div className="grid grid-cols-[2.25rem_1fr_1fr_auto] items-center gap-2 px-1 pb-2 font-mono text-[9px] uppercase tracking-label text-muted-strong lg:grid-cols-[2.25rem_1fr_1fr_4.5rem_auto] lg:gap-3">
-        <span>set</span>
+        <span>{t('workouts.setHeader')}</span>
         <span className="text-center">{t('workouts.reps')}</span>
         <span className="text-center">{t('workouts.weightKg')}</span>
         <span className="hidden text-center lg:block">{t('workouts.rest')}</span>
@@ -54,14 +54,14 @@ export function SetEditorTable({
               value={set.reps}
               onChange={(v) => onEditSet(set.id, { reps: v })}
               onStep={(d) => onStepSet(set.id, 'reps', d)}
-              ariaLabel={`Reps for set ${i + 1}`}
+              ariaLabel={t('workouts.repsForSet', { n: i + 1 })}
             />
             <Stepper
               value={set.weight}
               onChange={(v) => onEditSet(set.id, { weight: v })}
               onStep={(d) => onStepSet(set.id, 'weight', d)}
               step={5}
-              ariaLabel={`Weight for set ${i + 1}`}
+              ariaLabel={t('workouts.weightForSet', { n: i + 1 })}
             />
             <button
               type="button"

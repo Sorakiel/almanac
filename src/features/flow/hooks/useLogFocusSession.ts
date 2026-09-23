@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
+import { useT } from '@/hooks/useT'
 import { useToday } from '@/hooks/useToday'
 import { trackEvent } from '@/lib/analytics'
 import { createFocusSession } from '@/features/flow/api/focusSessions.api'
@@ -15,6 +16,7 @@ export function useLogFocusSession(): (minutes: number, label: string | null) =>
   const { user } = useSession()
   const { dateKey } = useToday()
   const queryClient = useQueryClient()
+  const { t } = useT()
 
   return useCallback(
     (minutes, label) => {
@@ -23,13 +25,13 @@ export function useLogFocusSession(): (minutes: number, label: string | null) =>
       trackEvent('focus_session_finished', { minutes: Math.round(minutes) })
       void createFocusSession({
         user_id: user.id,
-        label: label?.trim() || 'Focus session',
+        label: label?.trim() || t('flow.defaultSessionLabel'),
         minutes: Math.round(minutes),
         date: dateKey,
       })
         .then(() => queryClient.invalidateQueries({ queryKey: ['insights', 'focus', user.id] }))
         .catch(() => undefined)
     },
-    [user, dateKey, queryClient],
+    [user, dateKey, queryClient, t],
   )
 }

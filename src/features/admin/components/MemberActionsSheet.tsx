@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
 import { ExternalLink, ShieldMinus, ShieldPlus, Trash2 } from 'lucide-react'
 import { Sheet } from '@/components/ui/sheet'
-import { ConfirmSheet } from '@/components/common/ConfirmSheet'
-import { useUserManagement } from '@/features/admin/hooks/useUserManagement'
+import { DeleteMemberConfirm } from '@/features/admin/components/DeleteMemberConfirm'
+import { useMemberActions } from '@/features/admin/hooks/useMemberActions'
 import type { MemberRow } from '@/features/admin/types'
+import { useT } from '@/hooks/useT'
 
 interface MemberActionsSheetProps {
   member: MemberRow
@@ -17,6 +17,9 @@ interface MemberActionsSheetProps {
   currentUserId: string
 }
 
+const ROW =
+  'flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium hover:bg-surface'
+
 /** Per-member actions: view detail, appoint/demote admin (owner), delete. */
 export function MemberActionsSheet({
   member,
@@ -25,105 +28,77 @@ export function MemberActionsSheet({
   isOwner,
   currentUserId,
 }: MemberActionsSheetProps) {
+  const { t } = useT()
   const navigate = useNavigate()
-  const { setRole, remove, isSettingRole, isRemoving } = useUserManagement()
+  const actions = useMemberActions(member, isOwner, currentUserId)
   const [confirmDelete, setConfirmDelete] = useState(false)
-
-  const isSelf = member.id === currentUserId
-  const isOwnerRow = member.role === 'owner'
-  // Owner can toggle admin on anyone who isn't the owner or themselves.
-  const canManageRole = isOwner && !isOwnerRow && !isSelf
-  // Admins delete users; only the owner may delete an admin. Never the owner/self.
-  const canDelete = !isSelf && !isOwnerRow && (member.role === 'user' || isOwner)
-
-  const toggleAdmin = async () => {
-    const next = member.role === 'admin' ? 'user' : 'admin'
-    try {
-      await setRole({ target: member.id, role: next })
-      toast.success(
-        next === 'admin' ? `${member.name} is now an admin` : `${member.name} is now a member`,
-      )
-      onOpenChange(false)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not change role')
-    }
-  }
-
-  const confirmRemove = async () => {
-    try {
-      await remove(member.id)
-      toast.success(`${member.name} deleted`)
-      setConfirmDelete(false)
-      onOpenChange(false)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not delete user')
-    }
-  }
+  const close = () => onOpenChange(false)
 
   return (
     <>
-      <Sheet open={open} onOpenChange={onOpenChange} title={member.name} description={member.role}>
+      <Sheet
+        open={open}
+        onOpenChange={onOpenChange}
+        title={member.name}
+        description={t(`admin.roles.${member.role}`)}
+      >
         <div className="flex flex-col gap-2">
           <button
             type="button"
             onClick={() => {
-              onOpenChange(false)
+              close()
               navigate(`/admin/user/${member.id}`)
             }}
-            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium hover:bg-surface"
+            className={ROW}
           >
             <ExternalLink className="h-4 w-4 text-muted" aria-hidden="true" />
-            View details
+            {t('admin.viewDetails')}
           </button>
 
-          {canManageRole ? (
+          {actions.canManageRole ? (
             <button
               type="button"
-              onClick={toggleAdmin}
-              disabled={isSettingRole}
-              className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium hover:bg-surface disabled:opacity-60"
+              onClick={() => void actions.toggleAdmin(close)}
+              disabled={actions.isSettingRole}
+              className={`${ROW} disabled:opacity-60`}
             >
               {member.role === 'admin' ? (
-                <>
-                  <ShieldMinus className="h-4 w-4 text-muted" aria-hidden="true" />
-                  Remove admin
-                </>
+                <ShieldMinus className="h-4 w-4 text-muted" aria-hidden="true" />
               ) : (
-                <>
-                  <ShieldPlus className="h-4 w-4 text-accent" aria-hidden="true" />
-                  Make admin
-                </>
+                <ShieldPlus className="h-4 w-4 text-accent" aria-hidden="true" />
               )}
+              {member.role === 'admin' ? t('admin.removeAdmin') : t('admin.makeAdmin')}
             </button>
           ) : null}
 
-          {canDelete ? (
+          {actions.canDelete ? (
             <button
               type="button"
               onClick={() => setConfirmDelete(true)}
-              className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium text-accent hover:bg-surface"
+              className={`${ROW} text-accent`}
             >
               <Trash2 className="h-4 w-4" aria-hidden="true" />
-              Delete user
+              {t('admin.deleteUser')}
             </button>
           ) : null}
 
-          {!canManageRole && !canDelete ? (
-            <p className="px-4 py-2 text-sm text-muted-strong">
-              No actions available for this member.
-            </p>
+          {!actions.canManageRole && !actions.canDelete ? (
+            <p className="px-4 py-2 text-sm text-muted-strong">{t('admin.noActions')}</p>
           ) : null}
         </div>
       </Sheet>
 
-      <ConfirmSheet
+      <DeleteMemberConfirm
+        name={member.name}
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title={`Delete ${member.name}?`}
-        description="This permanently removes the account and all of their habits, logs, and feedback. This cannot be undone."
-        confirmLabel={isRemoving ? 'Deleting…' : 'Delete user'}
-        pending={isRemoving}
-        onConfirm={confirmRemove}
+        pending={actions.isRemoving}
+        onConfirm={() =>
+          void actions.remove(() => {
+            setConfirmDelete(false)
+            close()
+          })
+        }
       />
     </>
   )

@@ -1,32 +1,33 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, Dumbbell, Loader2, Pencil, Play, SlidersHorizontal } from 'lucide-react'
+import { ArrowLeft, Check, Dumbbell, Pencil, Play, SlidersHorizontal } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { IconTile } from '@/components/common/IconTile'
 import { Tag } from '@/components/common/Tag'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { EmptyState } from '@/components/common/EmptyState'
 import { CelebrationModal } from '@/components/common/CelebrationModal'
-import { Rail } from '@/components/common/desktop/rail'
+import { Rail } from '@/components/rail/Rail'
 import { ExerciseView } from '@/features/workouts/components/ExerciseView'
 import { WorkoutFormSheet } from '@/features/workouts/components/WorkoutFormSheet'
 import { WorkoutSessionRail } from '@/features/workouts/components/desktop/WorkoutSessionRail'
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
-import { useWorkoutSessionStore } from '@/stores/workoutSession'
+import { useWorkoutSessionStore } from '@/features/workouts/stores/workoutSession'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
+import { dateFromKey } from '@/lib/date'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import { useT } from '@/hooks/useT'
 
 /** Friendly label for a `YYYY-MM-DD` date, UTC-safe. */
 function formatDate(dateKey: string): string {
-  const [y, m, d] = dateKey.split('-').map(Number)
   return new Intl.DateTimeFormat('en-GB', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-  }).format(new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)))
+  }).format(dateFromKey(dateKey))
 }
 
 function WorkoutDetailPage() {
@@ -41,12 +42,7 @@ function WorkoutDetailPage() {
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('workouts.loadingOne')}</span>
-      </div>
-    )
+    return <LoadingState label={t('workouts.loadingOne')} />
   }
 
   if (isError || !workout) {
@@ -170,7 +166,7 @@ function WorkoutDetailPage() {
         open={mutations.celebrate}
         onOpenChange={(o) => !o && mutations.dismissCelebrate()}
         title={t('workouts.workoutComplete')}
-        message={`Every set of ${workout.name} is done. Strong session — well earned.`}
+        message={t('workouts.completeMessage', { name: workout.name })}
       />
     </>
   )

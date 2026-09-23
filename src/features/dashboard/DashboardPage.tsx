@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom'
-import { Loader2, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
+import { ErrorState } from '@/components/common/ErrorState'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/common/Avatar'
 import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
 import { AlmanacNarrator } from '@/features/dashboard/components/AlmanacNarrator'
 import { SectionLabel } from '@/components/common/SectionLabel'
-import { StatusLine } from '@/components/common/StatusLine'
-import { Rail } from '@/components/common/desktop/rail'
+import { StatusLine } from '@/features/dashboard/components/StatusLine'
+import { Rail } from '@/components/rail/Rail'
 import { NowBlock } from '@/features/dashboard/components/NowBlock'
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
 import { TodayStrip } from '@/features/dashboard/components/TodayStrip'
@@ -51,26 +53,11 @@ function DashboardPage() {
   const dateLabel = longDate.replace(/,/, ' ·').toUpperCase()
 
   if (isError) {
-    return (
-      <EmptyState
-        title={t('dashboard.loadFailed')}
-        description={t('dashboard.loadFailedHint')}
-        action={
-          <Button size="sm" variant="surface" onClick={refetch}>
-            {t('dashboard.tryAgain')}
-          </Button>
-        }
-      />
-    )
+    return <ErrorState title={t('dashboard.loadFailed')} onRetry={refetch} />
   }
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-16" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('dashboard.loading')}</span>
-      </div>
-    )
+    return <LoadingState label={t('dashboard.loading')} className="py-16" />
   }
 
   if (isDesktop) {

@@ -18,6 +18,8 @@ export default tseslint.config(
       // Generated native shells — not app source.
       'android',
       'ios',
+      // Agent worktrees are whole checkouts; linting them doubles every tsconfig root.
+      '.claude',
     ],
   },
   {

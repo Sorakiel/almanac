@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import type { AchievementTone, EvaluatedAchievement } from '@/features/achievements/types'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'
+import { achievementDescription, achievementTitle } from '@/features/achievements/lib/text'
 
 const TONES: Record<
   AchievementTone,
@@ -56,13 +57,6 @@ export function AchievementCard({ item }: { item: EvaluatedAchievement }) {
   const { t } = useT()
   const { def, unlocked, tierIndex, displayTitle, nextGoal, value } = item
   const unitKey = def.unit ? UNIT_KEY[def.unit] : undefined
-  // `displayTitle` is the current tier's name, or the badge's own title when no
-  // tier is reached yet — and only tier names live under `achievements.tiers`.
-  const titleKey = (
-    displayTitle === def.title
-      ? `achievements.catalog.${def.id}.title`
-      : `achievements.tiers.${displayTitle}`
-  ) as TranslationKey
   const Icon = def.icon
   const tone = TONES[def.tone]
   const currentTier = tierIndex >= 0 ? def.tiers[tierIndex] : null
@@ -109,9 +103,11 @@ export function AchievementCard({ item }: { item: EvaluatedAchievement }) {
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className={cn('font-semibold', !unlocked && 'text-muted')}>{t(titleKey)}</p>
+          <p className={cn('font-semibold', !unlocked && 'text-muted')}>
+            {achievementTitle(t, def, displayTitle)}
+          </p>
           <p className="mt-0.5 text-[13px] leading-snug text-muted">
-            {t(`achievements.catalog.${def.id}.description` as TranslationKey)}
+            {achievementDescription(t, def)}
           </p>
         </div>
       </div>

@@ -58,37 +58,31 @@
 almanac/
 ├─ public/                 # favicon, PWA icons, manifest.webmanifest, sw.js (push only)
 ├─ src/
-│  ├─ app/                 # shell, providers, router
-│  │  ├─ App.tsx
-│  │  ├─ router.tsx
-│  │  └─ providers.tsx     # QueryClient, Theme, Auth, Supabase session
+│  ├─ app/                 # everything that exists once per app
+│  │  ├─ App.tsx · router.tsx · providers.tsx · AppLayout.tsx
+│  │  ├─ shell/            # chrome: Sidebar, TopBar, BottomNav, RadialAddMenu, banners, route fallback/error
+│  │  └─ hooks/            # app-wide effects: reminders, widget sync, celebration watchers
 │  ├─ components/
-│  │  ├─ ui/               # shadcn primitives (button, card, dialog, sheet…)
-│  │  └─ common/           # app composites (StatCard, EmptyState, ProgressBlocks, BottomNav)
-│  ├─ features/            # one folder per module
-│  │  ├─ auth/
-│  │  ├─ dashboard/
+│  │  ├─ ui/               # shadcn primitives (button, card, sheet, switch, segmented…)
+│  │  ├─ common/           # reusable composites used by 2+ features (LoadingState, ErrorState, EmptyState, Heatmap…)
+│  │  └─ rail/             # desktop context-rail kit: <Rail> portal, RailCard/RailRow/RailNote, RailIdentity
+│  ├─ features/            # one folder per module; a component used by one feature lives in that feature
 │  │  ├─ habits/
 │  │  │  ├─ components/    # HabitCard, HabitFormSheet, HabitHeatmap
-│  │  │  ├─ hooks/         # useHabits, useHabitLogs, useToggleHabit
-│  │  │  ├─ api/           # habits.queries.ts (supabase calls)
+│  │  │  ├─ hooks/         # useHabits, useToggleHabit, queryKeys.ts, habitQueries.ts
+│  │  │  ├─ api/           # habits.api.ts (supabase calls)
+│  │  │  ├─ lib/           # pure logic (streaks, schedules) — unit-tested
 │  │  │  └─ types.ts
-│  │  ├─ workouts/
-│  │  ├─ reading/
-│  │  ├─ flow/            # deep-work focus timer
-│  │  ├─ insights/
-│  │  ├─ achievements/
-│  │  ├─ reflect/
-│  │  ├─ social/
-│  │  ├─ onboarding/
-│  │  ├─ modules/
-│  │  ├─ settings/
-│  │  └─ admin/
-│  ├─ lib/                 # supabase.ts, queryClient.ts, date.ts, analytics.ts, push.ts, notify.ts
-│  ├─ hooks/               # cross-cutting (useTheme, useSession)
-│  ├─ stores/              # zustand stores (theme, ui)
+│  │  ├─ workouts/         # + stores/ for its device-local session clock
+│  │  ├─ reading/ · flow/ · insights/ · achievements/ · reflect/
+│  │  ├─ social/ · onboarding/ · modules/ · settings/ · admin/ · auth/ · dashboard/
+│  ├─ lib/                 # framework-free helpers: supabase, queryClient, offlineMutations, optimistic, date, analytics
+│  │  └─ platform/         # runtime bridges: notify, push, serviceWorker, desktop (Tauri), statusBar/widgetBridge/androidUpdater (Capacitor)…
+│  ├─ hooks/               # cross-cutting hooks (useT, useSession, useToday, useNow, useOfflineMutation)
+│  ├─ stores/              # app-wide zustand stores (theme, locale, modules, focus, ui)
+│  ├─ i18n/                # en.ts (source) + ru.ts, typed against it
 │  ├─ styles/              # tailwind base, tokens.css, globals.css
-│  ├─ types/               # database.generated.ts, shared types
+│  ├─ types/               # database.generated.ts
 │  └─ main.tsx
 ├─ tests/                  # Playwright e2e specs + helpers/ (shared sign-in, staging client)
 ├─ supabase/               # migrations/, functions/ (edge), seed.sql, config.toml
@@ -106,30 +100,30 @@ almanac/
 
 All user-owned tables carry `user_id` and are protected by RLS. Use `timestamptz` (UTC) everywhere.
 
-| Table                | Key columns                                                                                                                                                                     |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Table                | Key columns                                                                                                                                                                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `profiles`           | id → auth.users, display_name, avatar_url, timezone, role (`user`\|`admin`\|`owner`), onboarded, reminder_enabled, reminder_hour, reminder_minute, reminder_sent_on, digest_enabled, digest_day, digest_hour, digest_minute, digest_sent_on, created_at |
-| `habits`             | id, user_id, name, description, icon, color, frequency (`daily`\|`weekly`\|`x_per_week`), target_count, sort_order, archived_at, created_at                                     |
-| `habit_logs`         | id, user_id, habit_id, date (local calendar date), count, note, created_at — **unique(habit_id, date)**                                                                         |
-| `workouts`           | id, user_id, name, scheduled_date, completed_at, created_at                                                                                                                     |
-| `exercises`          | id, user_id, name, muscle_group, created_at                                                                                                                                     |
-| `workout_exercises`  | id, workout_id, exercise_id, target_sets, target_reps, target_weight, sort_order                                                                                                |
-| `set_logs`           | id, workout_exercise_id, set_number, reps, weight, done, logged_at                                                                                                              |
-| `quotes`             | id, text, author — **global, read-only to users**                                                                                                                               |
-| `support_methods`    | id, kind (`link`\|`crypto`), label, hint, network, value, enabled, sort_order — **global; users read enabled rows, owner writes** (donations)                                   |
-| `app_settings`       | id (singleton), support_enabled — **global flags; any auth reads, owner writes**                                                                                                |
-| `reflections`        | id, user_id, date, body, mood, energy, day_rating, quote_id, created_at                                                                                                         |
-| `feedback`           | id, user_id, body, status, created_at                                                                                                                                           |
-| `habit_freezes`      | id, user_id, habit_id, date — a protected day that doesn't break a streak                                                                                                       |
-| `habit_subtasks`     | id, user_id, habit_id, title, completed_dates[], sort_order                                                                                                                     |
-| `books`              | id, user_id, title, author, status, progress_mode, current_unit, total_units, daily_goal, rating, started_on, finished_on                                                       |
-| `reading_sessions`   | id, user_id, book_id, date, units_read, minutes                                                                                                                                 |
-| `book_notes`         | id, user_id, book_id, body, page                                                                                                                                                |
-| `focus_sessions`     | id, user_id, date, minutes, label                                                                                                                                               |
-| `friendships`        | id, requester_id, addressee_id, status (`pending`\|`accepted`), responded_at                                                                                                    |
-| `activity_events`    | id, user_id, kind, subject, meta, event_date — privacy-safe friend feed; **dedup unique indexes make a duplicate insert an expected 409**                                       |
-| `achievement_grants` | id, user_id, achievement_id, granted_by — owner-awarded badges only; the rest are derived                                                                                       |
-| `push_subscriptions` | id, user_id, endpoint (**unique**), p256dh, auth, user_agent, last_success_at — one row per browser, not per user                                                               |
+| `habits`             | id, user_id, name, description, icon, color, frequency (`daily`\|`weekly`\|`x_per_week`), target_count, sort_order, archived_at, created_at                                                                                                             |
+| `habit_logs`         | id, user_id, habit_id, date (local calendar date), count, note, created_at — **unique(habit_id, date)**                                                                                                                                                 |
+| `workouts`           | id, user_id, name, scheduled_date, completed_at, created_at                                                                                                                                                                                             |
+| `exercises`          | id, user_id, name, muscle_group, created_at                                                                                                                                                                                                             |
+| `workout_exercises`  | id, workout_id, exercise_id, target_sets, target_reps, target_weight, sort_order                                                                                                                                                                        |
+| `set_logs`           | id, workout_exercise_id, set_number, reps, weight, done, logged_at                                                                                                                                                                                      |
+| `quotes`             | id, text, author — **global, read-only to users**                                                                                                                                                                                                       |
+| `support_methods`    | id, kind (`link`\|`crypto`), label, hint, network, value, enabled, sort_order — **global; users read enabled rows, owner writes** (donations)                                                                                                           |
+| `app_settings`       | id (singleton), support_enabled — **global flags; any auth reads, owner writes**                                                                                                                                                                        |
+| `reflections`        | id, user_id, date, body, mood, energy, day_rating, quote_id, created_at                                                                                                                                                                                 |
+| `feedback`           | id, user_id, body, status, created_at                                                                                                                                                                                                                   |
+| `habit_freezes`      | id, user_id, habit_id, date — a protected day that doesn't break a streak                                                                                                                                                                               |
+| `habit_subtasks`     | id, user_id, habit_id, title, completed_dates[], sort_order                                                                                                                                                                                             |
+| `books`              | id, user_id, title, author, status, progress_mode, current_unit, total_units, daily_goal, rating, started_on, finished_on                                                                                                                               |
+| `reading_sessions`   | id, user_id, book_id, date, units_read, minutes                                                                                                                                                                                                         |
+| `book_notes`         | id, user_id, book_id, body, page                                                                                                                                                                                                                        |
+| `focus_sessions`     | id, user_id, date, minutes, label                                                                                                                                                                                                                       |
+| `friendships`        | id, requester_id, addressee_id, status (`pending`\|`accepted`), responded_at                                                                                                                                                                            |
+| `activity_events`    | id, user_id, kind, subject, meta, event_date — privacy-safe friend feed; **dedup unique indexes make a duplicate insert an expected 409**                                                                                                               |
+| `achievement_grants` | id, user_id, achievement_id, granted_by — owner-awarded badges only; the rest are derived                                                                                                                                                               |
+| `push_subscriptions` | id, user_id, endpoint (**unique**), p256dh, auth, user_agent, last_success_at — one row per browser, not per user                                                                                                                                       |
 
 **RLS rules**
 
@@ -226,9 +220,11 @@ automatic continue on the `onlineManager` transition is broken and must not be r
 Restored data is invalidated on restore rather than trusted — the snapshot is throttled,
 and without that a reload right after a change replays the pre-change state.
 
-Adding a new write path: register its key + fn in `offlineMutations.ts`, give the live
-hook a `mutationKey` instead of its own `mutationFn`, and keep the variables JSON-safe —
-no closures, everything the `mutationFn` needs must travel in `variables`. Deliberately
+Adding a new write path: declare a typed `offlineKey<TData, TVariables>` and `register` its
+fn (+ the keys it invalidates) in `offlineMutations.ts`, then call it from the live hook
+through `useOfflineMutation(key, toVariables, options)` — never with its own `mutationFn`.
+Keep the variables JSON-safe — no closures, everything the `mutationFn` needs must travel in
+`variables`. Optimistic patches go through `patchQueryData` / `rollbackQueryData`. Deliberately
 excluded: admin actions (owner-only, connectivity assumed) and auth (must stay live).
 
 **What a browser sandbox cannot verify.** Notification permission is denied there, so Web Push delivery has never been proven end to end from a dev machine, and there is no Android emulator. Verify every link you can, then say plainly which one you could not.

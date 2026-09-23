@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
-import { BottomNav } from '@/components/common/BottomNav'
-import { CelebrationHost } from '@/components/common/CelebrationHost'
-import { OfflineBanner } from '@/components/common/OfflineBanner'
-import { ReinstallBanner } from '@/components/common/ReinstallBanner'
-import { Sidebar } from '@/components/common/desktop/Sidebar'
-import { TopBar } from '@/components/common/desktop/TopBar'
-import { RailActive } from '@/components/common/desktop/RailActive'
-import { RailTargetProvider } from '@/components/common/desktop/rail'
+import { LoadingState } from '@/components/common/LoadingState'
+import { BottomNav } from '@/app/shell/BottomNav'
+import { CelebrationHost } from '@/app/shell/CelebrationHost'
+import { OfflineBanner } from '@/app/shell/OfflineBanner'
+import { ReinstallBanner } from '@/app/shell/ReinstallBanner'
+import { Sidebar } from '@/app/shell/Sidebar'
+import { TopBar } from '@/app/shell/TopBar'
+import { RailActive } from '@/app/shell/RailActive'
+import { RailTargetProvider } from '@/components/rail/Rail'
 import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
-import { useCelebrationWatchers } from '@/hooks/useCelebrationWatchers'
-import { useDailyReminder } from '@/hooks/useDailyReminder'
-import { useNativeWidgetSync } from '@/hooks/useNativeWidgetSync'
+import { useCelebrationWatchers } from '@/app/hooks/useCelebrationWatchers'
+import { useDailyReminder } from '@/app/hooks/useDailyReminder'
+import { useNativeWidgetSync } from '@/app/hooks/useNativeWidgetSync'
 import { useSession } from '@/hooks/useSession'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useOnboardingStore } from '@/stores/onboarding'
@@ -50,12 +50,7 @@ export function AppLayout() {
   // flashes the welcome screen; the local flag is a fast-path for the device
   // that just finished (covers the gap before the row refetches).
   if (!profile && !locallyOnboarded) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading…</span>
-      </div>
-    )
+    return <LoadingState fullScreen />
   }
   if (!profile?.onboarded && !locallyOnboarded) return <Navigate to="/welcome" replace />
 

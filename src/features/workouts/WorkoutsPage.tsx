@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { Dumbbell, Loader2, Plus, RefreshCw } from 'lucide-react'
+import { Dumbbell, Plus } from 'lucide-react'
+import { ErrorState } from '@/components/common/ErrorState'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
-import { Rail } from '@/components/common/desktop/rail'
+import { Rail } from '@/components/rail/Rail'
 import { WorkoutCard } from '@/features/workouts/components/WorkoutCard'
 import { WorkoutFormSheet } from '@/features/workouts/components/WorkoutFormSheet'
 import { WeekStrip } from '@/features/workouts/components/WeekStrip'
@@ -69,21 +71,9 @@ function WorkoutsPage() {
       </header>
 
       {isLoading ? (
-        <div className="flex justify-center py-16" role="status" aria-live="polite">
-          <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-          <span className="sr-only">{t('workouts.loading')}</span>
-        </div>
+        <LoadingState label={t('workouts.loading')} className="py-16" />
       ) : isError ? (
-        <EmptyState
-          icon={RefreshCw}
-          title={t('workouts.loadFailed')}
-          description={t('workouts.loadFailedHint')}
-          action={
-            <Button size="sm" variant="surface" onClick={refetch}>
-              {t('workouts.tryAgain')}
-            </Button>
-          }
-        />
+        <ErrorState title={t('workouts.loadFailed')} onRetry={refetch} />
       ) : workouts.length === 0 ? (
         <EmptyState
           icon={Dumbbell}

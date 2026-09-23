@@ -7,6 +7,10 @@ import {
   unitNounPlural,
 } from '@/features/reading/lib/progress'
 import type { Book } from '@/features/reading/types'
+import { translate } from '@/i18n'
+import type { TFunction } from '@/hooks/useT'
+
+const t: TFunction = (key, vars) => translate('en', key, vars)
 
 function makeBook(overrides: Partial<Book> = {}): Book {
   return {
@@ -67,9 +71,9 @@ describe('statusForProgress', () => {
 
 describe('unit nouns', () => {
   it('matches the tracking mode', () => {
-    expect(unitNoun('pages')).toBe('page')
-    expect(unitNoun('chapters')).toBe('chapter')
-    expect(unitNounPlural('pages')).toBe('pages')
-    expect(unitNounPlural('chapters')).toBe('chapters')
+    expect(unitNoun('pages', t)).toBe('page')
+    expect(unitNoun('chapters', t)).toBe('chapter')
+    expect(unitNounPlural('pages', t)).toBe('Pages')
+    expect(unitNounPlural('chapters', t)).toBe('Chapters')
   })
 })

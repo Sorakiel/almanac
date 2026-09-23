@@ -13,6 +13,7 @@ import { dailyTarget } from '@/features/habits/lib/frequency'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { useBooks } from '@/features/reading/hooks/useBooks'
 import { FlowReadingRunner } from '@/features/flow/components/FlowReadingRunner'
+import { DurationPicker } from '@/features/flow/components/DurationPicker'
 import { FocusConsole } from '@/features/flow/components/FocusConsole'
 import { useLogFocusSession } from '@/features/flow/hooks/useLogFocusSession'
 import { useSession } from '@/hooks/useSession'
@@ -21,8 +22,9 @@ import { useFocusStore } from '@/stores/focus'
 import { useModulesStore } from '@/stores/modules'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { useNow } from '@/hooks/useNow'
+import { habitKeys } from '@/features/habits/hooks/queryKeys'
 
-const DURATIONS_MIN = [15, 25, 45]
 type Mode = 'habit' | 'book' | 'custom'
 
 /**
@@ -45,7 +47,6 @@ function FlowPage() {
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null)
   const [customLabel, setCustomLabel] = useState('')
   const [duration, setDuration] = useState(25)
-  const [now, setNow] = useState(() => Date.now())
 
   // If Reading was just disabled, fall back to Habit.
   if (mode === 'book' && !readingEnabled) {
@@ -53,6 +54,7 @@ function FlowPage() {
   }
 
   const running = endsAt !== null && durationMin !== null
+  const now = useNow(running)
   const dueHabits = habits.filter((h) => h.dueToday && !h.isComplete)
   const openBooks = books.filter((b) => b.status !== 'finished')
   const selectedHabit = habits.find((h) => h.id === selectedId) ?? null
@@ -76,7 +78,7 @@ function FlowPage() {
           date: dateKey,
           count: dailyTarget(habit),
         })
-        void queryClient.invalidateQueries({ queryKey: ['habitHistory', habit.id] })
+        void queryClient.invalidateQueries({ queryKey: habitKeys.history(habit.id) })
         void queryClient.invalidateQueries({ queryKey: ['habits'] })
         void queryClient.invalidateQueries({ queryKey: ['habitLogs'] })
       } catch (error) {
@@ -87,13 +89,6 @@ function FlowPage() {
     stop()
     toast.success(t('flow.doneShort'))
   }
-
-  // 1 Hz tick while a session runs; also catches sessions that expired offline.
-  useEffect(() => {
-    if (!running) return
-    const timer = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(timer)
-  }, [running])
 
   useEffect(() => {
     if (running && endsAt - now <= 0) {
@@ -117,7 +112,7 @@ function FlowPage() {
     return (
       <div className="flex flex-col gap-5 lg:mx-auto lg:max-w-xl">
         <header>
-          <p className="label-mono text-accent">// in session</p>
+          <p className="label-mono text-accent">{t('flow.inSessionLabel')}</p>
           <h1 className="mt-1 text-2xl">{t('flow.title')}</h1>
         </header>
 
@@ -129,7 +124,7 @@ function FlowPage() {
           pct={pct}
           onEnd={endSession}
           onComplete={bookId ? undefined : () => void completeSession(focusedMin)}
-          completeLabel={habitId ? 'Complete' : 'Done'}
+          completeLabel={habitId ? t('flow.complete') : t('flow.doneLabel')}
         />
 
         {bookId ? (
@@ -241,26 +236,7 @@ function FlowPage() {
 
       <div className="flex flex-col gap-2">
         <SectionLabel>{t('flow.length')}</SectionLabel>
-        <div className="flex gap-2" role="radiogroup" aria-label={t('flow.sessionLength')}>
-          {DURATIONS_MIN.map((min) => (
-            <button
-              key={min}
-              type="button"
-              role="radio"
-              aria-checked={duration === min}
-              onClick={() => setDuration(min)}
-              className={cn(
-                'flex-1 rounded-tile border py-3 font-mono text-sm tracking-label transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-                duration === min
-                  ? 'border-accent bg-accent/15 text-accent'
-                  : 'text-muted hover:text-foreground',
-              )}
-            >
-              {min}m
-            </button>
-          ))}
-        </div>
+        <DurationPicker value={duration} onChange={setDuration} />
       </div>
 
       <Button

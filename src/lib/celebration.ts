@@ -1,5 +1,5 @@
-import { haptic } from '@/lib/haptics'
-import { playChime } from '@/lib/sound'
+import { haptic } from '@/lib/platform/haptics'
+import { playChime } from '@/lib/platform/sound'
 import { useCelebrationStore, type CelebrationPayload } from '@/stores/celebration'
 
 /**

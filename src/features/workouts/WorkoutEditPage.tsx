@@ -16,12 +16,13 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { Loader2, Plus, Timer, X } from 'lucide-react'
+import { Plus, Timer, X } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
-import { Rail } from '@/components/common/desktop/rail'
+import { Rail } from '@/components/rail/Rail'
 import { DraftExerciseRow } from '@/features/workouts/components/edit/DraftExerciseRow'
 import { ExerciseLibraryRail } from '@/features/workouts/components/edit/ExerciseLibraryRail'
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
@@ -153,7 +154,7 @@ function DraftEditor({
     return (
       <>
         <div className="mx-auto w-full max-w-[900px]">
-          <p className="label-mono">// train / edit template</p>
+          <p className="label-mono">{t('workouts.editTemplateLabel')}</p>
           <div className="mt-2 flex items-start justify-between gap-4">
             <div className="min-w-0 max-w-[520px] flex-1">{nameField}</div>
             <div className="flex flex-none gap-2">
@@ -173,7 +174,8 @@ function DraftEditor({
               </span>
             ) : null}
             <span className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[11px] tabular-nums text-muted">
-              <Timer className="h-3.5 w-3.5" aria-hidden="true" />~{estimateMinutes(draft)} min
+              <Timer className="h-3.5 w-3.5" aria-hidden="true" />
+              {t('workouts.estimateMin', { count: estimateMinutes(draft) })}
             </span>
           </div>
 
@@ -279,12 +281,7 @@ function WorkoutEditPage() {
   useBreadcrumbLeaf(workout ? `Edit ${workout.name}` : undefined)
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('workouts.loadingOne')}</span>
-      </div>
-    )
+    return <LoadingState label={t('workouts.loadingOne')} />
   }
 
   if (isError || !workout) {

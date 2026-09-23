@@ -8,7 +8,10 @@ export interface HabitRate {
 
 /** One point on the completion-over-time trend. */
 export interface WeekPoint {
-  label: string
+  /** 0 = Sunday, for the 7-day range (one point per day). */
+  weekday?: number
+  /** 1-based week number, for the longer ranges. */
+  week?: number
   rate: number
 }
 
@@ -32,8 +35,8 @@ export interface Insights {
   /** Per-habit completion over the selected range, strongest first. */
   byHabit: HabitRate[]
   /** Strongest / weakest weekday for daily-scheduled habits (null if unknown). */
-  bestWeekday: string | null
-  worstWeekday: string | null
+  bestWeekday: number | null
+  worstWeekday: number | null
   /** False when there's nothing to show yet (no habits or no logs). */
   hasData: boolean
 }

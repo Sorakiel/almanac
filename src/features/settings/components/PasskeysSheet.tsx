@@ -4,7 +4,7 @@ import { KeyRound, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { usePasskeys } from '@/features/settings/hooks/usePasskeys'
-import { passkeysSupported } from '@/lib/webauthn'
+import { passkeysSupported } from '@/lib/platform/webauthn'
 import { useT } from '@/hooks/useT'
 
 interface PasskeysSheetProps {

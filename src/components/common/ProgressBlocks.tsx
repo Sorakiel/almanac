@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface ProgressBlocksProps {
   /** Completed units. */
@@ -41,6 +42,7 @@ export function ProgressBlocks({
   className,
   'aria-label': ariaLabel,
 }: ProgressBlocksProps) {
+  const { t } = useT()
   const safeTotal = Math.max(total, 1)
   const ratio = Math.min(Math.max(value / safeTotal, 0), 1)
 
@@ -60,7 +62,7 @@ export function ProgressBlocks({
       aria-valuemin={0}
       aria-valuemax={total}
       aria-valuenow={value}
-      aria-label={ariaLabel ?? `${value} of ${total} complete`}
+      aria-label={ariaLabel ?? t('a11y.ofComplete', { value, total })}
       className={cn('relative inline-block max-w-full overflow-hidden leading-none', className)}
     >
       <span

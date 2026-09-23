@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Play, Timer } from 'lucide-react'
-import { sessionElapsed, useWorkoutSessionStore } from '@/stores/workoutSession'
+import { sessionElapsed, useWorkoutSessionStore } from '@/features/workouts/stores/workoutSession'
 import { formatClock } from '@/features/workouts/lib/session'
 import type { WorkoutView } from '@/features/workouts/types'
 import { useT } from '@/hooks/useT'
+import { useNow } from '@/hooks/useNow'
 
 interface SessionResumeBannerProps {
   workouts: WorkoutView[]
@@ -19,16 +19,10 @@ export function SessionResumeBanner({ workouts }: SessionResumeBannerProps) {
   const navigate = useNavigate()
   const sessions = useWorkoutSessionStore((s) => s.sessions)
   const start = useWorkoutSessionStore((s) => s.start)
-  const [now, setNow] = useState(() => Date.now())
 
   const entry = Object.entries(sessions).find(([id]) => workouts.some((w) => w.id === id))
   const running = Boolean(entry?.[1].startedAt)
-
-  useEffect(() => {
-    if (!running) return
-    const timer = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(timer)
-  }, [running])
+  const now = useNow(running)
 
   if (!entry) return null
   const [workoutId, recordState] = entry
@@ -54,7 +48,7 @@ export function SessionResumeBanner({ workouts }: SessionResumeBannerProps) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="font-mono text-[10px] uppercase tracking-label text-accent">
-          {recordState.startedAt ? 'session in progress' : 'session paused'}
+          {recordState.startedAt ? t('workouts.sessionInProgress') : t('workouts.sessionPaused')}
         </p>
         <p className="mt-0.5 truncate text-sm font-semibold">
           {workout.name}

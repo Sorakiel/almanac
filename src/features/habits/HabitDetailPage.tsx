@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, Loader2, MoreHorizontal, Pencil, Snowflake, Trash2 } from 'lucide-react'
+import { ArrowLeft, Check, MoreHorizontal, Pencil, Snowflake, Trash2 } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { IconTile } from '@/components/common/IconTile'
@@ -10,7 +11,7 @@ import { StatTile } from '@/components/common/StatTile'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
-import { Rail } from '@/components/common/desktop/rail'
+import { Rail } from '@/components/rail/Rail'
 import { HabitChecklist } from '@/features/habits/components/HabitChecklist'
 import { HabitHeatmap } from '@/features/habits/components/HabitHeatmap'
 import { HabitDetailWorkspace } from '@/features/habits/components/desktop/HabitDetailWorkspace'
@@ -28,6 +29,7 @@ import { useUiStore } from '@/stores/ui'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { habitKeys } from '@/features/habits/hooks/queryKeys'
 
 function HabitDetailPage() {
   const { t } = useT()
@@ -64,7 +66,7 @@ function HabitDetailPage() {
         count: done && habit ? dailyTarget(habit) : 0,
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['habitHistory', id] })
+      void queryClient.invalidateQueries({ queryKey: habitKeys.history(id) })
       void queryClient.invalidateQueries({ queryKey: ['habitLogs'] })
     },
     onError: (error) =>
@@ -72,12 +74,7 @@ function HabitDetailPage() {
   })
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('habits.loadingOne')}</span>
-      </div>
-    )
+    return <LoadingState label={t('habits.loadingOne')} />
   }
 
   if (isError || !habit || !stats) {
@@ -131,7 +128,7 @@ function HabitDetailPage() {
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
         title={t('habits.confirmDeleteTitle')}
-        description={`"${habit.name}" and its streak will disappear from your lists. Its history is kept.`}
+        description={t('habits.confirmDeleteBody', { name: habit.name })}
         confirmLabel={t('habits.deleteHabit')}
         pending={archive.isPending}
         onConfirm={handleDelete}

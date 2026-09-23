@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useCountUp } from '@/hooks/useCountUp'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface CompletionDonutProps {
   completed: number
@@ -21,6 +22,7 @@ const TICKS = 36
  * on mount (staggered colour transition) and the centre percentage counts up.
  */
 export function CompletionDonut({ completed, total, size = 160 }: CompletionDonutProps) {
+  const { t } = useT()
   const safeTotal = Math.max(total, 0)
   const pct = safeTotal === 0 ? 0 : Math.round((completed / safeTotal) * 100)
 
@@ -56,7 +58,7 @@ export function CompletionDonut({ completed, total, size = 160 }: CompletionDonu
       className="relative shrink-0"
       style={{ width: size, height: size }}
       role="img"
-      aria-label={`${completed} of ${total} habits complete, ${pct} percent`}
+      aria-label={t('a11y.habitsDonut', { completed, total, pct })}
     >
       {/* Perfect day: a soft breathing halo behind the ring. */}
       {perfect ? (

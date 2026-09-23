@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Dumbbell, Loader2, Plus, RefreshCw } from 'lucide-react'
+import { Dumbbell, Plus } from 'lucide-react'
+import { ErrorState } from '@/components/common/ErrorState'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
@@ -13,6 +15,7 @@ import { workoutForDay } from '@/features/workouts/lib/week'
 import type { TrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import type { WorkoutView } from '@/features/workouts/types'
 import { useT } from '@/hooks/useT'
+import { dateFromKey } from '@/lib/date'
 import { intlLocale } from '@/lib/dateLocale'
 
 interface WorkoutsWorkspaceProps {
@@ -26,12 +29,11 @@ interface WorkoutsWorkspaceProps {
 
 /** Friendly "Monday, 6 July" from a `YYYY-MM-DD` key, UTC-safe, in the UI language. */
 function dayLabel(dateKey: string, locale: string): string {
-  const [y, m, d] = dateKey.split('-').map(Number)
   return new Intl.DateTimeFormat(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
-  }).format(new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1)))
+  }).format(dateFromKey(dateKey))
 }
 
 /** Desktop training workspace: week strip, the selected day's session, sessions. */
@@ -62,21 +64,9 @@ export function WorkoutsWorkspace({
       </header>
 
       {isLoading ? (
-        <div className="flex justify-center py-24" role="status" aria-live="polite">
-          <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-          <span className="sr-only">{t('workouts.loading')}</span>
-        </div>
+        <LoadingState label={t('workouts.loading')} />
       ) : isError ? (
-        <EmptyState
-          icon={RefreshCw}
-          title={t('workouts.loadFailed')}
-          description={t('workouts.loadFailedHint')}
-          action={
-            <Button size="sm" variant="surface" onClick={refetch}>
-              {t('workouts.tryAgain')}
-            </Button>
-          }
-        />
+        <ErrorState title={t('workouts.loadFailed')} onRetry={refetch} />
       ) : workouts.length === 0 ? (
         <div className="mt-8">
           <EmptyState

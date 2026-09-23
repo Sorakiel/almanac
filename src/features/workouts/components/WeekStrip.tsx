@@ -1,5 +1,6 @@
 import type { WeekDay } from '@/features/workouts/lib/week'
 import { cn } from '@/lib/utils'
+import { useT } from '@/hooks/useT'
 
 interface WeekStripProps {
   days: WeekDay[]
@@ -10,14 +11,16 @@ interface WeekStripProps {
 
 /** Monday-anchored 7-day strip; each day is selectable, today/selected accented. */
 export function WeekStrip({ days, selectedKey, onSelect }: WeekStripProps) {
+  const { t } = useT()
   return (
     <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
       {days.map((day) => {
         const selected = day.dateKey === selectedKey
+        const vars = { weekday: day.weekday, day: day.dayOfMonth }
         const label =
           day.dueCount === 0
-            ? `${day.weekday} ${day.dayOfMonth}, rest day`
-            : `${day.weekday} ${day.dayOfMonth}, ${day.dueCount} session${day.dueCount > 1 ? 's' : ''}`
+            ? t('workouts.dayRest', vars)
+            : t('workouts.daySessions', { ...vars, count: day.dueCount })
         return (
           <div key={day.dateKey} className="min-w-0 text-center">
             <div

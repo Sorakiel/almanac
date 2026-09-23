@@ -1,5 +1,4 @@
 import { lastNDateKeys } from '@/lib/date'
-import { frequencyLabel } from '@/features/habits/lib/frequency'
 import type { Habit } from '@/features/habits/types'
 import type { AdminUserDetail, Feedback, Profile, UserHabitRow } from '@/features/admin/types'
 import type { Database } from '@/types/database.generated'
@@ -43,7 +42,7 @@ export function computeUserDetail(
   const habitRows: UserHabitRow[] = habits.map((h) => ({
     id: h.id,
     name: h.name,
-    frequencyLabel: frequencyLabel(h as Habit),
+    frequency: { frequency: h.frequency, target_count: h.target_count } as Habit,
     doneLast30: doneDaysByHabit.get(h.id)?.size ?? 0,
   }))
 

@@ -1,22 +1,8 @@
 import { supabase } from '@/lib/supabase'
+import type { AchievementStatsInput } from '@/features/achievements/lib/stats'
 
-export interface RawAchievementData {
-  totalCompletions: number
-  currentStreak: number
-  bestStreak: number
-  habitsCount: number
-  workoutsCompleted: number
-  booksFinished: number
-  pagesRead: number
-  chaptersRead: number
-  notesWritten: number
-  reflections: number
-  tonnage: number
-  focusMinutes: number
-  earlyCount: number
-  lateCount: number
-  friendsCount: number
-}
+/** What the server can count — the rest of AchievementStats is derived client-side. */
+export type RawAchievementData = Omit<AchievementStatsInput, 'betaUser' | 'accountDays'>
 
 /**
  * One-shot pull of the aggregates achievements are scored from (own-rows RLS).

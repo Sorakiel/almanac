@@ -6,6 +6,7 @@ import { MANUAL_ACHIEVEMENTS } from '@/features/achievements/lib/catalog'
 import { useUserGrants } from '@/features/achievements/hooks/useUserGrants'
 import type { AchievementTone } from '@/features/achievements/types'
 import { useT } from '@/hooks/useT'
+import { achievementDescription, achievementTitle } from '@/features/achievements/lib/text'
 
 const TONE: Record<AchievementTone, string> = {
   accent: 'bg-accent/15 text-accent',
@@ -22,7 +23,8 @@ export function AwardAchievements({ userId, userName }: { userId: string; userNa
     toggle.mutate(
       { achievementId, on },
       {
-        onSuccess: () => toast.success(on ? `Awarded “${title}”` : `Revoked “${title}”`),
+        onSuccess: () =>
+          toast.success(t(on ? 'achievements.awarded' : 'achievements.revoked', { title })),
         onError: (error) =>
           toast.error(error instanceof Error ? error.message : t('achievements.awardFailed')),
       },
@@ -34,18 +36,19 @@ export function AwardAchievements({ userId, userName }: { userId: string; userNa
       <div className="divide-y overflow-hidden rounded-card border bg-surface">
         {MANUAL_ACHIEVEMENTS.map((def) => {
           const on = granted.has(def.id)
+          const title = achievementTitle(t, def, def.title)
           return (
             <div key={def.id} className="flex items-center gap-3 px-4 py-3">
               <IconTile icon={def.icon} tone={TONE[def.tone]} size="sm" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{def.title}</p>
-                <p className="truncate text-[12px] text-muted">{def.description}</p>
+                <p className="text-sm font-medium">{title}</p>
+                <p className="truncate text-[12px] text-muted">{achievementDescription(t, def)}</p>
               </div>
               <Switch
                 checked={on}
                 disabled={toggle.isPending}
-                onCheckedChange={(next) => onToggle(def.id, def.title, next)}
-                aria-label={`Award ${def.title} to ${userName}`}
+                onCheckedChange={(next) => onToggle(def.id, title, next)}
+                aria-label={t('achievements.awardTo', { title, name: userName })}
               />
             </div>
           )

@@ -30,6 +30,10 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # CI never checked formatting, so 25 files drifted before anyone noticed.
+      - name: Format
+        run: npm run format:check
+
       - name: Unit tests
         run: npm test
 
@@ -96,6 +100,15 @@ jobs:
           E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
         run: npm run test:e2e
+
+      - name: Upload screenshots
+        if: always() && steps.config.outputs.configured == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: screens
+          path: screenshots/
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Upload traces
         if: failure() && steps.config.outputs.configured == 'true'

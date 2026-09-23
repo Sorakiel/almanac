@@ -1,26 +1,20 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Loader2, Pencil, Timer } from 'lucide-react'
+import { ArrowLeft, Pencil, Timer } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
-import { Tag } from '@/components/common/Tag'
 import { BookFormSheet } from '@/features/reading/components/BookFormSheet'
 import { ProgressUpdater } from '@/features/reading/components/ProgressUpdater'
 import { BookStatusControls } from '@/features/reading/components/BookStatusControls'
 import { NotesSection } from '@/features/reading/components/NotesSection'
 import { useBook } from '@/features/reading/hooks/useBook'
-import { statusLabel, unitNounPlural } from '@/features/reading/lib/progress'
+import { unitCount } from '@/features/reading/lib/progress'
 import { useFocusStore } from '@/stores/focus'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
-import type { BookStatus } from '@/features/reading/types'
+import { BookStatusTag } from '@/features/reading/components/BookStatusTag'
 import { useT } from '@/hooks/useT'
-
-const STATUS_TONE: Record<BookStatus, 'muted' | 'accent' | 'teal'> = {
-  to_read: 'muted',
-  reading: 'accent',
-  finished: 'teal',
-}
 
 const READING_SESSION_MIN = 25
 
@@ -34,19 +28,14 @@ function BookDetailPage() {
   const [editOpen, setEditOpen] = useState(false)
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('reading.loadingBook')}</span>
-      </div>
-    )
+    return <LoadingState label={t('reading.loadingBook')} />
   }
 
   if (isError || !book) {
     return (
       <EmptyState
         title={t('reading.notFound')}
-        description="{t('reading.notFoundHint')}"
+        description={t('reading.notFoundHint')}
         action={
           <Button size="sm" variant="surface" onClick={() => navigate('/reading')}>
             {t('reading.backToLibrary')}
@@ -77,9 +66,9 @@ function BookDetailPage() {
             <h1 className="text-2xl tracking-title lg:text-[32px]">{book.title}</h1>
             <p className="mt-1 text-muted">{book.author ?? t('reading.unknownAuthor')}</p>
             <div className="mt-2 flex items-center gap-2">
-              <Tag tone={STATUS_TONE[book.status]}>{statusLabel(book.status, t)}</Tag>
+              <BookStatusTag status={book.status} />
               <span className="label-mono text-muted-strong">
-                by {book.progress_mode === 'chapters' ? 'chapter' : 'page'}
+                {t(`reading.byUnit.${book.progress_mode}`)}
               </span>
             </div>
           </div>
@@ -92,7 +81,7 @@ function BookDetailPage() {
 
       <Button onClick={readInFlow} size="lg" className="w-full shadow-glow">
         <Timer className="h-4 w-4" />
-        Read in Flow · {READING_SESSION_MIN} min
+        {t('reading.readInFlow', { flow: t('modules.flow.label'), count: READING_SESSION_MIN })}
       </Button>
 
       <ProgressUpdater book={book} sessions={sessions} />
@@ -110,9 +99,9 @@ function BookDetailPage() {
               >
                 <span className="font-mono text-muted-strong">{session.date}</span>
                 <span className="text-muted">
-                  {session.minutes > 0 ? `${session.minutes} min` : '—'}
+                  {session.minutes > 0 ? t('units.minutes', { count: session.minutes }) : '—'}
                   {session.units_read > 0
-                    ? ` · ${session.units_read} ${unitNounPlural(book.progress_mode, t)}`
+                    ? ` · ${unitCount(book.progress_mode, session.units_read, t)}`
                     : ''}
                 </span>
               </div>

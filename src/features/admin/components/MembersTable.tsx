@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MoreHorizontal } from 'lucide-react'
 import { Avatar } from '@/components/common/Avatar'
-import { Tag } from '@/components/common/Tag'
 import { MemberActionsSheet } from '@/features/admin/components/MemberActionsSheet'
-import { joinedLabel } from '@/features/admin/lib/format'
 import { cn } from '@/lib/utils'
-import type { MemberRow, UserRole } from '@/features/admin/types'
+import type { MemberRow } from '@/features/admin/types'
+import { RoleTag } from '@/features/admin/components/RoleTag'
+import { useJoinedLabel } from '@/features/admin/hooks/useJoinedLabel'
+import { useT } from '@/hooks/useT'
 
 interface MembersTableProps {
   members: MemberRow[]
@@ -17,14 +18,10 @@ interface MembersTableProps {
   currentUserId: string
 }
 
-const ROLE_TONE: Record<UserRole, 'accent' | 'muted' | 'teal'> = {
-  owner: 'teal',
-  admin: 'accent',
-  user: 'muted',
-}
-
 /** Recent-signups table: click a row to open the user; ⋯ for admin actions. */
 export function MembersTable({ members, todayKey, isOwner, currentUserId }: MembersTableProps) {
+  const { t } = useT()
+  const joined = useJoinedLabel()
   const navigate = useNavigate()
   const [active, setActive] = useState<MemberRow | null>(null)
 
@@ -32,11 +29,11 @@ export function MembersTable({ members, todayKey, isOwner, currentUserId }: Memb
     <div className="overflow-x-auto rounded-card border bg-surface">
       <div className="min-w-[520px]">
         <div className="grid grid-cols-[1.9fr_0.7fr_0.8fr_0.7fr_auto] gap-3 border-b px-4 py-3 font-mono text-[10px] uppercase tracking-label text-muted-strong">
-          <span>member</span>
-          <span>role</span>
-          <span>joined</span>
-          <span>active</span>
-          <span className="sr-only">actions</span>
+          <span>{t('admin.colMember')}</span>
+          <span>{t('admin.colRole')}</span>
+          <span>{t('admin.colJoined')}</span>
+          <span>{t('admin.colActive')}</span>
+          <span className="sr-only">{t('admin.colActions')}</span>
         </div>
         {members.map((m) => (
           <div
@@ -47,7 +44,7 @@ export function MembersTable({ members, todayKey, isOwner, currentUserId }: Memb
             <button
               type="button"
               onClick={() => navigate(`/admin/user/${m.id}`)}
-              aria-label={`View ${m.name}`}
+              aria-label={t('admin.viewMember', { name: m.name })}
               className="absolute inset-0 z-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
             />
             <span className="flex min-w-0 items-center gap-2.5">
@@ -55,15 +52,15 @@ export function MembersTable({ members, todayKey, isOwner, currentUserId }: Memb
               <span className="truncate">{m.name}</span>
               {m.id === currentUserId ? (
                 <span className="font-mono text-[9px] uppercase tracking-label text-muted-strong">
-                  you
+                  {t('admin.you')}
                 </span>
               ) : null}
             </span>
             <span>
-              <Tag tone={ROLE_TONE[m.role]}>{m.role}</Tag>
+              <RoleTag role={m.role} />
             </span>
             <span className="font-mono text-[11px] text-muted-strong">
-              {joinedLabel(m.joinedAt, todayKey)}
+              {joined(m.joinedAt, todayKey)}
             </span>
             <span className="flex items-center gap-1.5 font-mono text-[11px] text-muted-strong">
               <span
@@ -73,12 +70,12 @@ export function MembersTable({ members, todayKey, isOwner, currentUserId }: Memb
                   m.isActiveToday ? 'bg-teal' : 'bg-muted-strong',
                 )}
               />
-              {m.isActiveToday ? 'active' : '—'}
+              {m.isActiveToday ? t('admin.activeNow') : '—'}
             </span>
             <button
               type="button"
               onClick={() => setActive(m)}
-              aria-label={`Actions for ${m.name}`}
+              aria-label={t('admin.actionsFor', { name: m.name })}
               className="relative z-10 rounded-lg p-1.5 text-muted-strong transition-colors hover:bg-surface hover:text-foreground"
             >
               <MoreHorizontal className="h-4 w-4" aria-hidden="true" />

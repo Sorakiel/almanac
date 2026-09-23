@@ -1,16 +1,16 @@
 import { useEffect, type ReactNode } from 'react'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { Toaster } from 'sonner'
+import { AppToaster } from '@/app/shell/AppToaster'
 import { identifyUser, resetAnalytics } from '@/lib/analytics'
-import { checkForAndroidUpdate } from '@/lib/androidUpdater'
-import { initDeepLinks } from '@/lib/deepLink'
-import { checkForDesktopUpdate } from '@/lib/desktopUpdater'
-import { applyRunInBackground } from '@/lib/desktop'
+import { checkForAndroidUpdate } from '@/lib/platform/androidUpdater'
+import { initDeepLinks } from '@/lib/platform/deepLink'
+import { checkForDesktopUpdate } from '@/lib/platform/desktopUpdater'
+import { applyRunInBackground } from '@/lib/platform/desktop'
 import { clearQueryCache, persistOptions, queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
+import { useDaylight } from '@/app/hooks/useDaylight'
 import { useDesktopStore } from '@/stores/desktop'
 import { useSessionStore } from '@/stores/session'
-import { useThemeStore } from '@/stores/theme'
 
 interface ProvidersProps {
   children: ReactNode
@@ -18,7 +18,8 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   const setSession = useSessionStore((s) => s.setSession)
-  const theme = useThemeStore((s) => s.theme)
+  // The canvas glow tracks the local clock — see `lib/daylight.ts`.
+  useDaylight()
 
   // Native auto-update on launch; both are no-ops in the browser build.
   useEffect(() => {
@@ -85,7 +86,7 @@ export function Providers({ children }: ProvidersProps) {
       }}
     >
       {children}
-      <Toaster theme={theme === 'coffee' ? 'light' : 'dark'} position="top-center" richColors />
+      <AppToaster />
     </PersistQueryClientProvider>
   )
 }

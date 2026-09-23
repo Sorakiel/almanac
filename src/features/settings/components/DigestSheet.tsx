@@ -2,15 +2,15 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
-import { Switch } from '@/components/ui/switch'
+import { ChoiceChip } from '@/components/common/ChoiceChip'
+import { SwitchRow } from '@/components/common/SwitchRow'
+import { TimeField } from '@/features/settings/components/TimeField'
 import { useUpdateProfile } from '@/features/settings/hooks/useUpdateProfile'
-import { reminderTimeLabel } from '@/features/settings/lib/reminder'
-import { weekdayLabels } from '@/features/settings/lib/digest'
-import { requestNotifyPermission } from '@/lib/notify'
-import { disablePush, enablePush, pushSupported } from '@/lib/push'
+import { weekdayLabels } from '@/lib/dateLocale'
+import { requestNotifyPermission } from '@/lib/platform/notify'
+import { disablePush, enablePush, pushSupported } from '@/lib/platform/push'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
-import { cn } from '@/lib/utils'
 
 interface DigestSheetProps {
   open: boolean
@@ -53,15 +53,11 @@ export function DigestSheet({
 
   const dirty =
     on !== enabled || selectedDay !== day || selectedHour !== hour || selectedMinute !== minute
-  const timeValue = reminderTimeLabel(selectedHour, selectedMinute)
   const days = weekdayLabels(locale)
 
-  const onTimeChange = (value: string) => {
-    const [h, m] = value.split(':').map(Number)
-    if (Number.isFinite(h) && Number.isFinite(m)) {
-      setSelectedHour(h as number)
-      setSelectedMinute(m as number)
-    }
+  const setTime = (h: number, m: number) => {
+    setSelectedHour(h)
+    setSelectedMinute(m)
   }
 
   const save = async () => {
@@ -100,50 +96,40 @@ export function DigestSheet({
       description={t('settings.digestDescription')}
     >
       <div className="flex flex-col gap-5">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0">
-            <p className="text-sm font-medium">{t('settings.digestToggleLabel')}</p>
-            <p className="text-xs text-muted">{t('settings.digestToggleHint')}</p>
-          </div>
-          <Switch checked={on} onCheckedChange={setOn} aria-label={t('settings.digestTitle')} />
-        </div>
+        <SwitchRow
+          title={t('settings.digestToggleLabel')}
+          hint={t('settings.digestToggleHint')}
+          checked={on}
+          onCheckedChange={setOn}
+          aria-label={t('settings.digestTitle')}
+        />
 
         <div className="flex flex-col gap-2.5">
           <span className="label-mono">{t('settings.digestDay')}</span>
           <div className="flex flex-wrap gap-2" role="group" aria-label={t('settings.digestDay')}>
             {days.map((label, index) => (
-              <button
+              <ChoiceChip
                 key={label}
-                type="button"
+                active={selectedDay === index}
                 disabled={!on}
-                aria-pressed={selectedDay === index}
                 onClick={() => setSelectedDay(index)}
-                className={cn(
-                  'rounded-tile border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-                  selectedDay === index
-                    ? 'border-transparent bg-accent-solid text-on-accent-solid'
-                    : 'border-border text-muted hover:text-foreground',
-                )}
               >
                 {label}
-              </button>
+              </ChoiceChip>
             ))}
           </div>
         </div>
 
-        <label className="flex flex-col gap-1.5">
-          <span className="label-mono">{t('settings.digestTime')}</span>
-          <input
-            type="time"
-            value={timeValue}
-            onChange={(event) => onTimeChange(event.target.value)}
+        <div className="flex flex-col gap-1.5">
+          <TimeField
+            label={t('settings.digestTime')}
+            hour={selectedHour}
+            minute={selectedMinute}
+            onChange={setTime}
             disabled={!on}
-            aria-label={t('settings.digestTime')}
-            className="w-full rounded-tile border bg-surface px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
           />
           <span className="text-xs text-muted">{t('settings.digestTimezoneHint')}</span>
-        </label>
+        </div>
 
         <Button size="lg" onClick={save} disabled={isPending || !dirty}>
           {isPending ? t('settings.digestSaving') : t('settings.digestSaveButton')}

@@ -1,9 +1,8 @@
 import { useMemo } from 'react'
-import { Loader2, RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ErrorState } from '@/components/common/ErrorState'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Cascade } from '@/components/common/Cascade'
-import { EmptyState } from '@/components/common/EmptyState'
-import { Rail } from '@/components/common/desktop/rail'
+import { Rail } from '@/components/rail/Rail'
 import { AddFriend } from '@/features/social/components/AddFriend'
 import { ActivityFeed } from '@/features/social/components/ActivityFeed'
 import { RequestsList } from '@/features/social/components/RequestsList'
@@ -40,27 +39,11 @@ function SocialPage() {
   }, [data, selfId])
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('social.loading')}</span>
-      </div>
-    )
+    return <LoadingState label={t('social.loading')} />
   }
 
   if (isError) {
-    return (
-      <EmptyState
-        icon={RefreshCw}
-        title={t('social.loadFailed')}
-        description={t('social.loadFailedHint')}
-        action={
-          <Button size="sm" variant="surface" onClick={refetch}>
-            {t('social.tryAgain')}
-          </Button>
-        }
-      />
-    )
+    return <ErrorState title={t('social.loadFailed')} onRetry={refetch} />
   }
 
   if (isDesktop) {

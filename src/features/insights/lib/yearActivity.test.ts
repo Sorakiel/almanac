@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildYearActivity } from '@/features/insights/lib/yearActivity'
+import { buildYearActivity, groupYearByWeek } from '@/features/insights/lib/yearActivity'
 import type { Habit } from '@/features/habits/types'
 
 function habit(overrides: Partial<Habit> = {}): Habit {
@@ -74,5 +74,40 @@ describe('buildYearActivity', () => {
     const days = buildYearActivity(habits, completed, new Map(), WEEK, '2026-01-07')
 
     expect(days[3]!.ratio).toBe(1)
+  })
+})
+
+describe('groupYearByWeek', () => {
+  const day = (date: string, done: number, due: number) => ({
+    date,
+    done,
+    due,
+    ratio: due === 0 ? null : done / due,
+  })
+
+  it('covers the whole calendar year in Monday-started weeks', () => {
+    const weeks = groupYearByWeek([day('2026-01-01', 1, 1)], '2026-01-01')
+    // 1 Jan 2026 is a Thursday: a 4-day stub, then Mondays through 28 Dec.
+    expect(weeks[0]).toMatchObject({ start: '2026-01-01', end: '2026-01-04' })
+    expect(weeks[1]?.start).toBe('2026-01-05')
+    expect(weeks.at(-1)?.end).toBe('2026-12-31')
+    expect(weeks).toHaveLength(53)
+  })
+
+  it('sums a week and keeps rest weeks apart from missed ones', () => {
+    const days = [
+      day('2026-01-05', 2, 2),
+      day('2026-01-06', 0, 2),
+      day('2026-01-12', 0, 0),
+      day('2026-01-13', 0, 0),
+    ]
+    const weeks = groupYearByWeek(days, '2026-01-13')
+    expect(weeks[1]).toMatchObject({ done: 2, due: 4, ratio: 0.5, future: false })
+    expect(weeks[2]).toMatchObject({ ratio: null, containsToday: true, future: false })
+    expect(weeks[3]?.future).toBe(true)
+  })
+
+  it('returns nothing for an empty year', () => {
+    expect(groupYearByWeek([], '2026-01-01')).toEqual([])
   })
 })

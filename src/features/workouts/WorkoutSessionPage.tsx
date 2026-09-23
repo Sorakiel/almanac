@@ -1,17 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import {
-  Ban,
-  Check,
-  ChevronLeft,
-  EllipsisVertical,
-  Flag,
-  Loader2,
-  Pause,
-  Play,
-  Timer,
-} from 'lucide-react'
+import { Ban, Check, ChevronLeft, EllipsisVertical, Flag, Pause, Play, Timer } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { EmptyState } from '@/components/common/EmptyState'
@@ -24,7 +15,7 @@ import { SessionQueue } from '@/features/workouts/components/session/SessionQueu
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
 import { useSessionClock } from '@/features/workouts/hooks/useSessionClock'
-import { useWorkoutSessionStore } from '@/stores/workoutSession'
+import { useWorkoutSessionStore } from '@/features/workouts/stores/workoutSession'
 import {
   currentExerciseIndex,
   currentSet as firstUndoneSet,
@@ -59,12 +50,7 @@ function WorkoutSessionPage() {
   }, [id, start])
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('workouts.loadingSession')}</span>
-      </div>
-    )
+    return <LoadingState label={t('workouts.loadingSession')} fullScreen />
   }
 
   if (isError || !workout) {
@@ -147,7 +133,9 @@ function WorkoutSessionPage() {
           >
             <Timer className="h-3.5 w-3.5" aria-hidden="true" />
             {formatClock(elapsedMs)}
-            <span className="hidden sm:inline">{running ? 'elapsed' : 'paused'}</span>
+            <span className="hidden sm:inline">
+              {running ? t('workouts.clockElapsed') : t('workouts.clockPaused')}
+            </span>
           </span>
           <button
             type="button"
@@ -201,8 +189,8 @@ function WorkoutSessionPage() {
           {exercises.length === 0 ? (
             <div className="mt-10">
               <EmptyState
-                title="{t('workouts.session.noExercises')}"
-                description="{t('workouts.planFirst')}"
+                title={t('workouts.session.noExercises')}
+                description={t('workouts.planFirst')}
                 action={
                   <Button size="sm" onClick={leave}>
                     {t('workouts.planThisWorkout')}
@@ -241,7 +229,7 @@ function WorkoutSessionPage() {
                 >
                   <span className="flex items-center justify-center gap-1.5 py-[18px]">
                     <Timer className="h-3.5 w-3.5" aria-hidden="true" />
-                    {restMs !== null ? formatClock(restMs) : 'rest 90s'}
+                    {restMs !== null ? formatClock(restMs) : t('workouts.restDefault')}
                   </span>
                 </button>
                 <Button
@@ -314,7 +302,7 @@ function WorkoutSessionPage() {
           }
         }}
         title={t('workouts.session.completeBang')}
-        message={`Nice work on ${workout.name} — logged and done. Recovery counts too.`}
+        message={t('workouts.sessionDoneMessage', { name: workout.name })}
         actionLabel={t('workouts.session.finish')}
       />
     </div>

@@ -9,6 +9,7 @@ import { useReadingProgress } from '@/features/reading/hooks/useReadingProgress'
 import {
   dailyGoalPct,
   progressPct,
+  unitCount,
   unitNoun,
   unitNounPlural,
 } from '@/features/reading/lib/progress'
@@ -59,7 +60,7 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
   const onAdd = () => {
     const amount = Number.parseInt(addValue, 10)
     if (!Number.isFinite(amount) || amount <= 0) {
-      toast.error(`Enter how many ${nounPlural} you read`)
+      toast.error(t(`reading.enterAmount.${book.progress_mode}`))
       return
     }
     commit(book.current_unit + amount, () => setAddValue(''))
@@ -84,12 +85,14 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
         <div className="flex items-end justify-between gap-3">
           <p className="font-mono text-sm text-muted-strong">
             <span className="text-lg text-foreground">{book.current_unit}</span>
-            {book.total_units ? ` / ${book.total_units}` : ''} {nounPlural}
+            {book.total_units ? ` / ${book.total_units}` : ''}{' '}
+            {t(`reading.unitWord.${book.progress_mode}`, {
+              count: book.total_units ?? book.current_unit,
+            })}
           </p>
           <p className="label-mono text-accent">
             {t('reading.readTodayCount', {
-              count: readToday,
-              unit: readToday === 1 ? noun : nounPlural,
+              units: unitCount(book.progress_mode, readToday, t),
             })}
           </p>
         </div>
@@ -115,10 +118,7 @@ export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
           >
             <div className="flex items-center justify-between gap-3">
               <span className="label-mono normal-case">
-                {t('reading.dailyGoalLine', {
-                  count: goal,
-                  unit: goal === 1 ? noun : nounPlural,
-                })}
+                {t('reading.dailyGoalLine', { units: unitCount(book.progress_mode, goal, t) })}
               </span>
               <span
                 className={cn(

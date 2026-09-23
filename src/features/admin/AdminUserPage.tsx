@@ -1,110 +1,67 @@
 import { useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { toast } from 'sonner'
-import { ArrowLeft, Loader2, ShieldMinus, ShieldPlus, Trash2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Tag } from '@/components/common/Tag'
-import { SectionLabel } from '@/components/common/SectionLabel'
+import { ArrowLeft, ShieldMinus, ShieldPlus, Trash2 } from 'lucide-react'
 import { EmptyState } from '@/components/common/EmptyState'
-import { ConfirmSheet } from '@/components/common/ConfirmSheet'
-import { Rail } from '@/components/common/desktop/rail'
-import { AdminUserRail } from '@/features/admin/components/AdminUserRail'
-import { FeedbackManager } from '@/features/admin/components/FeedbackManager'
+import { LoadingState } from '@/components/common/LoadingState'
+import { SectionLabel } from '@/components/common/SectionLabel'
+import { Rail } from '@/components/rail/Rail'
+import { Button } from '@/components/ui/button'
 import { AwardAchievements } from '@/features/achievements/components/AwardAchievements'
+import { AdminStat } from '@/features/admin/components/AdminStat'
+import { AdminUserRail } from '@/features/admin/components/AdminUserRail'
+import { DeleteMemberConfirm } from '@/features/admin/components/DeleteMemberConfirm'
+import { FeedbackManager } from '@/features/admin/components/FeedbackManager'
+import { RoleTag } from '@/features/admin/components/RoleTag'
 import { useAdminUser } from '@/features/admin/hooks/useAdminUser'
-import { useUserManagement } from '@/features/admin/hooks/useUserManagement'
-import { joinedLabel } from '@/features/admin/lib/format'
+import { useJoinedLabel } from '@/features/admin/hooks/useJoinedLabel'
+import { useMemberActions } from '@/features/admin/hooks/useMemberActions'
+import type { AdminUserDetail } from '@/features/admin/types'
+import { frequencyLabel } from '@/features/habits/lib/frequency'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSession } from '@/hooks/useSession'
+import { useT } from '@/hooks/useT'
 import { useToday } from '@/hooks/useToday'
 import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
-import type { UserRole } from '@/features/admin/types'
-
-const ROLE_TONE: Record<UserRole, 'accent' | 'muted' | 'teal'> = {
-  owner: 'teal',
-  admin: 'accent',
-  user: 'muted',
-}
-
-function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div className="flex-1 rounded-2xl border bg-panel px-4 py-3.5">
-      <p className="font-mono text-[9.5px] uppercase tracking-label text-muted-strong">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold tabular-nums ${accent ? 'text-accent' : ''}`}>
-        {value}
-      </p>
-    </div>
-  )
-}
 
 /** Admin/owner view of one user: stats, habits, feedback + role/delete actions. */
 function AdminUserPage() {
+  const { t } = useT()
   const { id = '' } = useParams()
   const navigate = useNavigate()
-  const { user } = useSession()
   const { profile, isLoading: profileLoading } = useProfile()
-  const { dateKey } = useToday()
   const isAdmin = profile?.role === 'admin' || profile?.role === 'owner'
-  const isOwner = profile?.role === 'owner'
   const { data, isLoading, isError } = useAdminUser(id, isAdmin)
   useBreadcrumbLeaf(data?.name)
-  const { setRole, remove, isSettingRole, isRemoving } = useUserManagement()
-  const [confirmDelete, setConfirmDelete] = useState(false)
 
-  if (profileLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading…</span>
-      </div>
-    )
-  }
+  if (profileLoading) return <LoadingState />
   if (!isAdmin) return <Navigate to="/" replace />
 
   if (isLoading || !data) {
     return isError ? (
       <EmptyState
-        title="Couldn't load this user"
+        title={t('admin.userLoadFailed')}
         action={
           <Button size="sm" variant="surface" onClick={() => navigate('/admin')}>
-            Back to console
+            {t('admin.backToConsole')}
           </Button>
         }
       />
     ) : (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">Loading user…</span>
-      </div>
+      <LoadingState label={t('admin.loadingUser')} />
     )
   }
 
-  const isSelf = data.id === user?.id
-  const isOwnerRow = data.role === 'owner'
-  const canManageRole = isOwner && !isOwnerRow && !isSelf
-  const canDelete = !isSelf && !isOwnerRow && (data.role === 'user' || isOwner)
+  return <AdminUserView data={data} isOwner={profile?.role === 'owner'} />
+}
 
-  const toggleAdmin = async () => {
-    const next: UserRole = data.role === 'admin' ? 'user' : 'admin'
-    try {
-      await setRole({ target: data.id, role: next })
-      toast.success(
-        next === 'admin' ? `${data.name} is now an admin` : `${data.name} is now a member`,
-      )
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not change role')
-    }
-  }
-
-  const confirmRemove = async () => {
-    try {
-      await remove(data.id)
-      toast.success(`${data.name} deleted`)
-      navigate('/admin')
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not delete user')
-    }
-  }
+function AdminUserView({ data, isOwner }: { data: AdminUserDetail; isOwner: boolean }) {
+  const { t } = useT()
+  const navigate = useNavigate()
+  const { user } = useSession()
+  const { dateKey } = useToday()
+  const joined = useJoinedLabel()
+  const actions = useMemberActions(data, isOwner, user?.id ?? '')
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   return (
     <>
@@ -113,57 +70,62 @@ function AdminUserPage() {
           <button
             type="button"
             onClick={() => navigate('/admin')}
-            aria-label="Back to console"
+            aria-label={t('admin.backToConsole')}
             className="rounded-full p-1 text-muted hover:text-foreground"
           >
             <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           </button>
           <div className="min-w-0 flex-1">
-            <p className="label-mono text-accent">// member</p>
+            <p className="label-mono text-accent">{t('admin.memberLabel')}</p>
             <h1 className="truncate text-2xl lg:text-[32px] lg:tracking-title">{data.name}</h1>
             <p className="mt-1 flex items-center gap-2 font-mono text-[11px] text-muted-strong">
-              <Tag tone={ROLE_TONE[data.role]}>{data.role}</Tag>
-              joined {joinedLabel(data.joinedAt, dateKey)}
+              <RoleTag role={data.role} />
+              {t('admin.joinedLine', { when: joined(data.joinedAt, dateKey) })}
               {data.timezone ? ` · ${data.timezone.replace(/_/g, ' ')}` : ''}
             </p>
           </div>
-          {canManageRole ? (
-            <Button variant="surface" size="sm" onClick={toggleAdmin} disabled={isSettingRole}>
+          {actions.canManageRole ? (
+            <Button
+              variant="surface"
+              size="sm"
+              onClick={() => void actions.toggleAdmin()}
+              disabled={actions.isSettingRole}
+            >
               {data.role === 'admin' ? (
-                <>
-                  <ShieldMinus className="h-4 w-4" /> Remove admin
-                </>
+                <ShieldMinus className="h-4 w-4" />
               ) : (
-                <>
-                  <ShieldPlus className="h-4 w-4" /> Make admin
-                </>
+                <ShieldPlus className="h-4 w-4" />
               )}
+              {data.role === 'admin' ? t('admin.removeAdmin') : t('admin.makeAdmin')}
             </Button>
           ) : null}
-          {canDelete ? (
+          {actions.canDelete ? (
             <Button
               variant="surface"
               size="sm"
               className="text-accent"
               onClick={() => setConfirmDelete(true)}
             >
-              <Trash2 className="h-4 w-4" /> Delete
+              <Trash2 className="h-4 w-4" /> {t('admin.delete')}
             </Button>
           ) : null}
         </header>
 
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Stat label="habits" value={String(data.stats.habits)} accent />
-          <Stat label="active · 30d" value={`${data.stats.activeDays30}d`} />
-          <Stat label="completion" value={`${data.stats.completionPct}%`} />
-          <Stat label="logs · 30d" value={String(data.stats.logs)} />
+          <AdminStat label={t('admin.habits')} value={String(data.stats.habits)} accent />
+          <AdminStat
+            label={t('admin.active30d')}
+            value={t('admin.daysValue', { count: data.stats.activeDays30 })}
+          />
+          <AdminStat label={t('admin.completion')} value={`${data.stats.completionPct}%`} />
+          <AdminStat label={t('admin.logs30d')} value={String(data.stats.logs)} />
         </div>
 
         <section className="flex flex-col gap-3">
-          <SectionLabel>HABITS</SectionLabel>
+          <SectionLabel>{t('admin.habitsSection')}</SectionLabel>
           {data.habits.length === 0 ? (
             <p className="rounded-card border bg-surface px-4 py-6 text-center text-sm text-muted">
-              No active habits.
+              {t('admin.noHabits')}
             </p>
           ) : (
             <div className="overflow-hidden rounded-card border bg-surface">
@@ -174,7 +136,7 @@ function AdminUserPage() {
                 >
                   <span className="min-w-0 flex-1 truncate">{h.name}</span>
                   <span className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-                    {h.frequencyLabel}
+                    {frequencyLabel(h.frequency, t)}
                   </span>
                   <span className="font-mono text-[11px] text-accent">{h.doneLast30}/30</span>
                 </div>
@@ -184,20 +146,18 @@ function AdminUserPage() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <SectionLabel>FEEDBACK</SectionLabel>
+          <SectionLabel>{t('admin.feedbackSection')}</SectionLabel>
           <FeedbackManager items={data.feedback} todayKey={dateKey} hideAuthor />
         </section>
 
         {isOwner ? <AwardAchievements userId={data.id} userName={data.name} /> : null}
 
-        <ConfirmSheet
+        <DeleteMemberConfirm
+          name={data.name}
           open={confirmDelete}
           onOpenChange={setConfirmDelete}
-          title={`Delete ${data.name}?`}
-          description="This permanently removes the account and all of their habits, logs, and feedback. This cannot be undone."
-          confirmLabel={isRemoving ? 'Deleting…' : 'Delete user'}
-          pending={isRemoving}
-          onConfirm={confirmRemove}
+          pending={actions.isRemoving}
+          onConfirm={() => void actions.remove(() => navigate('/admin'))}
         />
       </div>
       <Rail>

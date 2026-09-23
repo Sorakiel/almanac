@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { ListChecks, Loader2, Plus, RefreshCw } from 'lucide-react'
+import { ListChecks, Plus } from 'lucide-react'
+import { ErrorState } from '@/components/common/ErrorState'
+import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
-import { Rail } from '@/components/common/desktop/rail'
+import { Rail } from '@/components/rail/Rail'
 import { AlmanacNarrator } from '@/features/dashboard/components/AlmanacNarrator'
 import { HabitCard } from '@/features/habits/components/HabitCard'
 import { TodayProgress } from '@/features/habits/components/TodayProgress'
@@ -68,21 +70,9 @@ function HabitsPage() {
       </header>
 
       {isLoading ? (
-        <div className="flex justify-center py-16" role="status" aria-live="polite">
-          <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-          <span className="sr-only">{t('habits.loading')}</span>
-        </div>
+        <LoadingState label={t('habits.loading')} className="py-16" />
       ) : isError ? (
-        <EmptyState
-          icon={RefreshCw}
-          title={t('habits.loadFailed')}
-          description={t('habits.loadFailedHint')}
-          action={
-            <Button size="sm" variant="surface" onClick={refetch}>
-              {t('habits.tryAgain')}
-            </Button>
-          }
-        />
+        <ErrorState title={t('habits.loadFailed')} onRetry={refetch} />
       ) : habits.length === 0 ? (
         <EmptyState
           icon={ListChecks}

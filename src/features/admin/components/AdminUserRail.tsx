@@ -1,58 +1,35 @@
 import { Avatar } from '@/components/common/Avatar'
-import { Tag } from '@/components/common/Tag'
-import { joinedLabel } from '@/features/admin/lib/format'
-import type { AdminUserDetail, UserRole } from '@/features/admin/types'
+import { RailCard, RailNote, RailRow } from '@/components/rail/RailCard'
+import { RoleTag } from '@/features/admin/components/RoleTag'
+import { useJoinedLabel } from '@/features/admin/hooks/useJoinedLabel'
+import type { AdminUserDetail } from '@/features/admin/types'
+import { useT } from '@/hooks/useT'
 
 interface AdminUserRailProps {
   user: AdminUserDetail
   todayKey: string
 }
 
-const ROLE_TONE: Record<UserRole, 'accent' | 'muted' | 'teal'> = {
-  owner: 'teal',
-  admin: 'accent',
-  user: 'muted',
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3 pt-2.5 text-[13.5px] first:pt-0">
-      <span className="text-muted">{label}</span>
-      <span className="min-w-0 truncate font-mono tabular-nums">{value}</span>
-    </div>
-  )
-}
-
 /** Desktop context rail for the admin user-detail page: identity + snapshot. */
 export function AdminUserRail({ user, todayKey }: AdminUserRailProps) {
+  const { t } = useT()
+  const joined = useJoinedLabel()
   return (
     <div className="flex flex-col gap-3.5">
       <div className="flex items-center gap-3">
         <Avatar name={user.name} size="md" />
         <div className="min-w-0">
           <p className="truncate text-[15px] font-semibold">{user.name}</p>
-          <Tag tone={ROLE_TONE[user.role]} className="mt-0.5">
-            {user.role}
-          </Tag>
+          <RoleTag role={user.role} className="mt-0.5" />
         </div>
       </div>
 
-      <div className="rounded-[18px] border bg-surface p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">account</p>
-        <div className="mt-2 flex flex-col">
-          <Row label="joined" value={joinedLabel(user.joinedAt, todayKey)} />
-          <Row label="timezone" value={user.timezone?.replace(/_/g, ' ') ?? '—'} />
-        </div>
-      </div>
+      <RailCard label={t('admin.account')}>
+        <RailRow label={t('admin.colJoined')} value={joined(user.joinedAt, todayKey)} />
+        <RailRow label={t('admin.timezone')} value={user.timezone?.replace(/_/g, ' ') ?? '—'} />
+      </RailCard>
 
-      <div className="rounded-[16px] border border-accent/25 bg-gradient-to-br from-accent/10 to-transparent p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-label text-accent">
-          elevated access
-        </p>
-        <p className="mt-2 text-[13px] leading-relaxed text-muted">
-          You&apos;re viewing another member&apos;s data. Role changes and deletion are permanent.
-        </p>
-      </div>
+      <RailNote label={t('admin.elevatedAccess')}>{t('admin.userNote')}</RailNote>
     </div>
   )
 }

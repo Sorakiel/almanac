@@ -1,8 +1,8 @@
-import { ArrowLeft, Loader2, RefreshCw, Trophy } from 'lucide-react'
+import { ArrowLeft, Trophy } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
+import { ErrorState } from '@/components/common/ErrorState'
+import { LoadingState } from '@/components/common/LoadingState'
 import { CountUp } from '@/components/common/CountUp'
-import { EmptyState } from '@/components/common/EmptyState'
 import { AchievementCard } from '@/features/achievements/components/AchievementCard'
 import { useAchievements } from '@/features/achievements/hooks/useAchievements'
 import { riseStagger } from '@/lib/motion'
@@ -25,27 +25,11 @@ function AchievementsPage() {
   const { achievements, isLoading, isError, refetch } = useAchievements()
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-24" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-        <span className="sr-only">{t('achievements.loading')}</span>
-      </div>
-    )
+    return <LoadingState label={t('achievements.loading')} />
   }
 
   if (isError) {
-    return (
-      <EmptyState
-        icon={RefreshCw}
-        title={t('achievements.loadFailed')}
-        description={t('achievements.loadFailedHint')}
-        action={
-          <Button size="sm" variant="surface" onClick={refetch}>
-            {t('achievements.tryAgain')}
-          </Button>
-        }
-      />
-    )
+    return <ErrorState title={t('achievements.loadFailed')} onRetry={refetch} />
   }
 
   const unlocked = unlockedCount(achievements)

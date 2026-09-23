@@ -13,8 +13,8 @@ export interface AchievementTier {
 
 export interface AchievementDef {
   id: string
+  /** English identity; the shown name and description come from `achievements.catalog.<id>`. */
   title: string
-  description: string
   icon: LucideIcon
   tone: AchievementTone
   /** Unit noun for progress copy, e.g. "days", "books". */
@@ -34,6 +34,7 @@ export interface AchievementDef {
 export interface AchievementStats {
   currentStreak: number
   bestStreak: number
+  /** All-time habit check-offs (repeats across habits counted separately). */
   totalCompletions: number
   workoutsCompleted: number
   booksFinished: number

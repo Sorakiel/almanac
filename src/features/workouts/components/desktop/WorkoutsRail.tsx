@@ -2,6 +2,8 @@ import { Dumbbell } from 'lucide-react'
 import { RecentSessions } from '@/features/workouts/components/RecentSessions'
 import type { TrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import { useT } from '@/hooks/useT'
+import { RailCard } from '@/components/rail/RailCard'
+import { RailIdentity } from '@/components/rail/RailIdentity'
 
 interface WorkoutsRailProps {
   overview: TrainingOverview
@@ -21,18 +23,12 @@ export function WorkoutsRail({ overview }: WorkoutsRailProps) {
   const { t } = useT()
   return (
     <div className="flex flex-col gap-3.5">
-      <div className="flex items-center gap-3">
-        <span
-          aria-hidden="true"
-          className="flex h-[38px] w-[38px] items-center justify-center rounded-xl bg-teal/15 text-teal"
-        >
-          <Dumbbell className="h-[18px] w-[18px]" />
-        </span>
-        <div>
-          <p className="text-[15px] font-semibold">{t('workouts.title')}</p>
-          <p className="font-mono text-[10px] text-muted-strong">{t('workouts.yourWeek')}</p>
-        </div>
-      </div>
+      <RailIdentity
+        icon={Dumbbell}
+        tone="bg-teal/15 text-teal"
+        title={t('workouts.title')}
+        subtitle={t('workouts.yourWeek')}
+      />
 
       <div className="flex gap-3">
         <StatTile
@@ -47,14 +43,9 @@ export function WorkoutsRail({ overview }: WorkoutsRailProps) {
         <StatTile label={t('workouts.completed')} value={overview.completedCount} />
       </div>
 
-      <div className="rounded-[18px] border bg-surface p-[18px]">
-        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-strong">
-          {t('workouts.recent')}
-        </p>
-        <div className="mt-2">
-          <RecentSessions workouts={overview.recent} />
-        </div>
-      </div>
+      <RailCard label={t('workouts.recent')}>
+        <RecentSessions workouts={overview.recent} />
+      </RailCard>
     </div>
   )
 }

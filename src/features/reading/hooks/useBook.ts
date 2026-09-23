@@ -3,6 +3,7 @@ import { fetchBookById } from '@/features/reading/api/books.api'
 import { fetchBookNotes } from '@/features/reading/api/notes.api'
 import { fetchReadingSessions } from '@/features/reading/api/sessions.api'
 import type { Book, BookNote, ReadingSession } from '@/features/reading/types'
+import { readingKeys } from '@/features/reading/hooks/queryKeys'
 
 interface UseBookResult {
   book: Book | undefined
@@ -18,19 +19,19 @@ export function useBook(id: string | undefined): UseBookResult {
   const enabled = Boolean(id)
 
   const bookQuery = useQuery({
-    queryKey: ['book', id],
+    queryKey: readingKeys.book(id ?? ''),
     queryFn: () => fetchBookById(id as string),
     enabled,
   })
 
   const notesQuery = useQuery({
-    queryKey: ['bookNotes', id],
+    queryKey: readingKeys.notes(id ?? ''),
     queryFn: () => fetchBookNotes(id as string),
     enabled,
   })
 
   const sessionsQuery = useQuery({
-    queryKey: ['readingSessions', id],
+    queryKey: readingKeys.sessions(id ?? ''),
     queryFn: () => fetchReadingSessions(id as string),
     enabled,
   })
