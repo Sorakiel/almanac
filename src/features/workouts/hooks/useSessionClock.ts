@@ -10,6 +10,8 @@ interface SessionClock {
   running: boolean
   /** Remaining rest in ms, or null when no rest timer is running. */
   restMs: number | null
+  /** Length of the current (or last) rest, in ms — the ring's full circle. */
+  restTotalMs: number
   /** Start a rest countdown (defaults to the standard rest interval). */
   startRest: (seconds?: number) => void
   /** Cancel any running rest countdown. */
@@ -24,9 +26,11 @@ interface SessionClock {
 export function useSessionClock(record: SessionRecord | null | undefined): SessionClock {
   const now = useNow()
   const [restEndsAt, setRestEndsAt] = useState<number | null>(null)
+  const [restTotalMs, setRestTotalMs] = useState(DEFAULT_REST_SECONDS * 1000)
 
   const startRest = useCallback((seconds = DEFAULT_REST_SECONDS) => {
     setRestEndsAt(Date.now() + seconds * 1000)
+    setRestTotalMs(seconds * 1000)
   }, [])
 
   const skipRest = useCallback(() => setRestEndsAt(null), [])
@@ -37,6 +41,7 @@ export function useSessionClock(record: SessionRecord | null | undefined): Sessi
     elapsedMs: sessionElapsed(record, now),
     running: Boolean(record?.startedAt),
     restMs: restEndsAt !== null && restEndsAt > now ? restEndsAt - now : null,
+    restTotalMs,
     startRest,
     skipRest,
   }

@@ -28,7 +28,7 @@ function SetCell({ set, isCurrent }: { set: SetLog; isCurrent: boolean }) {
       ) : null}
       <div
         className={cn(
-          'font-mono text-[10px] uppercase tracking-label',
+          'text-caption font-medium first-letter:uppercase',
           isCurrent ? 'text-accent' : 'text-muted-strong',
         )}
       >
@@ -38,9 +38,7 @@ function SetCell({ set, isCurrent }: { set: SetLog; isCurrent: boolean }) {
         {set.done ? (
           <Check className="h-5 w-5 text-accent" aria-hidden="true" />
         ) : isCurrent ? (
-          <span className="font-mono text-[20px] font-semibold tabular-nums leading-none">
-            {set.reps ?? '—'}
-          </span>
+          <span className="num text-headline font-semibold leading-none">{set.reps ?? '—'}</span>
         ) : (
           <span
             aria-hidden="true"
@@ -59,9 +57,9 @@ export function CurrentExercisePanel({ exercise, currentSet }: CurrentExercisePa
 
   return (
     <>
-      <p className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
+      <p className="flex items-center gap-1.5 text-footnote font-semibold text-accent">
         <Play className="h-3 w-3 fill-current" aria-hidden="true" />
-        {t('workouts.currentExercise')}
+        <span className="inline-block first-letter:uppercase">{t('workouts.currentExercise')}</span>
       </p>
 
       <div className="relative mt-3.5">
@@ -76,7 +74,7 @@ export function CurrentExercisePanel({ exercise, currentSet }: CurrentExercisePa
               {exercise.name}
             </h2>
             {target ? (
-              <span className="flex-none font-mono text-[13px] uppercase text-accent lg:text-sm">
+              <span className="num flex-none text-footnote text-accent lg:text-callout">
                 {target}
               </span>
             ) : null}
