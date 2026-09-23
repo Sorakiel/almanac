@@ -1460,8 +1460,6 @@ export const en = {
     },
     dragToTurn: 'drag to turn',
     nowActive: '▶ now · active',
-    switchTheme: 'Switch to {theme} theme',
-    toggleTheme: '{theme} · toggle theme',
   },
   celebrate: {
     nice: 'Nice',

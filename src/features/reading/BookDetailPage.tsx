@@ -12,7 +12,6 @@ import { NotesSection } from '@/features/reading/components/NotesSection'
 import { useBook } from '@/features/reading/hooks/useBook'
 import { unitCount } from '@/features/reading/lib/progress'
 import { useFocusStore } from '@/stores/focus'
-import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import { BookStatusTag } from '@/features/reading/components/BookStatusTag'
 import { useT } from '@/hooks/useT'
 
@@ -24,7 +23,6 @@ function BookDetailPage() {
   const navigate = useNavigate()
   const startFocus = useFocusStore((s) => s.start)
   const { book, notes, sessions, isLoading, isError } = useBook(id)
-  useBreadcrumbLeaf(book?.title)
   const [editOpen, setEditOpen] = useState(false)
 
   if (isLoading) {

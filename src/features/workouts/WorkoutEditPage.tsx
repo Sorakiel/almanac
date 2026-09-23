@@ -29,7 +29,6 @@ import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useWorkoutDraft, type LibraryPick } from '@/features/workouts/hooks/useWorkoutDraft'
 import { estimateMinutes, muscleSummary } from '@/features/workouts/lib/draft'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import type { SessionExercise } from '@/features/workouts/types'
 import { useT } from '@/hooks/useT'
 
@@ -278,7 +277,6 @@ function WorkoutEditPage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
-  useBreadcrumbLeaf(workout ? `Edit ${workout.name}` : undefined)
 
   if (isLoading) {
     return <LoadingState label={t('workouts.loadingOne')} />

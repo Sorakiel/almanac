@@ -1575,8 +1575,6 @@ export const ru: Translations = {
     },
     dragToTurn: 'крутите',
     nowActive: '▶ сейчас · идёт',
-    switchTheme: 'Переключить на тему «{theme}»',
-    toggleTheme: '{theme} · сменить тему',
   },
   celebrate: {
     nice: 'Отлично',
