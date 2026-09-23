@@ -73,25 +73,21 @@ function OnboardingPage() {
 
   // Finish from the Ready step: apply modules, optionally create the picked
   // habits, then land on Habits (or the dashboard if nothing was created).
-  const complete = async (withHabits: boolean, openForm = false) => {
+  const complete = (withHabits: boolean, openForm = false) => {
     if (saving) return
     setSaving(true)
     applyModules()
     const chosen = withHabits ? HABIT_TEMPLATES.filter((tpl) => picks.has(tpl.key)) : []
     if (chosen.length > 0) {
-      try {
-        // The habit is created with the name the user is reading, not the English one.
-        await Promise.all(
-          chosen.map((tpl) =>
-            create.mutateAsync(toInput(tpl, t(`onboarding.suggestions.${tpl.key}`))),
-          ),
-        )
-        toast.success(t('onboarding.habitsAdded', { count: chosen.length }))
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : t('onboarding.createFailed'))
-        setSaving(false)
-        return
+      // The habit is created with the name the user is reading, not the English
+      // one. Not awaited: each shows up at once and queues if offline.
+      for (const tpl of chosen) {
+        create.mutate(toInput(tpl, t(`onboarding.suggestions.${tpl.key}`)), {
+          onError: (error) =>
+            toast.error(error instanceof Error ? error.message : t('onboarding.createFailed')),
+        })
       }
+      toast.success(t('onboarding.habitsAdded', { count: chosen.length }))
     }
     dismissLocally()
     persistOnboarded()

@@ -1,3 +1,4 @@
+import { isUniqueViolation } from '@/lib/pgErrors'
 import { supabase } from '@/lib/supabase'
 import type { Workout, WorkoutInsert } from '@/features/workouts/types'
 
@@ -20,8 +21,10 @@ export async function fetchWorkoutById(id: string): Promise<Workout> {
   return data
 }
 
+/** Insert a workout; with a client id a retried insert resolves to the saved row, not a twin. */
 export async function createWorkout(input: WorkoutInsert): Promise<Workout> {
   const { data, error } = await supabase.from('workouts').insert(input).select().single()
+  if (isUniqueViolation(error) && input.id) return fetchWorkoutById(input.id)
   if (error) throw error
   return data
 }
