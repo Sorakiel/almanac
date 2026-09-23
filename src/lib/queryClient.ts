@@ -1,11 +1,20 @@
-import { QueryClient } from '@tanstack/react-query'
+import { QueryClient, dehydrate, onlineManager } from '@tanstack/react-query'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
-import type { PersistQueryClientOptions } from '@tanstack/react-query-persist-client'
+import type {
+  PersistedClient,
+  PersistQueryClientOptions,
+} from '@tanstack/react-query-persist-client'
+import { retryNetworkErrors, syncOnlineStateFromBrowser } from '@/lib/network'
 import { OFFLINE_MUTATION_ROOT, registerOfflineMutations } from '@/lib/offlineMutations'
 import { APP_VERSION } from '@/lib/version'
 
 /** How long a cached screen may be replayed offline before it is discarded. */
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
+const CACHE_KEY = 'almanac-query-cache'
+
+// Before anything can run a mutation — including the paused ones the
+// persisted cache is about to restore.
+syncOnlineStateFromBrowser()
 
 /** App-wide React Query client — the single source of truth for server data. */
 export const queryClient = new QueryClient({
@@ -18,6 +27,11 @@ export const queryClient = new QueryClient({
       // it goes unused and an offline cold start has nothing left to show.
       gcTime: MAX_AGE_MS,
     },
+    mutations: {
+      // Rides out a flaky connection; a real offline spell pauses the write
+      // instead (and survives a reload), so this is not the offline path.
+      retry: retryNetworkErrors,
+    },
   },
 })
 
@@ -28,7 +42,7 @@ registerOfflineMutations(queryClient)
 
 const persister = createSyncStoragePersister({
   storage: typeof window === 'undefined' ? undefined : window.localStorage,
-  key: 'almanac-query-cache',
+  key: CACHE_KEY,
   throttleTime: 2000,
 })
 
@@ -39,6 +53,10 @@ const persister = createSyncStoragePersister({
 // *before* this app session started.
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
+    // This listener is registered before onlineManager's own, so without
+    // flipping the flag here resumePausedMutations() would still see
+    // "offline" and do nothing.
+    onlineManager.setOnline(true)
     void queryClient.resumePausedMutations()
   })
 }
@@ -77,6 +95,35 @@ export const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
     shouldDehydrateMutation: (mutation) =>
       mutation.state.isPaused && mutation.options.mutationKey?.[0] === OFFLINE_MUTATION_ROOT,
   },
+}
+
+/**
+ * Write the cache to disk now, bypassing the persister's 2 s throttle.
+ *
+ * The throttle is trailing: a tap made offline and followed by closing or
+ * reloading the app within two seconds never reached storage, so the paused
+ * write was simply gone. `pagehide` / hidden visibility is the last moment a
+ * synchronous write is guaranteed to land. Same format the persister writes.
+ */
+function flushPersistedCache(): void {
+  const persisted: PersistedClient = {
+    buster: APP_VERSION,
+    timestamp: Date.now(),
+    clientState: dehydrate(queryClient, persistOptions.dehydrateOptions),
+  }
+  try {
+    window.localStorage.setItem(CACHE_KEY, JSON.stringify(persisted))
+  } catch {
+    // Quota or private mode: the throttled persister still runs and trims
+    // the cache on its own failure path, so there is nothing to add here.
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', flushPersistedCache)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushPersistedCache()
+  })
 }
 
 /**
