@@ -21,7 +21,6 @@ import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
 import { useToday } from '@/hooks/useToday'
-import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 
 /** Admin/owner view of one user: stats, habits, feedback + role/delete actions. */
 function AdminUserPage() {
@@ -31,7 +30,6 @@ function AdminUserPage() {
   const { profile, isLoading: profileLoading } = useProfile()
   const isAdmin = profile?.role === 'admin' || profile?.role === 'owner'
   const { data, isLoading, isError } = useAdminUser(id, isAdmin)
-  useBreadcrumbLeaf(data?.name)
 
   if (profileLoading) return <LoadingState />
   if (!isAdmin) return <Navigate to="/" replace />

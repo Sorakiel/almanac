@@ -75,8 +75,11 @@ function WorkoutSessionPage() {
   const currentSet = currentExercise ? firstUndoneSet(currentExercise) : null
   const exerciseLabel =
     exercises.length > 0
-      ? `exercise ${Math.min(currentIndex + 1, exercises.length)} / ${exercises.length}`
-      : 'no exercises'
+      ? t('workouts.exerciseOf', {
+          n: Math.min(currentIndex + 1, exercises.length),
+          total: exercises.length,
+        })
+      : t('workouts.noExercisesShort')
 
   const completeCurrentSet = () => {
     if (!currentSet) return
@@ -220,7 +223,7 @@ function WorkoutSessionPage() {
                   type="button"
                   onClick={() => (restMs !== null ? skipRest() : startRest())}
                   className={cn(
-                    'flex-none rounded-[15px] border px-4 font-mono text-[13px] transition-colors sm:w-[120px]',
+                    'flex-none whitespace-nowrap rounded-[15px] border px-4 font-mono text-[13px] transition-colors sm:min-w-[120px]',
                     restMs !== null
                       ? 'border-accent/40 bg-accent/10 text-accent'
                       : 'bg-surface text-muted hover:text-foreground',

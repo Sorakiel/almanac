@@ -23,7 +23,6 @@ import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habit
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useUiStore } from '@/stores/ui'
-import { useBreadcrumbLeaf } from '@/stores/breadcrumb'
 import { toastWithUndo } from '@/lib/undoToast'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
@@ -35,7 +34,6 @@ function HabitDetailPage() {
   const navigate = useNavigate()
   const openEditHabit = useUiStore((s) => s.openEditHabit)
   const { habit, stats, isLoading, isError } = useHabitDetail(id)
-  useBreadcrumbLeaf(habit?.name)
   const { archive, restore, remove } = useHabitMutations()
   const toggleFreeze = useToggleFreeze()
   const [menuOpen, setMenuOpen] = useState(false)

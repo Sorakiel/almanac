@@ -68,11 +68,11 @@ export function SetEditorTable({
               onClick={() => onEditSet(set.id, { restSeconds: nextRest(set.restSeconds) })}
               aria-label={t('a11y.restForSet', {
                 number: i + 1,
-                value: restLabel(set.restSeconds),
+                value: restLabel(set.restSeconds, t),
               })}
               className="hidden h-10 items-center justify-center rounded-xl border bg-bg font-mono text-[13px] tabular-nums text-muted transition-colors hover:text-foreground lg:flex"
             >
-              {restLabel(set.restSeconds)}
+              {restLabel(set.restSeconds, t)}
             </button>
             <button
               type="button"

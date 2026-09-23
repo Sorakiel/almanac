@@ -55,7 +55,7 @@ function SetCell({ set, isCurrent }: { set: SetLog; isCurrent: boolean }) {
 /** The focused current-exercise block: warm gradient card, target, and set grid. */
 export function CurrentExercisePanel({ exercise, currentSet }: CurrentExercisePanelProps) {
   const { t } = useT()
-  const target = exerciseTargetLabel(exercise)
+  const target = exerciseTargetLabel(exercise, t)
 
   return (
     <>

@@ -57,6 +57,13 @@ export default {
         footnote: ['13px', { lineHeight: '18px' }],
         caption: ['11px', { lineHeight: '13px' }],
       },
+      spacing: {
+        // Floating layers above the phone's glass bottom nav (toasts, the sync
+        // capsule) sit this far up; the capsule's height plus a gap lifts
+        // toasts over it.
+        'nav-clearance': '104px',
+        'capsule-clearance': '52px',
+      },
       // 28 sheets and containers · 20 cards and groups · 14 controls · 10 inner.
       borderRadius: {
         sheet: '28px',

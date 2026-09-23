@@ -29,7 +29,8 @@ function QueueCard({
   muted?: boolean
   dim?: number
 }) {
-  const target = exerciseTargetLabel(exercise)
+  const { t } = useT()
+  const target = exerciseTargetLabel(exercise, t)
   return (
     <div
       style={dim !== undefined ? { opacity: dim } : undefined}

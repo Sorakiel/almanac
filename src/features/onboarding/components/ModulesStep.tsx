@@ -24,7 +24,7 @@ export function ModulesStep({ modules, onToggle }: ModulesStepProps) {
         {OPTIONAL_MODULES.map(({ key, icon: Icon }) => {
           const on = modules[key]
           return (
-            <SelectTile key={key} on={on} onClick={() => onToggle(key)}>
+            <SelectTile key={key} on={on} stacked onClick={() => onToggle(key)}>
               <span
                 className={cn(
                   'flex h-10 w-10 flex-none items-center justify-center rounded-tile transition-colors',
@@ -33,7 +33,9 @@ export function ModulesStep({ modules, onToggle }: ModulesStepProps) {
               >
                 <Icon className="h-5 w-5" aria-hidden="true" />
               </span>
-              <span className="min-w-0 flex-1 font-semibold">{t(`modules.${key}.label`)}</span>
+              <span className="min-w-0 max-w-full break-words font-semibold">
+                {t(`modules.${key}.label`)}
+              </span>
             </SelectTile>
           )
         })}

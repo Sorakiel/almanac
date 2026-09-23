@@ -1,24 +1,26 @@
 import { Tag } from '@/components/common/Tag'
+import { muscleLabel } from '@/features/workouts/lib/muscles'
 import { exerciseTargetLabel } from '@/features/workouts/lib/session'
 import type { SessionExercise, SetLog } from '@/features/workouts/types'
-import { useT } from '@/hooks/useT'
+import { useT, type TFunction } from '@/hooks/useT'
 
 interface ExerciseViewProps {
   exercise: SessionExercise
 }
 
 /** Static "reps × weight" for one set, e.g. "10 × 15 kg" or "10 reps". */
-function setLine(set: SetLog): string {
-  if (set.reps != null && set.weight != null) return `${set.reps} × ${set.weight} kg`
-  if (set.reps != null) return `${set.reps} reps`
-  if (set.weight != null) return `${set.weight} kg`
+function setLine(set: SetLog, t: TFunction): string {
+  if (set.reps != null && set.weight != null)
+    return t('workouts.setWeight', { reps: set.reps, weight: set.weight })
+  if (set.reps != null) return t('workouts.repsCount', { count: set.reps })
+  if (set.weight != null) return t('units.kgValue', { value: set.weight })
   return '—'
 }
 
 /** Read-only exercise card — the plan as it reads before you tap Edit. */
 export function ExerciseView({ exercise }: ExerciseViewProps) {
   const { t } = useT()
-  const target = exerciseTargetLabel(exercise)
+  const target = exerciseTargetLabel(exercise, t)
 
   return (
     <div className="rounded-[20px] border bg-surface p-5">
@@ -26,7 +28,9 @@ export function ExerciseView({ exercise }: ExerciseViewProps) {
         <div className="min-w-0">
           <p className="truncate text-[16px] font-semibold">{exercise.name}</p>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            {exercise.muscleGroup ? <Tag tone="teal">{exercise.muscleGroup}</Tag> : null}
+            {exercise.muscleGroup ? (
+              <Tag tone="teal">{muscleLabel(exercise.muscleGroup, t)}</Tag>
+            ) : null}
             {target ? (
               <span className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
                 {t('workouts.targetLine', { target })}
@@ -49,7 +53,7 @@ export function ExerciseView({ exercise }: ExerciseViewProps) {
               <span className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
                 {set.set_number}
               </span>
-              <span className="text-sm font-medium tabular-nums">{setLine(set)}</span>
+              <span className="text-sm font-medium tabular-nums">{setLine(set, t)}</span>
             </div>
           ))}
         </div>
