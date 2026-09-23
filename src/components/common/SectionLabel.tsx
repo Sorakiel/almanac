@@ -8,11 +8,11 @@ interface SectionLabelProps {
   className?: string
 }
 
-/** Mono `// SECTION` micro-label with an optional right accessory. */
+/** Section heading — sans, sentence case — with an optional right accessory. */
 export function SectionLabel({ children, accessory, className }: SectionLabelProps) {
   return (
     <div className={cn('flex items-center justify-between', className)}>
-      <span className="label-mono">// {children}</span>
+      <span className="label-mono">{children}</span>
       {accessory ? <span className="label-mono text-muted-strong">{accessory}</span> : null}
     </div>
   )
