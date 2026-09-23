@@ -121,7 +121,7 @@ describe('labels', () => {
 
   it('restLabel shows seconds or a dash', () => {
     expect(restLabel(90, en)).toBe('90s')
-    expect(restLabel(90, ru)).toBe('90 с')
+    expect(restLabel(90, ru)).toBe('90\u00a0с')
     expect(restLabel(0, en)).toBe('—')
     expect(restLabel(null, en)).toBe('—')
   })

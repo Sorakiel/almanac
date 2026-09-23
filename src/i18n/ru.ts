@@ -1074,7 +1074,7 @@ export const ru: Translations = {
     sessionDoneMessage: '«{name}» — записано и сделано. Восстановление тоже важно.',
     editTemplateLabel: '// тренировки / шаблон',
     estimateMin: '~{count} мин',
-    restDefault: 'отдых 90 с',
+    restDefault: 'отдых 90 с',
     targetLine: 'цель {target}',
     setsCount: {
       one: '{count} подход',
@@ -1118,7 +1118,7 @@ export const ru: Translations = {
     repsCount: { one: '{count} повтор', few: '{count} повтора', many: '{count} повторов' },
     setWeight: '{reps} × {weight} кг',
     tonnes: '{value} т',
-    restSeconds: '{count} с',
+    restSeconds: '{count} с',
     dayMissed: 'пропущено',
     muscles: {
       legs: 'ноги',
