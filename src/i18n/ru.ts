@@ -198,6 +198,23 @@ export const ru: Translations = {
     },
   },
   flow: {
+    minutesShort: '{count} мин',
+    custom: 'Своя',
+    customAria: 'Своя длительность в минутах',
+    minUnit: 'мин',
+    customRange: 'Любое время от {min} до {max} минут.',
+    shorter: {
+      one: 'На {count} минуту короче',
+      few: 'На {count} минуты короче',
+      many: 'На {count} минут короче',
+      other: 'На {count} минуты короче',
+    },
+    longer: {
+      one: 'На {count} минуту длиннее',
+      few: 'На {count} минуты длиннее',
+      many: 'На {count} минут длиннее',
+      other: 'На {count} минуты длиннее',
+    },
     defaultSessionLabel: 'Фокус-сессия',
     title: 'Фокус',
     dueToday: 'НА СЕГОДНЯ',

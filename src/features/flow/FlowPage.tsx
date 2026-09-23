@@ -13,6 +13,7 @@ import { dailyTarget } from '@/features/habits/lib/frequency'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { useBooks } from '@/features/reading/hooks/useBooks'
 import { FlowReadingRunner } from '@/features/flow/components/FlowReadingRunner'
+import { DurationPicker } from '@/features/flow/components/DurationPicker'
 import { FocusConsole } from '@/features/flow/components/FocusConsole'
 import { useLogFocusSession } from '@/features/flow/hooks/useLogFocusSession'
 import { useSession } from '@/hooks/useSession'
@@ -24,7 +25,6 @@ import { useT } from '@/hooks/useT'
 import { useNow } from '@/hooks/useNow'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
 
-const DURATIONS_MIN = [15, 25, 45]
 type Mode = 'habit' | 'book' | 'custom'
 
 /**
@@ -236,26 +236,7 @@ function FlowPage() {
 
       <div className="flex flex-col gap-2">
         <SectionLabel>{t('flow.length')}</SectionLabel>
-        <div className="flex gap-2" role="radiogroup" aria-label={t('flow.sessionLength')}>
-          {DURATIONS_MIN.map((min) => (
-            <button
-              key={min}
-              type="button"
-              role="radio"
-              aria-checked={duration === min}
-              onClick={() => setDuration(min)}
-              className={cn(
-                'flex-1 rounded-tile border py-3 font-mono text-sm tracking-label transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-                duration === min
-                  ? 'border-accent bg-accent/15 text-accent'
-                  : 'text-muted hover:text-foreground',
-              )}
-            >
-              {min}m
-            </button>
-          ))}
-        </div>
+        <DurationPicker value={duration} onChange={setDuration} />
       </div>
 
       <Button
