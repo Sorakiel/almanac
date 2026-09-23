@@ -424,6 +424,8 @@ export const ru: Translations = {
     newHabit: 'Новая привычка',
     adminConsole: 'Консоль администратора',
     almanacWatches: 'Альманах наблюдает за вашим днём',
+    updateDownloading: 'Обновление {version} — загрузка…',
+    updateInstalled: 'Обновление установлено — перезапуск…',
   },
   achievements: {
     title: 'Достижения',

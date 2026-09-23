@@ -304,6 +304,7 @@ Keep the daily loop fast and low-friction above all — the #1 risk is still aba
 - **Verify before claiming.** Say which link you checked and which you could not — "works" without evidence is worse than "unproven". Two claims in this project turned out false on inspection; both are recorded in `../handoff.md` so they are not repeated.
 - **Ask before destructive/irreversible actions:** deleting data, rewriting already-applied migrations, force-pushing, or changing auth/RLS in ways that could lock the owner out.
 - **Never handle the owner's credentials.** For GitHub/Vercel/Supabase auth, output the exact commands and pause for the owner to run them.
+- **You may sign in as the shared staging E2E account** to verify screens behind auth — but only through the e2e machinery (`tests/helpers/app.ts` `signIn`, credentials from CI secrets or an owner-provided `.env.e2e.local`), never by typing the password yourself. With no local credentials, verify through the CI `e2e` job: `tests/screens.spec.ts` uploads a `screens` artifact to `gh run download`.
 - **Never add AI/Claude attribution** anywhere — commits, PR bodies, release notes.
 - Reports to the owner are: what shipped · what they must do · how to see it. No narration of work in progress.
 - Keep `README.md`, this file and `../handoff.md` current when the architecture changes.
