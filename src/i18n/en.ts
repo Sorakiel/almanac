@@ -1310,6 +1310,7 @@ export const en = {
     theme: 'Theme',
     dark: 'Dark',
     coffee: 'Coffee',
+    systemTheme: 'System',
     soundEffects: 'Sound effects',
     usageAnalytics: 'Usage analytics',
     usageAnalyticsHint:

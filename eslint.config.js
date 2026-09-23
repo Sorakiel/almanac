@@ -38,6 +38,19 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      // Tailwind arbitrary values (`text-[13px]`, `rounded-[11px]`) bypass the
+      // type scale, radii and colour tokens. A warning, not an error: there are
+      // hundreds to retire opportunistically, and new ones should be visible.
+      // Built-in rule rather than a plugin: it only has to spot `-[` in a class.
+      'no-restricted-syntax': [
+        'warn',
+        {
+          selector:
+            "JSXAttribute[name.name='className'] Literal[value=/(^|\\s)[!-]?[a-z][\\w:-]*-\\[[^\\]]+\\]/], CallExpression[callee.name='cn'] Literal[value=/(^|\\s)[!-]?[a-z][\\w:-]*-\\[[^\\]]+\\]/]",
+          message:
+            'Arbitrary Tailwind value — use a token from tailwind.config.ts (type scale, radii, colours).',
+        },
+      ],
     },
   },
   prettier,

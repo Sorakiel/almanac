@@ -37,15 +37,33 @@ export default {
         danger: withOpacity('--color-danger'),
         'on-danger': withOpacity('--color-on-danger'),
         success: withOpacity('--color-success'),
+        warning: withOpacity('--color-warning'),
       },
+      // The system face first (SF on Apple), Inter everywhere else. Mono is for
+      // numbers only — see `.num` in globals.css.
       fontFamily: {
-        sans: ['Inter', 'SF Pro Text', 'system-ui', 'sans-serif'],
+        sans: ['-apple-system', 'SF Pro Text', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
+      // The type scale, iOS-style: 34 / 28 / 22 / 17 / 15 / 13 / 11. Nothing
+      // smaller than 11; body is 17 on a phone. Named by role, so a screen asks
+      // for "a footnote" rather than for a pixel size.
+      fontSize: {
+        'large-title': ['34px', { lineHeight: '41px', letterSpacing: '-0.02em' }],
+        title: ['28px', { lineHeight: '34px', letterSpacing: '-0.02em' }],
+        headline: ['22px', { lineHeight: '28px', letterSpacing: '-0.01em' }],
+        body: ['17px', { lineHeight: '22px' }],
+        callout: ['15px', { lineHeight: '20px' }],
+        footnote: ['13px', { lineHeight: '18px' }],
+        caption: ['11px', { lineHeight: '13px' }],
+      },
+      // 28 sheets and containers · 20 cards and groups · 14 controls · 10 inner.
       borderRadius: {
+        sheet: '28px',
+        card: '20px',
         tile: '14px',
-        card: '22px',
-        sheet: '34px',
+        control: '14px',
+        inner: '10px',
         pill: '999px',
       },
       letterSpacing: {

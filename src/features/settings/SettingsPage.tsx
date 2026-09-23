@@ -19,6 +19,7 @@ import {
   Trophy,
   UserRound,
   Volume2,
+  SunMoon,
 } from 'lucide-react'
 import { Segmented } from '@/components/ui/segmented'
 import { Rail } from '@/components/rail/Rail'
@@ -51,7 +52,7 @@ import { useToday } from '@/hooks/useToday'
 function SettingsPage() {
   const navigate = useNavigate()
   const { user, status } = useSession()
-  const { theme, setTheme } = useTheme()
+  const { preference, setTheme } = useTheme()
   const { t, locale } = useT()
   const sound = usePrefsStore((s) => s.sound)
   const setSound = usePrefsStore((s) => s.setSound)
@@ -118,9 +119,10 @@ function SettingsPage() {
           <div className="py-3">
             <Segmented
               aria-label={t('settings.theme')}
-              value={theme}
+              value={preference}
               onChange={setTheme}
               options={[
+                { value: 'system', label: t('settings.systemTheme'), icon: SunMoon },
                 { value: 'dark', label: t('settings.dark'), icon: Moon },
                 { value: 'coffee', label: t('settings.coffee'), icon: Coffee },
               ]}

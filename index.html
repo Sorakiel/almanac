@@ -27,10 +27,19 @@
       ;(function () {
         try {
           var saved = JSON.parse(localStorage.getItem('almanac-theme') || 'null')
-          var theme = saved && saved.state && saved.state.theme === 'coffee' ? 'coffee' : 'dark'
+          var pref = (saved && saved.state && saved.state.theme) || 'dark'
+          // "system" follows the OS, exactly as resolveTheme does in the app.
+          var theme =
+            pref === 'system'
+              ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'coffee'
+              : pref === 'coffee'
+                ? 'coffee'
+                : 'dark'
           document.documentElement.setAttribute('data-theme', theme)
           var meta = document.querySelector('meta[name="theme-color"]')
-          if (meta) meta.setAttribute('content', theme === 'coffee' ? '#F4ECDD' : '#1B1B1D')
+          if (meta) meta.setAttribute('content', theme === 'coffee' ? '#F2EADB' : '#1B1B1D')
         } catch (e) {}
       })()
     </script>
@@ -49,7 +58,7 @@
         color-scheme: dark;
       }
       html[data-theme='coffee'] {
-        background: #f4ecdd;
+        background: #f2eadb;
         color-scheme: light;
       }
       .boot {

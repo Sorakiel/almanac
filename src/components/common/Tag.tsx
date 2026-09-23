@@ -15,12 +15,12 @@ const TONES = {
   muted: 'text-muted-strong',
 } as const
 
-/** Thin-border mono pill tag (categories, statuses) — a signature motif. */
+/** Thin-border pill tag (categories, statuses) — a signature motif, in words, so sans. */
 export function Tag({ children, tone = 'default', className }: TagProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-pill border px-2 py-0.5 font-mono text-[10px] uppercase tracking-label',
+        'inline-flex items-center rounded-pill border px-2 py-0.5 text-caption font-medium',
         TONES[tone],
         className,
       )}

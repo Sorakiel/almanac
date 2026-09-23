@@ -1420,6 +1420,7 @@ export const ru: Translations = {
     theme: 'Тема',
     dark: 'Тёмная',
     coffee: 'Кофейная',
+    systemTheme: 'Как в системе',
     soundEffects: 'Звуки',
     usageAnalytics: 'Аналитика использования',
     usageAnalyticsHint:
