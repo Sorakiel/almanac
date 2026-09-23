@@ -431,6 +431,7 @@ export const ru: Translations = {
     almanacWatches: 'Альманах наблюдает за вашим днём',
     updateDownloading: 'Обновление {version} — загрузка…',
     updateInstalled: 'Обновление установлено — перезапуск…',
+    noDate: 'Без даты',
   },
   achievements: {
     title: 'Достижения',

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sheet } from '@/components/ui/sheet'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
+import { DateField } from '@/components/common/DateField'
 import {
   RecurrencePicker,
   type RecurrenceValue,
@@ -54,6 +55,7 @@ export function WorkoutFormSheet({
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({
@@ -150,7 +152,19 @@ export function WorkoutFormSheet({
           {showDate ? (
             <label className="flex flex-col gap-1.5">
               <span className="label-mono">{dateLabel}</span>
-              <Input type="date" {...register('scheduled_date')} />
+              <Controller
+                control={control}
+                name="scheduled_date"
+                render={({ field }) => (
+                  <DateField
+                    ref={field.ref}
+                    name={field.name}
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                )}
+              />
             </label>
           ) : null}
 

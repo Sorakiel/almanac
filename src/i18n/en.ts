@@ -380,6 +380,7 @@ export const en = {
     almanacWatches: 'The Almanac watches your day',
     updateDownloading: 'Update {version} — downloading…',
     updateInstalled: 'Update installed — restarting…',
+    noDate: 'No date',
   },
   achievements: {
     title: 'Achievements',
