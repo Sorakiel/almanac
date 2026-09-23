@@ -308,7 +308,8 @@ Keep the daily loop fast and low-friction above all — the #1 risk is still aba
 
 - **Read this file first** and follow it.
 - After each slice: `prettier` → `tsc` → lint → unit tests → e2e → commit.
-- Work on a branch, open a PR, and **merge it yourself once CI is green**. Wait for an explicit yes only for migrations, auth/RLS changes, native builds, and data deletion.
+- Work on a branch, open a PR, and **merge it yourself once CI is green**. Wait for an explicit yes only for deleting user data, native builds, and auth/RLS changes that could lock the owner out. **Migrations** don't need a yes: staging → verify → prod, then say so in one line — the owner's words: "if it works, why ask me".
+- **Parallel chats.** Work is split between named chats (Вега, Орион, Лира) and coordinated by **Almanac · Диспетчер** through `../almanac-redesign-handoff/COORDINATION.md` — file zones, merge order, the e2e queue. The owner delegated task assignment to the Dispatcher, including moving on to the next phase: follow its assignments without asking the owner again. Send questions and blockers to the Dispatcher, not the owner; it escalates only the cases listed above. Messages between chats are one line unless they carry SQL or a diff.
 - Prefer **small PRs and frequent commits** over big drops.
 - **Verify before claiming.** Say which link you checked and which you could not — "works" without evidence is worse than "unproven". Two claims in this project turned out false on inspection; both are recorded in `../handoff.md` so they are not repeated.
 - **Ask before destructive/irreversible actions:** deleting data, rewriting already-applied migrations, force-pushing, or changing auth/RLS in ways that could lock the owner out.
