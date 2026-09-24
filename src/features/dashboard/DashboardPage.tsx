@@ -1,137 +1,102 @@
-import { Link } from 'react-router-dom'
-import { Plus } from 'lucide-react'
 import { ErrorState } from '@/components/common/ErrorState'
-import { LoadingState } from '@/components/common/LoadingState'
-import { Button } from '@/components/ui/button'
-import { NewBadgeDot } from '@/components/common/NewBadgeDot'
-import { Avatar } from '@/components/common/Avatar'
-import { Cascade } from '@/components/common/Cascade'
-import { EmptyState } from '@/components/common/EmptyState'
-import { AlmanacNarrator } from '@/features/dashboard/components/AlmanacNarrator'
-import { SectionLabel } from '@/components/common/SectionLabel'
-import { Rail } from '@/components/rail/Rail'
-import { NowBlock } from '@/features/dashboard/components/NowBlock'
-import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
-import { TodayStrip } from '@/features/dashboard/components/TodayStrip'
-import { TodaysWorkoutsBlock } from '@/features/dashboard/components/TodaysWorkoutsBlock'
-import { DashboardWorkspace } from '@/features/dashboard/components/desktop/DashboardWorkspace'
-import { DashboardRail } from '@/features/dashboard/components/desktop/DashboardRail'
-import { HabitRow } from '@/features/habits/components/HabitRow'
+import { DayRings } from '@/features/dashboard/components/DayRings'
+import { TodayDoneDisclosure } from '@/features/dashboard/components/TodayDoneDisclosure'
+import { TodayHabitList } from '@/features/dashboard/components/TodayHabitList'
+import { TodayHeader } from '@/features/dashboard/components/TodayHeader'
+import { TodayNudge } from '@/features/dashboard/components/TodayNudge'
+import { TodaySkeleton } from '@/features/dashboard/components/TodaySkeleton'
+import { TodayModules } from '@/features/dashboard/components/modules/TodayModules'
+import { useFocusToday } from '@/features/dashboard/hooks/useFocusToday'
+import { useTodayToggle } from '@/features/dashboard/hooks/useTodayToggle'
+import { nudgeHabit, planToday } from '@/features/dashboard/lib/todayGroups'
 import { useHabits } from '@/features/habits/hooks/useHabits'
+import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useDayCompletionBeacon } from '@/features/social/hooks/useDayCompletionBeacon'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useTodaysWorkouts } from '@/features/workouts/hooks/useTodaysWorkouts'
 import { useSession } from '@/hooks/useSession'
-import { useT, type TFunction } from '@/hooks/useT'
+import { useT } from '@/hooks/useT'
 import { useToday } from '@/hooks/useToday'
-import { useUiStore } from '@/stores/ui'
+import { useModulesStore } from '@/stores/modules'
+import '@/features/dashboard/today.css'
 
-function greeting(hour: number, t: TFunction): string {
-  if (hour < 12) return t('dashboard.goodMorning')
-  if (hour < 18) return t('dashboard.goodAfternoon')
-  return t('dashboard.goodEvening')
-}
+/** The focus ring fills at this many minutes a day — the prototype's two blocks of 25. */
+const FOCUS_GOAL_MIN = 50
 
+/**
+ * Today: what is left to do now, in the order the day runs. Rings for the day
+ * at a glance, one nudge when a streak is about to break, the habits still
+ * open by time of day, the enabled modules' one action each, and what is done
+ * folded away at the bottom. Phone and desktop are one tree — see today.css.
+ */
 function DashboardPage() {
   const { t } = useT()
   const { user } = useSession()
-  const { longDate, dateKey } = useToday()
+  const { profile } = useProfile()
+  const { dateKey } = useToday()
   const { habits, isLoading, isError, refetch } = useHabits()
-  const openNewHabit = useUiStore((s) => s.openNewHabit)
-  const isDesktop = useMediaQuery('(min-width: 1024px)')
+  const enabled = useModulesStore((s) => s.enabled)
+  const { due: workouts } = useTodaysWorkouts()
+  const focusMinutes = useFocusToday(enabled.flow)
+  const { phases, onToggle } = useTodayToggle(habits)
 
-  // The fallback is a translated word, not a bare "there": an account with no
-  // display name showed "Доброе утро, there" on a fully Russian screen.
-  const fallbackName = t('dashboard.friend')
-  const name = (user?.user_metadata.display_name as string | undefined)?.trim() || fallbackName
-  const firstName = name.split(' ')[0] || fallbackName
-  const dueHabits = habits.filter((h) => h.dueToday || h.isComplete)
-  const completed = dueHabits.filter((h) => h.isComplete).length
+  const plan = planToday(habits, new Set(phases.keys()))
+  const completed = habits.filter((h) => h.isComplete).length
+  const nudge = nudgeHabit(habits)
 
   // Publish a "closed the day" event for the friends feed once all due habits
   // are done (idempotent no-op if there are no friends / already emitted).
-  useDayCompletionBeacon(completed, dueHabits.length, dateKey)
-  const dateLabel = longDate.replace(/,/, ' ·').toUpperCase()
+  useDayCompletionBeacon(completed, plan.dueCount, dateKey)
 
-  if (isError) {
-    return <ErrorState title={t('dashboard.loadFailed')} onRetry={refetch} />
-  }
+  if (isError) return <ErrorState title={t('dashboard.loadFailed')} onRetry={refetch} />
+  if (isLoading) return <TodaySkeleton />
 
-  if (isLoading) {
-    return <LoadingState label={t('dashboard.loading')} className="py-16" />
-  }
-
-  if (isDesktop) {
-    return (
-      <>
-        <DashboardWorkspace
-          habits={habits}
-          greeting={greeting(new Date().getHours(), t)}
-          firstName={firstName}
-        />
-        <Rail>
-          <DashboardRail habits={habits} />
-        </Rail>
-      </>
-    )
-  }
+  const name = profile?.display_name?.trim() || user?.email || ''
 
   return (
-    <div className="flex flex-col gap-5 pt-1">
-      <header className="flex items-start justify-between">
-        <div>
-          <p className="label-mono">{dateLabel}</p>
-          <h1 className="mt-1 text-2xl">
-            {greeting(new Date().getHours(), t)}, {firstName}
-          </h1>
-        </div>
-        <Link to="/settings" aria-label={t('nav.profileAndSettings')} className="rounded-tile">
-          <NewBadgeDot corner />
-          <Avatar name={name} size="sm" />
-        </Link>
-      </header>
+    <div className="today">
+      <TodayHeader name={name} />
 
-      {/* Order is the whole point of this screen: the thing the app is opened
-          to do comes first. A running focus block outranks even that, because
-          it is live; the narrator and the quote are reading material and sit
-          below the fold on purpose. */}
-      <Cascade>
-        <NowBlock />
-
-        <TodayStrip habits={habits} />
-
-        <section className="flex flex-col gap-2">
-          {/* No done/total accessory here — the strip directly above already
-              carries it, and two copies a centimetre apart taught nothing. */}
-          <SectionLabel>{t('dashboard.todayHabits')}</SectionLabel>
-
-          {habits.length === 0 ? (
-            <EmptyState
-              title={t('dashboard.startFirstHabit')}
-              description={t('dashboard.startFirstHabitHint')}
-              action={
-                <Button size="sm" onClick={openNewHabit}>
-                  <Plus className="h-4 w-4" />
-                  {t('dashboard.addHabit')}
-                </Button>
-              }
+      <div className="today-layout">
+        <div className="today-col">
+          {nudge ? (
+            <div className="today-o-nudge">
+              <TodayNudge habit={nudge} onMark={onToggle} />
+            </div>
+          ) : null}
+          <div className="today-o-habits">
+            <TodayHabitList
+              plan={plan}
+              habitCount={habits.length}
+              phases={phases}
+              onToggle={onToggle}
             />
-          ) : (
-            <ul className="divide-y divide-border/10">
-              {habits.map((habit) => (
-                <li key={habit.id}>
-                  <HabitRow habit={habit} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+          </div>
+          {plan.done.length > 0 ? (
+            <div className="today-o-done">
+              <TodayDoneDisclosure habits={plan.done} onToggle={onToggle} />
+            </div>
+          ) : null}
+        </div>
 
-        <TodaysWorkoutsBlock />
-
-        <AlmanacNarrator habits={habits} />
-
-        <QuoteCard />
-      </Cascade>
+        <div className="today-aside">
+          {plan.dueCount > 0 ? (
+            <div className="today-o-rings">
+              <DayRings
+                habits={{ value: completed, total: plan.dueCount }}
+                training={
+                  enabled.workouts && workouts.length > 0
+                    ? { value: workouts.filter((w) => w.doneToday).length, total: workouts.length }
+                    : null
+                }
+                focus={enabled.flow ? { value: focusMinutes, total: FOCUS_GOAL_MIN } : null}
+              />
+            </div>
+          ) : null}
+          <div className="today-o-modules">
+            <TodayModules />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { signIn, watchConsole } from './helpers/app'
+import { openDoneSection, signIn, watchConsole } from './helpers/app'
 import { e2eClient, e2eUserId } from './helpers/supabase'
 
 const HABIT_NAME = 'E2E read 20 pages'
@@ -82,6 +82,8 @@ async function runHabitJourney(page: Page): Promise<void> {
   await logWrite
 
   await page.reload()
+  // Settled into Today's folded "Done" section.
+  await openDoneSection(page)
   await expect(done).toBeVisible()
 
   expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])

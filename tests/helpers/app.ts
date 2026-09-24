@@ -106,3 +106,14 @@ export async function recordOfflineShell(context: BrowserContext): Promise<Offli
     },
   }
 }
+
+/**
+ * Unfold Today's "Done" section. A ticked habit holds its row for a moment,
+ * then folds into this disclosure, which starts closed — so a spec that wants
+ * the ticked row back in view has to wait for the section and open it.
+ */
+export async function openDoneSection(page: Page): Promise<void> {
+  const disclosure = page.getByRole('button', { name: /^(done|готово)\b/i })
+  await expect(disclosure).toBeVisible({ timeout: 20_000 })
+  if ((await disclosure.getAttribute('aria-expanded')) === 'false') await disclosure.click()
+}

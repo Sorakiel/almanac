@@ -248,3 +248,26 @@ for (const v of VARIANTS) {
     expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
   })
 }
+
+/**
+ * Today at the prototype's own desktop size (desktop-prototype.html is drawn at
+ * 1280×800), for the side-by-side check — folded, then with "Done" open.
+ */
+for (const theme of ['dark', 'coffee'] as const) {
+  test(`screens · today-1280-${theme}-ru`, async ({ page }) => {
+    const errors = watchConsole(page)
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await signIn(page)
+    await applyPrefs(page, theme, 'ru')
+    await page.waitForLoadState('networkidle')
+    await expect(page.getByRole('heading', { level: 1, name: 'Сегодня' })).toBeVisible()
+    await expectNoHorizontalScroll(page, `today 1280 ${theme}`)
+    await shoot(page, `desktop1280-${theme}-ru-dashboard`, false)
+    const done = page.getByRole('button', { name: /^Готово/ })
+    if (await done.count()) {
+      await done.click()
+      await shoot(page, `desktop1280-${theme}-ru-dashboard-done`, false)
+    }
+    expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
+  })
+}

@@ -36,12 +36,18 @@ export function WeekDots({ week, color, className }: WeekDotsProps) {
           <span
             key={i}
             aria-hidden="true"
-            style={{ backgroundColor: filled ? fill : undefined, outlineColor: color }}
+            // The ring is inline: through `cn()`, tailwind-merge read `outline`
+            // and `outline-[1.5px]` as one group and kept neither, so today's
+            // dot drew nothing at all when it was still open.
+            style={{
+              backgroundColor: filled ? fill : undefined,
+              outline: today ? `1.5px solid ${color}` : undefined,
+              outlineOffset: today ? 1 : undefined,
+            }}
             className={cn(
               'h-1.5 w-1.5 rounded-full',
               !filled && (today ? 'bg-transparent' : 'bg-border/25'),
               filled && !today && 'opacity-85',
-              today && 'outline outline-[1.5px] outline-offset-1',
             )}
           />
         )
