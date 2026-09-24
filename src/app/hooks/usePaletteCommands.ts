@@ -102,7 +102,7 @@ export function usePaletteCommands(): PaletteCommand[] {
       label: t('palette.openProfile'),
       group: t('palette.groupGo'),
       icon: UserRound,
-      run: go('/settings'),
+      run: go('/profile'),
     },
     {
       id: 'theme',

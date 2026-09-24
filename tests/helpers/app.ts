@@ -106,3 +106,15 @@ export async function recordOfflineShell(context: BrowserContext): Promise<Offli
     },
   }
 }
+
+/**
+ * Open the ⌘K palette from the keyboard. The shortcut listener lives in the
+ * app shell, which mounts after the session and profile resolve — a key pressed
+ * straight after navigation lands on the boot skeleton and is lost. The
+ * toolbar's search pill renders with the shell, so it marks "listening".
+ */
+export async function openPalette(page: Page): Promise<void> {
+  await expect(page.locator('button[aria-keyshortcuts="Meta+K"]')).toBeVisible({ timeout: 20_000 })
+  await page.keyboard.press('ControlOrMeta+k')
+  await expect(page.getByRole('combobox')).toBeFocused()
+}

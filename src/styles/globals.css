@@ -264,6 +264,32 @@
     }
   }
 
+  /* Action sheet (ConfirmSheet): rises on the iOS sheet curve; the desktop
+     variant is centred, so it only fades. `translate` leaves the centring
+     transform alone. */
+  .action-sheet[data-state='open'] {
+    animation: action-sheet-in 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .action-sheet-scrim[data-state='open'] {
+    animation: fade-in 0.25s ease-out;
+  }
+  @keyframes action-sheet-in {
+    from {
+      translate: 0 105%;
+    }
+  }
+  @media (min-width: 1024px) {
+    .action-sheet[data-state='open'] {
+      animation: fade-in 0.2s ease-out;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .action-sheet[data-state='open'],
+    .action-sheet-scrim[data-state='open'] {
+      animation: none;
+    }
+  }
+
   /* Keyboard hint chip (⌘K, ⌘N) — the prototype's .kbd. */
   .kbd {
     font-family: theme('fontFamily.mono');
