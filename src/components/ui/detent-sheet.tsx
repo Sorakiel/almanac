@@ -72,7 +72,7 @@ export function DetentSheet({
         <Dialog.Content
           style={style}
           data-dragging={dragY !== null ? '' : undefined}
-          className="detent-sheet z-50 flex flex-col overflow-hidden bg-sheet text-foreground focus:outline-none"
+          className="detent-sheet bg-sheet z-50 flex flex-col overflow-hidden text-foreground focus:outline-none"
         >
           <div
             onPointerDown={onPointerDown}
@@ -88,7 +88,7 @@ export function DetentSheet({
               <Dialog.Title className="text-headline font-bold">{title}</Dialog.Title>
               <Dialog.Close
                 aria-label={t('common.close')}
-                className="grid h-9 w-9 place-items-center rounded-full bg-sheet-fill text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="bg-sheet-fill grid h-9 w-9 place-items-center rounded-full text-muted transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <X className="h-3.5 w-3.5" strokeWidth={2.6} aria-hidden="true" />
               </Dialog.Close>

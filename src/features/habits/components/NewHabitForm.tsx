@@ -65,7 +65,7 @@ export function NewHabitForm({ onDone }: NewHabitFormProps) {
         value={name}
         onChange={(event) => setName(event.target.value)}
         placeholder={t('create.namePlaceholder')}
-        className="h-12 w-full rounded-control bg-sheet-fill px-3.5 text-body text-foreground placeholder:text-muted-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+        className="bg-sheet-fill h-12 w-full rounded-control px-3.5 text-body text-foreground placeholder:text-muted-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
       />
 
       <span className="mx-1 mb-2 mt-4 text-footnote font-medium text-muted">
