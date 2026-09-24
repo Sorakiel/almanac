@@ -1,5 +1,4 @@
 import { BookOpen } from 'lucide-react'
-import { BookTicker } from '@/features/reading/components/BookTicker'
 import { libraryStats } from '@/features/reading/lib/library'
 import { useToday } from '@/hooks/useToday'
 import type { Book } from '@/features/reading/types'
@@ -29,8 +28,6 @@ export function BooksRail({ books }: { books: Book[] }) {
         <RailRow label={t('reading.finishedLower')} value={String(stats.finished)} />
         <RailRow label={t('reading.finishedIn', { year })} value={String(stats.finishedThisYear)} />
       </RailCard>
-
-      <BookTicker books={books} />
     </div>
   )
 }
