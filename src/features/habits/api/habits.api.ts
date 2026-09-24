@@ -72,9 +72,14 @@ export async function removeFreeze(habitId: string, date: string): Promise<void>
   if (error) throw error
 }
 
-/** A single habit by id (own-rows RLS applies). */
-export async function fetchHabitById(id: string): Promise<Habit> {
-  const { data, error } = await supabase.from('habits').select('*').eq('id', id).single()
+/**
+ * A single habit by id (own-rows RLS applies), or null once it is gone —
+ * deleted here or on another device. `maybeSingle`, not `single`: a missing
+ * row is an expected answer, and `single` turns it into a 406 the browser
+ * logs as a failed request.
+ */
+export async function fetchHabitById(id: string): Promise<Habit | null> {
+  const { data, error } = await supabase.from('habits').select('*').eq('id', id).maybeSingle()
   if (error) throw error
   return data
 }
@@ -98,7 +103,10 @@ export async function fetchHabitHistory(habitId: string, fromDate: string): Prom
  */
 export async function createHabit(input: HabitInsert): Promise<Habit> {
   const { data, error } = await supabase.from('habits').insert(input).select().single()
-  if (isUniqueViolation(error) && input.id) return fetchHabitById(input.id)
+  if (isUniqueViolation(error) && input.id) {
+    const saved = await fetchHabitById(input.id)
+    if (saved) return saved
+  }
   if (error) throw error
   return data
 }

@@ -154,7 +154,7 @@ export function useHabitDetail(habitId: string): UseHabitDetailResult {
     queryFn: () => fetchHabitFreezes(habitId, windowKeys[0]!),
   })
 
-  const habit = habitQuery.data
+  const habit = habitQuery.data ?? undefined
   let stats: HabitDetailStats | undefined
   if (habit && historyQuery.data) {
     const target = dailyTarget(habit)
