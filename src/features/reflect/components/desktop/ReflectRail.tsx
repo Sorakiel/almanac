@@ -1,4 +1,3 @@
-import { ReflectTicker } from '@/features/reflect/components/ReflectTicker'
 import { journalStreak, reflectionDateShortLabel } from '@/features/reflect/lib/format'
 import type { Reflection } from '@/features/reflect/types'
 import { useT } from '@/hooks/useT'
@@ -13,7 +12,7 @@ interface ReflectRailProps {
 
 const BORDER_TONES = ['border-accent', 'border-teal', 'border-amber'] as const
 
-/** Desktop Reflect context rail: the narrator, past entries, and the streak. */
+/** Desktop Reflect context rail: past entries and the streak. */
 export function ReflectRail({ reflections, past, dateKey }: ReflectRailProps) {
   const { t, locale } = useT()
   const dateLocale = intlLocale(locale)
@@ -21,8 +20,6 @@ export function ReflectRail({ reflections, past, dateKey }: ReflectRailProps) {
 
   return (
     <div className="flex flex-col gap-3.5">
-      <ReflectTicker reflections={reflections} dateKey={dateKey} />
-
       <p className="label-mono">{t('reflect.pastLabel')}</p>
 
       {past.length > 0 ? (

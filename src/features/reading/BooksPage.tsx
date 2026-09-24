@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Rail } from '@/components/rail/Rail'
 import { BookShelf } from '@/features/reading/components/BookShelf'
-import { BookTicker } from '@/features/reading/components/BookTicker'
 import { BookFormSheet } from '@/features/reading/components/BookFormSheet'
 import { BooksWorkspace } from '@/features/reading/components/desktop/BooksWorkspace'
 import { BooksRail } from '@/features/reading/components/desktop/BooksRail'
@@ -68,7 +67,6 @@ function BooksPage() {
         />
       ) : (
         <>
-          <BookTicker books={books} />
           <BookShelf books={books} />
           <Button size="lg" onClick={openNew} className="w-full shadow-glow">
             <Plus className="h-4 w-4" />
