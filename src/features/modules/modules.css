@@ -35,6 +35,7 @@
 }
 .mods-tile {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   padding: 14px;
   border-radius: 20px;
@@ -192,12 +193,19 @@
   background: rgb(var(--color-accent));
 }
 
-/* ---- desktop: tiles in three, Customize as a card on the right ---- */
-
+/*
+ * ---- wide: tiles in three, Customize as a card on the right ----
+ * Keyed to the page's own width, not the window's, so a narrow desktop window
+ * keeps the phone's two tiles and the "Customize" link instead of squeezing
+ * both columns.
+ */
+.mods {
+  container-type: inline-size;
+}
 .mods-customize-card {
   display: none;
 }
-@media (min-width: 1024px) {
+@container (min-width: 820px) {
   .mods-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 360px;
@@ -212,6 +220,7 @@
   }
   .mods-customize-card {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     align-content: start;
     gap: 10px;
     padding: 16px;
