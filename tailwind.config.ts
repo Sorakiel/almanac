@@ -14,6 +14,10 @@ export default {
   darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
+      // Wide enough for two content columns beside the sidebar and context rail.
+      screens: {
+        wide: '1400px',
+      },
       colors: {
         bg: withOpacity('--color-bg'),
         'bg-deep': withOpacity('--color-bg-deep'),
@@ -65,6 +69,8 @@ export default {
         // toasts over it.
         'nav-clearance': '104px',
         'capsule-clearance': '52px',
+        // The profile avatar's ring on the phone (112 on desktop is `28`).
+        avatar: '104px',
       },
       // 28 sheets and containers · 20 cards and groups · 14 controls · 10 inner.
       borderRadius: {
@@ -88,6 +94,14 @@ export default {
         avatar: '0 8px 24px -8px rgb(0 0 0 / 0.45)',
         medal: 'inset 0 1px 0 rgb(255 255 255 / 0.35), 0 6px 16px -6px rgb(0 0 0 / 0.4)',
         thumb: '0 1px 3px rgb(0 0 0 / 0.2)',
+      },
+      // Profile on wide screens: identity column + settings.
+      gridTemplateColumns: {
+        profile: '360px minmax(0, 1fr)',
+      },
+      // iOS-like overshoot for switches and toggles.
+      transitionTimingFunction: {
+        spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
       },
       backdropBlur: {
         nav: '20px',

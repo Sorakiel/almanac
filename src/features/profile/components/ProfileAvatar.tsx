@@ -44,7 +44,7 @@ export function ProfileAvatar({ name, color, progress, label, className }: Profi
           cy={center}
           r={R}
           fill="none"
-          className="stroke-accent motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700"
+          className="stroke-accent motion-safe:transition-all motion-safe:duration-700"
           strokeWidth={RING_WIDTH}
           strokeLinecap="round"
           strokeDasharray={C}
@@ -52,10 +52,10 @@ export function ProfileAvatar({ name, color, progress, label, className }: Profi
           transform={`rotate(-90 ${center} ${center})`}
         />
       </svg>
-      {/* 84 of 104 — the face sits 10 units inside the ring on each side. */}
+      {/* The face sits 10px inside the ring on each side, at either size. */}
       <span
         aria-hidden="true"
-        className="grid h-[80.77%] w-[80.77%] place-items-center rounded-full text-[34px] font-semibold text-white shadow-avatar lg:text-[36px]"
+        className="absolute inset-2.5 grid place-items-center rounded-full text-large-title font-semibold text-white shadow-avatar"
         style={{ background: avatarBackground(color) }}
       >
         {monogram(name)}

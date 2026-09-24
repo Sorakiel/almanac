@@ -58,7 +58,7 @@ export function ProfileSettings({ profile, email, supportVisible, onOpen }: Prof
     : off
 
   return (
-    <div className="grid grid-cols-1 gap-[22px]">
+    <div className="grid grid-cols-1 gap-6">
       <SettingsGroup title={t('profile.appearance')}>
         <SettingsItem
           icon={Sun}

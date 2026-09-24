@@ -45,7 +45,7 @@ export function BadgeShelf({ achievements, hasNew, isLoading, isError, onRetry }
               <Link
                 key={item.def.id}
                 to="/achievements"
-                className="grid w-[76px] flex-none snap-start justify-items-center gap-1.5 rounded-inner text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="grid w-20 flex-none snap-start justify-items-center gap-1.5 rounded-inner text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <span
                   className={cn(
@@ -67,11 +67,13 @@ export function BadgeShelf({ achievements, hasNew, isLoading, isError, onRetry }
                   {glint ? (
                     <span
                       aria-hidden="true"
-                      className="absolute -inset-[20%] -translate-x-[120%] bg-gradient-to-r from-transparent from-40% via-white/65 via-50% to-transparent to-60% motion-safe:animate-medal-sheen"
+                      className="absolute -inset-3 hidden bg-gradient-to-r from-transparent from-40% via-white/65 via-50% to-transparent to-60% motion-safe:block motion-safe:animate-medal-sheen"
                     />
                   ) : null}
                 </span>
-                <small className="text-[12px] font-medium leading-[1.2] text-muted">{title}</small>
+                <small className="text-footnote font-medium leading-tight text-muted">
+                  {title}
+                </small>
               </Link>
             )
           })}

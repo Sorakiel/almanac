@@ -23,8 +23,7 @@ import { useT } from '@/hooks/useT'
 import { useToday } from '@/hooks/useToday'
 
 /** Section heading on the phone; the desktop cards carry their own. */
-const SECTION_H =
-  'mx-1 mb-2 flex items-baseline justify-between text-[20px] font-semibold tracking-[-0.015em]'
+const SECTION_H = 'mx-1 mb-2 flex items-baseline justify-between text-headline font-semibold'
 
 /**
  * Profile (v0.6 §2.7) — who you are and everything you can set, in one place.
@@ -70,7 +69,7 @@ function ProfilePage() {
         to="/"
         className="-ml-1.5 inline-flex items-center gap-0.5 py-2 text-body text-accent lg:hidden"
       >
-        <ChevronLeft className="h-[22px] w-[22px]" strokeWidth={2.4} aria-hidden="true" />
+        <ChevronLeft className="h-6 w-6" strokeWidth={2.4} aria-hidden="true" />
         {t('profile.back')}
       </Link>
 
@@ -79,9 +78,9 @@ function ProfilePage() {
         <p className="text-large-title font-bold">{t('profile.title')}</p>
       </header>
 
-      <div className="lg:mx-auto lg:max-w-[1040px] min-[1400px]:grid min-[1400px]:grid-cols-[360px_minmax(0,1fr)] min-[1400px]:items-start min-[1400px]:gap-6">
-        <div className="grid min-w-0 grid-cols-1 gap-[22px] lg:gap-3.5 min-[1400px]:sticky min-[1400px]:top-0">
-          <div className="lg:rounded-[22px] lg:bg-surface lg:p-[18px]">
+      <div className="lg:mx-auto lg:max-w-5xl wide:grid wide:grid-cols-profile wide:items-start wide:gap-6">
+        <div className="grid min-w-0 grid-cols-1 gap-6 lg:gap-3.5 wide:sticky wide:top-0">
+          <div className="lg:rounded-card lg:bg-surface lg:p-5">
             <ProfileHero
               name={name}
               email={email}
@@ -106,7 +105,7 @@ function ProfilePage() {
           />
 
           <section
-            className="min-w-0 lg:rounded-[22px] lg:bg-surface lg:p-[18px]"
+            className="min-w-0 lg:rounded-card lg:bg-surface lg:p-5"
             aria-label={t('profile.badges')}
           >
             <h2 className={`${SECTION_H} lg:hidden`}>
@@ -128,7 +127,7 @@ function ProfilePage() {
           </section>
         </div>
 
-        <div className="mt-[22px] grid min-w-0 grid-cols-1 gap-[22px] lg:gap-[18px] min-[1400px]:mt-0">
+        <div className="mt-6 grid min-w-0 grid-cols-1 gap-6 lg:gap-5 wide:mt-0">
           <SettingsGroup>
             <FriendsRow />
           </SettingsGroup>
@@ -138,7 +137,7 @@ function ProfilePage() {
             supportVisible={supportVisible}
             onOpen={setSheet}
           />
-          <p className="mb-1.5 mt-[-4px] text-center text-footnote text-muted-strong">
+          <p className="-mt-1 mb-1.5 text-center text-footnote text-muted-strong">
             {t('profile.version', { version: APP_VERSION })}
           </p>
         </div>

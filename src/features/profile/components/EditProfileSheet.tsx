@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -33,7 +33,7 @@ interface EditProfileSheetProps {
 }
 
 const FIELD =
-  'h-[50px] w-full rounded-control bg-sheet-fill px-3.5 text-body text-foreground focus:outline-none focus:ring-2 focus:ring-accent'
+  'h-12 w-full rounded-control bg-sheet-fill px-3.5 text-body text-foreground focus:outline-none focus:ring-2 focus:ring-accent'
 const LABEL = 'mx-1 mb-2 mt-4 block text-footnote font-medium text-muted'
 
 /** "Изменить профиль": the avatar colour and the one name friends see. */
@@ -46,12 +46,12 @@ export function EditProfileSheet({
 }: EditProfileSheetProps) {
   const { t } = useT()
   const save = useEditProfile()
-  const { register, handleSubmit, watch, setValue, formState } = useForm<FormValues>({
+  const { register, handleSubmit, control, setValue, formState } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { name, color },
   })
-  const draftName = watch('name')
-  const draftColor = watch('color')
+  const draftName = useWatch({ control, name: 'name' })
+  const draftColor = useWatch({ control, name: 'color' })
 
   const onSubmit = handleSubmit(async (values) => {
     try {
@@ -74,7 +74,7 @@ export function EditProfileSheet({
         <div className="mb-2.5 mt-1.5 grid justify-items-center gap-2.5">
           <span
             aria-hidden="true"
-            className="grid h-24 w-24 place-items-center rounded-full text-[38px] font-semibold text-white transition-[background] duration-300"
+            className="grid h-24 w-24 place-items-center rounded-full text-large-title font-semibold text-white"
             style={{ background: avatarBackground(draftColor) }}
           >
             {monogram(draftName)}
@@ -89,7 +89,7 @@ export function EditProfileSheet({
                 aria-label={t('profile.color', { n: i + 1 })}
                 onClick={() => setValue('color', c, { shouldDirty: true })}
                 className={cn(
-                  'h-[34px] w-[34px] rounded-full border-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-sheet',
+                  'h-9 w-9 rounded-full border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-sheet',
                   draftColor === c ? 'border-foreground' : 'border-transparent',
                 )}
                 style={{ background: avatarBackground(c) }}
@@ -118,7 +118,7 @@ export function EditProfileSheet({
         <button
           type="submit"
           disabled={save.isPending || !formState.isDirty}
-          className="mt-[18px] h-[52px] w-full rounded-[26px] bg-accent-solid text-body font-semibold text-on-accent-solid transition-opacity disabled:opacity-40"
+          className="mt-5 h-12 w-full rounded-pill bg-accent-solid text-body font-semibold text-on-accent-solid transition-opacity disabled:opacity-40"
         >
           {save.isPending ? t('settings.saving') : t('profile.save')}
         </button>

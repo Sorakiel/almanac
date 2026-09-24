@@ -10,9 +10,9 @@ interface ProfileStatsProps {
 
 function Stat({ value, label }: { value: ReactNode; label: string }) {
   return (
-    <div className="rounded-[18px] bg-surface p-3 text-center lg:bg-transparent">
-      <b className="num block text-headline font-medium tracking-[-0.03em]">{value}</b>
-      <span className="text-[12.5px] text-muted">{label}</span>
+    <div className="rounded-card bg-surface p-3 text-center lg:bg-transparent">
+      <b className="num block text-headline font-medium">{value}</b>
+      <span className="text-footnote text-muted">{label}</span>
     </div>
   )
 }
@@ -28,7 +28,7 @@ export function ProfileStats({ activeDays, bestStreak, badges, badgesTotal }: Pr
         value={
           <>
             {badges}
-            <small className="text-[14px] text-muted-strong">/{badgesTotal}</small>
+            <small className="text-callout text-muted-strong">/{badgesTotal}</small>
           </>
         }
         label={t('profile.statBadges', { count: badges })}

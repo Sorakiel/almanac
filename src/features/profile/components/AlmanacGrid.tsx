@@ -46,28 +46,28 @@ export function AlmanacGrid({ grid, isLoading, isError, onRetry, className }: Al
       aria-label={t('profile.almanac')}
     >
       <div className="mx-0.5 mb-2.5 flex items-baseline justify-between">
-        <h2 className="text-[16px] font-semibold">{t('profile.almanac')}</h2>
+        <h2 className="text-body font-semibold">{t('profile.almanac')}</h2>
         <span className="text-footnote text-muted">{t('profile.halfYear')}</span>
       </div>
       {isError ? (
         <ErrorState title={t('profile.almanacLoadFailed')} onRetry={onRetry} />
       ) : isLoading ? (
-        <Skeleton className="h-[87px] w-full rounded-inner" />
+        <Skeleton className="h-20 w-full rounded-inner" />
       ) : (
         <>
           <div
             role="img"
             aria-label={t('profile.almanacAria')}
-            className="grid grid-flow-col grid-rows-7 justify-between gap-[3px]"
+            className="grid grid-flow-col grid-rows-7 justify-between gap-x-0.5 gap-y-1"
           >
             {grid.flatMap((week) =>
               week.map((cell) => (
                 <i
                   key={cell.date}
                   className={cn(
-                    'block h-[9px] w-[9px] rounded-[3px]',
+                    'block h-2 w-2 rounded-sm',
                     cell.future ? 'bg-transparent' : LEVEL[cell.level],
-                    cell.today && 'outline outline-[1.5px] outline-offset-1 outline-foreground',
+                    cell.today && 'outline outline-2 outline-offset-1 outline-foreground',
                   )}
                 />
               )),

@@ -21,7 +21,7 @@ interface SettingsItemProps {
   center?: boolean
 }
 
-const ROW = 'flex min-h-[50px] w-full items-center gap-3 px-4 text-left text-body'
+const ROW = 'flex min-h-12 w-full items-center gap-3 px-4 text-left text-body'
 
 /**
  * One row of a settings group. With `onClick` it's a button with a chevron;
@@ -42,11 +42,11 @@ export function SettingsItem({
     <span className={cn('flex min-w-0 flex-1 items-center gap-3', center && 'justify-center')}>
       {Icon ? (
         <span
-          className="grid h-[30px] w-[30px] flex-none place-items-center rounded-[9px] text-white"
+          className="grid h-8 w-8 flex-none place-items-center rounded-inner text-white"
           style={{ background: `var(--tile-${tile})` }}
           aria-hidden="true"
         >
-          <Icon className="h-[17px] w-[17px]" strokeWidth={2} />
+          <Icon className="h-4 w-4" strokeWidth={2} />
         </span>
       ) : null}
       <span className="truncate">{label}</span>
@@ -74,7 +74,7 @@ export function SettingsItem({
       )}
     >
       {lead}
-      {value ? <span className="max-w-[45%] truncate text-muted">{value}</span> : null}
+      {value ? <span className="max-w-40 truncate text-muted">{value}</span> : null}
       {center ? null : (
         <ChevronRight className="-ml-1.5 h-4 w-4 flex-none text-muted-strong" aria-hidden="true" />
       )}

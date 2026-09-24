@@ -31,7 +31,7 @@ export function ThemeSegment({ value, onChange }: ThemeSegmentProps) {
             aria-selected={active}
             onClick={() => onChange(option.value)}
             className={cn(
-              'rounded-lg px-[9px] py-1.5 text-footnote font-medium transition-colors',
+              'rounded-lg px-2.5 py-1.5 text-footnote font-medium transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
               active
                 ? 'bg-sheet shadow-thumb dark:bg-bg'

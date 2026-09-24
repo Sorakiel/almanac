@@ -37,7 +37,7 @@ export function ProfileHero({
         name={name}
         color={color}
         progress={progress}
-        className="h-[104px] w-[104px] lg:h-[112px] lg:w-[112px]"
+        className="h-avatar w-avatar lg:h-28 lg:w-28"
         label={t('profile.ringAria', { active, total })}
       />
       <h1 className="mt-1.5 text-title font-bold">{name}</h1>
@@ -50,7 +50,7 @@ export function ProfileHero({
       <button
         type="button"
         onClick={onEdit}
-        className="mt-2 rounded-pill bg-accent/15 px-3.5 py-2 text-[14px] font-semibold text-accent transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-95"
+        className="mt-2 rounded-pill bg-accent/15 px-3.5 py-2 text-callout font-semibold text-accent transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-95"
       >
         {t('profile.edit')}
       </button>
