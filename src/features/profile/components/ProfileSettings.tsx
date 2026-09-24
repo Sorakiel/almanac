@@ -36,18 +36,21 @@ interface ProfileSettingsProps {
 }
 
 /**
- * The zone as people say it, in the interface language — "Москва", "Нью-Йорк".
- * Falls back to the city part of the IANA id where the runtime has no name.
+ * The zone as people say it, in the interface language — "Москва", "Moscow
+ * Standard Time". `longGeneric`, not `shortGeneric`: Chromium answers the short
+ * form with the English city even in Russian. Russian appends ", стандартное
+ * время", which the row doesn't need. The city part of the IANA id is the
+ * fallback where the runtime has no name.
  */
 function zoneName(zone: string, locale: Locale): string {
   try {
     const part = new Intl.DateTimeFormat(intlLocale(locale), {
       timeZone: zone,
-      timeZoneName: 'shortGeneric',
+      timeZoneName: 'longGeneric',
     })
       .formatToParts(new Date())
       .find((p) => p.type === 'timeZoneName')
-    if (part?.value) return part.value
+    if (part?.value) return part.value.split(',')[0]!
   } catch {
     // An id this runtime doesn't know — show the raw city below.
   }
