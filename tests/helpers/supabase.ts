@@ -26,6 +26,29 @@ export async function e2eClient(): Promise<SupabaseClient<Database>> {
   return client
 }
 
+/**
+ * Put the account's synced settings back to "no choice" (every column null).
+ * Specs set theme and language per browser through localStorage; a row left
+ * by the previous spec would otherwise be adopted and repaint this one.
+ * There is no delete policy on purpose — null is the reset.
+ */
+export async function resetUserSettings(): Promise<void> {
+  const client = await e2eClient()
+  const userId = await e2eUserId(client)
+  const { error } = await client
+    .from('user_settings')
+    .update({
+      modules: null,
+      home_order: null,
+      pinned_tab: null,
+      theme: null,
+      locale: null,
+      sound: null,
+    })
+    .eq('user_id', userId)
+  if (error) throw new Error(`could not reset user_settings: ${error.message}`)
+}
+
 /** The E2E account's user id (after sign-in). */
 export async function e2eUserId(client: SupabaseClient<Database>): Promise<string> {
   const { data } = await client.auth.getUser()

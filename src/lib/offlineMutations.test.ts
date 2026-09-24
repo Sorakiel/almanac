@@ -79,6 +79,9 @@ vi.mock('@/features/social/api/social.api', () => ({
 vi.mock('@/features/modules/api/feedback.api', () => ({
   submitFeedback: vi.fn(async () => undefined),
 }))
+vi.mock('@/features/settings/api/userSettings.api', () => ({
+  upsertUserSettings: vi.fn(async () => undefined),
+}))
 vi.mock('@/features/settings/api/profiles.api', () => ({
   updateOwnProfile: vi.fn(async (id: string, patch: unknown) => ({ id, ...(patch as object) })),
 }))

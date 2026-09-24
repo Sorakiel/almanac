@@ -24,6 +24,8 @@ interface ThemeState {
   resolved: Theme
   setTheme: (theme: ThemePreference) => void
   toggleTheme: () => void
+  /** Take a choice made on another device — painted at once, no wipe animation. */
+  adoptTheme: (theme: ThemePreference) => void
 }
 
 /** Canvas colour per theme, mirroring `--color-bg` in the token layer. */
@@ -56,6 +58,11 @@ export const useThemeStore = create<ThemeState>()(
           applyTheme(resolved)
           set({ theme, resolved })
         })
+      },
+      adoptTheme: (theme) => {
+        const resolved = resolveTheme(theme)
+        applyTheme(resolved)
+        set({ theme, resolved })
       },
       // A toggle is an explicit choice: it flips what is on screen and stops
       // following the system.

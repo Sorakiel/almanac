@@ -49,6 +49,9 @@ import type { Book, BookInsert, BookNote } from '@/features/reading/types'
 import type { Reflection } from '@/features/reflect/types'
 import { submitFeedback } from '@/features/modules/api/feedback.api'
 import { updateOwnProfile, type Profile } from '@/features/settings/api/profiles.api'
+import { upsertUserSettings } from '@/features/settings/api/userSettings.api'
+import { settingsKeys } from '@/features/settings/hooks/queryKeys'
+import type { UserSettingsPatch } from '@/features/settings/lib/userSettings'
 import type { Database } from '@/types/database.generated'
 import { readingKeys } from '@/features/reading/hooks/queryKeys'
 import { reflectKeys } from '@/features/reflect/hooks/queryKeys'
@@ -257,6 +260,11 @@ export interface UpdateProfileVariables {
   patch: ProfileUpdate
 }
 
+export interface SaveUserSettingsVariables {
+  userId: string
+  patch: UserSettingsPatch
+}
+
 export interface SendFeedbackVariables {
   userId: string
   body: string
@@ -310,6 +318,7 @@ export const OFFLINE_MUTATION_KEYS = {
   removeFriendship: offlineKey<void, RemoveFriendshipVariables>('removeFriendship'),
   updateProfile: offlineKey<Profile, UpdateProfileVariables>('updateProfile'),
   sendFeedback: offlineKey<void, SendFeedbackVariables>('sendFeedback'),
+  saveUserSettings: offlineKey<void, SaveUserSettingsVariables>('saveUserSettings'),
 }
 
 /**
@@ -629,6 +638,15 @@ export function registerOfflineMutations(client: QueryClient): void {
   })
 
   register(OFFLINE_MUTATION_KEYS.sendFeedback, ({ userId, body }) => submitFeedback(userId, body))
+
+  // In order: two quick theme changes must land as the last one, not whichever
+  // request happens to finish second.
+  register(
+    OFFLINE_MUTATION_KEYS.saveUserSettings,
+    ({ userId, patch }) => upsertUserSettings(userId, patch),
+    ({ userId }) => [settingsKeys.userSettings(userId)],
+    { id: 'settings' },
+  )
 }
 
 /** Writes whose `id` variable is the habit's own id (the rest carry `habit` or `habitId`). */
