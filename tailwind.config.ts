@@ -20,6 +20,8 @@ export default {
         surface: withOpacity('--color-surface'),
         chrome: withOpacity('--color-chrome'),
         panel: withOpacity('--color-panel'),
+        sheet: withOpacity('--color-sheet'),
+        'sheet-fill': withOpacity('--color-sheet-fill'),
         foreground: withOpacity('--color-foreground'),
         muted: withOpacity('--color-muted'),
         'muted-strong': withOpacity('--color-muted-strong'),
