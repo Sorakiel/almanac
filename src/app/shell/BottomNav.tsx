@@ -31,7 +31,8 @@ function activeTab(pathname: string, pinnedTo: string | null): string | null {
   if (pathname === '/') return 'today'
   if (startsWith(pathname, '/insights')) return 'progress'
   if (pinnedTo && startsWith(pathname, pinnedTo)) return 'pinned'
-  if (pathname === '/more' || NAV_MODULES.some((m) => startsWith(pathname, m.to))) return 'modules'
+  if (startsWith(pathname, '/more') || NAV_MODULES.some((m) => startsWith(pathname, m.to)))
+    return 'modules'
   return null
 }
 
