@@ -91,7 +91,8 @@ async function seedSession(): Promise<string> {
   const userId = await e2eUserId(db)
   const { data: workout, error } = await db
     .from('workouts')
-    .insert({ user_id: userId, name: SESSION_WORKOUT })
+    // Daily, so Today shows it in its training card and ring as well.
+    .insert({ user_id: userId, name: SESSION_WORKOUT, recurrence: 'daily' })
     .select('id')
     .single()
   if (error) throw new Error(`could not seed the session workout: ${error.message}`)
@@ -120,16 +121,92 @@ async function seedSession(): Promise<string> {
   return workout.id
 }
 
+/**
+ * A representative day for Today: habits in each time-of-day group (one
+ * already ticked, so "Done" has a row), a book in progress and a finished
+ * focus block — so the rings and module cards are drawn with content rather
+ * than hidden. The workout comes from `seedSession`, which recurs daily.
+ */
+const TODAY_HABITS = [
+  { name: 'E2E screens · утро вода', time_of_day: 'morning', done: true },
+  { name: 'E2E screens · английский', time_of_day: 'afternoon', done: false },
+  { name: 'E2E screens · читать', time_of_day: 'evening', done: false },
+  { name: 'E2E screens · уборка', time_of_day: 'anytime', frequency: 'weekly', done: false },
+] as const
+const TODAY_BOOK = 'E2E screens · книга'
+const TODAY_FOCUS = 'E2E screens · фокус'
+
+async function dropToday(): Promise<void> {
+  const db = await e2eClient()
+  const userId = await e2eUserId(db)
+  await db
+    .from('habits')
+    .delete()
+    .eq('user_id', userId)
+    .in(
+      'name',
+      TODAY_HABITS.map((h) => h.name),
+    )
+  await db.from('books').delete().eq('user_id', userId).eq('title', TODAY_BOOK)
+  await db.from('focus_sessions').delete().eq('user_id', userId).eq('label', TODAY_FOCUS)
+}
+
+async function seedToday(): Promise<void> {
+  await dropToday()
+  const db = await e2eClient()
+  const userId = await e2eUserId(db)
+  // "Today" is the profile's local day, not UTC's — seeded on the runner's UTC
+  // date near midnight, the tick and the focus block landed on yesterday.
+  const { data: profile } = await db.from('profiles').select('timezone').eq('id', userId).single()
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: profile?.timezone ?? 'UTC' }).format(
+    new Date(),
+  )
+  const { data: habits, error } = await db
+    .from('habits')
+    .insert(
+      TODAY_HABITS.map((h, i) => ({
+        user_id: userId,
+        name: h.name,
+        time_of_day: h.time_of_day,
+        frequency: 'frequency' in h ? h.frequency : 'daily',
+        sort_order: 100 + i,
+      })),
+    )
+    .select('id, name')
+  if (error) throw new Error(`could not seed Today's habits: ${error.message}`)
+  const done = habits.filter((h) => TODAY_HABITS.find((t) => t.name === h.name)?.done)
+  const { error: logError } = await db
+    .from('habit_logs')
+    .insert(done.map((h) => ({ user_id: userId, habit_id: h.id, date: today, count: 1 })))
+  if (logError) throw new Error(`could not tick Today's habit: ${logError.message}`)
+  const { error: bookError } = await db.from('books').insert({
+    user_id: userId,
+    title: TODAY_BOOK,
+    status: 'reading',
+    progress_mode: 'pages',
+    current_unit: 212,
+    total_units: 320,
+    daily_goal: 15,
+  })
+  if (bookError) throw new Error(`could not seed the book: ${bookError.message}`)
+  const { error: focusError } = await db
+    .from('focus_sessions')
+    .insert({ user_id: userId, date: today, minutes: 25, label: TODAY_FOCUS })
+  if (focusError) throw new Error(`could not seed the focus block: ${focusError.message}`)
+}
+
 let sessionId = ''
 let habitId = ''
 
 test.beforeEach(async () => {
   habitId = await seedHistory()
   sessionId = await seedSession()
+  await seedToday()
 })
 test.afterEach(async () => {
   await dropSeed()
   await dropSession()
+  await dropToday()
 })
 
 async function applyPrefs(page: Page, theme: string, locale: string): Promise<void> {
@@ -137,6 +214,24 @@ async function applyPrefs(page: Page, theme: string, locale: string): Promise<vo
     ([th, lo]) => {
       localStorage.setItem('almanac-theme', JSON.stringify({ state: { theme: th }, version: 0 }))
       localStorage.setItem('almanac-locale', JSON.stringify({ state: { locale: lo }, version: 0 }))
+      // Every module on, so Today draws all of its module cards.
+      localStorage.setItem(
+        'almanac.modules',
+        JSON.stringify({
+          state: {
+            enabled: {
+              habits: true,
+              insights: true,
+              workouts: true,
+              flow: true,
+              reflect: true,
+              reading: true,
+              social: true,
+            },
+          },
+          version: 0,
+        }),
+      )
     },
     [theme, locale],
   )
@@ -261,6 +356,29 @@ for (const v of VARIANTS) {
     ).toBeVisible()
     await shoot(page, `${v.name}-session-rest`)
 
+    expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
+  })
+}
+
+/**
+ * Today at the prototype's own desktop size (desktop-prototype.html is drawn at
+ * 1280×800), for the side-by-side check — folded, then with "Done" open.
+ */
+for (const theme of ['dark', 'coffee'] as const) {
+  test(`screens · today-1280-${theme}-ru`, async ({ page }) => {
+    const errors = watchConsole(page)
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await signIn(page)
+    await applyPrefs(page, theme, 'ru')
+    await page.waitForLoadState('networkidle')
+    await expect(page.getByRole('heading', { level: 1, name: 'Сегодня' })).toBeVisible()
+    await expectNoHorizontalScroll(page, `today 1280 ${theme}`)
+    await shoot(page, `desktop1280-${theme}-ru-dashboard`, false)
+    const done = page.getByRole('button', { name: /^Готово/ })
+    if (await done.count()) {
+      await done.click()
+      await shoot(page, `desktop1280-${theme}-ru-dashboard-done`, false)
+    }
     expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
   })
 }

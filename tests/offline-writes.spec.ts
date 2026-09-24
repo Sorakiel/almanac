@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { recordOfflineShell, signIn, watchConsole } from './helpers/app'
+import { openDoneSection, recordOfflineShell, signIn, watchConsole } from './helpers/app'
 import { e2eClient, e2eUserId } from './helpers/supabase'
 
 const HABIT_NAME = 'E2E offline tap'
@@ -9,6 +9,14 @@ const completeButton = (page: Page) =>
   page.getByRole('button', { name: new RegExp(`^complete ${HABIT_NAME}$`, 'i') })
 const doneButton = (page: Page) =>
   page.getByRole('button', { name: new RegExp(`mark ${HABIT_NAME} incomplete`, 'i') })
+
+/** The ticked row lives in Today's folded "Done" section once it settles. */
+async function expectDone(page: Page, name: string, timeout?: number): Promise<void> {
+  await openDoneSection(page)
+  await expect(
+    page.getByRole('button', { name: new RegExp(`mark ${name} incomplete`, 'i') }),
+  ).toBeVisible({ timeout })
+}
 
 async function dropHabit(): Promise<void> {
   const db = await e2eClient()
@@ -88,7 +96,7 @@ test('a habit tapped offline lands on the server once the connection returns', a
 
   // The tap must still land instantly (optimistic) with no network available.
   await completeButton(page).click()
-  await expect(doneButton(page)).toBeVisible()
+  await expectDone(page, HABIT_NAME)
 
   // And the capsule tells the truth: the change is kept, not lost.
   const capsule = page.getByRole('status').filter({ hasText: /offline|sending|saved/i })
@@ -122,7 +130,7 @@ test('a tap survives the app being reloaded while still offline', async ({ page,
   // Reload straight away — inside the persister's 2 s throttle, the case that
   // used to lose the tap before it ever reached storage.
   await page.reload()
-  await expect(doneButton(page)).toBeVisible({ timeout: 20_000 })
+  await expectDone(page, HABIT_NAME, 20_000)
 
   const write = logWrite(page)
   await shell.online()
@@ -141,7 +149,7 @@ test('a tap made after an offline cold start is kept, then synced', async ({ pag
   await shell.offline()
   await page.reload()
   await completeButton(page).click({ timeout: 20_000 })
-  await expect(doneButton(page)).toBeVisible()
+  await expectDone(page, HABIT_NAME)
 
   // Long enough for a doomed request to fail and roll the tick back.
   await page.waitForTimeout(3_000)
@@ -173,10 +181,7 @@ test('a habit created and ticked offline lands, in order, after a reload', async
   // Both writes are queued behind each other; the reload must keep both, and
   // the tick must not reach the server before the habit it belongs to.
   await page.reload()
-  const done = page.getByRole('button', {
-    name: new RegExp(`mark ${OFFLINE_CREATED} incomplete`, 'i'),
-  })
-  await expect(done).toBeVisible({ timeout: 20_000 })
+  await expectDone(page, OFFLINE_CREATED, 20_000)
 
   const write = logWrite(page)
   await shell.online()

@@ -1,0 +1,622 @@
+/*
+ * Today — ported from the v0.6 prototype (`.p-row`, `.p-check`, `.p-summary`,
+ * `.p-mod`, `.p-disc`, `.p-donebox`). Sizes, curves and durations are the
+ * prototype's, copied rather than approximated; colours are the app's tokens.
+ * Kept as plain CSS because nearly every value here would otherwise be an
+ * arbitrary Tailwind value.
+ */
+
+.today {
+  --today-card: rgb(var(--color-surface));
+  /* The prototype's second card tone: a step lighter than the card on dark, a
+     step darker on coffee — ink mixed into the card does both. */
+  --today-card2: color-mix(in srgb, rgb(var(--color-foreground)) 7%, var(--today-card));
+  --today-ink2: rgb(var(--color-muted));
+  --today-ink3: rgb(var(--color-foreground) / 0.36);
+  --today-sep: rgb(var(--color-border) / var(--border-opacity));
+  /* The prototype's amber is the app's `warning`: #E0AA45 on dark, #A26E14 on
+     coffee. The flat category amber washes out on paper. */
+  --today-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --today-ios: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/*
+ * ---- layout: one tree for both shapes ----
+ * Phone: a single column — rings, nudge, habits, modules, done. Desktop: the
+ * habits on the left, a sticky 340px aside with the rings and module cards.
+ * The two columns are `display: contents` on the phone, so their children
+ * fall into the one flex column and `order` interleaves them.
+ */
+.today-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.today-col,
+.today-aside {
+  display: contents;
+}
+.today-o-rings {
+  order: 1;
+}
+.today-o-nudge {
+  order: 2;
+  /* The prototype sets the nudge 10px under the rings, not a section away. */
+  margin-top: -12px;
+}
+.today-o-habits {
+  order: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.today-o-modules {
+  order: 4;
+}
+.today-o-done {
+  order: 5;
+}
+@media (min-width: 1024px) {
+  .today-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+    gap: 24px;
+  }
+  .today-col {
+    display: grid;
+    align-content: start;
+    gap: 22px;
+  }
+  .today-aside {
+    position: sticky;
+    /* The prototype's 68 clears its 60px toolbar; ours has none yet, so the
+       aside sticks at the workspace's own top padding. */
+    top: 32px;
+    display: grid;
+    gap: 10px;
+  }
+  .today-o-nudge {
+    margin-top: 0;
+  }
+}
+
+/* ---- section heads and groups ---- */
+
+.today-sec-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 4px 8px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.today-sec-h > span {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--today-ink2);
+}
+
+.today-group {
+  background: var(--today-card);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* ---- habit row ---- */
+
+.today-row-wrap {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+.today-row-wrap > * {
+  min-height: 0;
+}
+/* Clipped only while folding, so the ripple and the focus ring aren't cut the rest of the time. */
+.today-row-wrap.is-collapsing > * {
+  overflow: hidden;
+}
+.today-row-wrap.is-collapsing {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateX(14px);
+  transition:
+    grid-template-rows 0.34s var(--today-ios),
+    opacity 0.22s,
+    transform 0.34s var(--today-ios);
+}
+
+.today-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 0 14px 0 8px;
+}
+.today-row-wrap + .today-row-wrap .today-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 60px;
+  right: 0;
+  height: 1px;
+  background: var(--today-sep);
+}
+
+.today-check {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  -webkit-tap-highlight-color: transparent;
+}
+.today-check:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.today-check > i {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--today-ink3);
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+.today-check svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: rgb(var(--color-on-accent));
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+}
+.today-row.is-done .today-check > i {
+  background: var(--hue);
+  border-color: var(--hue);
+  animation: today-boing 0.5s var(--today-spring);
+}
+.today-row.is-done .today-check svg {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.3s 0.08s ease-out;
+}
+.today-ripple {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--hue);
+  pointer-events: none;
+  animation: today-ripple 0.55s ease-out forwards;
+}
+@keyframes today-boing {
+  0% {
+    transform: scale(0.8);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes today-ripple {
+  from {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.today-row-main {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 0;
+  border-radius: 10px;
+}
+.today-row-name {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  transition: color 0.3s;
+}
+.today-row.is-done .today-row-name {
+  color: var(--today-ink2);
+}
+.today-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--today-ink2);
+  white-space: nowrap;
+}
+.today-flame {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: rgb(var(--color-warning));
+  font-size: 12px;
+}
+.today-flame svg {
+  width: 11px;
+  height: 11px;
+  fill: currentColor;
+}
+.today-hint {
+  display: none;
+}
+
+/* Streak +1 rolls like an odometer. */
+.today-odo {
+  display: inline-block;
+  height: 1.2em;
+  overflow: hidden;
+  vertical-align: bottom;
+  line-height: 1.2em;
+}
+.today-odo > span {
+  display: block;
+  animation: today-odo-up 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+.today-odo.is-down > span {
+  animation-name: today-odo-down;
+}
+@keyframes today-odo-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+@keyframes today-odo-down {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ---- summary rings ---- */
+
+.today-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 22px;
+  background: var(--today-card);
+}
+.today-summary svg {
+  flex: none;
+}
+.today-summary circle.is-value {
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+.today-legend {
+  display: grid;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+}
+.today-legend > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+}
+.today-legend dt > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--today-ink2);
+}
+.today-legend i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.today-legend b {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.today-legend small {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--today-ink3);
+}
+
+/* ---- nudge ---- */
+
+.today-nudge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 10px 14px;
+  border-radius: 16px;
+  background: color-mix(in srgb, rgb(var(--color-warning)) 14%, var(--today-card));
+  font-size: 14.5px;
+  line-height: 1.35;
+}
+.today-nudge > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: rgb(var(--color-warning));
+  color: rgb(var(--color-warning));
+}
+.today-nudge > button {
+  flex: none;
+  margin-left: auto;
+}
+
+/* ---- pills ---- */
+
+.today-pill {
+  flex: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgb(var(--color-accent));
+  color: rgb(var(--color-on-accent));
+  transition: transform 0.15s;
+}
+.today-pill:active {
+  transform: scale(0.95);
+}
+.today-pill.is-ghost {
+  background: color-mix(in srgb, var(--pill, rgb(var(--color-accent))) 16%, transparent);
+  color: var(--pill, rgb(var(--color-accent)));
+}
+.today-pill.is-teal {
+  background: rgb(var(--color-teal));
+  color: #fff;
+}
+
+/* ---- module cards ---- */
+
+.today-mod {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 20px;
+  background: var(--today-card);
+}
+.today-mod-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.today-ic {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--hue) 18%, transparent);
+  color: var(--hue);
+}
+.today-ic svg {
+  width: 20px;
+  height: 20px;
+}
+.today-mod-k {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--today-ink2);
+}
+.today-mod-v {
+  overflow-wrap: anywhere;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.today-mod-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--today-ink2);
+}
+.today-mod-foot > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.today-prog {
+  height: 6px;
+  border-radius: 9px;
+  background: var(--today-sep);
+  overflow: hidden;
+}
+.today-prog > b {
+  display: block;
+  height: 100%;
+  border-radius: 9px;
+  background: rgb(var(--color-warning));
+  transition: width 0.5s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+.today-mood {
+  display: flex;
+  gap: 6px;
+}
+.today-mood button {
+  flex: 1;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--today-card2);
+  font-size: 14px;
+  font-weight: 500;
+}
+.today-mood button[aria-pressed='true'] {
+  background: rgb(var(--color-accent));
+  color: rgb(var(--color-on-accent));
+}
+
+/* ---- "Done · N" disclosure ---- */
+
+.today-disc {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--today-card);
+  font-size: 16px;
+  font-weight: 500;
+}
+.today-disc > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 400;
+  color: var(--today-ink2);
+}
+.today-disc svg {
+  width: 16px;
+  height: 16px;
+  color: var(--today-ink3);
+  transition: transform 0.3s;
+}
+.today-disc[aria-expanded='true'] svg {
+  transform: rotate(90deg);
+}
+.today-donebox {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s var(--today-ios);
+}
+.today-donebox > div {
+  min-height: 0;
+  overflow: hidden;
+  /* Folded rows must leave the tab order and the accessibility tree too. */
+  visibility: hidden;
+  transition: visibility 0s 0.35s;
+}
+.today-donebox.is-open {
+  grid-template-rows: 1fr;
+}
+.today-donebox.is-open > div {
+  visibility: visible;
+  transition: none;
+}
+
+.today-big {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 22px;
+  background: var(--today-card);
+}
+.today-big h3 {
+  font-size: 21px;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+.today-big p {
+  font-size: 15px;
+  color: var(--today-ink2);
+}
+
+/* ---- the avatar in the header ---- */
+
+.today-ava {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    rgb(var(--color-accent-bright)),
+    rgb(var(--color-accent-deep))
+  );
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---- desktop: one line per row, the hint on hover (desktop-prototype `.dk-win .p-row`) ---- */
+
+@media (min-width: 1024px) {
+  .today-row {
+    min-height: 54px;
+  }
+  .today-row-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .today-row-name {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+  .today-row-meta {
+    margin: 0;
+  }
+  .today-hint {
+    display: inline;
+    margin-left: auto;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgb(var(--color-foreground) / 0.1);
+    color: var(--today-ink2);
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .today-row:hover .today-hint,
+  .today-row-main:focus-visible .today-hint {
+    opacity: 1;
+  }
+  .today-mood {
+    gap: 4px;
+  }
+  .today-mood button {
+    padding: 0 2px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .today *,
+  .today *::before,
+  .today *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

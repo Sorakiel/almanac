@@ -114,7 +114,13 @@ export function AppLayout() {
             </div>
           </main>
 
-          <aside className="app-scroll hidden w-[340px] flex-none flex-col overflow-y-auto border-l bg-chrome px-6 py-6 lg:flex">
+          {/* Today carries its own aside (desktop-prototype.html); the shell's rail would be a third column. */}
+          <aside
+            className={cn(
+              'app-scroll hidden w-[340px] flex-none flex-col overflow-y-auto border-l bg-chrome px-6 py-6',
+              pathname !== '/' && 'lg:flex',
+            )}
+          >
             <RailActive />
             <div ref={setRailEl} className="flex flex-1 flex-col" />
           </aside>
