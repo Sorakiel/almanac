@@ -67,7 +67,8 @@ test.describe('phone', () => {
 test('on desktop the sidebar’s Create opens the same sheet as a modal', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await signIn(page)
-  await page.getByRole('button', { name: 'Create', exact: true }).click()
+  // The sidebar's comes first; the toolbar "+" beside the search pill is the same action.
+  await page.getByRole('button', { name: 'Create', exact: true }).first().click()
   await expect(sheet(page)).toBeVisible()
   await expect(sheet(page).getByRole('button', { name: /^habit/i })).toBeVisible()
 })

@@ -1,5 +1,5 @@
 import type { Locale } from '@/i18n'
-import { NAV_MODULES, type ModuleKey } from '@/stores/modules'
+import { isPinnable, NAV_MODULES, type ModuleKey, type PinnableModule } from '@/stores/modules'
 import type { ThemePreference } from '@/stores/theme'
 import type { Json } from '@/types/database.generated'
 
@@ -9,14 +9,23 @@ export interface SyncedSettings {
   theme?: ThemePreference
   locale?: Locale
   sound?: boolean
+  /** The tab bar's pinned module; null is an explicit "none", not "no choice". */
+  pinned?: PinnableModule | null
 }
 
-/** The row's columns this client writes. `home_order`/`pinned_tab` arrive with the Customize screen. */
+/**
+ * How "no pinned tab" is stored. A null column means the account never chose,
+ * so unpinning on one device has to write something the others can adopt.
+ */
+const NO_PIN = 'none'
+
+/** The row's columns this client writes. `home_order` arrives with the Customize screen. */
 export interface UserSettingsPatch {
   modules?: Json
   theme?: string
   locale?: string
   sound?: boolean
+  pinned_tab?: string
 }
 
 /** A row as fetched, narrowed to the columns read here. */
@@ -25,6 +34,7 @@ export interface UserSettingsRow {
   theme: string | null
   locale: string | null
   sound: boolean | null
+  pinned_tab: string | null
   updated_at: string
 }
 
@@ -42,6 +52,8 @@ export function fromRow(row: UserSettingsRow): SyncedSettings {
   if (row.theme !== null && THEMES.includes(row.theme)) out.theme = row.theme as ThemePreference
   if (row.locale !== null && LOCALES.includes(row.locale)) out.locale = row.locale as Locale
   if (row.sound !== null) out.sound = row.sound
+  if (row.pinned_tab === NO_PIN) out.pinned = null
+  else if (row.pinned_tab !== null && isPinnable(row.pinned_tab)) out.pinned = row.pinned_tab
   if (row.modules !== null && typeof row.modules === 'object' && !Array.isArray(row.modules)) {
     const modules: Partial<Record<ModuleKey, boolean>> = {}
     for (const [key, on] of Object.entries(row.modules)) {
@@ -59,6 +71,7 @@ export function toPatch(settings: SyncedSettings): UserSettingsPatch {
   if (settings.theme !== undefined) patch.theme = settings.theme
   if (settings.locale !== undefined) patch.locale = settings.locale
   if (settings.sound !== undefined) patch.sound = settings.sound
+  if (settings.pinned !== undefined) patch.pinned_tab = settings.pinned ?? NO_PIN
   return patch
 }
 
@@ -79,6 +92,7 @@ export function changed(prev: SyncedSettings, next: SyncedSettings): SyncedSetti
   if (prev.theme !== next.theme) out.theme = next.theme
   if (prev.locale !== next.locale) out.locale = next.locale
   if (prev.sound !== next.sound) out.sound = next.sound
+  if (prev.pinned !== next.pinned) out.pinned = next.pinned
   return out
 }
 

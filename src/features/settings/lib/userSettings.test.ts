@@ -6,6 +6,7 @@ const row = (over: Partial<Parameters<typeof fromRow>[0]> = {}) => ({
   theme: null,
   locale: null,
   sound: null,
+  pinned_tab: null,
   updated_at: '2026-09-24T10:00:00Z',
   ...over,
 })
@@ -27,6 +28,20 @@ describe('fromRow', () => {
     ).toEqual({ modules: { reading: true } })
     expect(fromRow(row({ modules: { reading: 'yes' } }))).toEqual({ modules: {} })
     expect(fromRow(row({ modules: ['reading'] }))).toEqual({})
+  })
+})
+
+describe('pinned tab', () => {
+  it('tells "never chose" from "chose none"', () => {
+    expect(fromRow(row())).not.toHaveProperty('pinned')
+    expect(fromRow(row({ pinned_tab: 'none' }))).toEqual({ pinned: null })
+    expect(fromRow(row({ pinned_tab: 'reading' }))).toEqual({ pinned: 'reading' })
+    expect(toPatch({ pinned: null })).toEqual({ pinned_tab: 'none' })
+  })
+
+  it('drops a tab that cannot be pinned', () => {
+    expect(fromRow(row({ pinned_tab: 'insights' }))).toEqual({})
+    expect(fromRow(row({ pinned_tab: 'finances' }))).toEqual({})
   })
 })
 

@@ -21,6 +21,9 @@ const OUT = 'screenshots'
 const VARIANTS = [
   { name: 'phone-dark-ru', width: 390, height: 844, theme: 'dark', locale: 'ru' },
   { name: 'phone-coffee-ru', width: 390, height: 844, theme: 'coffee', locale: 'ru' },
+  // Phase 2 compares against the desktop prototype, which is drawn at 1280×800.
+  { name: 'laptop-dark-ru', width: 1280, height: 800, theme: 'dark', locale: 'ru' },
+  { name: 'laptop-coffee-ru', width: 1280, height: 800, theme: 'coffee', locale: 'ru' },
   { name: 'desktop-dark-ru', width: 1440, height: 900, theme: 'dark', locale: 'ru' },
   { name: 'desktop-coffee-ru', width: 1440, height: 900, theme: 'coffee', locale: 'ru' },
 ] as const
@@ -193,7 +196,8 @@ for (const v of VARIANTS) {
     // Create sheet: the grid, then the quick habit form. Viewport-only — a
     // full-page capture stretches a sheet sized to the viewport.
     const create = v.locale === 'ru' ? 'Создать' : 'Create'
-    await page.getByRole('button', { name: create, exact: true }).click()
+    // Desktop has two: the sidebar's and the toolbar "+"; both open the same sheet.
+    await page.getByRole('button', { name: create, exact: true }).first().click()
     const sheet = page.getByRole('dialog', { name: create })
     await expect(sheet).toBeVisible()
     await shoot(page, `${v.name}-create`, false)
@@ -204,6 +208,16 @@ for (const v of VARIANTS) {
     await shoot(page, `${v.name}-create-habit`, false)
     await page.keyboard.press('Escape')
     await expect(page.getByRole('dialog')).toBeHidden()
+
+    // ⌘K palette — desktop only; the phone has no keyboard shortcut to show.
+    if (v.width >= 1024) {
+      await page.goto('/')
+      await page.keyboard.press('ControlOrMeta+k')
+      await expect(page.getByRole('combobox')).toBeFocused()
+      await shoot(page, `${v.name}-palette`, false)
+      await page.keyboard.press('Escape')
+      await expect(page.getByRole('dialog')).toBeHidden()
+    }
 
     // Live session: working (ring shows elapsed + set progress), then resting
     // after a set is ticked (ring counts the set's own rest down).

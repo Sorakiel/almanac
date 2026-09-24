@@ -5,7 +5,7 @@ import type { UserSettingsPatch, UserSettingsRow } from '@/features/settings/lib
 export async function fetchUserSettings(userId: string): Promise<UserSettingsRow | null> {
   const { data, error } = await supabase
     .from('user_settings')
-    .select('modules, theme, locale, sound, updated_at')
+    .select('modules, theme, locale, sound, pinned_tab, updated_at')
     .eq('user_id', userId)
     .maybeSingle()
   if (error) throw error

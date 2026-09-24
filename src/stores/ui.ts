@@ -14,6 +14,9 @@ interface UiState {
   closeCreate: () => void
   /** Straight to the quick habit form — "New habit" buttons across the app. */
   openNewHabit: () => void
+  /** The ⌘K command palette. */
+  paletteOpen: boolean
+  setPaletteOpen: (open: boolean) => void
   /** The sync capsule is on screen — phone toasts stack above it instead of under it. */
   syncCapsuleVisible: boolean
   setSyncCapsuleVisible: (visible: boolean) => void
@@ -27,6 +30,8 @@ export const useUiStore = create<UiState>((set) => ({
   openCreate: (view = 'menu') => set({ create: view }),
   closeCreate: () => set({ create: null }),
   openNewHabit: () => set({ create: 'habit' }),
+  paletteOpen: false,
+  setPaletteOpen: (open) => set({ paletteOpen: open }),
   syncCapsuleVisible: false,
   setSyncCapsuleVisible: (visible) => set({ syncCapsuleVisible: visible }),
 }))
