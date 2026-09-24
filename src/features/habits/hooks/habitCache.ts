@@ -45,7 +45,8 @@ export function draftHabit(id: string, userId: string, input: HabitFormInput): H
 export function findHabit(client: QueryClient, userId: string, id: string): Habit | undefined {
   return (
     client.getQueryData<Habit[]>(habitKeys.all(userId))?.find((h) => h.id === id) ??
-    client.getQueryData<Habit>(habitKeys.detail(id))
+    client.getQueryData<Habit | null>(habitKeys.detail(id)) ??
+    undefined
   )
 }
 

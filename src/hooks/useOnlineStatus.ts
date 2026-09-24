@@ -1,9 +1,9 @@
 import { useSyncExternalStore } from 'react'
 
 /**
- * Subscribe to the browser's network connectivity. Backs the StatusLine "live
- * dot" so it reflects real reachability instead of a hardcoded label. Reads
- * synchronously (defaults to `true` on the server) to avoid a first-paint flip.
+ * Subscribe to the browser's network connectivity. Backs the sync capsule so it
+ * reflects real reachability instead of a hardcoded label. Reads synchronously
+ * (defaults to `true` on the server) to avoid a first-paint flip.
  */
 export function useOnlineStatus(): boolean {
   return useSyncExternalStore(

@@ -138,7 +138,9 @@ export function useHabitMutations() {
           habitKeys.freezesOf(id),
           habitKeys.subtasks(id),
         ]) {
-          queryClient.removeQueries({ queryKey })
+          // Inactive only: the detail page may still be mounted mid-navigation,
+          // and removing a watched query makes it fetch the deleted row again.
+          queryClient.removeQueries({ queryKey, type: 'inactive' })
         }
       },
       // Toasted here: the page that fired it has already navigated away.

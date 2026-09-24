@@ -8,7 +8,6 @@ import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
 import { AlmanacNarrator } from '@/features/dashboard/components/AlmanacNarrator'
 import { SectionLabel } from '@/components/common/SectionLabel'
-import { StatusLine } from '@/features/dashboard/components/StatusLine'
 import { Rail } from '@/components/rail/Rail'
 import { NowBlock } from '@/features/dashboard/components/NowBlock'
 import { QuoteCard } from '@/features/dashboard/components/QuoteCard'
@@ -124,8 +123,6 @@ function DashboardPage() {
         <AlmanacNarrator habits={habits} />
 
         <QuoteCard />
-
-        <StatusLine habitCount={habits.length} className="mt-1 px-1" />
       </Cascade>
     </div>
   )

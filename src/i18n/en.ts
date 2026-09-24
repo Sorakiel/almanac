@@ -1461,9 +1461,6 @@ export const en = {
     pendingMark: 'Waiting to sync',
   },
   status: {
-    online: 'online',
-    offline: 'offline',
-    syncing: 'syncing',
     habits: {
       one: '{count} habit',
       other: '{count} habits',

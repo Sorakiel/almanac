@@ -1582,9 +1582,6 @@ export const ru: Translations = {
     pendingMark: 'Ждёт отправки',
   },
   status: {
-    online: 'на связи',
-    offline: 'нет сети',
-    syncing: 'синхронизация',
     habits: {
       one: '{count} привычка',
       few: '{count} привычки',
