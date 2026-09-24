@@ -78,7 +78,8 @@ export function ModuleCard({ icon: Icon, tone, title, summary, wide, children }:
           open ? 'grid-rows-expanded' : 'grid-rows-collapsed',
         )}
       >
-        <div className="overflow-hidden">
+        {/* Collapsed on the phone means gone for screen readers and focus too. */}
+        <div className={cn('overflow-hidden', !open && 'max-lg:invisible')}>
           <div className="grid gap-2 px-3.5 pb-3.5 lg:px-4 lg:pb-4">{children}</div>
         </div>
       </div>

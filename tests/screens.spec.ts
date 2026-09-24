@@ -183,6 +183,8 @@ for (const v of VARIANTS) {
     // Progress with the habits card open — the year strip lives inside it.
     await page.goto('/insights')
     const habits = page.getByRole('region', { name: v.locale === 'ru' ? 'Привычки' : 'Habits' })
+    await expect(habits).toBeVisible()
+    // The phone opens details on tap; the desktop shows them without a button.
     const disclose = habits.getByRole('button', { expanded: false })
     if (await disclose.isVisible()) await disclose.click()
     await expect(habits.getByRole('group', { name: /2\d{3}/ })).toBeVisible()
