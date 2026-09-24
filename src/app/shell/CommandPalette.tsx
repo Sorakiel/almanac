@@ -60,6 +60,8 @@ export function CommandPalette() {
           className="palette lg fixed left-1/2 top-24 z-50 w-[min(580px,calc(100vw-32px))] overflow-hidden rounded-[22px] lg:left-[calc(50%+126px)]"
         >
           <Dialog.Title className="sr-only">{t('palette.title')}</Dialog.Title>
+          {/* The palette's only field: the caret and the selected row show focus;
+              a ring here gets clipped into a stray line along the panel. */}
           <input
             value={query}
             onChange={(e) => {
@@ -73,7 +75,7 @@ export function CommandPalette() {
             aria-expanded="true"
             aria-controls="palette-list"
             aria-activedescendant={matches.length ? optionId(index) : undefined}
-            className="h-14 w-full border-b border-foreground/10 bg-transparent px-5 text-[19px] text-foreground outline-none placeholder:text-muted-strong"
+            className="h-14 w-full border-b border-foreground/10 bg-transparent px-5 text-[19px] text-foreground outline-none placeholder:text-muted-strong focus-visible:ring-0"
           />
           <ul id="palette-list" role="listbox" className="max-h-[340px] overflow-y-auto p-1.5">
             {matches.length === 0 ? (
