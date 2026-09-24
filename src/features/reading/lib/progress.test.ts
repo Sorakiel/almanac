@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   progressFraction,
   progressPct,
+  quickAmount,
   statusForProgress,
+  unitsReadOn,
   unitNoun,
   unitNounPlural,
 } from '@/features/reading/lib/progress'
@@ -75,5 +77,37 @@ describe('unit nouns', () => {
     expect(unitNoun('chapters', t)).toBe('chapter')
     expect(unitNounPlural('pages', t)).toBe('Pages')
     expect(unitNounPlural('chapters', t)).toBe('Chapters')
+  })
+})
+
+describe('quickAmount', () => {
+  it('logs what is left of today’s goal', () => {
+    expect(quickAmount(makeBook({ daily_goal: 20, current_unit: 10 }), 5)).toBe(15)
+  })
+
+  it('offers the whole goal again once it is met', () => {
+    expect(quickAmount(makeBook({ daily_goal: 20, current_unit: 10 }), 25)).toBe(20)
+  })
+
+  it('falls back to 10 pages or 1 chapter without a goal', () => {
+    expect(quickAmount(makeBook(), 0)).toBe(10)
+    expect(quickAmount(makeBook({ progress_mode: 'chapters', total_units: 30 }), 0)).toBe(1)
+  })
+
+  it('never logs past the last page, and never less than one', () => {
+    expect(quickAmount(makeBook({ daily_goal: 20, current_unit: 96 }), 0)).toBe(4)
+    expect(quickAmount(makeBook({ daily_goal: 20, current_unit: 100 }), 0)).toBe(1)
+    expect(quickAmount(makeBook({ total_units: null, daily_goal: 30 }), 0)).toBe(30)
+  })
+})
+
+describe('unitsReadOn', () => {
+  it('sums only the given day', () => {
+    const sessions = [
+      { date: '2026-09-23', units_read: 5 },
+      { date: '2026-09-23', units_read: 7 },
+      { date: '2026-09-22', units_read: 30 },
+    ]
+    expect(unitsReadOn(sessions, '2026-09-23')).toBe(12)
   })
 })

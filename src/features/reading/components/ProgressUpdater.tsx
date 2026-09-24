@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Check, Plus } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { SectionLabel } from '@/components/common/SectionLabel'
+import { AmountStepper } from '@/features/reading/components/AmountStepper'
 import { useReadingProgress } from '@/features/reading/hooks/useReadingProgress'
 import {
-  dailyGoalPct,
   progressPct,
-  unitCount,
-  unitNoun,
-  unitNounPlural,
+  quickAmount,
+  stepSize,
+  unitsLeft,
+  unitsReadOn,
 } from '@/features/reading/lib/progress'
 import { cn } from '@/lib/utils'
 import { useToday } from '@/hooks/useToday'
@@ -21,162 +21,100 @@ import { toUserError } from '@/lib/userError'
 
 interface ProgressUpdaterProps {
   book: Book
-  /** This book's sessions — today's units sum into the "read today" tally. */
+  /** This book's sessions — today's units sum into the goal tally. */
   sessions: ReadingSession[]
 }
 
 /**
- * Progress control. "Read today" tallies the units logged for the current local
- * day (resetting every 24h); the add field appends however much you just read,
- * repeatably. A second field sets the current page/chapter absolutely.
+ * Where the book stands and one tap to move it: "+N" logs today's remaining
+ * goal, the stepper adjusts N first. Setting an exact page, the dates and the
+ * rating live in Edit — they are occasional, and this is the daily loop.
  */
 export function ProgressUpdater({ book, sessions }: ProgressUpdaterProps) {
   const { t } = useT()
   const logProgress = useReadingProgress()
   const { dateKey } = useToday()
-  const [addValue, setAddValue] = useState('')
-  const [currentValue, setCurrentValue] = useState('')
+  const readToday = unitsReadOn(sessions, dateKey)
+  const suggested = quickAmount(book, readToday)
+  // The stepper overrides the suggestion until the next log resets it.
+  const [override, setOverride] = useState<number | null>(null)
+  const amount = override ?? suggested
 
   const pct = progressPct(book)
-  const noun = unitNoun(book.progress_mode, t)
-  const nounPlural = unitNounPlural(book.progress_mode, t)
-  const readToday = sessions
-    .filter((s) => s.date === dateKey)
-    .reduce((sum, s) => sum + s.units_read, 0)
-  const goal = book.daily_goal
-  const goalPct = goal ? dailyGoalPct(readToday, goal) : null
-  const goalMet = goal ? readToday >= goal : false
+  const left = unitsLeft(book)
+  const goal = book.daily_goal && book.daily_goal > 0 ? book.daily_goal : null
+  const goalMet = goal !== null && readToday >= goal
+  const done = left === 0
+  const mode = book.progress_mode
 
-  const commit = (nextUnit: number, onDone?: () => void) => {
+  const log = () => {
+    // Not awaited: the numbers move now; offline the write queues.
     logProgress.mutate(
-      { book, nextUnit },
-      {
-        onSuccess: () => onDone?.(),
-        onError: (error) => toast.error(toUserError(error, t, 'reading.progressFailed')),
-      },
+      { book, nextUnit: book.current_unit + amount },
+      { onError: (error) => toast.error(toUserError(error, t, 'reading.progressFailed')) },
     )
-  }
-
-  const onAdd = () => {
-    const amount = Number.parseInt(addValue, 10)
-    if (!Number.isFinite(amount) || amount <= 0) {
-      toast.error(t(`reading.enterAmount.${book.progress_mode}`))
-      return
+    if (goal !== null && readToday < goal && readToday + amount >= goal) {
+      toast.success(t('reading.goalMetToast'))
     }
-    commit(book.current_unit + amount, () => setAddValue(''))
-  }
-
-  const onSetCurrent = () => {
-    const next = Number.parseInt(currentValue, 10)
-    if (!Number.isFinite(next) || next < 0) {
-      toast.error(t('reading.invalidNumber'))
-      return
-    }
-    commit(next, () => setCurrentValue(''))
+    setOverride(null)
   }
 
   return (
     <section className="flex flex-col gap-3">
-      <SectionLabel accessory={pct !== null ? `${pct}%` : undefined}>
+      <SectionLabel accessory={pct !== null ? <span className="num">{pct}%</span> : undefined}>
         {t('reading.progress')}
       </SectionLabel>
 
-      <div className="rounded-card border bg-surface p-4">
-        <div className="flex items-end justify-between gap-3">
-          <p className="font-mono text-sm text-muted-strong">
-            <span className="text-lg text-foreground">{book.current_unit}</span>
-            {book.total_units ? ` / ${book.total_units}` : ''}{' '}
-            {t(`reading.unitWord.${book.progress_mode}`, {
-              count: book.total_units ?? book.current_unit,
-            })}
-          </p>
-          <p className="label-mono text-accent">
-            {t('reading.readTodayCount', {
-              units: unitCount(book.progress_mode, readToday, t),
-            })}
-          </p>
-        </div>
+      <div className="flex flex-col gap-4 rounded-card border bg-surface p-4">
+        <p className="text-callout text-muted">
+          <span className="num text-headline text-foreground">{book.current_unit}</span>
+          {book.total_units ? (
+            <>
+              {' '}
+              {t('reading.of')} <span className="num">{book.total_units}</span>
+            </>
+          ) : null}{' '}
+          {t(`reading.unitWord.${mode}`, { count: book.total_units ?? book.current_unit })}
+        </p>
 
         {pct !== null ? (
-          <div className="mt-3">
-            <ProgressBlocks
-              value={book.current_unit}
-              total={book.total_units ?? 1}
-              blocks={24}
-              size="md"
-              animated
-            />
+          <ProgressBlocks
+            value={book.current_unit}
+            total={book.total_units ?? 1}
+            blocks={24}
+            size="md"
+            animated
+          />
+        ) : null}
+
+        {goal !== null ? (
+          <div className="flex items-center justify-between gap-3 text-callout">
+            <span className="text-muted">{t('reading.todayLabel')}</span>
+            <span
+              className={cn('flex items-center gap-1.5', goalMet ? 'text-success' : 'text-muted')}
+            >
+              {goalMet ? <Check className="h-4 w-4" aria-hidden="true" /> : null}
+              <span className="num">
+                {readToday} / {goal}
+              </span>
+              {goalMet ? t('reading.goalMet') : null}
+            </span>
           </div>
         ) : null}
 
-        {goal ? (
-          <div
-            className={cn(
-              'mt-4 rounded-2xl border px-4 py-3 transition-colors',
-              goalMet ? 'border-teal/40 bg-teal/10' : 'border-border bg-bg-deep',
-            )}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <span className="label-mono normal-case">
-                {t('reading.dailyGoalLine', { units: unitCount(book.progress_mode, goal, t) })}
-              </span>
-              <span
-                className={cn(
-                  'flex items-center gap-1 font-mono text-sm tabular-nums',
-                  goalMet ? 'text-teal' : 'text-muted-strong',
-                )}
-              >
-                {goalMet ? <Check className="h-4 w-4" aria-hidden="true" /> : null}
-                {Math.min(readToday, goal)} / {goal}
-              </span>
-            </div>
-            <div className="mt-2.5">
-              <ProgressBlocks
-                value={Math.min(readToday, goal)}
-                total={goal}
-                blocks={20}
-                size="md"
-                animated
-                aria-label={t('reading.goalPctAria', { pct: goalPct ?? 0 })}
-              />
-            </div>
+        {done ? (
+          <p className="flex items-center gap-2 text-callout text-success">
+            <Check className="h-4 w-4" aria-hidden="true" />
+            {t('reading.bookDone')}
+          </p>
+        ) : (
+          <div className="flex items-center gap-2">
+            <AmountStepper value={amount} onChange={setOverride} step={stepSize(mode)} max={left} />
+            <Button size="lg" className="flex-1" onClick={log}>
+              {t(`reading.quickAdd.${mode}`, { count: amount })}
+            </Button>
           </div>
-        ) : null}
-
-        <div className="mt-4 flex items-end gap-2">
-          <label className="flex flex-1 flex-col gap-1.5">
-            <span className="label-mono">{t('reading.readJustNow', { unit: nounPlural })}</span>
-            <Input
-              type="number"
-              inputMode="numeric"
-              min={1}
-              placeholder={t('reading.progressPlaceholder')}
-              value={addValue}
-              onChange={(event) => setAddValue(event.target.value)}
-            />
-          </label>
-          <Button onClick={onAdd} disabled={logProgress.isPending}>
-            <Plus className="h-4 w-4" />
-            {t('reading.add')}
-          </Button>
-        </div>
-
-        <div className="mt-3 flex items-end gap-2">
-          <label className="flex flex-1 flex-col gap-1.5">
-            <span className="label-mono">{t('reading.orSetCurrent', { unit: noun })}</span>
-            <Input
-              type="number"
-              inputMode="numeric"
-              min={0}
-              placeholder={String(book.current_unit)}
-              value={currentValue}
-              onChange={(event) => setCurrentValue(event.target.value)}
-            />
-          </label>
-          <Button variant="surface" onClick={onSetCurrent} disabled={logProgress.isPending}>
-            {t('reading.setProgress')}
-          </Button>
-        </div>
+        )}
       </div>
     </section>
   )
