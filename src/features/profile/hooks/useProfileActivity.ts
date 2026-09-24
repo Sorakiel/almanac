@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { habitQueries } from '@/features/habits/hooks/habitQueries'
-import { dateKeysBetween } from '@/features/insights/hooks/useYearActivity'
-import { buildYearActivity } from '@/features/insights/lib/yearActivity'
+import { dateKeysBetween } from '@/features/progress/hooks/useYearActivity'
+import { buildYearActivity } from '@/features/progress/lib/yearActivity'
 import {
   almanacStartKey,
   buildAlmanacGrid,
