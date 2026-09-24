@@ -20,7 +20,7 @@ interface ColorStyle {
   tile: string
   /** Solid fill (color-picker swatch). */
   solid: string
-  /** Solid foreground (sparkline stroke, accents) as a CSS color. */
+  /** Solid foreground (week dots, accents) as a CSS color. */
   stroke: string
 }
 

@@ -1015,7 +1015,6 @@ export const en = {
     loadOneFailed: 'Couldn’t load this habit',
     emptyTitle: 'No habits yet',
     emptyHint: 'Create your first habit to start a streak.',
-    filterHintMobile: 'Tap the filter pill to cycle to another frequency.',
     filterHintDesktop: 'Pick another frequency above.',
     activeCount: {
       one: '{count} active',
@@ -1109,7 +1108,6 @@ export const en = {
       every_n_days: 'every n days',
       every_n_weeks: 'every n weeks',
     },
-    filterAria: 'Filter by frequency: {name}. Tap for next filter.',
     noneMatch: 'Nothing matches “{name}”',
     form: {
       name: 'Name',
@@ -1152,6 +1150,7 @@ export const en = {
     editOrder: 'Reorder',
     doneEditing: 'Done',
     reorderHint: 'Drag a habit by its handle to change the order on Today.',
+    weekDots: 'Done on {done} of the last {total} days',
   },
   modules: {
     habits: { label: 'Habits', description: 'Daily tracking, streaks, and schedules.' },

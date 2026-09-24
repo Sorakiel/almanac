@@ -1,3 +1,4 @@
+import type { DayStatus } from '@/features/habits/lib/schedule'
 import type { Database } from '@/types/database.generated'
 
 export type Habit = Database['public']['Tables']['habits']['Row']
@@ -12,8 +13,8 @@ export type HabitTimeOfDay = Database['public']['Enums']['habit_time_of_day']
 export interface HabitWithTodayLog extends Habit {
   todayCount: number
   isComplete: boolean
-  /** Per-day completed flag (0/1) over the recent window, oldest→newest. */
-  series: number[]
+  /** Per-day status over the recent window, oldest→newest; the last is today. */
+  week: DayStatus[]
   /** Days completed within the recent window. */
   completedRecent: number
   /** Length of the recent window (e.g. 7). */
