@@ -155,7 +155,12 @@ async function seedToday(): Promise<void> {
   await dropToday()
   const db = await e2eClient()
   const userId = await e2eUserId(db)
-  const today = new Date().toISOString().slice(0, 10)
+  // "Today" is the profile's local day, not UTC's — seeded on the runner's UTC
+  // date near midnight, the tick and the focus block landed on yesterday.
+  const { data: profile } = await db.from('profiles').select('timezone').eq('id', userId).single()
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: profile?.timezone ?? 'UTC' }).format(
+    new Date(),
+  )
   const { data: habits, error } = await db
     .from('habits')
     .insert(
