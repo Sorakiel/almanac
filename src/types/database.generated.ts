@@ -735,6 +735,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          home_order: string[] | null
+          locale: string | null
+          modules: Json | null
+          pinned_tab: string | null
+          sound: boolean | null
+          theme: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          home_order?: string[] | null
+          locale?: string | null
+          modules?: Json | null
+          pinned_tab?: string | null
+          sound?: boolean | null
+          theme?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          home_order?: string[] | null
+          locale?: string | null
+          modules?: Json | null
+          pinned_tab?: string | null
+          sound?: boolean | null
+          theme?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       workout_exercises: {
         Row: {
           exercise_id: string

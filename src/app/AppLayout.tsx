@@ -13,6 +13,7 @@ import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
 import { useCelebrationWatchers } from '@/app/hooks/useCelebrationWatchers'
 import { useDailyReminder } from '@/app/hooks/useDailyReminder'
 import { useNativeWidgetSync } from '@/app/hooks/useNativeWidgetSync'
+import { useUserSettingsSync } from '@/app/hooks/useUserSettingsSync'
 import { useSession } from '@/hooks/useSession'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useOnboardingStore } from '@/stores/onboarding'
@@ -46,6 +47,8 @@ export function AppLayout() {
   // Watch live data for moments worth celebrating (perfect day, streak
   // milestones, achievement unlocks). Rendered visuals come from <CelebrationHost>.
   useCelebrationWatchers()
+  // Theme, language, modules and sound follow the account across devices.
+  useUserSettingsSync()
 
   // Onboarding is gated on `profiles.onboarded` so it survives across devices.
   // Wait for the profile before deciding, so an already-onboarded user never

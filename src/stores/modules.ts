@@ -96,6 +96,8 @@ interface ModulesState {
   toggle: (key: ModuleKey) => void
   /** Set a module on/off directly (onboarding picks it up); core stays pinned. */
   setModule: (key: ModuleKey, on: boolean) => void
+  /** Take the account's module choices, as saved from another device. */
+  adoptModules: (saved: Partial<Record<ModuleKey, boolean>>) => void
 }
 
 export const useModulesStore = create<ModulesState>()(
@@ -108,6 +110,8 @@ export const useModulesStore = create<ModulesState>()(
           if (NAV_MODULES.find((m) => m.key === key)?.core) return state
           return { enabled: { ...state.enabled, [key]: !state.enabled[key] } }
         }),
+      adoptModules: (saved) =>
+        set((state) => ({ enabled: withCoreOn({ ...state.enabled, ...saved }) })),
       setModule: (key, on) =>
         set((state) => {
           if (NAV_MODULES.find((m) => m.key === key)?.core) return state
