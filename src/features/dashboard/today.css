@@ -63,6 +63,15 @@
     align-items: start;
     gap: 24px;
   }
+  /* Each column is a grid of its own, and an implicit track is sized to its
+     items' min-content — the unbroken row names. WebKit (Safari, the Tauri
+     window) then widened the habits past their column and under the aside at
+     narrow desktop widths; an explicit shrinkable track keeps them inside. */
+  .today-col,
+  .today-aside {
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
   .today-col {
     display: grid;
     align-content: start;
@@ -110,6 +119,9 @@
 .today-row-wrap {
   display: grid;
   grid-template-rows: 1fr;
+  /* An explicit column, or WebKit sizes the implicit one to the row's
+     min-content and pushes the week dots out of a narrow card. */
+  grid-template-columns: minmax(0, 1fr);
 }
 .today-row-wrap > * {
   min-height: 0;
@@ -246,13 +258,20 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+  overflow: hidden;
   margin-top: 2px;
   font-size: 13px;
   line-height: 1.3;
   color: var(--today-ink2);
   white-space: nowrap;
 }
+.today-row-meta > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .today-flame {
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -318,6 +337,7 @@
 }
 .today-legend {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   flex: 1;
   gap: 6px;
   min-width: 0;
@@ -404,6 +424,7 @@
 
 .today-mod {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   padding: 14px;
   border-radius: 20px;
@@ -515,6 +536,7 @@
 .today-donebox {
   display: grid;
   grid-template-rows: 0fr;
+  grid-template-columns: minmax(0, 1fr);
   transition: grid-template-rows 0.35s var(--today-ios);
 }
 .today-donebox > div {
@@ -534,6 +556,7 @@
 
 .today-big {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   padding: 16px;
   border-radius: 22px;
@@ -568,9 +591,16 @@
   font-weight: 600;
 }
 
-/* ---- desktop: one line per row, the hint on hover (desktop-prototype `.dk-win .p-row`) ---- */
-
-@media (min-width: 1024px) {
+/*
+ * ---- wide groups: one line per row, the hint on hover (desktop-prototype `.dk-win .p-row`) ----
+ * Keyed to the group's own width, not the window's: at a narrow desktop width
+ * the habits column is phone-narrow, and one line there left the name a few
+ * letters long. Below this the row keeps the phone's two lines.
+ */
+.today-group {
+  container-type: inline-size;
+}
+@container (min-width: 480px) {
   .today-row {
     min-height: 54px;
   }
@@ -584,24 +614,37 @@
     min-width: 0;
   }
   .today-row-meta {
+    /* The cadence gives way before the name does. */
+    flex-shrink: 10;
     margin: 0;
   }
-  .today-hint {
-    display: inline;
-    margin-left: auto;
-    padding: 2px 6px;
-    border-radius: 6px;
-    background: rgb(var(--color-foreground) / 0.1);
-    color: var(--today-ink2);
-    font-size: 11px;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.15s;
+}
+@media (hover: hover) {
+  @container (min-width: 480px) {
+    .today-hint {
+      display: inline;
+      /* The hint gives way first: the name and meta keep their room. */
+      flex-shrink: 100;
+      min-width: 0;
+      overflow: hidden;
+      margin-left: auto;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgb(var(--color-foreground) / 0.1);
+      color: var(--today-ink2);
+      font-size: 11px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .today-row:hover .today-hint,
+    .today-row-main:focus-visible .today-hint {
+      opacity: 1;
+    }
   }
-  .today-row:hover .today-hint,
-  .today-row-main:focus-visible .today-hint {
-    opacity: 1;
-  }
+}
+
+@media (min-width: 1024px) {
   .today-mood {
     gap: 4px;
   }
