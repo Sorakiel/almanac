@@ -7,12 +7,15 @@ import { SyncCapsule } from '@/app/shell/SyncCapsule'
 import { ReinstallBanner } from '@/app/shell/ReinstallBanner'
 import { Sidebar } from '@/app/shell/Sidebar'
 import { RailActive } from '@/app/shell/RailActive'
+import { CommandPalette } from '@/app/shell/CommandPalette'
+import { DesktopToolbar } from '@/app/shell/DesktopToolbar'
 import { ErrorState } from '@/components/common/ErrorState'
 import { RailTargetProvider } from '@/components/rail/Rail'
 import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
 import { CreateSheet } from '@/app/shell/CreateSheet'
 import { useCelebrationWatchers } from '@/app/hooks/useCelebrationWatchers'
 import { useDailyReminder } from '@/app/hooks/useDailyReminder'
+import { useGlobalShortcuts } from '@/app/hooks/useGlobalShortcuts'
 import { useNativeWidgetSync } from '@/app/hooks/useNativeWidgetSync'
 import { useUserSettingsSync } from '@/app/hooks/useUserSettingsSync'
 import { useSession } from '@/hooks/useSession'
@@ -23,9 +26,9 @@ import { cn } from '@/lib/utils'
 
 /**
  * Authenticated shell. One product, two shapes:
- *  - Mobile (`< lg`): a centered max-w-md column with the glass bottom nav.
- *  - Desktop (`lg+`): the spec-board three-column shell — nav rail, a scrolling
- *    workspace, and a context rail fed per-page via `<Rail>` (see rail.tsx).
+ *  - Mobile (`< lg`): a centered max-w-md column with the glass tab bar and "+".
+ *  - Desktop (`lg+`): a floating glass sidebar, a scrolling workspace with the
+ *    ⌘K toolbar, and a context rail fed per-page via `<Rail>` (see rail.tsx).
  *
  * The routed page renders once; the chrome around it swaps by breakpoint.
  */
@@ -50,6 +53,8 @@ export function AppLayout() {
   useCelebrationWatchers()
   // Theme, language, modules and sound follow the account across devices.
   useUserSettingsSync()
+  // ⌘K palette, ⌘N new habit.
+  useGlobalShortcuts()
 
   // Onboarding is gated on `profiles.onboarded` so it survives across devices.
   // Wait for the profile before deciding, so an already-onboarded user never
@@ -83,7 +88,8 @@ export function AppLayout() {
         <ReinstallBanner />
 
         <div className="flex flex-1 lg:min-h-0">
-          <div className="hidden lg:flex">
+          {/* The sidebar floats (fixed, 8px inset); this keeps its column clear. */}
+          <div className="hidden w-[252px] flex-none lg:block">
             <Sidebar />
           </div>
 
@@ -93,9 +99,10 @@ export function AppLayout() {
               // overrides padding via lg:py-8 where there's no system bar.
               'mx-auto w-full max-w-md flex-1 px-5 pt-[max(env(safe-area-inset-top),1.5rem)]',
               hideNav ? 'flex flex-col pb-6' : 'pb-28',
-              'app-scroll lg:mx-0 lg:max-w-none lg:overflow-y-auto lg:px-10 lg:py-8',
+              'app-scroll lg:mx-0 lg:max-w-none lg:overflow-y-auto lg:px-8 lg:pb-[60px] lg:pt-0',
             )}
           >
+            <DesktopToolbar />
             {/* Keyed so the page remounts per route (replays the Cascade). The
                 cross-fade itself is the View Transition (see viewTransition on
                 the nav links + globals.css), so no per-route animation here.
@@ -120,6 +127,7 @@ export function AppLayout() {
         )}
         <HabitFormSheet />
         <CreateSheet />
+        <CommandPalette />
         <SyncCapsule />
         <CelebrationHost />
       </div>

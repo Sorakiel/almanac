@@ -1,93 +1,112 @@
-import { NavLink } from 'react-router-dom'
-import { Home, LayoutGrid, type LucideIcon } from 'lucide-react'
+import { useLayoutEffect, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import { ChartNoAxesColumn, House, LayoutGrid, type LucideIcon } from 'lucide-react'
 import { CreateButton } from '@/app/shell/CreateButton'
-import { CORE_MODULES } from '@/stores/modules'
+import { NAV_MODULES, useModulesStore } from '@/stores/modules'
 import { useT } from '@/hooks/useT'
-import type { TranslationKey } from '@/i18n/types'
-import { cn } from '@/lib/utils'
 
-interface NavItem {
+interface Tab {
+  key: string
   to: string
-  labelKey: TranslationKey
-  /** Lucide icon — matches the modules hub so the nav and "More" stay in sync. */
+  label: string
   icon: LucideIcon
-  end?: boolean
 }
 
-const TODAY: NavItem = { to: '/', labelKey: 'nav.today', icon: Home, end: true }
-const MORE: NavItem = { to: '/more', labelKey: 'nav.more', icon: LayoutGrid }
+/** Where the lens sits, in px from the bar's left edge; null hides it. */
+interface LensBox {
+  left: number
+  width: number
+}
 
-function NavButton({ item }: { item: NavItem }) {
+function startsWith(pathname: string, to: string): boolean {
+  return pathname === to || pathname.startsWith(`${to}/`)
+}
+
+/**
+ * Which tab owns the current route. Module screens opened from the hub belong
+ * to «Модули» unless the module has its own pinned tab; screens outside the
+ * tabs (settings, friends' profile, admin) light none.
+ */
+function activeTab(pathname: string, pinnedTo: string | null): string | null {
+  if (pathname === '/') return 'today'
+  if (startsWith(pathname, '/insights')) return 'progress'
+  if (pinnedTo && startsWith(pathname, pinnedTo)) return 'pinned'
+  if (pathname === '/more' || NAV_MODULES.some((m) => startsWith(pathname, m.to))) return 'modules'
+  return null
+}
+
+/**
+ * Phone tab bar: Сегодня · Прогресс · (one pinned module) · Модули on a glass
+ * capsule, with the glass "+" standing apart on the right. A lens slides under
+ * the current tab.
+ */
+export function BottomNav() {
   const { t } = useT()
-  const Icon = item.icon
+  const { pathname } = useLocation()
+  const pinnedKey = useModulesStore((s) => s.pinned)
+  const enabled = useModulesStore((s) => s.enabled)
+  // A pin outlives its module being switched off; the tab only shows while it is on.
+  const pinned = NAV_MODULES.find((m) => m.key === pinnedKey && enabled[m.key]) ?? null
+
+  const tabs: Tab[] = [
+    { key: 'today', to: '/', label: t('nav.today'), icon: House },
+    { key: 'progress', to: '/insights', label: t('nav.progress'), icon: ChartNoAxesColumn },
+    ...(pinned
+      ? [
+          {
+            key: 'pinned',
+            to: pinned.to,
+            label: t(`modules.${pinned.key}.label`),
+            icon: pinned.icon,
+          },
+        ]
+      : []),
+    { key: 'modules', to: '/more', label: t('nav.modules'), icon: LayoutGrid },
+  ]
+  const current = activeTab(pathname, pinned?.to ?? null)
+
+  const barRef = useRef<HTMLDivElement>(null)
+  const [lens, setLens] = useState<LensBox | null>(null)
+  useLayoutEffect(() => {
+    const bar = barRef.current
+    if (!bar) return
+    const place = () => {
+      const on = bar.querySelector<HTMLElement>('[aria-current="page"]')
+      setLens(on ? { left: on.offsetLeft, width: on.offsetWidth } : null)
+    }
+    place()
+    const observer = new ResizeObserver(place)
+    observer.observe(bar)
+    return () => observer.disconnect()
+  }, [current, tabs.length])
+
   return (
-    <NavLink
-      to={item.to}
-      end={item.end}
-      viewTransition
-      className={({ isActive }) =>
-        cn(
-          'flex w-12 flex-col items-center gap-1 py-1 transition-colors active:scale-90',
-          isActive ? 'text-accent' : 'text-muted hover:text-foreground',
-        )
-      }
-    >
-      {({ isActive }) => (
-        <>
-          <Icon
-            key={isActive ? 'on' : 'off'}
-            aria-hidden="true"
-            className={cn('h-[18px] w-[18px]', isActive && 'motion-safe:animate-pop')}
-            strokeWidth={1.75}
-          />
-          <span className="font-mono text-[8px] uppercase tracking-label">{t(item.labelKey)}</span>
+    <div className="tabbar-dock">
+      <nav ref={barRef} aria-label={t('nav.primary')} className="tabbar lg">
+        {lens ? (
           <span
             aria-hidden="true"
-            className={cn(
-              'h-1 w-1 rounded-full bg-accent transition-all duration-300',
-              isActive ? 'scale-100 opacity-100' : 'scale-0 opacity-0',
-            )}
+            className="tabbar-lens"
+            style={{ left: lens.left, width: lens.width }}
           />
-        </>
-      )}
-    </NavLink>
-  )
-}
-
-/** Glassmorphism bottom nav (spec board): Today + core modules + More. */
-export function BottomNav() {
-  // A fixed, uncluttered mobile nav: Today, the core modules (Habits, Insights),
-  // then More. Optional modules stay one tap away inside the More hub — the small
-  // bottom bar never has to grow or reshuffle as the user toggles modules.
-  const { t } = useT()
-  const core: NavItem[] = CORE_MODULES.map((m) => ({
-    to: m.to,
-    labelKey: `modules.${m.key}.label`,
-    icon: m.icon,
-  }))
-  const left: NavItem[] = [TODAY, ...core.slice(0, 1)]
-  const right: NavItem[] = [...core.slice(1), MORE]
-
-  return (
-    <nav
-      aria-label={t('nav.primary')}
-      className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
-    >
-      <div className="flex h-[60px] w-full max-w-md items-center rounded-[24px] border bg-surface/75 px-3 shadow-soft backdrop-blur-nav">
-        <div className="flex flex-1 justify-around">
-          {left.map((item) => (
-            <NavButton key={item.to} item={item} />
-          ))}
-        </div>
-
-        <CreateButton />
-
-        <div className="flex flex-1 justify-around">
-          {right.map((item) => (
-            <NavButton key={item.to} item={item} />
-          ))}
-        </div>
-      </div>
-    </nav>
+        ) : null}
+        {tabs.map((tab) => {
+          const Icon = tab.icon
+          return (
+            <Link
+              key={tab.key}
+              to={tab.to}
+              viewTransition
+              aria-current={current === tab.key ? 'page' : undefined}
+              className="tabbar-tab"
+            >
+              <Icon aria-hidden="true" />
+              <span className="max-w-full truncate px-1">{tab.label}</span>
+            </Link>
+          )
+        })}
+      </nav>
+      <CreateButton />
+    </div>
   )
 }

@@ -74,6 +74,17 @@ export const CORE_MODULES: NavModule[] = NAV_MODULES.filter((m) => m.core)
 /** Toggleable modules — surfaced under "Modules" once enabled. */
 export const OPTIONAL_MODULES: NavModule[] = NAV_MODULES.filter((m) => !m.core)
 
+/**
+ * Modules that can take the tab bar's optional fourth tab. Insights is already
+ * there as «Прогресс», so pinning it would show the same screen twice.
+ */
+export type PinnableModule = Exclude<ModuleKey, 'insights'>
+export const PINNABLE_MODULES: NavModule[] = NAV_MODULES.filter((m) => m.key !== 'insights')
+
+export function isPinnable(key: string): key is PinnableModule {
+  return PINNABLE_MODULES.some((m) => m.key === key)
+}
+
 const DEFAULTS: Record<ModuleKey, boolean> = {
   habits: true,
   insights: true,
@@ -98,12 +109,17 @@ interface ModulesState {
   setModule: (key: ModuleKey, on: boolean) => void
   /** Take the account's module choices, as saved from another device. */
   adoptModules: (saved: Partial<Record<ModuleKey, boolean>>) => void
+  /** The one module with its own tab in the phone tab bar, or null for none. */
+  pinned: PinnableModule | null
+  setPinned: (key: PinnableModule | null) => void
 }
 
 export const useModulesStore = create<ModulesState>()(
   persist(
     (set) => ({
       enabled: DEFAULTS,
+      pinned: null,
+      setPinned: (key) => set({ pinned: key }),
       toggle: (key) =>
         set((state) => {
           // Core modules are permanent; ignore attempts to hide them.
@@ -124,7 +140,12 @@ export const useModulesStore = create<ModulesState>()(
       // and keep core modules pinned on even if an older state disabled them.
       merge: (persisted, current) => {
         const saved = (persisted as Partial<ModulesState> | undefined)?.enabled ?? {}
-        return { ...current, enabled: withCoreOn({ ...DEFAULTS, ...saved }) }
+        const pinned = (persisted as Partial<ModulesState> | undefined)?.pinned
+        return {
+          ...current,
+          enabled: withCoreOn({ ...DEFAULTS, ...saved }),
+          pinned: typeof pinned === 'string' && isPinnable(pinned) ? pinned : null,
+        }
       },
     },
   ),

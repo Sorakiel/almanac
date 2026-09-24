@@ -1,29 +1,24 @@
 import { Link, NavLink } from 'react-router-dom'
-import { Home, Plus, type LucideIcon } from 'lucide-react'
-import { Avatar } from '@/components/common/Avatar'
-import { BrandMark } from '@/components/common/BrandMark'
+import { ChartNoAxesColumn, House, LayoutGrid, Plus, type LucideIcon } from 'lucide-react'
 import { NewBadgeDot } from '@/components/common/NewBadgeDot'
 import { useHabits } from '@/features/habits/hooks/useHabits'
-import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSession } from '@/hooks/useSession'
-import { CORE_MODULES, OPTIONAL_MODULES, useModulesStore } from '@/stores/modules'
+import { NAV_MODULES, useModulesStore } from '@/stores/modules'
 import { useUiStore } from '@/stores/ui'
 import { useT } from '@/hooks/useT'
-import type { TranslationKey } from '@/i18n/types'
 import { cn } from '@/lib/utils'
 
 interface NavEntry {
   to: string
-  labelKey: TranslationKey
-  /** Lucide icon — shared with the modules hub so nav and "More" stay in sync. */
+  label: string
   icon: LucideIcon
   end?: boolean
-  /** Optional live count badge (resolved by the sidebar). */
+  /** Live count on the right; hidden at zero. */
   count?: number
 }
 
+/** The prototype's .dk-nav row. */
 function NavRow({ entry }: { entry: NavEntry }) {
-  const { t } = useT()
   const Icon = entry.icon
   return (
     <NavLink
@@ -32,10 +27,9 @@ function NavRow({ entry }: { entry: NavEntry }) {
       viewTransition
       className={({ isActive }) =>
         cn(
-          'flex items-center gap-3 rounded-[13px] px-3.5 py-3 text-[14.5px] transition-colors',
-          isActive
-            ? 'bg-accent-solid font-semibold text-on-accent-solid'
-            : 'text-muted hover:bg-surface/60 hover:text-foreground',
+          'group flex h-9 w-full items-center gap-2.5 rounded-inner px-2.5 text-sm font-medium text-foreground transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+          isActive ? 'bg-foreground/[0.11]' : 'hover:bg-foreground/[0.06]',
         )
       }
     >
@@ -43,19 +37,12 @@ function NavRow({ entry }: { entry: NavEntry }) {
         <>
           <Icon
             aria-hidden="true"
-            className={cn('h-[18px] w-[18px]', !isActive && 'text-muted-strong')}
-            strokeWidth={1.75}
+            className={cn('h-[18px] w-[18px] flex-none', isActive ? 'text-accent' : 'text-muted')}
+            strokeWidth={1.9}
           />
-          <span className="flex-1">{t(entry.labelKey)}</span>
-          {entry.count !== undefined && entry.count > 0 ? (
-            <span
-              className={cn(
-                'font-mono text-[11px]',
-                isActive ? 'font-bold' : 'text-muted-strong/70',
-              )}
-            >
-              {entry.count}
-            </span>
+          <span className="min-w-0 flex-1 truncate">{entry.label}</span>
+          {entry.count ? (
+            <span className="num text-xs font-medium text-muted-strong">{entry.count}</span>
           ) : null}
         </>
       )}
@@ -63,62 +50,49 @@ function NavRow({ entry }: { entry: NavEntry }) {
   )
 }
 
-/** Desktop nav rail (spec board): brand, primary nav, modules, profile card. */
+function initial(name: string): string {
+  return name.trim().charAt(0).toUpperCase() || '?'
+}
+
+/**
+ * Desktop navigation: a floating glass panel inset from the window edge.
+ * «Создать ⌘N», the three hubs, the modules the user has on, and the profile
+ * at the bottom. The profile links to Settings until the Profile screen lands.
+ */
 export function Sidebar() {
   const { t } = useT()
   const { user } = useSession()
-  const { profile } = useProfile()
   const { habits } = useHabits()
   const enabled = useModulesStore((s) => s.enabled)
   const openCreate = useUiStore((s) => s.openCreate)
 
-  const dueCount = habits.filter((h) => (h.dueToday || h.isComplete) && !h.isComplete).length
+  const dueCount = habits.filter((h) => h.dueToday && !h.isComplete).length
   const name = (user?.user_metadata.display_name as string | undefined) ?? t('settings.you')
-  const roleLabel =
-    profile?.role === 'owner'
-      ? t('rail.owner')
-      : profile?.role === 'admin'
-        ? t('rail.admin')
-        : t('rail.member')
 
-  // Fixed primary nav: Today + the core modules (Habits, Insights). Always
-  // present, never toggled — the three buttons the app always answers with.
   const primary: NavEntry[] = [
-    { to: '/', labelKey: 'nav.today', icon: Home, end: true, count: dueCount },
-    ...CORE_MODULES.map((m): NavEntry => ({
-      to: m.to,
-      labelKey: `modules.${m.key}.label`,
-      icon: m.icon,
-      count: m.key === 'habits' ? habits.length : undefined,
-    })),
+    { to: '/', label: t('nav.today'), icon: House, end: true, count: dueCount },
+    { to: '/insights', label: t('nav.progress'), icon: ChartNoAxesColumn },
+    { to: '/more', label: t('nav.modules'), icon: LayoutGrid, end: true },
   ]
-
-  // Optional modules the user has switched on in the hub live under "Modules".
-  const modules: NavEntry[] = OPTIONAL_MODULES.filter((m) => enabled[m.key]).map((m) => ({
-    to: m.to,
-    labelKey: `modules.${m.key}.label`,
-    icon: m.icon,
-  }))
+  // Progress already has its own row above; the rest are the modules that are on.
+  const mine: NavEntry[] = NAV_MODULES.filter((m) => m.key !== 'insights' && enabled[m.key]).map(
+    (m) => ({ to: m.to, label: t(`modules.${m.key}.label`), icon: m.icon }),
+  )
 
   return (
-    <aside className="flex w-[250px] flex-none flex-col border-r bg-chrome px-[18px] py-6">
-      <Link
-        to="/"
-        viewTransition
-        className="mb-[22px] flex items-center gap-[11px] px-2 focus-visible:outline-none"
-      >
-        <BrandMark size="sm" />
-        <span className="font-mono text-[17px] font-bold tracking-[0.06em]">ALMANAC</span>
-      </Link>
-
-      {/* Desktop's "+": the same Create sheet, as a centred modal. */}
+    <aside className="lg fixed bottom-2 left-2 top-2 z-30 flex w-[236px] flex-col gap-0.5 rounded-[22px] px-3 pb-3 pt-3.5">
       <button
         type="button"
         onClick={() => openCreate()}
-        className="mb-3 flex h-10 items-center gap-2 rounded-control bg-accent-solid px-3 text-callout font-semibold text-on-accent-solid transition-colors hover:bg-accent-solid-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-chrome"
+        aria-haspopup="dialog"
+        aria-keyshortcuts="Meta+N"
+        className="mb-3 flex h-[38px] flex-none items-center gap-2 rounded-xl bg-accent-solid px-3 text-sm font-semibold text-on-accent-solid transition-colors hover:bg-accent-solid-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
       >
         <Plus className="h-[18px] w-[18px]" strokeWidth={2.4} aria-hidden="true" />
         {t('create.title')}
+        <kbd aria-hidden="true" className="kbd ml-auto bg-black/[0.14] text-inherit">
+          ⌘N
+        </kbd>
       </button>
 
       <nav aria-label={t('nav.primary')} className="flex flex-col gap-0.5">
@@ -127,48 +101,36 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <p className="px-3.5 pb-2.5 pt-[22px] font-mono text-[9.5px] uppercase tracking-label text-muted-strong/80">
-        {t('nav.modules')}
-      </p>
-      {modules.length > 0 ? (
-        <nav aria-label={t('nav.modules')} className="mb-1 flex flex-col gap-0.5">
-          {modules.map((entry) => (
-            <NavRow key={entry.to} entry={entry} />
-          ))}
-        </nav>
+      {mine.length > 0 ? (
+        <>
+          <p className="mx-2.5 mb-1 mt-4 text-xs font-semibold text-muted-strong">
+            {t('nav.myModules')}
+          </p>
+          <nav aria-label={t('nav.myModules')} className="flex flex-col gap-0.5">
+            {mine.map((entry) => (
+              <NavRow key={entry.to} entry={entry} />
+            ))}
+          </nav>
+        </>
       ) : null}
-      <NavLink
-        to="/more"
-        viewTransition
-        className={({ isActive }) =>
-          cn(
-            'flex items-center gap-[11px] rounded-[11px] px-3.5 py-[9px] text-[13.5px] transition-colors',
-            isActive ? 'text-foreground' : 'text-muted hover:text-foreground',
-          )
-        }
-      >
-        <span aria-hidden="true" className="h-[9px] w-[9px] rounded-[3px] bg-muted-strong/50" />
-        <span className="flex-1">{t('nav.more')}</span>
-        <span className="font-mono text-[9px] text-muted-strong/70">{t('nav.hub')}</span>
-      </NavLink>
-
-      <div className="flex-1" />
 
       <Link
         to="/settings"
         viewTransition
-        className="flex items-center gap-[11px] rounded-tile border bg-surface p-[11px] transition-colors hover:border-accent/40"
+        className="mt-auto flex w-full items-center gap-2.5 rounded-[14px] p-2 text-left transition-colors hover:bg-foreground/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
-        <Avatar name={name} size="sm" className="h-9 w-9 rounded-[11px]" />
+        <span
+          aria-hidden="true"
+          className="grid h-9 w-9 flex-none place-items-center rounded-full bg-gradient-to-br from-accent-bright to-accent-deep text-sm font-semibold text-on-accent-deep"
+        >
+          {initial(name)}
+        </span>
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-1.5">
-            <span className="truncate text-[13.5px] font-semibold">{name}</span>
+            <b className="truncate text-sm font-semibold">{name}</b>
             <NewBadgeDot />
           </span>
-          <span className="block font-mono text-[9.5px] text-muted-strong">{roleLabel}</span>
-        </span>
-        <span aria-hidden="true" className="text-sm text-muted-strong">
-          ⚙
+          <small className="block truncate text-xs text-muted">{t('nav.profileAndSettings')}</small>
         </span>
       </Link>
     </aside>

@@ -25,12 +25,16 @@ function readLocal(): SyncedSettings {
     theme: useThemeStore.getState().theme,
     locale: useLocaleStore.getState().locale,
     sound: usePrefsStore.getState().sound,
+    pinned: useModulesStore.getState().pinned,
   }
 }
 
 /** Put the account's settings on this device, without animating or re-uploading them. */
 function adopt(remote: SyncedSettings): void {
   if (remote.modules) useModulesStore.getState().adoptModules(remote.modules)
+  if (remote.pinned !== undefined && remote.pinned !== useModulesStore.getState().pinned) {
+    useModulesStore.getState().setPinned(remote.pinned)
+  }
   if (remote.sound !== undefined && remote.sound !== usePrefsStore.getState().sound) {
     usePrefsStore.getState().setSound(remote.sound)
   }
