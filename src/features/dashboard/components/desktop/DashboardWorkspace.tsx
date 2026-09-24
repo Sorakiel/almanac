@@ -4,7 +4,6 @@ import { Cascade } from '@/components/common/Cascade'
 import { CountUp } from '@/components/common/CountUp'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
-import { StatusLine } from '@/features/dashboard/components/StatusLine'
 import { NowBlock } from '@/features/dashboard/components/NowBlock'
 import { TodaysWorkoutsBlock } from '@/features/dashboard/components/TodaysWorkoutsBlock'
 import { DesktopHabitTile } from '@/features/dashboard/components/desktop/DesktopHabitTile'
@@ -172,8 +171,6 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
             unit={t('dashboard.habitsUnit')}
           />
         </section>
-
-        <StatusLine habitCount={habits.length} className="mt-6" />
       </Cascade>
     </div>
   )
