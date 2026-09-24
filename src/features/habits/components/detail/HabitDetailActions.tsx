@@ -31,7 +31,6 @@ function ActionRow({
       onClick={onClick}
       className={cn(
         'flex min-h-[50px] w-full items-center justify-between px-4 text-left text-body transition-colors hover:bg-foreground/[0.04] focus-visible:bg-foreground/[0.06] focus-visible:ring-0 focus-visible:ring-offset-0',
-        '[&+&]:border-t [&+&]:border-foreground/10',
         danger && 'text-danger',
       )}
     >
@@ -70,7 +69,12 @@ export function HabitDetailActions({
             />
           </div>
         ) : null}
-        <div className={cn(canFreeze && 'border-t border-foreground/10')}>
+        <div
+          className={cn(
+            'divide-y divide-foreground/10',
+            canFreeze && 'border-t border-foreground/10',
+          )}
+        >
           <ActionRow onClick={onEdit} trailing={chevron}>
             {t('habits.edit')}
           </ActionRow>

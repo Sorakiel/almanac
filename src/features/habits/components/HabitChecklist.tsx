@@ -42,7 +42,7 @@ export function HabitChecklist({ habit }: HabitChecklistProps) {
           return (
             <li
               key={subtask.id}
-              className="relative flex min-h-[60px] items-center gap-3 pl-2 pr-3.5 [&+&]:before:absolute [&+&]:before:left-[60px] [&+&]:before:right-0 [&+&]:before:top-0 [&+&]:before:h-px [&+&]:before:bg-foreground/10"
+              className="relative flex min-h-[60px] items-center gap-3 pl-2 pr-3.5 before:absolute before:left-[60px] before:right-0 before:top-0 before:h-px before:bg-foreground/10 first:before:hidden"
             >
               <button
                 type="button"
