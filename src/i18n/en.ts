@@ -375,12 +375,19 @@ export const en = {
     nextObservation: 'Next observation',
     observationOf: 'Observation {index} of {total}',
     quickAdd: 'Quick add',
-    closeQuickAdd: 'Close quick add',
     newHabit: 'New habit',
     adminConsole: 'Admin console',
     almanacWatches: 'The Almanac watches your day',
     updateDownloading: 'Update {version} — downloading…',
     updateInstalled: 'Update installed — restarting…',
+    createTitle: 'Create',
+    create: {
+      habit: 'Habit',
+      workouts: 'Workout',
+      reflect: 'Journal entry',
+      reading: 'Book',
+      flow: 'Focus',
+    },
     noDate: 'No date',
   },
   achievements: {
@@ -1496,7 +1503,6 @@ export const en = {
       one: 'You still have {count} habit to finish today.',
       other: 'You still have {count} habits to finish today.',
     },
-    dragToTurn: 'drag to turn',
     nowActive: '▶ now · active',
   },
   celebrate: {

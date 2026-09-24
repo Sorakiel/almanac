@@ -60,7 +60,7 @@ almanac/
 ├─ src/
 │  ├─ app/                 # everything that exists once per app
 │  │  ├─ App.tsx · router.tsx · providers.tsx · AppLayout.tsx
-│  │  ├─ shell/            # chrome: Sidebar, BottomNav, RadialAddMenu, banners, route fallback/error
+│  │  ├─ shell/            # chrome: Sidebar, BottomNav, AddButton + CreateSheet, banners, route fallback/error
 │  │  └─ hooks/            # app-wide effects: reminders, widget sync, celebration watchers
 │  ├─ components/
 │  │  ├─ ui/               # shadcn primitives (button, card, sheet, switch, segmented…)

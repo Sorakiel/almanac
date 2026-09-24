@@ -426,12 +426,19 @@ export const ru: Translations = {
     nextObservation: 'Следующее наблюдение',
     observationOf: 'Наблюдение {index} из {total}',
     quickAdd: 'Быстро добавить',
-    closeQuickAdd: 'Закрыть быстрое добавление',
     newHabit: 'Новая привычка',
     adminConsole: 'Консоль администратора',
     almanacWatches: 'Альманах наблюдает за вашим днём',
     updateDownloading: 'Обновление {version} — загрузка…',
     updateInstalled: 'Обновление установлено — перезапуск…',
+    createTitle: 'Создать',
+    create: {
+      habit: 'Привычка',
+      workouts: 'Тренировка',
+      reflect: 'Запись дня',
+      reading: 'Книга',
+      flow: 'Фокус',
+    },
     noDate: 'Без даты',
   },
   achievements: {
@@ -1620,7 +1627,6 @@ export const ru: Translations = {
       many: 'На сегодня осталось {count} привычек.',
       other: 'На сегодня осталось {count} привычки.',
     },
-    dragToTurn: 'крутите',
     nowActive: '▶ сейчас · идёт',
   },
   celebrate: {
