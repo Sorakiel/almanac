@@ -55,9 +55,8 @@ function join(
     // window of "expected" days it never existed for.
     const createdKey = localDateKey(timezone, new Date(habit.created_at))
 
-    // Sparkline holds the line across scheduled rest days (an "every 3 days"
-    // gap isn't a dip) and only falls on a genuine missed due-day — so a habit
-    // that's on cadence never reads as trending down.
+    // Rest days stay rest (an "every 3 days" gap isn't a miss), so the week
+    // dots only go empty on a genuine missed due-day.
     const cells = computeDayCells(
       habit,
       new Set(windowSlice.filter(doneOn)),
@@ -65,10 +64,6 @@ function join(
       windowSlice,
       todayKey,
       createdKey,
-    )
-    let held = 0
-    const series: number[] = cells.map((cell) =>
-      cell.status === 'done' ? (held = 1) : cell.status === 'missed' ? (held = 0) : held,
     )
     const expected = expectedCompletionsInWindow(
       habit,
@@ -94,7 +89,7 @@ function join(
       ...habit,
       todayCount,
       isComplete,
-      series,
+      week: cells.map((cell) => cell.status),
       completedRecent,
       windowDays: WINDOW_DAYS,
       rate: expected > 0 ? Math.min(completedRecent / expected, 1) : 0,

@@ -1,6 +1,6 @@
 import type { HabitFrequency } from '@/features/habits/types'
 
-/** Frequency filters, in cycle order. Labels come from `habits.filters.*` and
+/** Frequency filters, in display order. Labels come from `habits.filters.*` and
  *  are resolved at render — never here, or they stop following the language. */
 export const FILTERS: { value: HabitFrequency | 'all' }[] = [
   { value: 'all' },

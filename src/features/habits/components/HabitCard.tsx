@@ -5,8 +5,8 @@ import { PendingSyncMark } from '@/components/common/PendingSyncMark'
 import { Card } from '@/components/ui/card'
 import { CompletionToggle } from '@/components/common/CompletionToggle'
 import { IconTile } from '@/components/common/IconTile'
-import { Sparkline } from '@/components/common/Sparkline'
 import { StreakFlame } from '@/features/habits/components/StreakFlame'
+import { WeekDots } from '@/features/habits/components/WeekDots'
 import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
@@ -19,7 +19,7 @@ interface HabitCardProps {
   habit: HabitWithTodayLog
 }
 
-/** Rich habits-list card: icon, history stat, sparkline, one-tap check. */
+/** Rich habits-list card: icon, history stat, week dots, one-tap check. */
 export function HabitCard({ habit }: HabitCardProps) {
   const { t } = useT()
   const navigate = useNavigate()
@@ -98,7 +98,7 @@ export function HabitCard({ habit }: HabitCardProps) {
             </span>
           ) : null}
         </span>
-        <Sparkline values={habit.series} stroke={color.stroke} />
+        <WeekDots week={habit.week} color={color.stroke} className="mb-1" />
       </div>
     </Card>
   )

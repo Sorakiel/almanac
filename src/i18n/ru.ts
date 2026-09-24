@@ -1098,7 +1098,6 @@ export const ru: Translations = {
     loadOneFailed: 'Не удалось загрузить привычку',
     emptyTitle: 'Привычек пока нет',
     emptyHint: 'Создайте первую привычку, чтобы начать серию.',
-    filterHintMobile: 'Нажмите на фильтр, чтобы переключить частоту.',
     filterHintDesktop: 'Выберите другую частоту выше.',
     activeCount: {
       one: '{count} активная',
@@ -1197,7 +1196,6 @@ export const ru: Translations = {
       every_n_days: 'каждые n дней',
       every_n_weeks: 'каждые n недель',
     },
-    filterAria: 'Фильтр по частоте: {name}. Нажмите, чтобы переключить.',
     noneMatch: 'Ничего не подходит под «{name}»',
     form: {
       name: 'Название',
@@ -1240,6 +1238,7 @@ export const ru: Translations = {
     editOrder: 'Порядок',
     doneEditing: 'Готово',
     reorderHint: 'Перетащите привычку за ручку, чтобы изменить порядок на «Сегодня».',
+    weekDots: 'Выполнено {done} из последних {total} дней',
   },
   modules: {
     habits: { label: 'Привычки', description: 'Ежедневные отметки, серии и расписание.' },

@@ -11,7 +11,7 @@ import { TodayProgress } from '@/features/habits/components/TodayProgress'
 import { HabitsWorkspace } from '@/features/habits/components/desktop/HabitsWorkspace'
 import { HabitsRail } from '@/features/habits/components/desktop/HabitsRail'
 import { useHabits } from '@/features/habits/hooks/useHabits'
-import { FILTERS, FILTER_THRESHOLD } from '@/features/habits/lib/filters'
+import { FILTERS } from '@/features/habits/lib/filters'
 import { riseStagger } from '@/lib/motion'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useUiStore } from '@/stores/ui'
@@ -21,15 +21,12 @@ function HabitsPage() {
   const { t } = useT()
   const { habits, isLoading, isError, refetch } = useHabits()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
+  // Only the desktop workspace filters; on a phone the list is short enough to scan.
   const [filterIndex, setFilterIndex] = useState(0)
   // Reordering lives here, behind an explicit mode, so Today stays tap-only.
   const [reordering, setReordering] = useState(false)
   const isDesktop = useMediaQuery('(min-width: 1024px)')
 
-  const filter = FILTERS[filterIndex]!
-  const filterLabel = t(`habits.filters.${filter.value}`)
-  const visible =
-    filter.value === 'all' ? habits : habits.filter((h) => h.frequency === filter.value)
   const stagger = riseStagger()
 
   if (isDesktop) {
@@ -70,16 +67,6 @@ function HabitsPage() {
               {reordering ? t('habits.doneEditing') : t('habits.editOrder')}
             </Button>
           ) : null}
-          {!reordering && habits.length >= FILTER_THRESHOLD ? (
-            <button
-              type="button"
-              onClick={() => setFilterIndex((i) => (i + 1) % FILTERS.length)}
-              aria-label={t('habits.filterAria', { name: filterLabel })}
-              className="rounded-pill border px-3 py-2 font-mono text-[10px] tracking-label text-muted transition-colors hover:text-foreground"
-            >
-              ◇ {filterLabel} ‹›
-            </button>
-          ) : null}
         </div>
       </header>
 
@@ -107,23 +94,16 @@ function HabitsPage() {
       ) : (
         <>
           <TodayProgress habits={habits} />
-          {visible.length === 0 ? (
-            <EmptyState
-              title={t('habits.noneMatch', { name: filterLabel })}
-              description={t('habits.filterHintMobile')}
-            />
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {visible.map((habit, i) => {
-                const rise = stagger(i)
-                return (
-                  <li key={habit.id} className={rise.className} style={rise.style}>
-                    <HabitCard habit={habit} />
-                  </li>
-                )
-              })}
-            </ul>
-          )}
+          <ul className="flex flex-col gap-3">
+            {habits.map((habit, i) => {
+              const rise = stagger(i)
+              return (
+                <li key={habit.id} className={rise.className} style={rise.style}>
+                  <HabitCard habit={habit} />
+                </li>
+              )
+            })}
+          </ul>
           <Button size="lg" onClick={openNewHabit} className="w-full shadow-glow">
             <Plus className="h-4 w-4" />
             {t('habits.newHabit')}
