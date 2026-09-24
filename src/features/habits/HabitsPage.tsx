@@ -5,8 +5,8 @@ import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Rail } from '@/components/rail/Rail'
-import { AlmanacNarrator } from '@/features/dashboard/components/AlmanacNarrator'
 import { HabitCard } from '@/features/habits/components/HabitCard'
+import { SortableHabitList } from '@/features/habits/components/SortableHabitList'
 import { TodayProgress } from '@/features/habits/components/TodayProgress'
 import { HabitsWorkspace } from '@/features/habits/components/desktop/HabitsWorkspace'
 import { HabitsRail } from '@/features/habits/components/desktop/HabitsRail'
@@ -22,6 +22,8 @@ function HabitsPage() {
   const { habits, isLoading, isError, refetch } = useHabits()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
   const [filterIndex, setFilterIndex] = useState(0)
+  // Reordering lives here, behind an explicit mode, so Today stays tap-only.
+  const [reordering, setReordering] = useState(false)
   const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   const filter = FILTERS[filterIndex]!
@@ -57,16 +59,28 @@ function HabitsPage() {
           <p className="label-mono">// {t('habits.activeCount', { count: habits.length })}</p>
           <h1 className="mt-1 text-2xl">{t('habits.title')}</h1>
         </div>
-        {habits.length >= FILTER_THRESHOLD ? (
-          <button
-            type="button"
-            onClick={() => setFilterIndex((i) => (i + 1) % FILTERS.length)}
-            aria-label={t('habits.filterAria', { name: filterLabel })}
-            className="rounded-pill border px-3 py-2 font-mono text-[10px] tracking-label text-muted transition-colors hover:text-foreground"
-          >
-            ◇ {filterLabel} ‹›
-          </button>
-        ) : null}
+        <div className="flex items-center gap-2">
+          {habits.length > 1 ? (
+            <Button
+              size="sm"
+              variant={reordering ? 'primary' : 'surface'}
+              aria-pressed={reordering}
+              onClick={() => setReordering((on) => !on)}
+            >
+              {reordering ? t('habits.doneEditing') : t('habits.editOrder')}
+            </Button>
+          ) : null}
+          {!reordering && habits.length >= FILTER_THRESHOLD ? (
+            <button
+              type="button"
+              onClick={() => setFilterIndex((i) => (i + 1) % FILTERS.length)}
+              aria-label={t('habits.filterAria', { name: filterLabel })}
+              className="rounded-pill border px-3 py-2 font-mono text-[10px] tracking-label text-muted transition-colors hover:text-foreground"
+            >
+              ◇ {filterLabel} ‹›
+            </button>
+          ) : null}
+        </div>
       </header>
 
       {isLoading ? (
@@ -85,9 +99,13 @@ function HabitsPage() {
             </Button>
           }
         />
+      ) : reordering ? (
+        <>
+          <p className="text-sm text-muted">{t('habits.reorderHint')}</p>
+          <SortableHabitList habits={habits} />
+        </>
       ) : (
         <>
-          <AlmanacNarrator habits={habits} />
           <TodayProgress habits={habits} />
           {visible.length === 0 ? (
             <EmptyState

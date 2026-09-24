@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
+import { NewBadgeDot } from '@/components/common/NewBadgeDot'
 import { Avatar } from '@/components/common/Avatar'
 import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
@@ -15,7 +16,7 @@ import { TodayStrip } from '@/features/dashboard/components/TodayStrip'
 import { TodaysWorkoutsBlock } from '@/features/dashboard/components/TodaysWorkoutsBlock'
 import { DashboardWorkspace } from '@/features/dashboard/components/desktop/DashboardWorkspace'
 import { DashboardRail } from '@/features/dashboard/components/desktop/DashboardRail'
-import { SortableHabitList } from '@/features/habits/components/SortableHabitList'
+import { HabitRow } from '@/features/habits/components/HabitRow'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useDayCompletionBeacon } from '@/features/social/hooks/useDayCompletionBeacon'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
@@ -84,6 +85,7 @@ function DashboardPage() {
           </h1>
         </div>
         <Link to="/settings" aria-label={t('nav.profileAndSettings')} className="rounded-tile">
+          <NewBadgeDot corner />
           <Avatar name={name} size="sm" />
         </Link>
       </header>
@@ -114,7 +116,13 @@ function DashboardPage() {
               }
             />
           ) : (
-            <SortableHabitList habits={habits} />
+            <ul className="divide-y divide-border/10">
+              {habits.map((habit) => (
+                <li key={habit.id}>
+                  <HabitRow habit={habit} />
+                </li>
+              ))}
+            </ul>
           )}
         </section>
 

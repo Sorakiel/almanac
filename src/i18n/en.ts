@@ -234,7 +234,6 @@ export const en = {
     subtitle: 'A short reflection each day, paired with your quote of the day.',
     loading: 'Loading your journal…',
     loadFailed: 'Couldn’t load your journal',
-    tickerTitle: 'the journal // reading your entries',
     past: 'PAST',
     pastEmpty: 'Your past reflections will collect here, one day at a time.',
     pastEmptyShort: 'Your past reflections will collect here.',
@@ -245,22 +244,6 @@ export const en = {
     ratingAria: '{name} rating',
     ratingValueAria: '{name} {value} of 5',
     deleteAria: 'Delete reflection from {date}',
-    lines: {
-      gap: {
-        one: '{count} day since your last entry — pick the thread back up.',
-        other: '{count} days since your last entry — pick the thread back up.',
-      },
-      streak: {
-        one: '{count}-day journaling streak going.',
-        other: '{count}-day journaling streak going.',
-      },
-      days30: {
-        one: 'Journaled {count} day in the last 30.',
-        other: 'Journaled {count} days in the last 30.',
-      },
-      rating: 'Your days rate {rating}/5 on average lately.',
-      consistency: 'Reflecting on {pct}% of your days this month.',
-    },
     update: 'Update',
     energy: 'Energy',
     unknownAuthor: 'Unknown',
@@ -540,40 +523,10 @@ export const en = {
     emptyTitle: 'No insights yet',
     emptyHint: 'Add your first habit and start checking it off — your trends will build up here.',
     addFirstHabit: 'Add your first habit',
-    lines: {
-      habits: 'Habits at {pct}% over 30 days.',
-      habitsDelta: 'Habits at {pct}% over 30 days ({delta}% vs prior).',
-      bestStreak: {
-        one: 'Best run across habits: {count} day.',
-        other: 'Best run across habits: {count} days.',
-      },
-      workouts: {
-        one: '{count} training session logged this month.',
-        other: '{count} training sessions logged this month.',
-      },
-      pages: {
-        one: '{count} page read in the last 30 days.',
-        other: '{count} pages read in the last 30 days.',
-      },
-      booksReading: {
-        one: '{count} book in progress.',
-        other: '{count} books in progress.',
-      },
-      journalStreak: {
-        one: '{count}-day journaling streak going.',
-        other: '{count}-day journaling streak going.',
-      },
-      journaled: {
-        one: 'Journaled {count} day this month.',
-        other: 'Journaled {count} days this month.',
-      },
-      focusHours: '{hours}h of deep work logged all-time.',
-    },
     completion: 'completion',
     bestStreak: 'best streak',
     active: 'active',
     rangeLabel: 'Insights range',
-    tickerTitle: 'the almanac // reading everything',
     trendTitle: 'Completion over the last weeks',
     notEnoughHistory: 'Not enough history yet',
     nothingToCompare: 'No habits to compare yet.',
@@ -647,7 +600,6 @@ export const en = {
     books: 'books',
     finishedLower: 'finished',
     readingLower: 'reading',
-    tickerTitle: 'the shelf // reading your progress',
     statuses: { to_read: 'To read', reading: 'Reading', finished: 'Finished' },
     statusLabel: 'Reading status',
     started: 'Started',
@@ -734,38 +686,6 @@ export const en = {
     shelf: 'your shelf',
     snapshot: 'snapshot',
     finishedIn: 'finished {year}',
-    lines: {
-      finish: 'So close — “{title}” is {pct}% done. Finish it.',
-      furthest: {
-        one: '{count} book in progress — “{title}” leads at {pct}%.',
-        other: '{count} books in progress — “{title}” leads at {pct}%.',
-      },
-      progress: "You're {pct}% through “{title}”.",
-      reading: {
-        one: '{count} book on the go right now.',
-        other: '{count} books on the go right now.',
-      },
-      pages: {
-        one: '{value} page read in the last 30 days.',
-        other: '{value} pages read in the last 30 days.',
-      },
-      minutes: {
-        one: '{count} minute of reading logged this month.',
-        other: '{count} minutes of reading logged this month.',
-      },
-      sessions: {
-        one: '{count} reading session this month.',
-        other: '{count} reading sessions this month.',
-      },
-      finishedYear: {
-        one: '{count} book finished in {year}.',
-        other: '{count} books finished in {year}.',
-      },
-      shelf: {
-        one: '{count} book on your shelf. Pick one up.',
-        other: '{count} books on your shelf. Pick one up.',
-      },
-    },
   },
   workouts: {
     clockElapsed: 'elapsed',
@@ -841,39 +761,6 @@ export const en = {
     workoutComplete: 'Workout complete!',
     scheduleAndDelete: 'Schedule & delete',
     updateFailed: 'Could not update the workout',
-    lines: {
-      dueToday: {
-        one: '{count} session on the plan for today.',
-        other: '{count} sessions on the plan for today.',
-      },
-      overdue: {
-        one: '{count} planned session overdue — run or reschedule.',
-        other: '{count} planned sessions overdue — run or reschedule.',
-      },
-      rest: {
-        one: '{count} day since your last session — time to move.',
-        other: '{count} days since your last session — time to move.',
-      },
-      lastSession: {
-        one: 'Last session was {count} day ago.',
-        other: 'Last session was {count} days ago.',
-      },
-      upcoming: {
-        one: '{count} session coming up on your plan.',
-        other: '{count} sessions coming up on your plan.',
-      },
-      pr: 'Heaviest lift on record: {name} at {weight}kg × {reps}.',
-      done30d: {
-        one: '{count} session done in the last 30 days.',
-        other: '{count} sessions done in the last 30 days.',
-      },
-      volume30d: '{volume}kg of volume moved this month.',
-      topExercise: {
-        one: 'Most-trained lift: {name} across {count} session.',
-        other: 'Most-trained lift: {name} across {count} sessions.',
-      },
-    },
-    tickerTitle: 'the log // reading your training',
     trainedToday: 'You trained today. Nice work.',
     session: {
       title: 'Session',
@@ -891,7 +778,10 @@ export const en = {
       logFailed: 'Could not log the set',
       finishFailed: 'Could not finish the workout',
       completeSet: 'Complete set {number}',
-      effortTrace: 'Session effort trace',
+      resting: 'rest',
+      inProgress: 'in the workout',
+      paused: 'paused',
+      next: 'Next: {what}',
       railHint: 'Tick each set as you finish it — volume is reps × weight across completed sets.',
     },
     editor: {
@@ -1003,17 +893,6 @@ export const en = {
     repsForSet: 'Reps for set {n}',
     weightForSet: 'Weight for set {n}',
     setN: 'set {n}',
-    pulseHeader: '▷ session.pulse // {mode}',
-    pulseRest: 'rest {time}',
-    pulseSets: 'sets {done}/{total}',
-    pulseElapsed: 'elapsed {time}',
-    pulseTempo: '{tempo} / set',
-    pulseMode: {
-      working: 'under load',
-      recovery: 'recovering',
-      paused: 'paused',
-      complete: 'session complete',
-    },
     exerciseOf: 'exercise {n} / {total}',
     noExercisesShort: 'no exercises',
     repsCount: { one: '{count} rep', other: '{count} reps' },
@@ -1265,6 +1144,9 @@ export const en = {
     checklistLabel: 'checklist',
     confirmDeleteBody:
       '“{name}” goes with every check-in, freeze and checklist item. This can’t be undone — archive it instead to keep the history.',
+    editOrder: 'Reorder',
+    doneEditing: 'Done',
+    reorderHint: 'Drag a habit by its handle to change the order on Today.',
   },
   modules: {
     habits: { label: 'Habits', description: 'Daily tracking, streaks, and schedules.' },
@@ -1448,6 +1330,11 @@ export const en = {
       'The file is built in your browser and never leaves the device unless you send it somewhere.',
     ready: 'Export ready',
     failed: 'Could not export your data',
+  },
+  badges: {
+    new: 'New badge: {name}',
+    view: 'View',
+    unseen: 'New badge — not seen yet',
   },
   sync: {
     offline: 'Offline · changes will be saved',

@@ -16,7 +16,6 @@ import { WorkoutInsightsSection } from '@/features/insights/components/WorkoutIn
 import { ReadingInsightsSection } from '@/features/insights/components/ReadingInsightsSection'
 import { ReflectInsightsSection } from '@/features/insights/components/ReflectInsightsSection'
 import { FocusInsightsSection } from '@/features/insights/components/FocusInsightsSection'
-import { InsightsTicker } from '@/features/insights/components/InsightsTicker'
 import { InsightsWorkspace } from '@/features/insights/components/desktop/InsightsWorkspace'
 import { InsightsRail } from '@/features/insights/components/desktop/InsightsRail'
 import { insightRangeLabel } from '@/features/insights/lib/insightRange'
@@ -42,7 +41,6 @@ function InsightsPage() {
   // Fixed at 30d regardless of the user's range pick — the cross-module
   // ticker line always reads "over 30 days"; React Query dedupes the
   // underlying habits/logs fetch with the call above.
-  const { insights: tickerInsights } = useInsights('30d')
   const { data: workoutInsights, isLoading: woLoading } = useWorkoutInsights()
   const { data: readingInsights, isLoading: rdLoading } = useReadingInsights()
   const { data: reflectInsights, isLoading: rfLoading } = useReflectInsights()
@@ -99,7 +97,7 @@ function InsightsPage() {
           onRangeChange={setRange}
         />
         <Rail>
-          <InsightsRail insights={insights} tickerInsights={tickerInsights} />
+          <InsightsRail insights={insights} />
         </Rail>
       </>
     )
@@ -116,8 +114,6 @@ function InsightsPage() {
       </header>
 
       <Cascade>
-        <InsightsTicker habits={tickerInsights} />
-
         <YearStrip days={yearDays} todayKey={dateKey} />
 
         {habitHasData ? (

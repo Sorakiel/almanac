@@ -12,9 +12,7 @@ interface SessionQueueProps {
 
 function Eyebrow({ children }: { children: string }) {
   return (
-    <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-strong">
-      {children}
-    </p>
+    <p className="text-footnote font-medium text-muted-strong first-letter:uppercase">{children}</p>
   )
 }
 
@@ -41,7 +39,7 @@ function QueueCard({
           {exercise.name}
         </p>
         {target ? (
-          <p className="mt-0.5 truncate font-mono text-[10px] text-muted-strong">{target}</p>
+          <p className="num mt-0.5 truncate text-caption text-muted-strong">{target}</p>
         ) : null}
       </div>
       <span className="flex-none">{right}</span>
@@ -71,7 +69,7 @@ export function SessionQueue({ exercises, currentIndex }: SessionQueueProps) {
                 right={
                   <span
                     className={cn(
-                      'font-mono text-[10px] tabular-nums',
+                      'num text-caption',
                       i === 0 ? 'text-accent' : 'text-muted-strong',
                     )}
                   >

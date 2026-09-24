@@ -29,7 +29,7 @@ interface SortableHabitListProps {
   habits: HabitWithTodayLog[]
 }
 
-/** Today's habit list with drag-and-drop reordering (persists sort_order). */
+/** The habit list in reorder mode: drag-and-drop by the handle (persists sort_order). */
 export function SortableHabitList({ habits }: SortableHabitListProps) {
   const { t } = useT()
   const { reorder } = useHabitMutations()

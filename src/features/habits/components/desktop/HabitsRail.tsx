@@ -1,5 +1,4 @@
 import { IconTile } from '@/components/common/IconTile'
-import { AlmanacNarrator } from '@/features/dashboard/components/AlmanacNarrator'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
@@ -21,8 +20,6 @@ export function HabitsRail({ habits }: HabitsRailProps) {
 
   return (
     <div className="flex flex-col gap-5">
-      <AlmanacNarrator habits={habits} />
-
       <div>
         <p className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
           {t('habits.rail.thisWeek')}

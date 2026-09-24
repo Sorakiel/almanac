@@ -1,0 +1,24 @@
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+interface BadgesState {
+  /** A badge was unlocked that the user has not looked at yet. */
+  unseen: boolean
+  markUnseen: () => void
+  markSeen: () => void
+}
+
+/**
+ * The "you have a new badge" dot on the profile entry points. Device-local,
+ * like the seen-unlocks set it complements: it only means "not opened here".
+ */
+export const useBadgesStore = create<BadgesState>()(
+  persist(
+    (set) => ({
+      unseen: false,
+      markUnseen: () => set({ unseen: true }),
+      markSeen: () => set({ unseen: false }),
+    }),
+    { name: 'almanac.badges' },
+  ),
+)

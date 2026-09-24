@@ -5,7 +5,6 @@ import { LoadingState } from '@/components/common/LoadingState'
 import { Rail } from '@/components/rail/Rail'
 import { fetchQuotes, type Quote } from '@/features/dashboard/api/quotes.api'
 import { localizeQuotes } from '@/features/dashboard/lib/quotes'
-import { ReflectTicker } from '@/features/reflect/components/ReflectTicker'
 import { ReflectTimeline } from '@/features/reflect/components/ReflectTimeline'
 import { ReflectWorkspace } from '@/features/reflect/components/desktop/ReflectWorkspace'
 import { ReflectRail } from '@/features/reflect/components/desktop/ReflectRail'
@@ -62,8 +61,6 @@ function ReflectPage() {
         <p className="label-mono">// {t('reflect.eyebrow')}</p>
         <h1 className="mt-1 text-2xl">{t('reflect.title')}</h1>
       </header>
-
-      <ReflectTicker reflections={reflections} dateKey={dateKey} />
 
       <ReflectTimeline dateKey={dateKey} today={today} past={past} quoteById={quoteById} />
     </section>
