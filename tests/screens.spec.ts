@@ -66,8 +66,66 @@ async function seedHistory(): Promise<void> {
   if (logError) throw new Error(`could not seed the screens logs: ${logError.message}`)
 }
 
-test.beforeEach(seedHistory)
-test.afterEach(dropSeed)
+/**
+ * A planned workout for the live-session screen: one exercise, three sets, so
+ * the ring has progress to draw and "next" has something to name.
+ */
+const SESSION_WORKOUT = 'E2E screens · session'
+const SESSION_EXERCISE = 'E2E screens · squat'
+
+async function dropSession(): Promise<void> {
+  const db = await e2eClient()
+  const userId = await e2eUserId(db)
+  // Workout first: its workout_exercises cascade, and they restrict the exercise delete.
+  await db.from('workouts').delete().eq('user_id', userId).eq('name', SESSION_WORKOUT)
+  await db.from('exercises').delete().eq('user_id', userId).eq('name', SESSION_EXERCISE)
+}
+
+async function seedSession(): Promise<string> {
+  await dropSession()
+  const db = await e2eClient()
+  const userId = await e2eUserId(db)
+  const { data: workout, error } = await db
+    .from('workouts')
+    .insert({ user_id: userId, name: SESSION_WORKOUT })
+    .select('id')
+    .single()
+  if (error) throw new Error(`could not seed the session workout: ${error.message}`)
+  const { data: exercise, error: exerciseError } = await db
+    .from('exercises')
+    .insert({ user_id: userId, name: SESSION_EXERCISE })
+    .select('id')
+    .single()
+  if (exerciseError) throw new Error(`could not seed the exercise: ${exerciseError.message}`)
+  const { data: link, error: linkError } = await db
+    .from('workout_exercises')
+    .insert({ workout_id: workout.id, exercise_id: exercise.id, target_sets: 3, target_reps: 5 })
+    .select('id')
+    .single()
+  if (linkError) throw new Error(`could not attach the exercise: ${linkError.message}`)
+  const { error: setsError } = await db.from('set_logs').insert(
+    [1, 2, 3].map((n) => ({
+      workout_exercise_id: link.id,
+      set_number: n,
+      reps: 5,
+      weight: 80,
+      rest_seconds: 120,
+    })),
+  )
+  if (setsError) throw new Error(`could not seed the sets: ${setsError.message}`)
+  return workout.id
+}
+
+let sessionId = ''
+
+test.beforeEach(async () => {
+  await seedHistory()
+  sessionId = await seedSession()
+})
+test.afterEach(async () => {
+  await dropSeed()
+  await dropSession()
+})
 
 async function applyPrefs(page: Page, theme: string, locale: string): Promise<void> {
   await page.evaluate(
@@ -130,6 +188,23 @@ for (const v of VARIANTS) {
     await expect(page.getByRole('dialog')).toBeVisible()
     await shoot(page, `${v.name}-settings-password`)
     await page.keyboard.press('Escape')
+
+    // Live session: working (ring shows elapsed + set progress), then resting
+    // after a set is ticked (ring counts the set's own rest down).
+    await page.goto(`/train/${sessionId}/session`)
+    const complete = page.getByRole('button', {
+      name: v.locale === 'ru' ? 'Завершить подход 1' : 'Complete set 1',
+    })
+    await expect(complete).toBeVisible({ timeout: 20_000 })
+    await expectNoHorizontalScroll(page, `${v.name} session`)
+    await shoot(page, `${v.name}-session`)
+    await complete.click()
+    await expect(
+      page.getByRole('button', {
+        name: v.locale === 'ru' ? 'Завершить подход 2' : 'Complete set 2',
+      }),
+    ).toBeVisible()
+    await shoot(page, `${v.name}-session-rest`)
 
     expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
   })
