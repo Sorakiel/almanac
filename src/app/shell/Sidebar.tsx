@@ -2,6 +2,8 @@ import { Link, NavLink } from 'react-router-dom'
 import { ChartNoAxesColumn, House, LayoutGrid, Plus, type LucideIcon } from 'lucide-react'
 import { NewBadgeDot } from '@/components/common/NewBadgeDot'
 import { useHabits } from '@/features/habits/hooks/useHabits'
+import { avatarBackground, avatarColorKey, monogram } from '@/features/profile/lib/avatarColors'
+import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSession } from '@/hooks/useSession'
 import { NAV_MODULES, useModulesStore } from '@/stores/modules'
 import { useUiStore } from '@/stores/ui'
@@ -50,24 +52,23 @@ function NavRow({ entry }: { entry: NavEntry }) {
   )
 }
 
-function initial(name: string): string {
-  return name.trim().charAt(0).toUpperCase() || '?'
-}
-
 /**
  * Desktop navigation: a floating glass panel inset from the window edge.
  * «Создать ⌘N», the three hubs, the modules the user has on, and the profile
- * at the bottom. The profile links to Settings until the Profile screen lands.
+ * at the bottom.
  */
 export function Sidebar() {
   const { t } = useT()
   const { user } = useSession()
+  const { profile } = useProfile()
   const { habits } = useHabits()
   const enabled = useModulesStore((s) => s.enabled)
   const openCreate = useUiStore((s) => s.openCreate)
 
   const dueCount = habits.filter((h) => h.dueToday && !h.isComplete).length
-  const name = (user?.user_metadata.display_name as string | undefined) ?? t('settings.you')
+  // The same name and face as the profile screen: the row first, sign-up metadata as a fallback.
+  const metaName = user?.user_metadata.display_name as string | undefined
+  const name = profile?.display_name || metaName || t('settings.you')
 
   const primary: NavEntry[] = [
     { to: '/', label: t('nav.today'), icon: House, end: true, count: dueCount },
@@ -115,15 +116,16 @@ export function Sidebar() {
       ) : null}
 
       <Link
-        to="/settings"
+        to="/profile"
         viewTransition
         className="mt-auto flex w-full items-center gap-2.5 rounded-[14px] p-2 text-left transition-colors hover:bg-foreground/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <span
           aria-hidden="true"
-          className="grid h-9 w-9 flex-none place-items-center rounded-full bg-gradient-to-br from-accent-bright to-accent-deep text-sm font-semibold text-on-accent-deep"
+          style={{ background: avatarBackground(avatarColorKey(profile?.avatar_color)) }}
+          className="grid h-9 w-9 flex-none place-items-center rounded-full text-sm font-semibold text-on-accent-deep"
         >
-          {initial(name)}
+          {monogram(name)}
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-1.5">
