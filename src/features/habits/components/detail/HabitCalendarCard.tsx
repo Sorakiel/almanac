@@ -86,9 +86,10 @@ export function HabitCalendarCard({ stats }: HabitCalendarCardProps) {
               key={d.date}
               aria-current={d.today ? 'date' : undefined}
               className={cn(
-                'num grid aspect-square place-items-center rounded-full text-footnote font-medium',
+                // Capped at the phone's ~40px cell so a wide column keeps round days, not discs.
+                'num grid aspect-square w-full max-w-10 place-items-center justify-self-center rounded-full text-footnote font-medium',
                 DAY_CLASS[d.state],
-                d.today && 'text-foreground outline outline-2 -outline-offset-2 outline-accent',
+                d.today && 'text-foreground ring-2 ring-inset ring-accent',
               )}
             >
               {d.day}
