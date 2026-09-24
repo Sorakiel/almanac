@@ -273,6 +273,9 @@ for (const v of VARIANTS) {
       const slug = path === '/' ? 'dashboard' : path.slice(1)
       await expectNoHorizontalScroll(page, `${v.name} ${path}`)
       await shoot(page, `${v.name}-${slug}`)
+      // What the first screen really looks like: a full-page capture pins the
+      // fixed tab bar mid-page, which reads as an overlap that is not there.
+      if (path === '/') await shoot(page, `${v.name}-${slug}-fold`, false)
     }
 
     // Progress with the habits card open — the year strip lives inside it.
