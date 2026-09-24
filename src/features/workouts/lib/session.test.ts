@@ -6,10 +6,15 @@ import {
   estimateMinutes,
   formatClock,
   isExerciseDone,
+  nextSetLabel,
   plannedVolume,
   sessionProgress,
 } from '@/features/workouts/lib/session'
 import type { SessionExercise, SetLog } from '@/features/workouts/types'
+import { translate } from '@/i18n'
+
+const t = (key: Parameters<typeof translate>[1], vars?: Parameters<typeof translate>[2]) =>
+  translate('ru', key, vars)
 
 let setId = 0
 function makeSet(overrides: Partial<SetLog> = {}): SetLog {
@@ -136,5 +141,29 @@ describe('formatClock', () => {
 
   it('clamps negatives to zero', () => {
     expect(formatClock(-500)).toBe('0:00')
+  })
+})
+
+describe('nextSetLabel', () => {
+  it('names the next set of the same exercise with its target', () => {
+    const ex = makeExercise({
+      name: 'Жим',
+      targetSets: 3,
+      targetReps: 8,
+      targetWeight: 60,
+      sets: [makeSet({ set_number: 1, done: true }), makeSet({ set_number: 2 })],
+    })
+    expect(nextSetLabel([ex], t)).toBe('подход 2 · 3 × 8 · 60 кг')
+  })
+
+  it('names the next exercise when the current one is finished', () => {
+    const done = makeExercise({ name: 'Жим', sets: [makeSet({ done: true })] })
+    const next = makeExercise({ name: 'Тяга', sets: [makeSet({ set_number: 1 })] })
+    expect(nextSetLabel([done, next], t)).toBe('Тяга · подход 1')
+  })
+
+  it('is null when every set is logged', () => {
+    const ex = makeExercise({ sets: [makeSet({ done: true })] })
+    expect(nextSetLabel([ex], t)).toBeNull()
   })
 })

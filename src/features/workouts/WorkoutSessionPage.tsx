@@ -10,7 +10,7 @@ import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { CelebrationModal } from '@/components/common/CelebrationModal'
 import { CurrentExercisePanel } from '@/features/workouts/components/session/CurrentExercisePanel'
-import { SessionPulse } from '@/features/workouts/components/session/SessionPulse'
+import { RestRing } from '@/features/workouts/components/session/RestRing'
 import { SessionQueue } from '@/features/workouts/components/session/SessionQueue'
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
@@ -20,6 +20,7 @@ import {
   currentExerciseIndex,
   currentSet as firstUndoneSet,
   formatClock,
+  nextSetLabel,
   sessionProgress,
 } from '@/features/workouts/lib/session'
 import { cn } from '@/lib/utils'
@@ -37,7 +38,7 @@ function WorkoutSessionPage() {
   const start = useWorkoutSessionStore((s) => s.start)
   const pause = useWorkoutSessionStore((s) => s.pause)
   const end = useWorkoutSessionStore((s) => s.end)
-  const { elapsedMs, running, restMs, startRest, skipRest } = useSessionClock(record)
+  const { elapsedMs, running, restMs, restTotalMs, startRest, skipRest } = useSessionClock(record)
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
   const [finishing, setFinishing] = useState(false)
@@ -89,7 +90,8 @@ function WorkoutSessionPage() {
         onError: (e) => toast.error(toUserError(e, t, 'workouts.session.logFailed')),
       },
     )
-    startRest()
+    // The set's own rest if it has one, the standard interval otherwise.
+    startRest(currentSet.rest_seconds ?? undefined)
   }
 
   const togglePause = () => (running ? pause(id) : start(id))
@@ -126,15 +128,15 @@ function WorkoutSessionPage() {
           >
             <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           </button>
-          <span className="truncate font-mono text-xs font-semibold">{workout.name}</span>
+          <span className="min-w-0 truncate text-footnote font-semibold">{workout.name}</span>
           <span
             className={cn(
-              'flex flex-none items-center gap-1.5 font-mono text-[11px] uppercase tabular-nums tracking-label',
+              'flex flex-none items-center gap-1.5 text-footnote',
               running ? 'text-accent' : 'text-muted-strong',
             )}
           >
             <Timer className="h-3.5 w-3.5" aria-hidden="true" />
-            {formatClock(elapsedMs)}
+            <span className="num">{formatClock(elapsedMs)}</span>
             <span className="hidden sm:inline">
               {running ? t('workouts.clockElapsed') : t('workouts.clockPaused')}
             </span>
@@ -153,7 +155,7 @@ function WorkoutSessionPage() {
           </button>
         </div>
         <div className="flex flex-none items-center gap-2">
-          <span className="rounded-full bg-surface px-3.5 py-[7px] font-mono text-[11px] text-muted">
+          <span className="rounded-full bg-surface px-3.5 py-1.5 text-footnote text-muted">
             {exerciseLabel}
           </span>
           <button
@@ -183,9 +185,7 @@ function WorkoutSessionPage() {
               })}
             />
             <div className="flex-1" />
-            <span className="font-mono text-2xl font-semibold tabular-nums lg:text-[28px]">
-              {progress.pct}%
-            </span>
+            <span className="num text-headline font-semibold lg:text-title">{progress.pct}%</span>
           </div>
 
           {exercises.length === 0 ? (
@@ -208,13 +208,15 @@ function WorkoutSessionPage() {
                 ) : null}
               </div>
 
-              <SessionPulse
-                running={running}
+              <RestRing
                 restMs={restMs}
+                restTotalMs={restTotalMs}
+                running={running}
+                elapsedMs={elapsedMs}
                 doneSets={progress.doneSets}
                 totalSets={progress.totalSets}
-                elapsedMs={elapsedMs}
-                className="mt-7 h-[152px] flex-none lg:mt-9 lg:h-auto lg:min-h-0 lg:flex-1"
+                next={nextSetLabel(exercises, t)}
+                className="mt-7 flex-none lg:mt-9 lg:min-h-0 lg:flex-1"
               />
 
               {/* Action bar: persistent rest + complete */}
@@ -223,7 +225,7 @@ function WorkoutSessionPage() {
                   type="button"
                   onClick={() => (restMs !== null ? skipRest() : startRest())}
                   className={cn(
-                    'flex-none whitespace-nowrap rounded-[15px] border px-4 font-mono text-[13px] transition-colors sm:min-w-[120px]',
+                    'flex-none whitespace-nowrap rounded-control border px-4 text-footnote transition-colors sm:min-w-[120px]',
                     restMs !== null
                       ? 'border-accent/40 bg-accent/10 text-accent'
                       : 'bg-surface text-muted hover:text-foreground',
@@ -231,13 +233,17 @@ function WorkoutSessionPage() {
                 >
                   <span className="flex items-center justify-center gap-1.5 py-[18px]">
                     <Timer className="h-3.5 w-3.5" aria-hidden="true" />
-                    {restMs !== null ? formatClock(restMs) : t('workouts.restDefault')}
+                    {restMs !== null ? (
+                      <span className="num">{formatClock(restMs)}</span>
+                    ) : (
+                      t('workouts.restDefault')
+                    )}
                   </span>
                 </button>
                 <Button
                   size="lg"
                   className="h-auto flex-1 py-[18px] text-base shadow-glow"
-                  disabled={!currentSet || mutations.editSet.isPending}
+                  disabled={!currentSet}
                   onClick={completeCurrentSet}
                 >
                   <Check className="h-4 w-4" />

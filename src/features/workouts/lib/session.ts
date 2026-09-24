@@ -97,3 +97,20 @@ export function formatClock(ms: number): string {
   if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${ss}`
   return `${m}:${ss}`
 }
+
+/**
+ * What comes after the set just logged, for the rest ring: "set 3 · 8 × 60 kg"
+ * within the same exercise, or the next exercise's name when this one is done.
+ * Null when nothing is left.
+ */
+export function nextSetLabel(exercises: SessionExercise[], t: TFunction): string | null {
+  const index = currentExerciseIndex(exercises)
+  const exercise = index >= 0 ? exercises[index] : undefined
+  const set = exercise ? currentSet(exercise) : null
+  if (!exercise || !set) return null
+  const target = exerciseTargetLabel(exercise, t)
+  const setPart = t('workouts.setN', { n: set.set_number })
+  const detail = target ? `${setPart} · ${target}` : setPart
+  // The first set of an exercise means the previous one just finished: name it.
+  return set.set_number === 1 ? `${exercise.name} · ${detail}` : detail
+}
