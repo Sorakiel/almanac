@@ -1,5 +1,5 @@
 import { expect, type BrowserContext, type Page } from '@playwright/test'
-import { E2E_EMAIL, E2E_PASSWORD } from './supabase'
+import { E2E_EMAIL, E2E_PASSWORD, resetUserSettings } from './supabase'
 
 /**
  * Sign in through the real auth form and wait for the app shell.
@@ -7,7 +7,12 @@ import { E2E_EMAIL, E2E_PASSWORD } from './supabase'
  * Scoped to the `<form>` — the page also has a "Sign in with a passkey"
  * button outside it (RET-8), and `/sign in/i` alone now matches both.
  */
-export async function signIn(page: Page): Promise<void> {
+export async function signIn(
+  page: Page,
+  { keepSettings = false }: { keepSettings?: boolean } = {},
+): Promise<void> {
+  // Each spec starts from a neutral settings row unless it seeded one itself.
+  if (!keepSettings) await resetUserSettings()
   await page.goto('/auth')
   await page.getByLabel('Email').fill(E2E_EMAIL)
   await page.getByLabel('Password').fill(E2E_PASSWORD)
