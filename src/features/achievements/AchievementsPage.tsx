@@ -44,11 +44,11 @@ function AchievementsPage() {
     <div className="mx-auto flex max-w-[900px] flex-col gap-6">
       <div>
         <Link
-          to="/settings"
+          to="/profile"
           className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-foreground lg:hidden"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          {t('achievements.settings')}
+          {t('profile.title')}
         </Link>
 
         <header className="mt-3 flex items-end justify-between gap-4">

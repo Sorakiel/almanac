@@ -47,7 +47,7 @@ const InsightsPage = lazyWithReload(() => import('@/features/insights/InsightsPa
 const AdminPage = lazyWithReload(() => import('@/features/admin/AdminPage'))
 const AdminUserPage = lazyWithReload(() => import('@/features/admin/AdminUserPage'))
 const ModulesPage = lazyWithReload(() => import('@/features/modules/ModulesPage'))
-const SettingsPage = lazyWithReload(() => import('@/features/settings/SettingsPage'))
+const ProfilePage = lazyWithReload(() => import('@/features/profile/ProfilePage'))
 const WorkoutsPage = lazyWithReload(() => import('@/features/workouts/WorkoutsPage'))
 const WorkoutDetailPage = lazyWithReload(() => import('@/features/workouts/WorkoutDetailPage'))
 const WorkoutSessionPage = lazyWithReload(() => import('@/features/workouts/WorkoutSessionPage'))
@@ -100,7 +100,9 @@ export const router = createBrowserRouter([
           { path: '/reading/:id', element: suspend(<BookDetailPage />) },
           { path: '/friends', element: suspend(<SocialPage />) },
           { path: '/achievements', element: suspend(<AchievementsPage />) },
-          { path: '/settings', element: suspend(<SettingsPage />) },
+          { path: '/profile', element: suspend(<ProfilePage />) },
+          // Settings now live in the profile; old links and email redirects land there.
+          { path: '/settings', element: <Navigate to="/profile" replace /> },
         ],
       },
     ],

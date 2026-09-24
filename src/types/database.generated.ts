@@ -464,6 +464,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_color: string | null
           avatar_url: string | null
           created_at: string
           digest_day: number
@@ -482,6 +483,7 @@ export type Database = {
           timezone: string
         }
         Insert: {
+          avatar_color?: string | null
           avatar_url?: string | null
           created_at?: string
           digest_day?: number
@@ -500,6 +502,7 @@ export type Database = {
           timezone?: string
         }
         Update: {
+          avatar_color?: string | null
           avatar_url?: string | null
           created_at?: string
           digest_day?: number

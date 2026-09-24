@@ -28,7 +28,7 @@ const VARIANTS = [
   { name: 'desktop-coffee-ru', width: 1440, height: 900, theme: 'coffee', locale: 'ru' },
 ] as const
 
-const SCREENS = ['/', '/insights', '/flow', '/settings', '/social', '/habits'] as const
+const SCREENS = ['/', '/insights', '/flow', '/profile', '/social', '/habits'] as const
 
 /**
  * A habit with a few months of history, so Insights draws the year strip
@@ -186,10 +186,19 @@ for (const v of VARIANTS) {
     await shoot(page, `${v.name}-flow-custom`)
 
     // Password sheet: opened only, never submitted — the shared account's password stays put.
-    await page.goto('/settings')
+    await page.goto('/profile')
     await page.getByRole('button', { name: v.locale === 'ru' ? /Пароль/ : /Password/ }).click()
     await expect(page.getByRole('dialog')).toBeVisible()
-    await shoot(page, `${v.name}-settings-password`)
+    await shoot(page, `${v.name}-profile-password`)
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toBeHidden()
+
+    // Edit profile: opened only, never saved — the shared account's name stays put.
+    await page
+      .getByRole('button', { name: v.locale === 'ru' ? 'Изменить профиль' : 'Edit profile' })
+      .click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    await shoot(page, `${v.name}-profile-edit`, false)
     await page.keyboard.press('Escape')
     await expect(page.getByRole('dialog')).toBeHidden()
 

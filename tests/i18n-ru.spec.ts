@@ -29,7 +29,7 @@ const STATIC_ROUTES = [
   '/reading',
   '/friends',
   '/achievements',
-  '/settings',
+  '/profile',
 ]
 
 interface AccountData {

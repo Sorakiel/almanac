@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase'
 export async function requestEmailChange(email: string): Promise<string | null> {
   const { data, error } = await supabase.auth.updateUser(
     { email },
-    { emailRedirectTo: authRedirectTo('/settings') },
+    { emailRedirectTo: authRedirectTo('/profile') },
   )
   if (error) throw error
   return data.user.new_email ?? null

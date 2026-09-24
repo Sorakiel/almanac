@@ -9,6 +9,8 @@ export const LATIN_ALLOWED = new Set([
   'almanac',
   // sonner's own region label ("Notifications alt+T"), set in AppToaster.
   'notifications',
+  // A file format's name, like CSV (too short to be caught) — the export offers both.
+  'json',
 ])
 
 /** An English word: four or more Latin letters in a row. */

@@ -43,7 +43,7 @@ test('a theme picked here is saved to the account, even when picked offline', as
 }) => {
   const shell = await recordOfflineShell(context)
   await signIn(page)
-  await page.goto('/settings')
+  await page.goto('/profile')
   await page.getByRole('tab', { name: /coffee/i }).click()
   await expect.poll(savedTheme, { timeout: 15_000 }).toBe('coffee')
 

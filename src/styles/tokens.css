@@ -124,3 +124,32 @@
   --glass-shade: rgba(90, 60, 30, 0.18);
   --glass-highlight: rgba(255, 255, 255, 0.9);
 }
+
+/*
+ * Identity gradients — the same in both themes, like the brand mark: an avatar
+ * or a badge is the user's, not the theme's. Avatars pick one of five by key
+ * (`profiles.avatar_color`); medallions follow the achievement's tone; the
+ * settings list tints its 30px icon tiles from the same family (iOS Settings).
+ */
+:root {
+  --avatar-ember: linear-gradient(135deg, #ef8857, #c2562a);
+  --avatar-teal: linear-gradient(135deg, #3fb8a8, #1f6f66);
+  --avatar-amber: linear-gradient(135deg, #e0aa45, #a26e14);
+  --avatar-violet: linear-gradient(135deg, #8c7bd8, #5a4ba8);
+  --avatar-graphite: linear-gradient(135deg, #6b6b72, #3a3a40);
+
+  --medal-accent: linear-gradient(145deg, #e8743b, #b84a1f);
+  --medal-teal: linear-gradient(145deg, #3fb8a8, #1f6f66);
+  --medal-amber: linear-gradient(145deg, #e0aa45, #a26e14);
+
+  --tile-amber: #e0aa45;
+  --tile-ember: #e8743b;
+  --tile-rust: #c2562a;
+  --tile-teal: #3fb8a8;
+  --tile-pine: #1f8578;
+  --tile-ochre: #a26e14;
+  --tile-violet: #8c7bd8;
+  --tile-blue: #5a8bd8;
+  --tile-green: #52c48a;
+  --tile-graphite: #6b6b72;
+}
