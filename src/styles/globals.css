@@ -23,11 +23,9 @@
     background-attachment: fixed;
   }
 
-  /* Desktop workspace stays a flat paper frame (#F2EADB / #1B1B1D):
-     the phone's radial glow is dropped at lg. What replaces it is `--bg-veil`,
-     a 22%-tall wash of the same daylight colour — weak enough that panels keep
-     their edge against the canvas, present enough that the room changes over a
-     working day. Both variables are written by `useDaylight`. */
+  /* Desktop: the prototype's window glow — one radial pool from above the top
+     edge across the whole window, so the glass sidebar and the workspace share
+     one light. `--bg-veil` is written by `useDaylight` to follow the clock. */
   @media (min-width: 1024px) {
     body {
       background-image: var(--bg-veil);
@@ -287,6 +285,18 @@
     .action-sheet[data-state='open'],
     .action-sheet-scrim[data-state='open'] {
       animation: none;
+    }
+  }
+
+  /* Desktop context rail: only there when something is in it — the running
+     focus card or a page's <Rail> content. An empty rail was a dark strip
+     down the right of every screen that had nothing to say (D13). */
+  .context-rail {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .context-rail:has(> :not(:empty)) {
+      display: flex;
     }
   }
 
