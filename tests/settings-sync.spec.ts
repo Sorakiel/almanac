@@ -16,19 +16,25 @@ async function savedTheme(): Promise<string | null | undefined> {
   return data?.theme
 }
 
-test('a theme chosen on another device is applied on sign-in', async ({ page }) => {
-  const errors = watchConsole(page)
-  const db = await e2eClient()
-  const userId = await e2eUserId(db)
-  const { error } = await db
-    .from('user_settings')
-    .upsert({ user_id: userId, theme: 'coffee' }, { onConflict: 'user_id' })
-  if (error) throw error
+test.describe('in a dark-scheme browser', () => {
+  // So nothing but the account can make the page coffee: with the OS in light
+  // mode a default of "system" would paint coffee on its own.
+  test.use({ colorScheme: 'dark' })
 
-  // A fresh browser: nothing chosen locally, so the account's choice wins.
-  await signIn(page, { keepSettings: true })
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'coffee', { timeout: 15_000 })
-  expect(errors).toEqual([])
+  test('a theme chosen on another device is applied on sign-in', async ({ page }) => {
+    const errors = watchConsole(page)
+    const db = await e2eClient()
+    const userId = await e2eUserId(db)
+    const { error } = await db
+      .from('user_settings')
+      .upsert({ user_id: userId, theme: 'coffee' }, { onConflict: 'user_id' })
+    if (error) throw error
+
+    // A fresh browser: nothing chosen locally, so the account's choice wins.
+    await signIn(page, { keepSettings: true })
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'coffee', { timeout: 15_000 })
+    expect(errors).toEqual([])
+  })
 })
 
 test('a theme picked here is saved to the account, even when picked offline', async ({
@@ -43,6 +49,8 @@ test('a theme picked here is saved to the account, even when picked offline', as
 
   await shell.offline()
   await page.getByRole('tab', { name: /dark/i }).click()
+  // The theme lands a frame later, inside the view-transition callback.
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await page.reload()
   await expect(page.getByRole('tab', { name: /dark/i })).toHaveAttribute('aria-selected', 'true', {
     timeout: 20_000,
