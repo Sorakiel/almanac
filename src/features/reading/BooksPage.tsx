@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { BookOpen, Plus } from 'lucide-react'
 import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
@@ -10,6 +9,7 @@ import { BookFormSheet } from '@/features/reading/components/BookFormSheet'
 import { BooksWorkspace } from '@/features/reading/components/desktop/BooksWorkspace'
 import { BooksRail } from '@/features/reading/components/desktop/BooksRail'
 import { useBooks } from '@/features/reading/hooks/useBooks'
+import { useCreateIntent } from '@/hooks/useCreateIntent'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useT } from '@/hooks/useT'
 
@@ -17,7 +17,7 @@ function BooksPage() {
   const { t } = useT()
   const { books, isLoading, isError, refetch } = useBooks()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
-  const [formOpen, setFormOpen] = useState(false)
+  const [formOpen, setFormOpen] = useCreateIntent()
 
   const openNew = () => setFormOpen(true)
   const formSheet = formOpen ? <BookFormSheet open onOpenChange={setFormOpen} /> : null

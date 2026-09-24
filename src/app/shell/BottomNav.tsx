@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { Home, LayoutGrid, type LucideIcon } from 'lucide-react'
-import { RadialAddMenu } from '@/app/shell/RadialAddMenu'
+import { CreateButton } from '@/app/shell/CreateButton'
 import { CORE_MODULES } from '@/stores/modules'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'
@@ -80,7 +80,7 @@ export function BottomNav() {
           ))}
         </div>
 
-        <RadialAddMenu />
+        <CreateButton />
 
         <div className="flex flex-1 justify-around">
           {right.map((item) => (

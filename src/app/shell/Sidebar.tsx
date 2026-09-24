@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
-import { Home, type LucideIcon } from 'lucide-react'
+import { Home, Plus, type LucideIcon } from 'lucide-react'
 import { Avatar } from '@/components/common/Avatar'
 import { BrandMark } from '@/components/common/BrandMark'
 import { NewBadgeDot } from '@/components/common/NewBadgeDot'
@@ -7,6 +7,7 @@ import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSession } from '@/hooks/useSession'
 import { CORE_MODULES, OPTIONAL_MODULES, useModulesStore } from '@/stores/modules'
+import { useUiStore } from '@/stores/ui'
 import { useT } from '@/hooks/useT'
 import type { TranslationKey } from '@/i18n/types'
 import { cn } from '@/lib/utils'
@@ -69,6 +70,7 @@ export function Sidebar() {
   const { profile } = useProfile()
   const { habits } = useHabits()
   const enabled = useModulesStore((s) => s.enabled)
+  const openCreate = useUiStore((s) => s.openCreate)
 
   const dueCount = habits.filter((h) => (h.dueToday || h.isComplete) && !h.isComplete).length
   const name = (user?.user_metadata.display_name as string | undefined) ?? t('settings.you')
@@ -108,6 +110,16 @@ export function Sidebar() {
         <BrandMark size="sm" />
         <span className="font-mono text-[17px] font-bold tracking-[0.06em]">ALMANAC</span>
       </Link>
+
+      {/* Desktop's "+": the same Create sheet, as a centred modal. */}
+      <button
+        type="button"
+        onClick={() => openCreate()}
+        className="mb-3 flex h-10 items-center gap-2 rounded-control bg-accent-solid px-3 text-callout font-semibold text-on-accent-solid transition-colors hover:bg-accent-solid-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-chrome"
+      >
+        <Plus className="h-[18px] w-[18px]" strokeWidth={2.4} aria-hidden="true" />
+        {t('create.title')}
+      </button>
 
       <nav aria-label={t('nav.primary')} className="flex flex-col gap-0.5">
         {primary.map((entry) => (

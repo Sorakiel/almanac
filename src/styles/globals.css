@@ -271,3 +271,84 @@
     --toast-bottom: theme('spacing.6');
   }
 }
+
+/* ── Detent sheet (Create) ────────────────────────────────────────────────
+   Copied from the prototype's .p-sheet: 6 px in from the phone's edges so the
+   38 px corners follow the display's, 60 px of the screen left above it, and
+   two resting heights — large (0) and medium (the top 58 % showing). The
+   resting offset arrives as --sheet-y from DetentSheet. At lg it is the
+   desktop prototype's .dk-modal: a centred 500 px card. */
+.detent-sheet {
+  position: fixed;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  height: calc(100dvh - 60px);
+  border-radius: 38px;
+  transform: translateY(var(--sheet-y, 0px));
+  transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 -10px 40px rgb(0 0 0 / 0.25);
+}
+.detent-sheet[data-dragging] {
+  transition: none;
+}
+.detent-sheet[data-state='open'] {
+  animation: sheet-in 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.detent-sheet[data-state='closed'] {
+  animation: sheet-out 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+@media (min-width: 1024px) {
+  .detent-sheet {
+    /* Centred over the workspace, not the window: half the nav rail to the right. */
+    left: calc(50% + 125px);
+    right: auto;
+    top: 50%;
+    bottom: auto;
+    width: 500px;
+    height: auto;
+    max-height: min(680px, calc(100vh - 4rem));
+    border-radius: 30px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.55);
+  }
+  .detent-sheet[data-state='open'] {
+    animation: modal-in 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .detent-sheet[data-state='closed'] {
+    animation: modal-out 0.2s ease forwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detent-sheet,
+  .detent-sheet[data-state] {
+    transition: none;
+    animation-duration: 1ms;
+  }
+}
+
+/* No `to`: each runs to (or from) the element's own resting transform. */
+@keyframes sheet-in {
+  from {
+    transform: translateY(105%);
+  }
+}
+@keyframes sheet-out {
+  to {
+    transform: translateY(105%);
+  }
+}
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+@keyframes modal-out {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}

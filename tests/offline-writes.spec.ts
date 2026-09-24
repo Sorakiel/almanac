@@ -32,7 +32,10 @@ async function createHabit(page: Page, name = HABIT_NAME): Promise<void> {
     .first()
     .click()
   await page.getByLabel('Name').fill(name)
-  await page.getByRole('button', { name: /create habit/i }).click()
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: /^create$/i })
+    .click()
   // The sheet closes on the tap itself — it must never wait on the network.
   await expect(page.getByRole('dialog')).toBeHidden({ timeout: 3_000 })
   await expect(page.getByRole('link', { name })).toBeVisible()

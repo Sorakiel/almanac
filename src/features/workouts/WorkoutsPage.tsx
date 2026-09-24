@@ -17,6 +17,7 @@ import { WorkoutsRail } from '@/features/workouts/components/desktop/WorkoutsRai
 import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
 import { useTrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import { dayStateFor, workoutForDay } from '@/features/workouts/lib/week'
+import { useCreateIntent } from '@/hooks/useCreateIntent'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useT } from '@/hooks/useT'
 import { intlLocale } from '@/lib/dateLocale'
@@ -26,7 +27,7 @@ function WorkoutsPage() {
   const { workouts, isLoading, isError, refetch } = useWorkouts()
   const overview = useTrainingOverview()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
-  const [formOpen, setFormOpen] = useState(false)
+  const [formOpen, setFormOpen] = useCreateIntent()
   const [selectedKey, setSelectedKey] = useState(overview.todayKey)
 
   const openNew = () => setFormOpen(true)

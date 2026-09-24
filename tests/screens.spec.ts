@@ -145,10 +145,10 @@ async function expectNoHorizontalScroll(page: Page, label: string): Promise<void
   expect(overflow, `${label} scrolls sideways by ${overflow}px`).toBeLessThanOrEqual(1)
 }
 
-async function shoot(page: Page, file: string): Promise<void> {
+async function shoot(page: Page, file: string, fullPage = true): Promise<void> {
   // Let entrance cascades settle so the capture shows the resting layout.
   await page.waitForTimeout(700)
-  await page.screenshot({ path: `${OUT}/${file}.png`, fullPage: true })
+  await page.screenshot({ path: `${OUT}/${file}.png`, fullPage })
 }
 
 for (const v of VARIANTS) {
@@ -188,6 +188,22 @@ for (const v of VARIANTS) {
     await expect(page.getByRole('dialog')).toBeVisible()
     await shoot(page, `${v.name}-settings-password`)
     await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toBeHidden()
+
+    // Create sheet: the grid, then the quick habit form. Viewport-only — a
+    // full-page capture stretches a sheet sized to the viewport.
+    const create = v.locale === 'ru' ? 'Создать' : 'Create'
+    await page.getByRole('button', { name: create, exact: true }).click()
+    const sheet = page.getByRole('dialog', { name: create })
+    await expect(sheet).toBeVisible()
+    await shoot(page, `${v.name}-create`, false)
+    await sheet.getByRole('button', { name: v.locale === 'ru' ? /^Привычка/ : /^Habit/ }).click()
+    await expect(
+      page.getByRole('dialog', { name: v.locale === 'ru' ? 'Новая привычка' : 'New habit' }),
+    ).toBeVisible()
+    await shoot(page, `${v.name}-create-habit`, false)
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toBeHidden()
 
     // Live session: working (ring shows elapsed + set progress), then resting
     // after a set is ticked (ring counts the set's own rest down).
