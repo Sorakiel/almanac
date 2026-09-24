@@ -43,7 +43,7 @@ export function HabitsWorkspace({
     <div className="mx-auto max-w-[900px]">
       <header className="flex items-start justify-between">
         <div>
-          <p className="label-mono">// {t('habits.activeCount', { count: habits.length })}</p>
+          <p className="label-mono">{t('habits.activeCount', { count: habits.length })}</p>
           <h1 className="mt-1.5 text-[40px] leading-none tracking-title">{t('habits.title')}</h1>
         </div>
         {/* The empty state carries its own CTA; two identical buttons 200px

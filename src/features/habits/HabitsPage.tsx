@@ -53,7 +53,7 @@ function HabitsPage() {
     <section className="flex flex-col gap-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="label-mono">// {t('habits.activeCount', { count: habits.length })}</p>
+          <p className="label-mono">{t('habits.activeCount', { count: habits.length })}</p>
           <h1 className="mt-1 text-2xl">{t('habits.title')}</h1>
         </div>
         <div className="flex items-center gap-2">

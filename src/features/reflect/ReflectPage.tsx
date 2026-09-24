@@ -58,7 +58,7 @@ function ReflectPage() {
   return (
     <section className="flex flex-col gap-5">
       <header>
-        <p className="label-mono">// {t('reflect.eyebrow')}</p>
+        <p className="label-mono">{t('reflect.eyebrow')}</p>
         <h1 className="mt-1 text-2xl">{t('reflect.title')}</h1>
       </header>
 

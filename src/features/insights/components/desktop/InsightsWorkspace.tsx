@@ -47,7 +47,7 @@ export function InsightsWorkspace({
     <div className="mx-auto max-w-[900px]">
       <header className="flex items-start justify-between">
         <div>
-          <p className="label-mono">// {insightRangeLabel(range, t)}</p>
+          <p className="label-mono">{insightRangeLabel(range, t)}</p>
           <h1 className="mt-1.5 text-[44px] leading-none tracking-title">{t('insights.title')}</h1>
           <p className="mt-2 text-[15px] text-muted">{t('insights.subtitle')}</p>
         </div>

@@ -79,7 +79,7 @@ function DashboardPage() {
     <div className="flex flex-col gap-5 pt-1">
       <header className="flex items-start justify-between">
         <div>
-          <p className="label-mono">// {dateLabel}</p>
+          <p className="label-mono">{dateLabel}</p>
           <h1 className="mt-1 text-2xl">
             {greeting(new Date().getHours(), t)}, {firstName}
           </h1>

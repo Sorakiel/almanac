@@ -16,7 +16,7 @@ interface SheetProps {
   onOpenChange: (open: boolean) => void
   title: string
   description?: string
-  /** Render the title as a mono `// SECTION` micro-label (spec-board modals). */
+  /** Render the title as a small section label instead of a heading. */
   mono?: boolean
   /** Skip Radix's focus-first-field on open — avoids a stray ring on the name input. */
   preventInitialFocus?: boolean
@@ -134,7 +134,7 @@ export function Sheet({
             <Dialog.Title
               className={cn(mono ? 'label-mono' : 'text-lg font-semibold tracking-title')}
             >
-              {mono ? `// ${title}` : title}
+              {title}
             </Dialog.Title>
             <Dialog.Close
               aria-label={t('common.close')}

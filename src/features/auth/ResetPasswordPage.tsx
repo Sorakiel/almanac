@@ -43,7 +43,7 @@ function ResetPasswordPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 px-6 py-12">
       <div>
-        <p className="label-mono">// almanac</p>
+        <p className="label-mono">almanac</p>
         <h1 className="mt-1 text-3xl">{t('auth.reset.title')}</h1>
         <p className="mt-1 text-sm text-muted">
           {status === 'authenticated' ? t('auth.reset.hint') : t('auth.reset.expired')}

@@ -36,7 +36,7 @@ function ModulesPage() {
     <>
       <div className="flex flex-col gap-5 lg:max-w-[760px]">
         <header>
-          <p className="label-mono">// {t('modulesPage.commandCenter')}</p>
+          <p className="label-mono">{t('modulesPage.commandCenter')}</p>
           <h1 className="mt-1 text-2xl lg:mt-1.5 lg:text-[32px] lg:tracking-title">
             {t('modulesPage.title')}
           </h1>
