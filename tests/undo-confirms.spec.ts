@@ -10,7 +10,7 @@ const HABIT_NAME = 'E2E habit to delete'
 const BOOK_TITLE = 'E2E book to delete'
 const WORKOUT_NAME = 'E2E workout to delete'
 
-// The reflection list and the habit options menu are the phone layout.
+// The reflection list is the phone layout.
 test.use({ viewport: { width: 390, height: 844 } })
 
 async function clearRows(): Promise<void> {
@@ -93,8 +93,7 @@ test('a habit archives with Undo, and deletes for good only after a confirm', as
 
   await page.goto(`/habits/${id}`)
   await expect(page.getByRole('heading', { name: HABIT_NAME })).toBeVisible({ timeout: 20_000 })
-  await page.getByRole('button', { name: /habit options/i }).click()
-  await page.getByRole('button', { name: /archive habit/i }).click()
+  await page.getByRole('button', { name: /^archive$/i }).click()
   await expect(page).toHaveURL(/\/habits$/)
   await undo(page).click()
   // On the phone layout a list row opens through a button, not a link.
@@ -103,12 +102,11 @@ test('a habit archives with Undo, and deletes for good only after a confirm', as
 
   await page.goto(`/habits/${id}`)
   await expect(page.getByRole('heading', { name: HABIT_NAME })).toBeVisible({ timeout: 20_000 })
-  await page.getByRole('button', { name: /habit options/i }).click()
-  await page.getByRole('button', { name: /delete habit/i }).click()
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: /delete forever/i })
-    .click()
+  await page.getByRole('button', { name: /delete forever/i }).click()
+  // The red action sheet puts Cancel first: Enter must never destroy anything.
+  const sheet = page.getByRole('dialog', { name: /delete .* for good/i })
+  await expect(sheet.getByRole('button', { name: /cancel/i })).toBeFocused()
+  await sheet.getByRole('button', { name: /delete forever/i }).click()
   await expect(page).toHaveURL(/\/habits$/)
   await expect.poll(() => rowExists('habits', id), { timeout: 15_000 }).toBe(false)
   expect(errors).toEqual([])
