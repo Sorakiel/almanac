@@ -17,6 +17,7 @@ const HEATMAP_DAYS = 371 // 53 weeks
 export interface HabitDetailStats {
   streak: number
   best: number
+  /** Schedule-aware completion over the last 30 days. */
   ratePct: number
   /** Total completed days over the heatmap window. */
   total: number
@@ -24,6 +25,7 @@ export interface HabitDetailStats {
   heatmap: DayCell[]
   /** Local date key the habit was created — days before it are void, not rest. */
   createdKey: string
+  todayKey: string
   todayDone: boolean
   /** Today is protected by a streak freeze. */
   todayFrozen: boolean
@@ -123,6 +125,7 @@ function computeStats(
     total: completed.size,
     heatmap,
     createdKey,
+    todayKey,
     todayDone: completed.has(todayKey),
     todayFrozen: frozen.has(todayKey),
   }

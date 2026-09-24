@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { signIn, watchConsole } from './helpers/app'
+import { openPalette, signIn, watchConsole } from './helpers/app'
 
 test.describe('phone', () => {
   test.use({ viewport: { width: 390, height: 844 } })
@@ -28,9 +28,8 @@ test('⌘K palette runs a command from the keyboard', async ({ page }) => {
   const errors = watchConsole(page)
   await page.setViewportSize({ width: 1440, height: 900 })
   await signIn(page)
-  await page.keyboard.press('ControlOrMeta+k')
+  await openPalette(page)
   const input = page.getByRole('combobox')
-  await expect(input).toBeFocused()
   await input.fill('progress')
   await expect(page.getByRole('option', { selected: true })).toHaveText(/Open “Progress”/)
   await page.keyboard.press('Enter')

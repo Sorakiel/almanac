@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { signIn, watchConsole } from './helpers/app'
+import { openPalette, signIn, watchConsole } from './helpers/app'
 import { e2eClient, e2eUserId } from './helpers/supabase'
 
 /**
@@ -44,7 +44,7 @@ async function dropSeed(): Promise<void> {
   if (error) throw new Error(`could not clear the screens seed: ${error.message}`)
 }
 
-async function seedHistory(): Promise<void> {
+async function seedHistory(): Promise<string> {
   await dropSeed()
   const db = await e2eClient()
   const userId = await e2eUserId(db)
@@ -67,6 +67,7 @@ async function seedHistory(): Promise<void> {
     .map((i) => ({ user_id: userId, habit_id: data.id, date: day(i), count: 1 }))
   const { error: logError } = await db.from('habit_logs').insert(logs)
   if (logError) throw new Error(`could not seed the screens logs: ${logError.message}`)
+  return data.id
 }
 
 /**
@@ -120,9 +121,10 @@ async function seedSession(): Promise<string> {
 }
 
 let sessionId = ''
+let habitId = ''
 
 test.beforeEach(async () => {
-  await seedHistory()
+  habitId = await seedHistory()
   sessionId = await seedSession()
 })
 test.afterEach(async () => {
@@ -218,11 +220,25 @@ for (const v of VARIANTS) {
     await page.keyboard.press('Escape')
     await expect(page.getByRole('dialog')).toBeHidden()
 
+    // Habit detail: month calendar, then the year, then the red action sheet.
+    await page.goto(`/habits/${habitId}`)
+    await expect(page.getByRole('heading', { name: SEED_HABIT })).toBeVisible({ timeout: 20_000 })
+    await expectNoHorizontalScroll(page, `${v.name} habit detail`)
+    await shoot(page, `${v.name}-habit-detail`)
+    await page.getByRole('radio', { name: v.locale === 'ru' ? 'Год' : 'Year' }).click()
+    await shoot(page, `${v.name}-habit-detail-year`)
+    await page
+      .getByRole('button', { name: v.locale === 'ru' ? 'Удалить навсегда' : 'Delete forever' })
+      .click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    await shoot(page, `${v.name}-habit-delete-sheet`, false)
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toBeHidden()
+
     // ⌘K palette — desktop only; the phone has no keyboard shortcut to show.
     if (v.width >= 1024) {
       await page.goto('/')
-      await page.keyboard.press('ControlOrMeta+k')
-      await expect(page.getByRole('combobox')).toBeFocused()
+      await openPalette(page)
       await shoot(page, `${v.name}-palette`, false)
       await page.keyboard.press('Escape')
       await expect(page.getByRole('dialog')).toBeHidden()
