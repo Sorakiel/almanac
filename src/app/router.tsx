@@ -43,7 +43,7 @@ const DashboardPage = lazyWithReload(() => import('@/features/dashboard/Dashboar
 const HabitsPage = lazyWithReload(() => import('@/features/habits/HabitsPage'))
 const HabitDetailPage = lazyWithReload(() => import('@/features/habits/HabitDetailPage'))
 const FlowPage = lazyWithReload(() => import('@/features/flow/FlowPage'))
-const InsightsPage = lazyWithReload(() => import('@/features/insights/InsightsPage'))
+const ProgressPage = lazyWithReload(() => import('@/features/progress/ProgressPage'))
 const AdminPage = lazyWithReload(() => import('@/features/admin/AdminPage'))
 const AdminUserPage = lazyWithReload(() => import('@/features/admin/AdminUserPage'))
 const ModulesPage = lazyWithReload(() => import('@/features/modules/ModulesPage'))
@@ -91,7 +91,7 @@ export const router = createBrowserRouter([
           { path: '/train', element: suspend(<WorkoutsPage />) },
           { path: '/train/:id', element: suspend(<WorkoutDetailPage />) },
           { path: '/train/:id/edit', element: suspend(<WorkoutEditPage />) },
-          { path: '/insights', element: suspend(<InsightsPage />) },
+          { path: '/insights', element: suspend(<ProgressPage />) },
           { path: '/more', element: suspend(<ModulesPage />) },
           { path: '/admin', element: suspend(<AdminPage />) },
           { path: '/admin/user/:id', element: suspend(<AdminUserPage />) },

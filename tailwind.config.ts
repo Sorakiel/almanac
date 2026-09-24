@@ -98,10 +98,23 @@ export default {
       // Profile on wide screens: identity column + settings.
       gridTemplateColumns: {
         profile: '360px minmax(0, 1fr)',
+        // Progress bars: name · track · value (the prototype's `.p-hb`).
+        'bar-row': '110px minmax(0, 1fr) 46px',
+        'bar-row-wide': '170px minmax(0, 1fr) 46px',
       },
       // iOS-like overshoot for switches and toggles.
       transitionTimingFunction: {
         spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        // iOS sheet curve — detents, disclosures, anything that opens in place.
+        sheet: 'cubic-bezier(0.32, 0.72, 0, 1)',
+      },
+      // A disclosure that animates its height without measuring it.
+      gridTemplateRows: {
+        collapsed: '0fr',
+        expanded: '1fr',
+      },
+      transitionProperty: {
+        rows: 'grid-template-rows',
       },
       backdropBlur: {
         nav: '20px',

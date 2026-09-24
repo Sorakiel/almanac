@@ -74,7 +74,7 @@ almanac/
 │  │  │  ├─ lib/           # pure logic (streaks, schedules) — unit-tested
 │  │  │  └─ types.ts
 │  │  ├─ workouts/         # + stores/ for its device-local session clock
-│  │  ├─ reading/ · flow/ · insights/ · achievements/ · reflect/
+│  │  ├─ reading/ · flow/ · progress/ (the /insights route) · achievements/ · reflect/
 │  │  ├─ profile/          # /profile — identity + every setting (replaced the Settings screen)
 │  │  ├─ settings/         # the forms, sheets and api the profile opens (no page of its own)
 │  │  ├─ social/ · onboarding/ · modules/ · admin/ · auth/ · dashboard/
