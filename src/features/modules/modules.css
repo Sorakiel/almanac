@@ -1,0 +1,245 @@
+/*
+ * Modules and Customize — ported from the v0.6 prototypes (`.p-mgrid`,
+ * `.p-mt`, `.p-row` with `.p-handle`, `.p-radio`, `.dk-mods`, `.dk-card`).
+ * Plain CSS for the same reason as today.css: the values are the prototype's
+ * and would all be arbitrary Tailwind values.
+ */
+
+.mods {
+  --mods-card: rgb(var(--color-surface));
+  --mods-card2: color-mix(in srgb, rgb(var(--color-foreground)) 7%, var(--mods-card));
+  --mods-ink2: rgb(var(--color-muted));
+  --mods-ink3: rgb(var(--color-foreground) / 0.36);
+  --mods-sep: rgb(var(--color-border) / var(--border-opacity));
+}
+
+.mods-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin: 8px 2px 16px;
+}
+.mods-link {
+  padding: 6px 0;
+  color: rgb(var(--color-accent));
+  font-size: 17px;
+  font-weight: 500;
+}
+
+/* ---- tiles ---- */
+
+.mods-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.mods-tile {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 20px;
+  background: var(--mods-card);
+  text-align: left;
+  transition:
+    transform 0.15s,
+    opacity 0.3s;
+}
+.mods-tile:active {
+  transform: scale(0.97);
+}
+.mods-tile.is-off {
+  opacity: 0.45;
+}
+.mods-tile b {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+}
+.mods-tile small {
+  display: block;
+  hyphens: auto;
+  overflow-wrap: break-word;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--mods-ink2);
+}
+.mods-ic {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--hue) 18%, transparent);
+  color: var(--hue);
+}
+.mods-ic svg {
+  width: 20px;
+  height: 20px;
+}
+.mods-ic.is-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+}
+.mods-ic.is-small svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---- Customize lists ---- */
+
+.mods-sec-h {
+  margin: 0 4px 8px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.mods-group {
+  background: var(--mods-card);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.mods-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 0 14px 0 8px;
+  background: inherit;
+}
+.mods-row + .mods-row::before,
+.mods-radio-row + .mods-radio-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 60px;
+  right: 0;
+  height: 1px;
+  background: var(--mods-sep);
+}
+.mods-radio-row + .mods-radio-row::before {
+  left: 16px;
+}
+.mods-row.is-dragging {
+  z-index: 1;
+  box-shadow: 0 12px 30px -10px rgb(0 0 0 / 0.35);
+}
+.mods-handle {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 44px;
+  margin-left: 2px;
+  color: var(--mods-ink3);
+  cursor: grab;
+  touch-action: none;
+}
+.mods-handle:active {
+  cursor: grabbing;
+}
+.mods-handle svg {
+  width: 18px;
+  height: 18px;
+}
+.mods-row-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.mods-note {
+  margin: 8px 16px 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--mods-ink2);
+}
+
+.mods-radio-row {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 50px;
+  padding: 0 16px;
+  font-size: 17px;
+  text-align: left;
+}
+.mods-radio {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--mods-ink3);
+}
+[aria-checked='true'] > .mods-radio {
+  border-color: rgb(var(--color-accent));
+}
+[aria-checked='true'] > .mods-radio::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgb(var(--color-accent));
+}
+
+/* ---- desktop: tiles in three, Customize as a card on the right ---- */
+
+.mods-customize-card {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .mods-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    align-items: start;
+    gap: 24px;
+  }
+  .mods-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .mods-link {
+    display: none;
+  }
+  .mods-customize-card {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 16px;
+    border-radius: 20px;
+    background: var(--mods-card);
+  }
+  .mods-customize-card .mods-group {
+    background: var(--mods-card2);
+  }
+  .mods-customize-card b {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .mods-customize-card small {
+    font-size: 13px;
+    color: var(--mods-ink2);
+  }
+  .mods-customize-card .mods-note {
+    margin: 0 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mods *,
+  .mods *::before,
+  .mods *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

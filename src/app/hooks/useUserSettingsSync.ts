@@ -26,6 +26,7 @@ function readLocal(): SyncedSettings {
     locale: useLocaleStore.getState().locale,
     sound: usePrefsStore.getState().sound,
     pinned: useModulesStore.getState().pinned,
+    order: useModulesStore.getState().order,
   }
 }
 
@@ -34,6 +35,9 @@ function adopt(remote: SyncedSettings): void {
   if (remote.modules) useModulesStore.getState().adoptModules(remote.modules)
   if (remote.pinned !== undefined && remote.pinned !== useModulesStore.getState().pinned) {
     useModulesStore.getState().setPinned(remote.pinned)
+  }
+  if (remote.order && remote.order.join() !== useModulesStore.getState().order.join()) {
+    useModulesStore.getState().setOrder(remote.order)
   }
   if (remote.sound !== undefined && remote.sound !== usePrefsStore.getState().sound) {
     usePrefsStore.getState().setSound(remote.sound)

@@ -28,7 +28,16 @@ const VARIANTS = [
   { name: 'desktop-coffee-ru', width: 1440, height: 900, theme: 'coffee', locale: 'ru' },
 ] as const
 
-const SCREENS = ['/', '/progress', '/flow', '/profile', '/social', '/habits'] as const
+const SCREENS = [
+  '/',
+  '/progress',
+  '/flow',
+  '/profile',
+  '/social',
+  '/habits',
+  '/more',
+  '/more/customize',
+] as const
 
 /**
  * A habit with a few months of history, so Insights draws the year strip
@@ -270,7 +279,7 @@ for (const v of VARIANTS) {
     for (const path of SCREENS) {
       await page.goto(path)
       await page.waitForLoadState('networkidle')
-      const slug = path === '/' ? 'dashboard' : path.slice(1)
+      const slug = path === '/' ? 'dashboard' : path.slice(1).replaceAll('/', '-')
       await expectNoHorizontalScroll(page, `${v.name} ${path}`)
       await shoot(page, `${v.name}-${slug}`)
       // What the first screen really looks like: a full-page capture pins the

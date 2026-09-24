@@ -85,6 +85,24 @@ export function isPinnable(key: string): key is PinnableModule {
   return PINNABLE_MODULES.some((m) => m.key === key)
 }
 
+/** The toggleable modules, in the order the account set in Customize. */
+export type OrderedModule = Exclude<ModuleKey, 'habits' | 'insights'>
+export const DEFAULT_ORDER: OrderedModule[] = OPTIONAL_MODULES.map((m) => m.key as OrderedModule)
+
+export function isOrderedModule(key: string): key is OrderedModule {
+  return (DEFAULT_ORDER as string[]).includes(key)
+}
+
+/**
+ * A saved order made whole: unknown keys dropped, duplicates removed, and any
+ * module the saved list doesn't mention (a newer module, an older save)
+ * appended in its default place.
+ */
+export function normalizeOrder(saved: readonly string[]): OrderedModule[] {
+  const known = [...new Set(saved.filter(isOrderedModule))]
+  return [...known, ...DEFAULT_ORDER.filter((k) => !known.includes(k))]
+}
+
 const DEFAULTS: Record<ModuleKey, boolean> = {
   habits: true,
   insights: true,
@@ -112,6 +130,9 @@ interface ModulesState {
   /** The one module with its own tab in the phone tab bar, or null for none. */
   pinned: PinnableModule | null
   setPinned: (key: PinnableModule | null) => void
+  /** Module order on Today and in "My modules" — every toggleable module, on or off. */
+  order: OrderedModule[]
+  setOrder: (order: readonly string[]) => void
 }
 
 export const useModulesStore = create<ModulesState>()(
@@ -120,6 +141,8 @@ export const useModulesStore = create<ModulesState>()(
       enabled: DEFAULTS,
       pinned: null,
       setPinned: (key) => set({ pinned: key }),
+      order: DEFAULT_ORDER,
+      setOrder: (order) => set({ order: normalizeOrder(order) }),
       toggle: (key) =>
         set((state) => {
           // Core modules are permanent; ignore attempts to hide them.
@@ -141,10 +164,12 @@ export const useModulesStore = create<ModulesState>()(
       merge: (persisted, current) => {
         const saved = (persisted as Partial<ModulesState> | undefined)?.enabled ?? {}
         const pinned = (persisted as Partial<ModulesState> | undefined)?.pinned
+        const order = (persisted as Partial<ModulesState> | undefined)?.order
         return {
           ...current,
           enabled: withCoreOn({ ...DEFAULTS, ...saved }),
           pinned: typeof pinned === 'string' && isPinnable(pinned) ? pinned : null,
+          order: normalizeOrder(Array.isArray(order) ? order : []),
         }
       },
     },

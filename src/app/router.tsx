@@ -46,6 +46,7 @@ const FlowPage = lazyWithReload(() => import('@/features/flow/FlowPage'))
 const ProgressPage = lazyWithReload(() => import('@/features/progress/ProgressPage'))
 const AdminPage = lazyWithReload(() => import('@/features/admin/AdminPage'))
 const AdminUserPage = lazyWithReload(() => import('@/features/admin/AdminUserPage'))
+const CustomizePage = lazyWithReload(() => import('@/features/modules/CustomizePage'))
 const ModulesPage = lazyWithReload(() => import('@/features/modules/ModulesPage'))
 const ProfilePage = lazyWithReload(() => import('@/features/profile/ProfilePage'))
 const WorkoutsPage = lazyWithReload(() => import('@/features/workouts/WorkoutsPage'))
@@ -95,6 +96,7 @@ export const router = createBrowserRouter([
           // The screen was Insights until v0.6; old bookmarks and links land here.
           { path: '/insights', element: <Navigate to="/progress" replace /> },
           { path: '/more', element: suspend(<ModulesPage />) },
+          { path: '/more/customize', element: suspend(<CustomizePage />) },
           { path: '/admin', element: suspend(<AdminPage />) },
           { path: '/admin/user/:id', element: suspend(<AdminUserPage />) },
           { path: '/reflect', element: suspend(<ReflectPage />) },

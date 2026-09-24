@@ -7,6 +7,7 @@ const row = (over: Partial<Parameters<typeof fromRow>[0]> = {}) => ({
   locale: null,
   sound: null,
   pinned_tab: null,
+  home_order: null,
   updated_at: '2026-09-24T10:00:00Z',
   ...over,
 })
@@ -69,5 +70,21 @@ describe('toPatch', () => {
   it('writes only the columns present, so it never clears another device’s choice', () => {
     expect(toPatch({ theme: 'coffee' })).toEqual({ theme: 'coffee' })
     expect(toPatch({})).toEqual({})
+  })
+})
+
+describe('home order', () => {
+  it('reads a saved order whole, dropping unknown keys and appending missing ones', () => {
+    expect(fromRow(row({ home_order: ['reading', 'finances', 'reading', 'workouts'] }))).toEqual({
+      order: ['reading', 'workouts', 'flow', 'reflect', 'social'],
+    })
+    expect(fromRow(row())).not.toHaveProperty('order')
+  })
+
+  it('writes and diffs the order as a list', () => {
+    const order = ['flow', 'workouts', 'reflect', 'reading', 'social'] as const
+    expect(toPatch({ order: [...order] })).toEqual({ home_order: [...order] })
+    expect(changed({ order: [...order] }, { order: [...order] })).toEqual({})
+    expect(changed({ order: [...order] }, { order: [...order].reverse() })).toHaveProperty('order')
   })
 })
