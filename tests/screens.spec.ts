@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { signIn, watchConsole } from './helpers/app'
+import { openPalette, signIn, watchConsole } from './helpers/app'
 import { e2eClient, e2eUserId } from './helpers/supabase'
 
 /**
@@ -238,8 +238,7 @@ for (const v of VARIANTS) {
     // ⌘K palette — desktop only; the phone has no keyboard shortcut to show.
     if (v.width >= 1024) {
       await page.goto('/')
-      await page.keyboard.press('ControlOrMeta+k')
-      await expect(page.getByRole('combobox')).toBeFocused()
+      await openPalette(page)
       await shoot(page, `${v.name}-palette`, false)
       await page.keyboard.press('Escape')
       await expect(page.getByRole('dialog')).toBeHidden()
