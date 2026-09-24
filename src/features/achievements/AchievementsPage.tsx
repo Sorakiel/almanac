@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { ArrowLeft, Trophy } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ErrorState } from '@/components/common/ErrorState'
@@ -6,6 +7,7 @@ import { CountUp } from '@/components/common/CountUp'
 import { AchievementCard } from '@/features/achievements/components/AchievementCard'
 import { useAchievements } from '@/features/achievements/hooks/useAchievements'
 import { riseStagger } from '@/lib/motion'
+import { useBadgesStore } from '@/stores/badges'
 import { levelsEarned, unlockedCount } from '@/features/achievements/lib/evaluate'
 import { useT } from '@/hooks/useT'
 
@@ -23,6 +25,9 @@ function Stat({ value, label }: { value: number; label: string }) {
 function AchievementsPage() {
   const { t } = useT()
   const { achievements, isLoading, isError, refetch } = useAchievements()
+  // Opening the page is what "seen" means for the profile dot.
+  const markSeen = useBadgesStore((s) => s.markSeen)
+  useEffect(() => markSeen(), [markSeen])
 
   if (isLoading) {
     return <LoadingState label={t('achievements.loading')} />

@@ -2,6 +2,7 @@ import { Link, NavLink } from 'react-router-dom'
 import { Home, type LucideIcon } from 'lucide-react'
 import { Avatar } from '@/components/common/Avatar'
 import { BrandMark } from '@/components/common/BrandMark'
+import { NewBadgeDot } from '@/components/common/NewBadgeDot'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSession } from '@/hooks/useSession'
@@ -148,7 +149,10 @@ export function Sidebar() {
       >
         <Avatar name={name} size="sm" className="h-9 w-9 rounded-[11px]" />
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13.5px] font-semibold">{name}</span>
+          <span className="flex items-center gap-1.5">
+            <span className="truncate text-[13.5px] font-semibold">{name}</span>
+            <NewBadgeDot />
+          </span>
           <span className="block font-mono text-[9.5px] text-muted-strong">{roleLabel}</span>
         </span>
         <span aria-hidden="true" className="text-sm text-muted-strong">

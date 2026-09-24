@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
+import { NewBadgeDot } from '@/components/common/NewBadgeDot'
 import { Avatar } from '@/components/common/Avatar'
 import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
@@ -84,6 +85,7 @@ function DashboardPage() {
           </h1>
         </div>
         <Link to="/settings" aria-label={t('nav.profileAndSettings')} className="rounded-tile">
+          <NewBadgeDot corner />
           <Avatar name={name} size="sm" />
         </Link>
       </header>

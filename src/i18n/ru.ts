@@ -1574,6 +1574,11 @@ export const ru: Translations = {
     ready: 'Файл готов',
     failed: 'Не удалось выгрузить данные',
   },
+  badges: {
+    new: 'Новый значок: {name}',
+    view: 'Смотреть',
+    unseen: 'Есть новый значок',
+  },
   sync: {
     offline: 'Нет сети · изменения сохранятся',
     offlinePending: {

@@ -21,6 +21,7 @@ import {
   Volume2,
   SunMoon,
 } from 'lucide-react'
+import { NewBadgeDot } from '@/components/common/NewBadgeDot'
 import { Segmented } from '@/components/ui/segmented'
 import { Rail } from '@/components/rail/Rail'
 import { SettingsRail } from '@/features/settings/components/SettingsRail'
@@ -183,6 +184,7 @@ function SettingsPage() {
           <SettingsRow
             icon={Trophy}
             label={t('settings.achievements')}
+            badge={<NewBadgeDot />}
             onClick={() => navigate('/achievements')}
           />
           {supportVisible ? (

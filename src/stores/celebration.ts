@@ -1,22 +1,13 @@
-import type { ComponentType } from 'react'
-
 import { create } from 'zustand'
 
 export type CelebrationKind = 'perfect-day' | 'achievement' | 'pr' | 'milestone'
 
 export interface CelebrationPayload {
   kind: CelebrationKind
-  /** Headline for the modal / burst caption. */
+  /** The burst caption. */
   title: string
-  /** Supporting line, shown in the modal. */
+  /** Supporting line (read by screen readers with the caption). */
   message?: string
-  /** Badge glyph for the modal (e.g. the unlocked achievement's icon). */
-  icon?: ComponentType<{ className?: string }>
-  /**
-   * A full centered modal (achievement unlocks). Otherwise a lightweight
-   * top-of-screen confetti burst that auto-clears.
-   */
-  modal?: boolean
 }
 
 interface CelebrationState {
