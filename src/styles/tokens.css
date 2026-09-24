@@ -50,6 +50,10 @@
      the main canvas. Deeper than surface on dark, lighter on coffee. */
   --color-chrome: 21 21 23; /* #151517 */
   --color-panel: 36 36 39; /* #242427 */
+  /* Sheets and modals (prototype .p-card / .p-card2): the sheet itself and the
+     fields and tiles that sit on it. */
+  --color-sheet: 28 28 31; /* #1C1C1F */
+  --color-sheet-fill: 38 38 42; /* #26262A */
 
   /* Mobile canvas glow — the phone frame lifts a warm radial glow from the top
      edge into the base (spec board). Desktop keeps the frame flat (globals.css
@@ -104,6 +108,8 @@
      the warm card that sits on the #F2EADB workspace. */
   --color-chrome: 246 238 223; /* #F6EEDF — the prototype's second card tone */
   --color-panel: 255 251 243; /* #FFFBF3 */
+  --color-sheet: 255 251 243; /* #FFFBF3 */
+  --color-sheet-fill: 246 238 223; /* #F6EEDF */
 
   /* Coffee mobile glow — warm peach rising from the top into the paper canvas
      (spec board phone). Desktop stays flat #F2EADB (globals.css drops it at lg). */

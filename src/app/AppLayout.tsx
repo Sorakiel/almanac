@@ -10,6 +10,7 @@ import { RailActive } from '@/app/shell/RailActive'
 import { ErrorState } from '@/components/common/ErrorState'
 import { RailTargetProvider } from '@/components/rail/Rail'
 import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
+import { CreateSheet } from '@/app/shell/CreateSheet'
 import { useCelebrationWatchers } from '@/app/hooks/useCelebrationWatchers'
 import { useDailyReminder } from '@/app/hooks/useDailyReminder'
 import { useNativeWidgetSync } from '@/app/hooks/useNativeWidgetSync'
@@ -118,6 +119,7 @@ export function AppLayout() {
           </div>
         )}
         <HabitFormSheet />
+        <CreateSheet />
         <SyncCapsule />
         <CelebrationHost />
       </div>

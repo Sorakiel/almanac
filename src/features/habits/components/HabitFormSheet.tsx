@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input'
 import { Sheet } from '@/components/ui/sheet'
 import { CountStepper } from '@/features/habits/components/CountStepper'
 import { InlineSelect } from '@/features/habits/components/InlineSelect'
-import { HabitChecklistDraftEditor } from '@/features/habits/components/HabitChecklistDraftEditor'
 import { HabitChecklistEditor } from '@/features/habits/components/HabitChecklistEditor'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
@@ -90,23 +89,23 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
 }
 
-/** Create/edit bottom sheet with icon, color, repeats, and time-of-day pickers. */
+/** Edit sheet for an existing habit: icon, colour, repeats, time of day, checklist. */
 export function HabitFormSheet() {
   const { t } = useT()
   const habitForm = useUiStore((s) => s.habitForm)
   const closeHabitForm = useUiStore((s) => s.closeHabitForm)
   const { habits } = useHabits()
-  const { create, update, archive, restore } = useHabitMutations()
+  const { update, archive, restore } = useHabitMutations()
 
-  const editing = habitForm && habitForm !== 'new' ? habits.find((h) => h.id === habitForm) : null
-  const open = habitForm !== null
+  // New habits are made in the Create sheet; this one only edits.
+  const editing = habitForm ? (habits.find((h) => h.id === habitForm) ?? null) : null
+  const open = editing !== null
 
   const { register, handleSubmit, reset, control, setValue, formState } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: DEFAULTS,
   })
   const values = useWatch({ control }) as FormValues
-  const [draftChecklist, setDraftChecklist] = useState<string[]>([])
 
   const preset = presetOf(values.frequency)
   const unit: CustomUnit = FREQ_UNIT[values.frequency] ?? 'days'
@@ -117,28 +116,22 @@ export function HabitFormSheet() {
   // input (the "clicking Weekly does nothing" bug).
   const lastResetKey = useRef<string | null>(null)
   useEffect(() => {
-    if (!open) {
+    if (!editing) {
       lastResetKey.current = null
       return
     }
-    const key = editing ? editing.id : 'new'
-    if (lastResetKey.current === key) return
-    lastResetKey.current = key
-    reset(
-      editing
-        ? {
-            name: editing.name,
-            description: editing.description ?? '',
-            icon: (editing.icon as HabitIcon) ?? 'sparkles',
-            color: (editing.color as HabitColor) ?? 'accent',
-            frequency: editing.frequency,
-            target_count: editing.target_count,
-            time_of_day: editing.time_of_day ?? 'anytime',
-          }
-        : DEFAULTS,
-    )
-    setDraftChecklist([])
-  }, [open, editing, reset])
+    if (lastResetKey.current === editing.id) return
+    lastResetKey.current = editing.id
+    reset({
+      name: editing.name,
+      description: editing.description ?? '',
+      icon: (editing.icon as HabitIcon) ?? 'sparkles',
+      color: (editing.color as HabitColor) ?? 'accent',
+      frequency: editing.frequency,
+      target_count: editing.target_count,
+      time_of_day: editing.time_of_day ?? 'anytime',
+    })
+  }, [editing, reset])
 
   const selectSimplePreset = (next: Exclude<Preset, 'custom'>) => {
     setValue('frequency', next)
@@ -170,15 +163,8 @@ export function HabitFormSheet() {
       target_count: isCustom ? v.target_count : 1,
       time_of_day: v.time_of_day,
     }
-    if (editing) {
-      // No "saved" toast: the change is on screen the moment the sheet closes.
-      update.mutate({ id: editing.id, input }, { onError: onSaveError })
-    } else {
-      const id = crypto.randomUUID()
-      const checklist = draftChecklist.map((title) => ({ id: crypto.randomUUID(), title }))
-      create.mutate({ ...input, id, checklist }, { onError: onSaveError })
-      toastWithUndo(t('habits.created'), t('common.undo'), () => archive.mutate(id))
-    }
+    // No "saved" toast: the change is on screen the moment the sheet closes.
+    if (editing) update.mutate({ id: editing.id, input }, { onError: onSaveError })
     closeHabitForm()
   })
 
@@ -194,7 +180,7 @@ export function HabitFormSheet() {
     <Sheet
       open={open}
       onOpenChange={(next) => !next && closeHabitForm()}
-      title={editing ? t('habits.editHabit') : t('habits.newHabit')}
+      title={t('habits.editHabit')}
       mono
       preventInitialFocus
     >
@@ -341,14 +327,10 @@ export function HabitFormSheet() {
           </div>
         </div>
 
-        {editing ? (
-          <HabitChecklistEditor habit={editing} />
-        ) : (
-          <HabitChecklistDraftEditor items={draftChecklist} onChange={setDraftChecklist} />
-        )}
+        {editing ? <HabitChecklistEditor habit={editing} /> : null}
 
         <Button type="submit" size="lg" className="mt-1">
-          {editing ? t('habits.form.save') : t('habits.form.create')}
+          {t('habits.form.save')}
         </Button>
 
         {editing ? (

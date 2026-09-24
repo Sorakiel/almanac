@@ -53,7 +53,10 @@ async function runHabitJourney(page: Page): Promise<void> {
     .first()
     .click()
   await page.getByLabel('Name').fill(HABIT_NAME)
-  await page.getByRole('button', { name: /create habit/i }).click()
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: /^create$/i })
+    .click()
 
   // Habit cards on /habits are buttons ("Open <name>"); on the dashboard the
   // same habit is a link. Assert each in its own vocabulary rather than
