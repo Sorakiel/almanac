@@ -72,7 +72,7 @@ export function Sidebar() {
 
   const primary: NavEntry[] = [
     { to: '/', label: t('nav.today'), icon: House, end: true, count: dueCount },
-    { to: '/insights', label: t('nav.progress'), icon: ChartNoAxesColumn },
+    { to: '/progress', label: t('nav.progress'), icon: ChartNoAxesColumn },
     { to: '/more', label: t('nav.modules'), icon: LayoutGrid, end: true },
   ]
   // Progress already has its own row above; the rest are the modules that are on.

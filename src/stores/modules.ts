@@ -39,7 +39,7 @@ export const NAV_MODULES: NavModule[] = [
   {
     key: 'insights',
     icon: BarChart3,
-    to: '/insights',
+    to: '/progress',
     core: true,
   },
   {

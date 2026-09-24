@@ -23,7 +23,7 @@ const STATIC_ROUTES = [
   '/habits',
   '/flow',
   '/train',
-  '/insights',
+  '/progress',
   '/more',
   '/reflect',
   '/reading',

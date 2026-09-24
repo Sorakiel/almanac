@@ -28,7 +28,7 @@ const VARIANTS = [
   { name: 'desktop-coffee-ru', width: 1440, height: 900, theme: 'coffee', locale: 'ru' },
 ] as const
 
-const SCREENS = ['/', '/insights', '/flow', '/profile', '/social', '/habits'] as const
+const SCREENS = ['/', '/progress', '/flow', '/profile', '/social', '/habits'] as const
 
 /**
  * A habit with a few months of history, so Insights draws the year strip
@@ -262,7 +262,7 @@ for (const v of VARIANTS) {
     await expect(page.locator('html')).toHaveAttribute('lang', v.locale)
 
     // Progress has loaded its data once the habits card (seeded above) is drawn.
-    await page.goto('/insights')
+    await page.goto('/progress')
     await expect(
       page.getByRole('region', { name: v.locale === 'ru' ? 'Привычки' : 'Habits' }),
     ).toBeVisible()
@@ -279,7 +279,7 @@ for (const v of VARIANTS) {
     }
 
     // Progress with the habits card open — the year strip lives inside it.
-    await page.goto('/insights')
+    await page.goto('/progress')
     const habits = page.getByRole('region', { name: v.locale === 'ru' ? 'Привычки' : 'Habits' })
     await expect(habits).toBeVisible()
     // The phone opens details on tap; the desktop shows them without a button.

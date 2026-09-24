@@ -29,7 +29,7 @@ function startsWith(pathname: string, to: string): boolean {
  */
 function activeTab(pathname: string, pinnedTo: string | null): string | null {
   if (pathname === '/') return 'today'
-  if (startsWith(pathname, '/insights')) return 'progress'
+  if (startsWith(pathname, '/progress')) return 'progress'
   if (pinnedTo && startsWith(pathname, pinnedTo)) return 'pinned'
   if (startsWith(pathname, '/more') || NAV_MODULES.some((m) => startsWith(pathname, m.to)))
     return 'modules'
@@ -51,7 +51,7 @@ export function BottomNav() {
 
   const tabs: Tab[] = [
     { key: 'today', to: '/', label: t('nav.today'), icon: House },
-    { key: 'progress', to: '/insights', label: t('nav.progress'), icon: ChartNoAxesColumn },
+    { key: 'progress', to: '/progress', label: t('nav.progress'), icon: ChartNoAxesColumn },
     ...(pinned
       ? [
           {

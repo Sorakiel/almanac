@@ -12,7 +12,7 @@ test.describe('phone', () => {
     await expect(tabs.first()).toHaveAttribute('aria-current', 'page')
 
     await tabs.nth(1).click()
-    await expect(page).toHaveURL(/\/insights$/)
+    await expect(page).toHaveURL(/\/progress$/)
     await expect(tabs.nth(1)).toHaveAttribute('aria-current', 'page')
 
     // A module opened from the hub still belongs to the Modules tab.
@@ -33,7 +33,7 @@ test('⌘K palette runs a command from the keyboard', async ({ page }) => {
   await input.fill('progress')
   await expect(page.getByRole('option', { selected: true })).toHaveText(/Open “Progress”/)
   await page.keyboard.press('Enter')
-  await expect(page).toHaveURL(/\/insights$/)
+  await expect(page).toHaveURL(/\/progress$/)
   await expect(page.getByRole('dialog')).toBeHidden()
   expect(errors).toEqual([])
 })
