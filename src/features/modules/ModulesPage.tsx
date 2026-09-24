@@ -13,6 +13,7 @@ import { SOON_MODULES } from '@/features/modules/soon'
 import { NAV_MODULES, useModulesStore, type ModuleKey } from '@/stores/modules'
 import { cn } from '@/lib/utils'
 import { useT } from '@/hooks/useT'
+import { intlLocale } from '@/lib/dateLocale'
 
 /** Per-module icon tint, keyed to the shared NAV_MODULES list. */
 const MODULE_TONE: Record<ModuleKey, string> = {
@@ -26,7 +27,7 @@ const MODULE_TONE: Record<ModuleKey, string> = {
 }
 
 function ModulesPage() {
-  const { t } = useT()
+  const { t, locale } = useT()
   const navigate = useNavigate()
   const enabled = useModulesStore((s) => s.enabled)
   const toggle = useModulesStore((s) => s.toggle)
@@ -95,23 +96,15 @@ function ModulesPage() {
             </div>
           </section>
 
-          <section className="flex flex-col gap-3">
-            <SectionLabel>{t('modulesPage.comingSoon')}</SectionLabel>
-            <div className="grid grid-cols-3 gap-3">
-              {SOON_MODULES.map((m) => (
-                <div
-                  key={m.key}
-                  className="flex flex-col items-center gap-2 rounded-[18px] border border-dashed px-3 py-4 text-center opacity-80"
-                >
-                  <IconTile icon={m.icon} tone="bg-border/10 text-muted" size="sm" />
-                  <p className="text-[13px] font-medium text-muted">
-                    {t(`modulesPage.soonModules.${m.key}`)}
-                  </p>
-                  <Tag tone="muted">{t('modulesPage.soon')}</Tag>
-                </div>
-              ))}
-            </div>
-          </section>
+          <p className="px-1 text-sm text-muted">
+            {t('modulesPage.soonLine', {
+              list: new Intl.ListFormat(intlLocale(locale), { type: 'conjunction' }).format(
+                SOON_MODULES.map((m) =>
+                  t(`modulesPage.soonModules.${m.key}`).toLocaleLowerCase(locale),
+                ),
+              ),
+            })}
+          </p>
 
           <button
             type="button"
