@@ -52,7 +52,7 @@ export function WorkoutsWorkspace({
   return (
     <div className="mx-auto w-full max-w-[900px]">
       <header>
-        <p className="label-mono">// {overview.week.label}</p>
+        <p className="label-mono">{overview.week.label}</p>
         <div className="mt-1.5 flex items-center justify-between gap-4">
           <h1 className="text-[40px] leading-none tracking-title">{t('workouts.title')}</h1>
           <Button onClick={onNew} className="flex-none shadow-glow">

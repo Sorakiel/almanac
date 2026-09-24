@@ -80,7 +80,7 @@ export function DashboardWorkspace({ habits, greeting, firstName }: DashboardWor
     <div className="mx-auto max-w-[900px]">
       <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
         <div className="min-w-0">
-          <p className="label-mono">// {weekday}</p>
+          <p className="label-mono">{weekday}</p>
           <h1 className="mt-1.5 text-[44px] leading-none tracking-title">
             {greeting}, {firstName}
           </h1>

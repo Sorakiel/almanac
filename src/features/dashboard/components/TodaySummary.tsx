@@ -37,7 +37,7 @@ export function TodaySummary({ habits }: TodaySummaryProps) {
       <div className="relative flex items-center gap-4">
         <CompletionDonut completed={done} total={total} size={148} />
         <div className="min-w-0 flex-1">
-          <p className="label-mono">// {t('dashboard.today')}</p>
+          <p className="label-mono">{t('dashboard.today')}</p>
           <p className="mt-1 font-mono text-lg tabular-nums">
             <span className="text-foreground">{done}</span>
             <span className="text-muted">

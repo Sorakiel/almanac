@@ -53,7 +53,7 @@ function AchievementsPage() {
 
         <header className="mt-3 flex items-end justify-between gap-4">
           <div>
-            <p className="label-mono">// {t('achievements.eyebrow')}</p>
+            <p className="label-mono">{t('achievements.eyebrow')}</p>
             <h1 className="mt-1 flex items-center gap-2 text-2xl lg:text-[32px] lg:tracking-title">
               <Trophy className="h-6 w-6 text-accent" aria-hidden="true" />
               {t('achievements.title')}

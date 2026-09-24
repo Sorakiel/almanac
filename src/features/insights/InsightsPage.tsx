@@ -107,7 +107,7 @@ function InsightsPage() {
     <section className="flex flex-col gap-6">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="label-mono">// {insightRangeLabel(range, t)}</p>
+          <p className="label-mono">{insightRangeLabel(range, t)}</p>
           <h1 className="mt-1 text-2xl">{t('insights.title')}</h1>
         </div>
         <RangeToggle value={range} onChange={setRange} className="mt-0.5" />

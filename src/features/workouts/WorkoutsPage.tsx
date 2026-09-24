@@ -66,7 +66,7 @@ function WorkoutsPage() {
     <section className="flex flex-col gap-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="label-mono">// {overview.week.label}</p>
+          <p className="label-mono">{overview.week.label}</p>
           <h1 className="mt-1 text-2xl">{t('workouts.title')}</h1>
         </div>
       </header>

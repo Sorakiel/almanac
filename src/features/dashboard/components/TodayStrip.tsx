@@ -45,7 +45,7 @@ export function TodayStrip({ habits }: TodayStripProps) {
         }}
       />
       <div className="relative flex items-baseline justify-between">
-        <span className="label-mono">// {t('dashboard.today')}</span>
+        <span className="label-mono">{t('dashboard.today')}</span>
         <span className="font-mono text-[13px] tabular-nums">
           <span className="text-foreground">{done}</span>
           <span className="text-muted"> / {total}</span>

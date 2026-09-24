@@ -73,7 +73,7 @@ function SocialPage() {
   return (
     <section className="flex flex-col gap-6">
       <header>
-        <p className="label-mono">// {t('social.yourCircleLower')}</p>
+        <p className="label-mono">{t('social.yourCircleLower')}</p>
         <h1 className="mt-1 text-2xl">{t('social.title')}</h1>
       </header>
 
@@ -94,7 +94,7 @@ function SocialPage() {
         />
 
         <section className="flex flex-col gap-3">
-          <p className="label-mono">// {t('social.activity')}</p>
+          <p className="label-mono">{t('social.activity')}</p>
           <ActivityFeed feed={feed} todayKey={dateKey} hasFriends={data.friends.length > 0} />
         </section>
 

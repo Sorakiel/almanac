@@ -138,7 +138,7 @@ function FlowPage() {
   return (
     <div className="flex flex-col gap-5 lg:mx-auto lg:max-w-xl">
       <header>
-        <p className="label-mono">// {t('flow.deepWork')}</p>
+        <p className="label-mono">{t('flow.deepWork')}</p>
         <h1 className="mt-1 text-2xl">{t('flow.title')}</h1>
       </header>
 
