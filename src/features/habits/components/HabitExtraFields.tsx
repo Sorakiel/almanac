@@ -82,7 +82,7 @@ export function HabitExtraFields({ value, onChange }: HabitExtraFieldsProps) {
           value={value.description}
           onChange={(event) => set({ description: event.target.value })}
           placeholder={t('create.descriptionPlaceholder')}
-          className="bg-sheet-fill h-12 w-full rounded-control px-3.5 text-body text-foreground placeholder:text-muted-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+          className="h-12 w-full rounded-control bg-sheet-fill px-3.5 text-body text-foreground placeholder:text-muted-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
         />
       </label>
 

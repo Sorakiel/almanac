@@ -90,7 +90,7 @@ export function CreateSheet() {
               key={action.key}
               type="button"
               onClick={() => run(action.key)}
-              className="bg-sheet-fill grid justify-items-start gap-2.5 rounded-card p-3.5 text-left transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-95"
+              className="grid justify-items-start gap-2.5 rounded-card bg-sheet-fill p-3.5 text-left transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-95"
             >
               <IconTile icon={action.icon} tone={action.tone} size="sm" />
               <span className="text-callout font-semibold">
