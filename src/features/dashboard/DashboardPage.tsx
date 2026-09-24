@@ -16,7 +16,7 @@ import { TodayStrip } from '@/features/dashboard/components/TodayStrip'
 import { TodaysWorkoutsBlock } from '@/features/dashboard/components/TodaysWorkoutsBlock'
 import { DashboardWorkspace } from '@/features/dashboard/components/desktop/DashboardWorkspace'
 import { DashboardRail } from '@/features/dashboard/components/desktop/DashboardRail'
-import { SortableHabitList } from '@/features/habits/components/SortableHabitList'
+import { HabitRow } from '@/features/habits/components/HabitRow'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useDayCompletionBeacon } from '@/features/social/hooks/useDayCompletionBeacon'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
@@ -116,7 +116,13 @@ function DashboardPage() {
               }
             />
           ) : (
-            <SortableHabitList habits={habits} />
+            <ul className="divide-y divide-border/10">
+              {habits.map((habit) => (
+                <li key={habit.id}>
+                  <HabitRow habit={habit} />
+                </li>
+              ))}
+            </ul>
           )}
         </section>
 

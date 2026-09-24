@@ -1157,6 +1157,9 @@ export const en = {
     checklistLabel: 'checklist',
     confirmDeleteBody:
       '“{name}” goes with every check-in, freeze and checklist item. This can’t be undone — archive it instead to keep the history.',
+    editOrder: 'Reorder',
+    doneEditing: 'Done',
+    reorderHint: 'Drag a habit by its handle to change the order on Today.',
   },
   modules: {
     habits: { label: 'Habits', description: 'Daily tracking, streaks, and schedules.' },
