@@ -1,26 +1,17 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
+import { SettingsItem } from '@/features/profile/components/SettingsItem'
 import { useAuthActions } from '@/features/auth/hooks/useAuthActions'
 import { useT } from '@/hooks/useT'
 import { toUserError } from '@/lib/userError'
 
-interface SignOutButtonProps {
-  className?: string
-}
-
 /**
- * Sign out, behind a confirmation.
- *
- * Signing out destroys nothing — the data is on the server — but it sits at the
- * bottom of a scrolling settings list on mobile, where a mis-tap costs you a
- * password entry to undo. Cheap to confirm, annoying to hit by accident.
- *
- * Owns its own state so both shells (the mobile page and the desktop rail) get
- * the same behaviour from one place.
+ * «Выйти» as the last red row, behind a confirm: nothing is lost by signing
+ * out, but it sits at the bottom of a long scroll where a mis-tap costs a
+ * password to undo.
  */
-export function SignOutButton({ className }: SignOutButtonProps) {
+export function SignOutItem() {
   const { t } = useT()
   const { logOut } = useAuthActions()
   const [confirming, setConfirming] = useState(false)
@@ -36,14 +27,12 @@ export function SignOutButton({ className }: SignOutButtonProps) {
 
   return (
     <>
-      <Button
-        variant="outline"
-        className={className}
+      <SettingsItem
+        label={t('settings.signOut')}
+        tone="danger"
+        center
         onClick={() => setConfirming(true)}
-        disabled={logOut.isPending}
-      >
-        {t('settings.signOut')}
-      </Button>
+      />
       {confirming ? (
         <ConfirmSheet
           open

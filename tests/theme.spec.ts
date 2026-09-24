@@ -5,7 +5,7 @@ test('switches between dark and coffee and remembers the choice', async ({ page 
   const errors = watchConsole(page)
   await signIn(page)
 
-  await page.goto('/settings')
+  await page.goto('/profile')
   await page.getByRole('tab', { name: /coffee/i }).click()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'coffee')
 

@@ -75,7 +75,9 @@ almanac/
 │  │  │  └─ types.ts
 │  │  ├─ workouts/         # + stores/ for its device-local session clock
 │  │  ├─ reading/ · flow/ · insights/ · achievements/ · reflect/
-│  │  ├─ social/ · onboarding/ · modules/ · settings/ · admin/ · auth/ · dashboard/
+│  │  ├─ profile/          # /profile — identity + every setting (replaced the Settings screen)
+│  │  ├─ settings/         # the forms, sheets and api the profile opens (no page of its own)
+│  │  ├─ social/ · onboarding/ · modules/ · admin/ · auth/ · dashboard/
 │  ├─ lib/                 # framework-free helpers: supabase, queryClient, offlineMutations, optimistic, date, analytics
 │  │  └─ platform/         # runtime bridges: notify, push, serviceWorker, desktop (Tauri), statusBar/widgetBridge/androidUpdater (Capacitor)…
 │  ├─ hooks/               # cross-cutting hooks (useT, useSession, useToday, useNow, useOfflineMutation)
@@ -102,7 +104,7 @@ All user-owned tables carry `user_id` and are protected by RLS. Use `timestamptz
 
 | Table                | Key columns                                                                                                                                                                                                                                                                                            |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `profiles`           | id → auth.users, display_name, avatar_url, timezone, role (`user`\|`admin`\|`owner`), onboarded, reminder_enabled, reminder_hour, reminder_minute, reminder_sent_on, digest_enabled, digest_day, digest_hour, digest_minute, digest_sent_on, created_at                                                |
+| `profiles`           | id → auth.users, display_name, avatar_url, avatar_color (gradient key, null = ember), timezone, role (`user`\|`admin`\|`owner`), onboarded, reminder_enabled, reminder_hour, reminder_minute, reminder_sent_on, digest_enabled, digest_day, digest_hour, digest_minute, digest_sent_on, created_at     |
 | `habits`             | id, user_id, name, description, icon, color, frequency (`daily`\|`weekly`\|`x_per_week`), target_count, sort_order, archived_at, created_at                                                                                                                                                            |
 | `habit_logs`         | id, user_id, habit_id, date (local calendar date), count, note, created_at — **unique(habit_id, date)**                                                                                                                                                                                                |
 | `workouts`           | id, user_id, name, scheduled_date, completed_at, created_at                                                                                                                                                                                                                                            |

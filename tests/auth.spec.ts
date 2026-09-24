@@ -11,12 +11,12 @@ test('signs in, lands on the dashboard, signs out', async ({ page }) => {
   await signIn(page)
   await expect(page.getByText(/today · habits/i)).toBeVisible()
 
-  await page.goto('/settings')
+  await page.goto('/profile')
   // Signing out is behind a confirmation — the first click only opens the sheet.
   await page.getByRole('button', { name: /sign out/i }).click()
   const confirm = page.getByRole('dialog')
   await expect(confirm).toBeVisible()
-  await expect(page).toHaveURL(/\/settings$/)
+  await expect(page).toHaveURL(/\/profile$/)
   await confirm.getByRole('button', { name: /sign out/i }).click()
   await expect(page).toHaveURL(/\/auth$/)
 

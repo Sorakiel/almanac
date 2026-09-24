@@ -28,7 +28,7 @@ const VARIANTS = [
   { name: 'desktop-coffee-ru', width: 1440, height: 900, theme: 'coffee', locale: 'ru' },
 ] as const
 
-const SCREENS = ['/', '/insights', '/flow', '/settings', '/social', '/habits'] as const
+const SCREENS = ['/', '/insights', '/flow', '/profile', '/social', '/habits'] as const
 
 /**
  * A habit with a few months of history, so Insights draws the year strip
@@ -186,10 +186,19 @@ for (const v of VARIANTS) {
     await shoot(page, `${v.name}-flow-custom`)
 
     // Password sheet: opened only, never submitted — the shared account's password stays put.
-    await page.goto('/settings')
+    await page.goto('/profile')
     await page.getByRole('button', { name: v.locale === 'ru' ? /Пароль/ : /Password/ }).click()
     await expect(page.getByRole('dialog')).toBeVisible()
-    await shoot(page, `${v.name}-settings-password`)
+    await shoot(page, `${v.name}-profile-password`)
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toBeHidden()
+
+    // Edit profile: opened only, never saved — the shared account's name stays put.
+    await page
+      .getByRole('button', { name: v.locale === 'ru' ? 'Изменить профиль' : 'Edit profile' })
+      .click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    await shoot(page, `${v.name}-profile-edit`, false)
     await page.keyboard.press('Escape')
     await expect(page.getByRole('dialog')).toBeHidden()
 
@@ -236,6 +245,24 @@ for (const v of VARIANTS) {
     ).toBeVisible()
     await shoot(page, `${v.name}-session-rest`)
 
+    expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
+  })
+}
+
+/**
+ * Phase 2–3 screens are compared against the desktop prototype at 1280×800 too
+ * (the prototype's own window size), not only at 1440.
+ */
+for (const theme of ['dark', 'coffee'] as const) {
+  test(`screens · desktop-1280-${theme}-ru · profile`, async ({ page }) => {
+    const errors = watchConsole(page)
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await signIn(page)
+    await applyPrefs(page, theme, 'ru')
+    await page.goto('/profile')
+    await page.waitForLoadState('networkidle')
+    await expectNoHorizontalScroll(page, `1280 ${theme} /profile`)
+    await shoot(page, `desktop-1280-${theme}-ru-profile`, false)
     expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
   })
 }
