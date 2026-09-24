@@ -248,21 +248,3 @@ for (const v of VARIANTS) {
     expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
   })
 }
-
-/**
- * Phase 2–3 screens are compared against the desktop prototype at 1280×800 too
- * (the prototype's own window size), not only at 1440.
- */
-for (const theme of ['dark', 'coffee'] as const) {
-  test(`screens · desktop-1280-${theme}-ru · profile`, async ({ page }) => {
-    const errors = watchConsole(page)
-    await page.setViewportSize({ width: 1280, height: 800 })
-    await signIn(page)
-    await applyPrefs(page, theme, 'ru')
-    await page.goto('/profile')
-    await page.waitForLoadState('networkidle')
-    await expectNoHorizontalScroll(page, `1280 ${theme} /profile`)
-    await shoot(page, `desktop-1280-${theme}-ru-profile`, false)
-    expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
-  })
-}

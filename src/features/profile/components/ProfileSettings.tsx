@@ -19,9 +19,9 @@ import { ThemeSegment } from '@/features/profile/components/ThemeSegment'
 import type { ProfileSheetId } from '@/features/profile/components/ProfileSheets'
 import type { Profile } from '@/features/settings/api/profiles.api'
 import { reminderTimeLabel } from '@/features/settings/lib/reminder'
-import { LOCALES } from '@/i18n'
+import { LOCALES, type Locale } from '@/i18n'
 import { browserTimezone } from '@/lib/date'
-import { weekdayLabels } from '@/lib/dateLocale'
+import { intlLocale, weekdayLabels } from '@/lib/dateLocale'
 import { isDesktopApp } from '@/lib/platform/desktop'
 import { useDesktopStore } from '@/stores/desktop'
 import { usePrefsStore } from '@/stores/prefs'
@@ -35,8 +35,22 @@ interface ProfileSettingsProps {
   onOpen: (sheet: ProfileSheetId) => void
 }
 
-/** "Europe/Moscow" → "Moscow": the city is what people recognise. */
-function zoneCity(zone: string): string {
+/**
+ * The zone as people say it, in the interface language — "Москва", "Нью-Йорк".
+ * Falls back to the city part of the IANA id where the runtime has no name.
+ */
+function zoneName(zone: string, locale: Locale): string {
+  try {
+    const part = new Intl.DateTimeFormat(intlLocale(locale), {
+      timeZone: zone,
+      timeZoneName: 'shortGeneric',
+    })
+      .formatToParts(new Date())
+      .find((p) => p.type === 'timeZoneName')
+    if (part?.value) return part.value
+  } catch {
+    // An id this runtime doesn't know — show the raw city below.
+  }
   return (zone.split('/').pop() ?? zone).replace(/_/g, ' ')
 }
 
@@ -114,7 +128,7 @@ export function ProfileSettings({ profile, email, supportVisible, onOpen }: Prof
           icon={Timer}
           tile="pine"
           label={t('settings.timezone')}
-          value={zoneCity(profile?.timezone ?? browserTimezone())}
+          value={zoneName(profile?.timezone ?? browserTimezone(), locale)}
           onClick={() => onOpen('timezone')}
         />
         <SettingsItem
