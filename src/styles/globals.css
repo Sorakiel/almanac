@@ -522,3 +522,22 @@
     transform: translate(-50%, -48%) scale(0.96);
   }
 }
+
+/* The rest ring drains in one continuous animation over the whole rest rather
+   than a step per clock tick. Duration and the (negative) delay come in as
+   custom properties, so a ring mounted mid-rest picks up where the rest is.
+   Reduced motion keeps the inline per-second offset instead. */
+@media (prefers-reduced-motion: no-preference) {
+  .ring-drain {
+    animation: ring-drain var(--drain-ms) linear var(--drain-delay) forwards;
+  }
+}
+
+@keyframes ring-drain {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: var(--ring-c);
+  }
+}

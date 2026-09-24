@@ -1,3 +1,4 @@
+import { DrainArc } from '@/features/workouts/components/session/DrainArc'
 import { formatClock } from '@/features/workouts/lib/session'
 import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
@@ -7,6 +8,8 @@ interface RestRingProps {
   restMs: number | null
   /** Length of the rest that is counting down, in ms. */
   restTotalMs: number
+  /** Identifies this rest, so a new one restarts the drain even at the same length. */
+  restEndsAt: number | null
   /** False while the session clock is paused. */
   running: boolean
   elapsedMs: number
@@ -24,12 +27,13 @@ const CIRCUMFERENCE = 2 * Math.PI * R
  * The session's one big number. Resting, it is the countdown, drained by an
  * accent ring, with the next set underneath — the two things you look up for
  * between sets. Working, it is the session clock, with a teal ring for the
- * share of sets done. Driven by the 1 Hz session clock and a CSS transition:
- * no animation frame loop running for the whole workout.
+ * share of sets done. The rest arc drains in one CSS animation per rest (see
+ * DrainArc); the sets arc eases to each new share — no frame loop either way.
  */
 export function RestRing({
   restMs,
   restTotalMs,
+  restEndsAt,
   running,
   elapsedMs,
   doneSets,
@@ -62,20 +66,32 @@ export function RestRing({
             strokeWidth="7"
             className="stroke-foreground/10"
           />
-          <circle
-            cx="60"
-            cy="60"
-            r={R}
-            fill="none"
-            strokeWidth="7"
-            strokeLinecap="round"
-            strokeDasharray={CIRCUMFERENCE}
-            strokeDashoffset={CIRCUMFERENCE * (1 - ratio)}
-            className={cn(
-              'motion-safe:transition-[stroke-dashoffset] motion-safe:duration-1000 motion-safe:ease-linear',
-              resting ? 'stroke-accent' : 'stroke-teal',
-            )}
-          />
+          {resting ? (
+            <DrainArc
+              key={`rest-${restEndsAt ?? 0}`}
+              r={R}
+              circumference={CIRCUMFERENCE}
+              remainingMs={restMs}
+              totalMs={restTotalMs}
+              className="stroke-accent"
+            />
+          ) : (
+            <circle
+              key="sets"
+              cx="60"
+              cy="60"
+              r={R}
+              fill="none"
+              strokeWidth="7"
+              strokeLinecap="round"
+              strokeDasharray={CIRCUMFERENCE}
+              // Its own element, keyed apart from the rest arc: one shared
+              // circle used to sweep across the whole ring on every switch
+              // between resting and working.
+              style={{ strokeDashoffset: CIRCUMFERENCE * (1 - ratio) }}
+              className="stroke-teal motion-safe:transition-all motion-safe:duration-500 motion-safe:ease-sheet"
+            />
+          )}
         </svg>
         <div
           className="absolute inset-0 flex flex-col items-center justify-center gap-1"
