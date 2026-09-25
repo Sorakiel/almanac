@@ -10,11 +10,20 @@ const PLACEHOLDERS = 5
 
 interface BadgeShelfProps {
   achievements: EvaluatedAchievement[]
-  /** A badge unlocked since the achievements page was last opened. */
-  hasNew: boolean
+  /** The badge unlocked last, while it hasn't been looked at — it glints. */
+  newestId: string | null
   isLoading: boolean
   isError: boolean
   onRetry: () => void
+}
+
+/** Newest first, as the prototype's shelf: the fresh badge leads the row. */
+function newestFirst(
+  items: EvaluatedAchievement[],
+  newestId: string | null,
+): EvaluatedAchievement[] {
+  const newest = items.find((a) => a.def.id === newestId && a.unlocked)
+  return newest ? [newest, ...items.filter((a) => a !== newest)] : items
 }
 
 /**
@@ -22,7 +31,13 @@ interface BadgeShelfProps {
  * while it hasn't been looked at. Every medallion opens the achievements page,
  * which is the badge detail.
  */
-export function BadgeShelf({ achievements, hasNew, isLoading, isError, onRetry }: BadgeShelfProps) {
+export function BadgeShelf({
+  achievements,
+  newestId,
+  isLoading,
+  isError,
+  onRetry,
+}: BadgeShelfProps) {
   const { t } = useT()
 
   if (isError) return <ErrorState title={t('profile.badgesLoadFailed')} onRetry={onRetry} />
@@ -36,11 +51,11 @@ export function BadgeShelf({ achievements, hasNew, isLoading, isError, onRetry }
         ? Array.from({ length: PLACEHOLDERS }, (_, i) => (
             <Skeleton key={i} className="h-16 w-16 flex-none rounded-full" />
           ))
-        : achievements.map((item, i) => {
+        : newestFirst(achievements, newestId).map((item) => {
             const title = achievementTitle(t, item.def, item.displayTitle)
             const tier = item.unlocked ? item.def.tiers[item.tierIndex]?.label : null
             const Icon = item.def.icon
-            const glint = hasNew && i === 0 && item.unlocked
+            const glint = item.unlocked && item.def.id === newestId
             return (
               <Link
                 key={item.def.id}
@@ -67,7 +82,7 @@ export function BadgeShelf({ achievements, hasNew, isLoading, isError, onRetry }
                   {glint ? (
                     <span
                       aria-hidden="true"
-                      className="absolute -inset-3 hidden bg-gradient-to-r from-transparent from-40% via-white/65 via-50% to-transparent to-60% motion-safe:block motion-safe:animate-medal-sheen"
+                      className="medal-glint absolute -inset-3 hidden motion-safe:block motion-safe:animate-medal-sheen"
                     />
                   ) : null}
                 </span>

@@ -4,7 +4,9 @@ import { persist } from 'zustand/middleware'
 interface BadgesState {
   /** A badge was unlocked that the user has not looked at yet. */
   unseen: boolean
-  markUnseen: () => void
+  /** The achievement that unlocked last — the one medallion that glints. */
+  newestId: string | null
+  markUnseen: (achievementId: string) => void
   markSeen: () => void
 }
 
@@ -16,7 +18,8 @@ export const useBadgesStore = create<BadgesState>()(
   persist(
     (set) => ({
       unseen: false,
-      markUnseen: () => set({ unseen: true }),
+      newestId: null,
+      markUnseen: (achievementId) => set({ unseen: true, newestId: achievementId }),
       markSeen: () => set({ unseen: false }),
     }),
     { name: 'almanac.badges' },

@@ -86,7 +86,7 @@ export function useCelebrationWatchers(): void {
     // A quiet toast and a dot on the profile, not a modal: an unlock usually
     // lands the moment the user ticks a habit, and a scene in front of the
     // list interrupts exactly the five-second loop the app is built around.
-    markUnseen()
+    markUnseen(top.def.id)
     toast.info(t('badges.new', { name: achievementTitle(t, top.def, top.displayTitle) }), {
       duration: BADGE_TOAST_MS,
       action: { label: t('badges.view'), onClick: () => navigate('/achievements') },

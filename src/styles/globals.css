@@ -734,3 +734,15 @@
     opacity: 0;
   }
 }
+
+/* The newest badge's glint (motion.html "New badge", the prototype's .pf-badge.new):
+   a 105° band of light swept across the medallion by `animate-medal-sheen`. */
+.medal-glint {
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgb(255 255 255 / 0.65) 50%,
+    transparent 60%
+  );
+  transform: translateX(-120%);
+}
