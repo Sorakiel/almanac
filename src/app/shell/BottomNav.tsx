@@ -5,6 +5,7 @@ import { CreateButton } from '@/app/shell/CreateButton'
 import { NAV_MODULES, useModulesStore } from '@/stores/modules'
 import { useGlassLens } from '@/hooks/useGlassLens'
 import { useT } from '@/hooks/useT'
+import { useTabClick } from '@/app/hooks/useTabClick'
 
 interface Tab {
   key: string
@@ -45,6 +46,7 @@ function activeTab(pathname: string, pinnedTo: string | null): string | null {
 export function BottomNav() {
   const { t } = useT()
   const { pathname } = useLocation()
+  const tabClick = useTabClick()
   const pinnedKey = useModulesStore((s) => s.pinned)
   const enabled = useModulesStore((s) => s.enabled)
   // A pin outlives its module being switched off; the tab only shows while it is on.
@@ -100,6 +102,7 @@ export function BottomNav() {
               key={tab.key}
               to={tab.to}
               viewTransition
+              onClick={tabClick(tab.to)}
               aria-current={current === tab.key ? 'page' : undefined}
               className="tabbar-tab"
             >
