@@ -28,6 +28,7 @@ function habit(id: string, overrides: Partial<HabitWithTodayLog> = {}): HabitWit
     streak: 0,
     atRisk: false,
     frozenToday: false,
+    skippedToday: false,
     dueToday: true,
     ...overrides,
   }
@@ -60,6 +61,17 @@ describe('planToday', () => {
       habit('open'),
     ])
     expect(plan.done.map((h) => h.id)).toEqual(['done'])
+    expect(plan.groups.flatMap((g) => g.habits).map((h) => h.id)).toEqual(['open'])
+    expect(plan.dueCount).toBe(2)
+  })
+
+  it('closes a habit skipped on purpose without counting it as due', () => {
+    const plan = planToday([
+      habit('skip', { skippedToday: true, frozenToday: true, dueToday: false }),
+      habit('done', { isComplete: true }),
+      habit('open'),
+    ])
+    expect(plan.done.map((h) => h.id)).toEqual(['done', 'skip'])
     expect(plan.groups.flatMap((g) => g.habits).map((h) => h.id)).toEqual(['open'])
     expect(plan.dueCount).toBe(2)
   })

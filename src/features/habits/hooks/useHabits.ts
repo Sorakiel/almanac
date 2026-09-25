@@ -81,9 +81,12 @@ function join(
     const dueIn = dueInDays(habit, daysSinceLastDone)
 
     const isComplete = todayCount >= target
-    const dueToday = isDueOn(habit, todayKey, daysSinceLastDone)
     const streak = currentStreak(habit, doneOn, windowKeys, frozenOn)
     const frozenToday = frozenOn(todayKey)
+    // A deliberate skip takes the day off the list — reminders, the day's
+    // total and "at risk" all stop counting it — without costing the streak.
+    const skippedToday = frozenToday && !isComplete
+    const dueToday = isDueOn(habit, todayKey, daysSinceLastDone) && !skippedToday
 
     return {
       ...habit,
@@ -97,6 +100,7 @@ function join(
       dueToday,
       streak,
       frozenToday,
+      skippedToday,
       // A streak is "at risk" only while it's still losable today: due, unfinished,
       // not already protected by a freeze, and with a run already going (≥2 days,
       // so a fresh day-one habit isn't nagged).

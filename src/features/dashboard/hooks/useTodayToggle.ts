@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+import { useToggleFreeze } from '@/features/habits/hooks/useToggleFreeze'
 import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
 import { dailyTarget } from '@/features/habits/lib/frequency'
 import { useT } from '@/hooks/useT'
@@ -23,6 +24,8 @@ function atCount(habit: HabitWithTodayLog, count: number): HabitWithTodayLog {
 interface TodayToggle {
   phases: ReadonlyMap<string, SettlePhase>
   onToggle: (habit: HabitWithTodayLog) => void
+  /** Skip today on purpose, or take the skip back — the streak holds either way. */
+  onSkip: (habit: HabitWithTodayLog) => void
 }
 
 /**
@@ -33,6 +36,7 @@ interface TodayToggle {
 export function useTodayToggle(habits: HabitWithTodayLog[]): TodayToggle {
   const { t } = useT()
   const toggle = useToggleHabit()
+  const freeze = useToggleFreeze()
   const { phases, settle, release } = useSettlingRows()
 
   // Undo runs seconds after the tap, against whatever the habit is by then.
@@ -78,5 +82,22 @@ export function useTodayToggle(habits: HabitWithTodayLog[]): TodayToggle {
     })
   }
 
-  return { phases, onToggle }
+  const onSkip = (habit: HabitWithTodayLog) => {
+    if (habit.isComplete) return
+    haptic('medium')
+    const skip = !habit.skippedToday
+    const write = (on: boolean) =>
+      freeze.mutate(
+        { habitId: habit.id, freeze: on },
+        { onError: (error) => toast.error(toUserError(error, t, 'habits.freezeFailed')) },
+      )
+    write(skip)
+    toastWithUndo(
+      t(skip ? 'dashboard.skipped' : 'dashboard.unskipped', { name: habit.name }),
+      t('common.undo'),
+      () => write(!skip),
+    )
+  }
+
+  return { phases, onToggle, onSkip }
 }

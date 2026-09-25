@@ -29,6 +29,11 @@ export interface HabitWithTodayLog extends Habit {
   atRisk: boolean
   /** Today is protected by a streak freeze — a miss won't break the run. */
   frozenToday: boolean
-  /** False for an interval habit still resting, or a weekdays habit on a weekend. */
+  /**
+   * Skipped on purpose today (a freeze on an unfinished day): closed for the
+   * day like a done habit, but counted neither as done nor as due.
+   */
+  skippedToday: boolean
+  /** False for an interval habit still resting, a weekdays habit on a weekend, or one skipped today. */
   dueToday: boolean
 }
