@@ -1,19 +1,30 @@
 import { Plus, Search } from 'lucide-react'
 import { useT } from '@/hooks/useT'
+import { cn } from '@/lib/utils'
 import { useUiStore } from '@/stores/ui'
 
 /**
  * Desktop page toolbar (prototype .dk-tool): sticks to the top of the
  * workspace, fading the content that scrolls under it, with the ⌘K search pill
- * and a "+" on the right.
+ * and a "+" on the right. The screen's title fades in on the left once its
+ * large heading has scrolled under the bar.
  */
-export function DesktopToolbar() {
+interface DesktopToolbarProps {
+  /** The screen's title, shown once its large heading has scrolled away. */
+  title: string | null
+  compact: boolean
+}
+
+export function DesktopToolbar({ title, compact }: DesktopToolbarProps) {
   const { t } = useT()
   const setPaletteOpen = useUiStore((s) => s.setPaletteOpen)
   const openCreate = useUiStore((s) => s.openCreate)
 
   return (
     <div className="sticky top-0 z-20 -mx-8 hidden h-[60px] items-center gap-2.5 bg-gradient-to-b from-bg from-35% to-bg/0 pl-8 pr-6 lg:flex">
+      <span aria-hidden="true" className={cn('toolbar-title truncate', compact && 'is-on')}>
+        {title}
+      </span>
       <button
         type="button"
         onClick={() => setPaletteOpen(true)}

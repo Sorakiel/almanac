@@ -17,6 +17,8 @@ import { useCelebrationWatchers } from '@/app/hooks/useCelebrationWatchers'
 import { useDailyReminder } from '@/app/hooks/useDailyReminder'
 import { useGlobalShortcuts } from '@/app/hooks/useGlobalShortcuts'
 import { useRouteMotion } from '@/app/hooks/useRouteMotion'
+import { useCompactTitle } from '@/app/hooks/useCompactTitle'
+import { CompactTitleBar } from '@/app/shell/CompactTitleBar'
 import { useNativeWidgetSync } from '@/app/hooks/useNativeWidgetSync'
 import { useUserSettingsSync } from '@/app/hooks/useUserSettingsSync'
 import { useSession } from '@/hooks/useSession'
@@ -58,6 +60,9 @@ export function AppLayout() {
   useGlobalShortcuts()
   // Tab switch / push / pop for the route View Transition; entrance once per screen.
   useRouteMotion(pathname)
+  // The large title collapses into the top bar on scroll.
+  // Watches <main>, which exists only once the shell has more than the skeleton to show.
+  const compactTitle = useCompactTitle(Boolean(profile || locallyOnboarded))
 
   // Onboarding is gated on `profiles.onboarded` so it survives across devices.
   // Wait for the profile before deciding, so an already-onboarded user never
@@ -105,7 +110,7 @@ export function AppLayout() {
               'app-scroll lg:mx-0 lg:max-w-none lg:overflow-y-auto lg:px-8 lg:pb-[60px] lg:pt-0',
             )}
           >
-            <DesktopToolbar />
+            <DesktopToolbar title={compactTitle.title} compact={compactTitle.compact} />
             {/* Not keyed by route: the move between screens is the View
                 Transition (useRouteMotion + globals.css), and a screen's
                 entrance cascade plays on its first visit only. hideNav routes
@@ -137,6 +142,7 @@ export function AppLayout() {
             <BottomNav />
           </div>
         )}
+        <CompactTitleBar title={compactTitle.title} visible={compactTitle.compact} />
         <HabitFormSheet />
         <CreateSheet />
         <CommandPalette />
