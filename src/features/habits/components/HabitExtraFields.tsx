@@ -1,3 +1,4 @@
+import { GoalField } from '@/features/habits/components/GoalField'
 import { HabitChecklistDraftEditor } from '@/features/habits/components/HabitChecklistDraftEditor'
 import {
   HABIT_COLORS,
@@ -7,6 +8,7 @@ import {
   type HabitColor,
   type HabitIcon,
 } from '@/features/habits/lib/habitVisuals'
+import type { Goal } from '@/features/habits/lib/goal'
 import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
 
@@ -15,6 +17,7 @@ export interface HabitExtras {
   color: HabitColor
   description: string
   checklist: string[]
+  goal: Goal
 }
 
 interface HabitExtraFieldsProps {
@@ -24,13 +27,15 @@ interface HabitExtraFieldsProps {
 
 const LABEL = 'mx-1 mb-2 mt-4 text-footnote font-medium text-muted'
 
-/** "More options" in the quick habit form: colour, icon, a note, a checklist. */
+/** "More options" in the quick habit form: a daily amount, colour, icon, a note, a checklist. */
 export function HabitExtraFields({ value, onChange }: HabitExtraFieldsProps) {
   const { t } = useT()
   const set = (patch: Partial<HabitExtras>) => onChange({ ...value, ...patch })
 
   return (
     <>
+      <GoalField value={value.goal} onChange={(goal) => set({ goal })} labelClassName={LABEL} />
+
       <span className={LABEL}>{t('create.color')}</span>
       <div role="radiogroup" aria-label={t('create.color')} className="flex gap-2.5">
         {HABIT_COLOR_OPTIONS.map((key) => (

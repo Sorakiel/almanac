@@ -954,6 +954,7 @@ export const ru: Translations = {
     nudgeAction: 'Отметить',
     details: 'Подробнее ›',
     checked: '«{name}» отмечено',
+    cleared: '«{name}» сброшено до нуля',
     doneSection: 'Готово',
     allClosed: 'Все привычки на сегодня закрыты',
     allClosedHint: 'Идеальный день. Серия продолжается.',
@@ -989,6 +990,23 @@ export const ru: Translations = {
   },
   habits: {
     title: 'Привычки',
+    goal: {
+      label: 'Сколько за день',
+      once: 'Один раз',
+      custom: 'Своё',
+      presets: { glasses: '8 стаканов', pages: '20 страниц', minutes: '30 минут' },
+      unit: 'Единица',
+      unitPlaceholder: 'раз',
+      units: {
+        glasses: { one: 'стакан', few: 'стакана', many: 'стаканов' },
+        pages: { one: 'страница', few: 'страницы', many: 'страниц' },
+        minutes: { one: 'минута', few: 'минуты', many: 'минут' },
+        times: { one: 'раз', few: 'раза', many: 'раз' },
+      },
+      progress: '{count} из {goal}',
+      addOne: '«{name}»: плюс один, {count} из {goal}',
+      clear: '«{name}»: сбросить, выполнено {goal} из {goal}',
+    },
     detail: {
       daysInARow: { one: 'день подряд', few: 'дня подряд', many: 'дней подряд' },
       startStreak: 'Начните серию сегодня',

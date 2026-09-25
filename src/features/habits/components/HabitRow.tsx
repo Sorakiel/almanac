@@ -5,6 +5,7 @@ import { Tag } from '@/components/common/Tag'
 import { CheckToggle } from '@/features/habits/components/HabitCard'
 import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
 import { frequencyLabel } from '@/features/habits/lib/frequency'
+import { isQuantitative } from '@/features/habits/lib/goal'
 import {
   claimHabitName,
   HABIT_NAME_ATTR,
@@ -52,6 +53,11 @@ export function HabitRow({ habit }: HabitRowProps) {
         {habit.name}
       </Link>
       <PendingSyncMark habitId={habit.id} />
+      {isQuantitative(habit) && !resting ? (
+        <span className="num flex-none text-footnote text-muted">
+          {Math.min(habit.todayCount, habit.daily_goal)}/{habit.daily_goal}
+        </span>
+      ) : null}
       {resting ? (
         <Tag tone="muted">
           {habit.dueInDays > 0

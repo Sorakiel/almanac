@@ -10,6 +10,7 @@ import { WeekDots } from '@/features/habits/components/WeekDots'
 import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
+import { goalProgress, isQuantitative } from '@/features/habits/lib/goal'
 import {
   claimHabitName,
   HABIT_NAME_ATTR,
@@ -36,6 +37,9 @@ export function HabitCard({ habit }: HabitCardProps) {
   // it's locked and struck through until its next due date.
   const resting = !habit.isComplete && !habit.dueToday
   const subtitle = [
+    isQuantitative(habit) && !resting
+      ? goalProgress(Math.min(habit.todayCount, habit.daily_goal), habit, t)
+      : null,
     habit.description,
     resting
       ? habit.dueInDays > 0
@@ -150,9 +154,17 @@ export function CheckToggle({ habit, onToggle }: CheckToggleProps) {
     ? habit.dueInDays > 0
       ? t('habits.aria.restingDays', { name: habit.name, count: habit.dueInDays })
       : t('habits.aria.resting', { name: habit.name })
-    : habit.isComplete
-      ? t('habits.aria.markIncomplete', { name: habit.name })
-      : t('habits.aria.complete', { name: habit.name })
+    : isQuantitative(habit)
+      ? habit.isComplete
+        ? t('habits.goal.clear', { name: habit.name, goal: habit.daily_goal })
+        : t('habits.goal.addOne', {
+            name: habit.name,
+            count: habit.todayCount,
+            goal: habit.daily_goal,
+          })
+      : habit.isComplete
+        ? t('habits.aria.markIncomplete', { name: habit.name })
+        : t('habits.aria.complete', { name: habit.name })
   return (
     <CompletionToggle
       done={habit.isComplete}

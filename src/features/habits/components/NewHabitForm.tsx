@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { ChipGroup } from '@/features/habits/components/ChipGroup'
 import { HabitExtraFields, type HabitExtras } from '@/features/habits/components/HabitExtraFields'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
+import { ONCE, normalizeUnit } from '@/features/habits/lib/goal'
 import { CADENCES, CADENCE_ORDER, TIME_ORDER, type Cadence } from '@/features/habits/lib/cadence'
 import type { HabitTimeOfDay } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
@@ -43,6 +44,8 @@ export function NewHabitForm({ onDone }: NewHabitFormProps) {
         color: extras?.color ?? 'accent',
         ...CADENCES[cadence],
         time_of_day: time,
+        daily_goal: extras?.goal.goal ?? 1,
+        unit: normalizeUnit(extras?.goal.unit ?? null),
         checklist: (extras?.checklist ?? []).map((title) => ({ id: crypto.randomUUID(), title })),
       },
       { onError: (error) => toast.error(toUserError(error, t, 'habits.saveFailed')) },
@@ -94,7 +97,13 @@ export function NewHabitForm({ onDone }: NewHabitFormProps) {
         <button
           type="button"
           onClick={() =>
-            setExtras({ icon: 'sparkles', color: 'accent', description: '', checklist: [] })
+            setExtras({
+              icon: 'sparkles',
+              color: 'accent',
+              description: '',
+              checklist: [],
+              goal: ONCE,
+            })
           }
           className="mr-auto min-h-11 px-1 text-callout font-medium text-accent"
         >

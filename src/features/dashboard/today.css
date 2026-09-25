@@ -203,6 +203,24 @@
   stroke-dashoffset: 0;
   transition: stroke-dashoffset 0.3s 0.08s ease-out;
 }
+.today-ring {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+.today-ring circle {
+  fill: none;
+  stroke: var(--hue);
+  stroke-width: 2;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s var(--today-spring);
+}
+.today-goal {
+  flex: none;
+  color: rgb(var(--color-foreground));
+}
 .today-ripple {
   position: absolute;
   width: 28px;

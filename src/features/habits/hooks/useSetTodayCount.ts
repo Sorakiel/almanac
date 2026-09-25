@@ -5,17 +5,16 @@ import { useToday } from '@/hooks/useToday'
 import { patchQueryData, rollbackQueryData, type OptimisticContext } from '@/lib/optimistic'
 import { OFFLINE_MUTATION_KEYS, type SetHabitCountVariables } from '@/lib/offlineMutations'
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
-import { dailyTarget } from '@/features/habits/lib/frequency'
 import type { Habit, HabitLog } from '@/features/habits/types'
 
 /**
- * The detail page's "Mark done for today": sets today's count to the full
- * target (or clears it). Optimistic on the history the page draws from, and
+ * The detail page's writes to today: "Mark" sets the count to the full goal
+ * (0 clears it), and a counted habit's − / + step it one unit at a time. Optimistic on the history the page draws from, and
  * queued like every other habit write, so it survives an offline reload.
  */
-export function useMarkHabitDone(
+export function useSetTodayCount(
   habit: Habit | undefined,
-): OfflineMutation<void, SetHabitCountVariables, boolean, OptimisticContext<HabitLog[]>> {
+): OfflineMutation<void, SetHabitCountVariables, number, OptimisticContext<HabitLog[]>> {
   const queryClient = useQueryClient()
   const { user } = useSession()
   const { dateKey } = useToday()
@@ -25,12 +24,7 @@ export function useMarkHabitDone(
 
   return useOfflineMutation(
     OFFLINE_MUTATION_KEYS.setHabitCount,
-    (done: boolean) => ({
-      userId,
-      habitId,
-      date: dateKey,
-      count: done && habit ? dailyTarget(habit) : 0,
-    }),
+    (count: number) => ({ userId, habitId, date: dateKey, count: Math.max(0, count) }),
     {
       onMutate: ({ count }) =>
         patchQueryData<HabitLog[]>(queryClient, historyKey, (logs) => {
