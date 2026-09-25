@@ -9,6 +9,7 @@ import { NAV_MODULES, useModulesStore } from '@/stores/modules'
 import { useUiStore } from '@/stores/ui'
 import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
+import { useTabClick } from '@/app/hooks/useTabClick'
 
 interface NavEntry {
   to: string
@@ -22,11 +23,13 @@ interface NavEntry {
 /** The prototype's .dk-nav row. */
 function NavRow({ entry }: { entry: NavEntry }) {
   const Icon = entry.icon
+  const tabClick = useTabClick()
   return (
     <NavLink
       to={entry.to}
       end={entry.end}
       viewTransition
+      onClick={tabClick(entry.to)}
       className={({ isActive }) =>
         cn(
           'group flex h-9 w-full items-center gap-2.5 rounded-inner px-2.5 text-sm font-medium text-foreground transition-colors',
@@ -64,6 +67,7 @@ export function Sidebar() {
   const { habits } = useHabits()
   const enabled = useModulesStore((s) => s.enabled)
   const openCreate = useUiStore((s) => s.openCreate)
+  const tabClick = useTabClick()
 
   const dueCount = habits.filter((h) => h.dueToday && !h.isComplete).length
   // The same name and face as the profile screen: the row first, sign-up metadata as a fallback.
@@ -118,6 +122,7 @@ export function Sidebar() {
       <Link
         to="/profile"
         viewTransition
+        onClick={tabClick('/profile')}
         className="mt-auto flex w-full items-center gap-2.5 rounded-[14px] p-2 text-left transition-colors hover:bg-foreground/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <span
