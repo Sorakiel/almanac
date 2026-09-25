@@ -9,9 +9,12 @@
 
 :root,
 :root[data-theme='dark'] {
-  --color-bg: 27 27 29; /* #1B1B1D */
+  --color-bg: 17 17 19; /* #111113 — the prototype's canvas */
   --color-bg-deep: 14 14 16; /* #0E0E10 */
-  --color-surface: 38 38 42; /* #26262A */
+  /* Three levels, as in the prototype: canvas #111113 → card #1C1C1F →
+     nested #26262A (sheet-fill). The card level was missing — cards sat at
+     the nested tone straight on the canvas, flatter than the design (D18). */
+  --color-surface: 28 28 31; /* #1C1C1F */
   --color-foreground: 236 231 216; /* #ECE7D8 */
   --color-muted: 168 165 158; /* #A8A59E */
   --color-muted-strong: 133 129 122; /* #85817A */

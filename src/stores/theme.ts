@@ -29,7 +29,7 @@ interface ThemeState {
 }
 
 /** Canvas colour per theme, mirroring `--color-bg` in the token layer. */
-const CHROME_COLOR: Record<Theme, string> = { dark: '#1B1B1D', coffee: '#F2EADB' }
+const CHROME_COLOR: Record<Theme, string> = { dark: '#111113', coffee: '#F2EADB' }
 
 /**
  * Reflect the theme onto <html data-theme> so the CSS token layer swaps, keep
