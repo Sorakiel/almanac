@@ -19,6 +19,7 @@ import { useTrainingOverview } from '@/features/workouts/hooks/useTrainingOvervi
 import { dayStateFor, workoutForDay } from '@/features/workouts/lib/week'
 import { useCreateIntent } from '@/hooks/useCreateIntent'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useOpenKey } from '@/hooks/useSheetKey'
 import { useT } from '@/hooks/useT'
 import { intlLocale } from '@/lib/dateLocale'
 
@@ -32,7 +33,8 @@ function WorkoutsPage() {
 
   const openNew = () => setFormOpen(true)
 
-  const formSheet = formOpen ? <WorkoutFormSheet open onOpenChange={setFormOpen} /> : null
+  const formKey = useOpenKey(formOpen)
+  const formSheet = <WorkoutFormSheet key={formKey} open={formOpen} onOpenChange={setFormOpen} />
 
   if (isDesktop) {
     return (

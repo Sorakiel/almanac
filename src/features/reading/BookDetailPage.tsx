@@ -13,6 +13,7 @@ import { useBook } from '@/features/reading/hooks/useBook'
 import { unitCount } from '@/features/reading/lib/progress'
 import { useFocusStore } from '@/stores/focus'
 import { BookStatusTag } from '@/features/reading/components/BookStatusTag'
+import { useOpenKey } from '@/hooks/useSheetKey'
 import { useT } from '@/hooks/useT'
 import { dateFromKey } from '@/lib/date'
 import { intlLocale } from '@/lib/dateLocale'
@@ -26,6 +27,7 @@ function BookDetailPage() {
   const startFocus = useFocusStore((s) => s.start)
   const { book, notes, sessions, isLoading, isError } = useBook(id)
   const [editOpen, setEditOpen] = useState(false)
+  const editKey = useOpenKey(editOpen)
 
   if (isLoading) {
     return <LoadingState label={t('reading.loadingBook')} />
@@ -118,16 +120,16 @@ function BookDetailPage() {
         </section>
       ) : null}
 
-      {/* Mounted per opening, so the form starts from the book as it is now —
-          progress logged since the last edit included. */}
-      {editOpen ? (
-        <BookFormSheet
-          open
-          onOpenChange={setEditOpen}
-          book={book}
-          onDeleted={() => navigate('/reading')}
-        />
-      ) : null}
+      {/* Remounted on each opening (the key), so the form starts from the book
+          as it is now — progress logged since the last edit included — while
+          staying mounted through the close so its exit animation plays. */}
+      <BookFormSheet
+        key={editKey}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        book={book}
+        onDeleted={() => navigate('/reading')}
+      />
     </div>
   )
 }

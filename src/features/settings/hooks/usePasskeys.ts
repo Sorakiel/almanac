@@ -10,13 +10,17 @@ export interface Passkey {
 
 const PASSKEYS_KEY = ['passkeys'] as const
 
-/** The signed-in user's registered passkeys, plus register/rename/delete. */
-export function usePasskeys() {
+/**
+ * The signed-in user's registered passkeys, plus register/rename/delete. The
+ * list loads only while `enabled` — the sheet stays mounted when closed.
+ */
+export function usePasskeys(enabled = true) {
   const queryClient = useQueryClient()
   const invalidate = () => void queryClient.invalidateQueries({ queryKey: PASSKEYS_KEY })
 
   const query = useQuery({
     queryKey: PASSKEYS_KEY,
+    enabled,
     queryFn: async (): Promise<Passkey[]> => {
       const { data, error } = await supabase.auth.passkey.list()
       if (error) throw error

@@ -19,6 +19,7 @@ import { useWorkoutSessionStore } from '@/features/workouts/stores/workoutSessio
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import { dateFromKey } from '@/lib/date'
 import { intlLocale } from '@/lib/dateLocale'
+import { useOpenKey } from '@/hooks/useSheetKey'
 import { useT } from '@/hooks/useT'
 import { toUserError } from '@/lib/userError'
 
@@ -40,6 +41,7 @@ function WorkoutDetailPage() {
   const startSessionClock = useWorkoutSessionStore((s) => s.start)
   const hasActiveSession = useWorkoutSessionStore((s) => Boolean(s.sessions[id]))
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const settingsKey = useOpenKey(settingsOpen)
 
   if (isLoading) {
     return <LoadingState label={t('workouts.loadingOne')} />
@@ -155,14 +157,13 @@ function WorkoutDetailPage() {
         <WorkoutSessionRail workout={workout} exercises={exercises} />
       </Rail>
 
-      {settingsOpen ? (
-        <WorkoutFormSheet
-          open
-          onOpenChange={setSettingsOpen}
-          workout={workout}
-          onDeleted={() => navigate('/train')}
-        />
-      ) : null}
+      <WorkoutFormSheet
+        key={settingsKey}
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        workout={workout}
+        onDeleted={() => navigate('/train')}
+      />
 
       <CelebrationModal
         open={mutations.celebrate}
