@@ -110,8 +110,14 @@ export function AppLayout() {
                 Transition (useRouteMotion + globals.css), and a screen's
                 entrance cascade plays on its first visit only. hideNav routes
                 stretch to fill main so their own `mt-auto` bottom CTA reaches
-                the true bottom — main is only flex-col in that case. */}
-            <div className={cn(hideNav && 'flex flex-1 flex-col')}>
+                the true bottom — main is only flex-col in that case.
+                Every screen reads as one bounded column on desktop (1024px, the
+                prototype's 1280 workspace): dense dashboards stay readable on a
+                big monitor instead of running edge to edge. */}
+            <div
+              data-page-column
+              className={cn('lg:mx-auto lg:w-full lg:max-w-5xl', hideNav && 'flex flex-1 flex-col')}
+            >
               <Outlet />
             </div>
           </main>

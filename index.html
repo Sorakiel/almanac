@@ -9,7 +9,7 @@
     <!-- Kept in sync with the app's own theme (not the OS scheme) by
          applyTheme — a coffee canvas under dark browser chrome looks broken
          once the app is installed and the chrome is all you see. -->
-    <meta name="theme-color" content="#1B1B1D" />
+    <meta name="theme-color" content="#111113" />
     <!-- iOS ignores the manifest's display mode; this is what makes an
          added-to-home-screen Almanac open without Safari's chrome. -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -39,7 +39,7 @@
                 : 'dark'
           document.documentElement.setAttribute('data-theme', theme)
           var meta = document.querySelector('meta[name="theme-color"]')
-          if (meta) meta.setAttribute('content', theme === 'coffee' ? '#F2EADB' : '#1B1B1D')
+          if (meta) meta.setAttribute('content', theme === 'coffee' ? '#F2EADB' : '#111113')
         } catch (e) {}
       })()
     </script>
@@ -54,7 +54,7 @@
          blank page WebKit shows between documents) follow the app theme, not
          the OS — color-scheme is what decides that before any CSS arrives. */
       html {
-        background: #1b1b1d;
+        background: #111113;
         color-scheme: dark;
       }
       html[data-theme='coffee'] {

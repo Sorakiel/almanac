@@ -109,7 +109,7 @@ function ProgressPage() {
   }
 
   return (
-    <div className="flex flex-col gap-3 lg:mx-auto lg:max-w-5xl lg:gap-3.5">
+    <div className="flex flex-col gap-3 lg:gap-3.5">
       <header className="mx-0.5 mb-1 mt-2 lg:mb-3 lg:mt-1 lg:flex lg:items-end lg:justify-between lg:gap-6">
         <div>
           <p className="text-callout font-medium text-muted">{t(SUBTITLE[range])}</p>

@@ -37,3 +37,23 @@ test('⌘K palette runs a command from the keyboard', async ({ page }) => {
   await expect(page.getByRole('dialog')).toBeHidden()
   expect(errors).toEqual([])
 })
+
+// Every screen stays a readable column (the shell's max-w-5xl, 1024px) instead of
+// running edge to edge — the owner's window is ~1970px wide.
+test('screens keep a bounded column on a wide window', async ({ page }) => {
+  await page.setViewportSize({ width: 1970, height: 1100 })
+  await signIn(page)
+  for (const [path, heading] of [
+    ['/progress', 'Progress'],
+    ['/profile', 'Profile'],
+    ['/reflect', 'Reflect'],
+  ] as const) {
+    await page.goto(path)
+    await expect(page.getByText(heading, { exact: true }).first()).toBeVisible({ timeout: 20_000 })
+    const widest = await page
+      .locator('main [data-page-column]')
+      .evaluate((el) => el.getBoundingClientRect().width)
+    expect(widest, `${path} column width`).toBeLessThanOrEqual(1024)
+    expect(widest, `${path} column width`).toBeGreaterThan(600)
+  }
+})

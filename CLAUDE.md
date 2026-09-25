@@ -145,7 +145,7 @@ Mirror the _Almanac_ spec board. All colors are **CSS variables** referenced thr
 
 **Dark theme**
 
-- Backgrounds: `#1B1B1D` / `#0E0E10` · surface `#26262A`
+- Backgrounds: `#111113` / `#0E0E10` · cards/surface `#1C1C1F` · nested (sheet-fill) `#26262A` — three levels, as in the v0.6 prototype
 - Text: `#ECE7D8` · muted `#A8A59E` / `#85817A`
 - Accent: `#EF8857` (bright) / `#C2562A` (deep)
 

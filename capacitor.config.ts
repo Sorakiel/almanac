@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   // Dark WebView background so the edge-to-edge system-bar areas never flash
   // white before the themed UI paints (the app bg fills the viewport after).
-  backgroundColor: '#1B1B1D',
+  backgroundColor: '#111113',
   plugins: {
     StatusBar: {
       // We draw behind the bars (edge-to-edge) and drive icon colour from the
