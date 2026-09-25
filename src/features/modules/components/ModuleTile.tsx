@@ -18,6 +18,7 @@ export function ModuleTile({ module, off }: ModuleTileProps) {
   return (
     <Link
       to={module.to}
+      viewTransition
       className={cn('mods-tile', off && 'is-off')}
       style={{ '--hue': MODULE_HUE[module.key] } as CSSProperties}
     >

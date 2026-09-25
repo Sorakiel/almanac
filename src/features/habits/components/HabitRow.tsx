@@ -5,7 +5,11 @@ import { Tag } from '@/components/common/Tag'
 import { CheckToggle } from '@/features/habits/components/HabitCard'
 import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
 import { frequencyLabel } from '@/features/habits/lib/frequency'
-import { habitNameTransition } from '@/features/habits/lib/transition'
+import {
+  claimHabitName,
+  HABIT_NAME_ATTR,
+  habitNameTransition,
+} from '@/features/habits/lib/transition'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
@@ -37,6 +41,8 @@ export function HabitRow({ habit }: HabitRowProps) {
       <Link
         to={`/habits/${habit.id}`}
         viewTransition
+        onClick={(e) => claimHabitName(habit.id, e.currentTarget)}
+        {...{ [HABIT_NAME_ATTR]: '' }}
         style={habitNameTransition(habit.id)}
         className={cn(
           'min-w-0 flex-1 truncate rounded font-medium transition-colors hover:text-accent',

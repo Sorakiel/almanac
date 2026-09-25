@@ -5,6 +5,11 @@ import { PendingSyncMark } from '@/components/common/PendingSyncMark'
 import { WeekDots } from '@/features/habits/components/WeekDots'
 import { frequencyLabel } from '@/features/habits/lib/frequency'
 import { resolveHabitColor } from '@/features/habits/lib/habitVisuals'
+import {
+  claimHabitName,
+  HABIT_NAME_ATTR,
+  habitNameTransition,
+} from '@/features/habits/lib/transition'
 import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
@@ -63,8 +68,19 @@ export function TodayHabitRow({ habit, phase, onToggle }: TodayHabitRowProps) {
           {ripples > 0 ? <span key={ripples} aria-hidden="true" className="today-ripple" /> : null}
         </button>
 
-        <Link to={`/habits/${habit.id}`} className="today-row-main">
-          <span className="today-row-name">{habit.name}</span>
+        <Link
+          to={`/habits/${habit.id}`}
+          viewTransition
+          onClick={(e) => claimHabitName(habit.id, e.currentTarget)}
+          className="today-row-main"
+        >
+          <span
+            className="today-row-name"
+            {...{ [HABIT_NAME_ATTR]: '' }}
+            style={habitNameTransition(habit.id)}
+          >
+            {habit.name}
+          </span>
           <span className="today-row-meta">
             {habit.streak > 0 ? (
               <span

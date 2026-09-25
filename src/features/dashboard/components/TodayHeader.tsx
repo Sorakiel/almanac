@@ -26,6 +26,7 @@ export function TodayHeader({ name }: TodayHeaderProps) {
       </div>
       <Link
         to="/profile"
+        viewTransition
         aria-label={t('nav.profileAndSettings')}
         className="relative rounded-full lg:hidden"
       >
