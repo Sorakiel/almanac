@@ -1582,6 +1582,7 @@ export const ru: Translations = {
     nowActive: '▶ сейчас · идёт',
   },
   celebrate: {
+    sealRim: 'ДЕНЬ ЗАКРЫТ · {date} · ALMANAC ·',
     nice: 'Отлично',
     perfectDayTitle: 'Идеальный день',
     perfectDayMessage: 'Все привычки на сегодня закрыты. Темп сохранён.',

@@ -1,44 +1,48 @@
 import { useEffect } from 'react'
-import { Confetti } from '@/components/common/Confetti'
+import { DaySeal } from '@/app/shell/DaySeal'
 import { useCelebrationStore } from '@/stores/celebration'
 
-/** How long a burst stays before auto-clearing. */
-const BURST_MS = 2000
+/** The seal's own animation runs 2.1 s; take it away just after. */
+const SEAL_MS = 2150
+/** A caption stays long enough to read. */
+const CAPTION_MS = 2000
 
 /**
- * Renders the single active celebration, wherever it was fired from: a
- * top-of-screen confetti burst with a caption that clears itself. Nothing here
- * waits for the user — badge unlocks are a toast (useCelebrationWatchers).
+ * Renders the one active celebration, wherever it was fired from. A perfect
+ * day gets the "День закрыт" seal; anything smaller (a streak milestone) is a
+ * glass caption at the top. No modal, no confetti, nothing that waits for a
+ * tap — badge unlocks are a toast (useCelebrationWatchers).
  */
 export function CelebrationHost() {
   const active = useCelebrationStore((s) => s.active)
   const token = useCelebrationStore((s) => s.token)
   const dismiss = useCelebrationStore((s) => s.dismiss)
+  const seal = active?.kind === 'perfect-day'
 
   useEffect(() => {
     if (!active) return
-    const id = window.setTimeout(dismiss, BURST_MS)
+    const id = window.setTimeout(dismiss, seal ? SEAL_MS : CAPTION_MS)
     return () => window.clearTimeout(id)
-    // token changes on every show, so a rapid second burst restarts the timer.
-  }, [active, token, dismiss])
+    // token changes on every show, so a rapid second one restarts the timer.
+  }, [active, token, dismiss, seal])
 
   if (!active) return null
 
+  // Keyed by token so a second celebration replays from the start.
+  if (seal) {
+    return <DaySeal key={token} label={[active.title, active.message].filter(Boolean).join('. ')} />
+  }
+
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex justify-center"
+      key={token}
+      className="pointer-events-none fixed inset-x-0 top-0 z-celebration flex justify-center px-4 pt-safe-top"
       role="status"
       aria-live="polite"
     >
-      {/* keyed by token so the confetti + caption remount (replay) each burst */}
-      <div key={token} className="relative w-full max-w-md">
-        <Confetti count={20} />
-        <div className="mt-[max(env(safe-area-inset-top),1rem)] flex justify-center px-4">
-          <span className="lg rounded-pill px-4 py-2 text-center text-footnote font-semibold text-accent motion-safe:animate-rise">
-            {active.title}
-          </span>
-        </div>
-      </div>
+      <span className="lg rounded-pill px-4 py-2 text-center text-footnote font-semibold text-accent motion-safe:animate-rise">
+        {active.title}
+      </span>
     </div>
   )
 }
