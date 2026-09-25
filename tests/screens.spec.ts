@@ -180,7 +180,10 @@ async function seedToday(): Promise<void> {
         name: h.name,
         time_of_day: h.time_of_day,
         frequency: 'frequency' in h ? h.frequency : 'daily',
-        ...('goal' in h ? { daily_goal: h.goal, unit: 'glasses' } : {}),
+        // Every row names every column: in a bulk insert PostgREST fills a key
+        // missing from one row with null, not with the column default.
+        daily_goal: 'goal' in h ? h.goal : 1,
+        unit: 'goal' in h ? 'glasses' : null,
         sort_order: 100 + i,
       })),
     )
