@@ -38,7 +38,8 @@ function WorkoutSessionPage() {
   const start = useWorkoutSessionStore((s) => s.start)
   const pause = useWorkoutSessionStore((s) => s.pause)
   const end = useWorkoutSessionStore((s) => s.end)
-  const { elapsedMs, running, restMs, restTotalMs, startRest, skipRest } = useSessionClock(record)
+  const { elapsedMs, running, restMs, restTotalMs, restEndsAt, startRest, skipRest } =
+    useSessionClock(record)
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
   const [finishing, setFinishing] = useState(false)
@@ -211,6 +212,7 @@ function WorkoutSessionPage() {
               <RestRing
                 restMs={restMs}
                 restTotalMs={restTotalMs}
+                restEndsAt={restEndsAt}
                 running={running}
                 elapsedMs={elapsedMs}
                 doneSets={progress.doneSets}

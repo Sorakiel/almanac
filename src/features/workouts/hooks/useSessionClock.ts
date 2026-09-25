@@ -12,6 +12,8 @@ interface SessionClock {
   restMs: number | null
   /** Length of the current (or last) rest, in ms — the ring's full circle. */
   restTotalMs: number
+  /** When the running rest ends (epoch ms) — identifies one rest from the next. */
+  restEndsAt: number | null
   /** Start a rest countdown (defaults to the standard rest interval). */
   startRest: (seconds?: number) => void
   /** Cancel any running rest countdown. */
@@ -42,6 +44,7 @@ export function useSessionClock(record: SessionRecord | null | undefined): Sessi
     running: Boolean(record?.startedAt),
     restMs: restEndsAt !== null && restEndsAt > now ? restEndsAt - now : null,
     restTotalMs,
+    restEndsAt,
     startRest,
     skipRest,
   }
