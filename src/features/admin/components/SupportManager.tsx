@@ -12,6 +12,7 @@ import {
   type SupportMethod,
 } from '@/features/settings/lib/support'
 import { LoadingState } from '@/components/common/LoadingState'
+import { useLastValue, useOpenKey } from '@/hooks/useSheetKey'
 import { useT } from '@/hooks/useT'
 import { toUserError } from '@/lib/userError'
 
@@ -24,6 +25,10 @@ export function SupportManager() {
   const { methods, enabled, isLoading, isError, setEnabled } = useSupportAdmin(true)
   const [editing, setEditing] = useState<SupportMethod | null>(null)
   const [creating, setCreating] = useState(false)
+  const createKey = useOpenKey(creating)
+  const editKey = useOpenKey(editing !== null)
+  // Keeps the method on screen while its sheet slides out.
+  const shownMethod = useLastValue(editing)
 
   const toggleSection = async (next: boolean) => {
     try {
@@ -73,10 +78,13 @@ export function SupportManager() {
         <Plus className="h-4 w-4" /> {t('admin.addMethod')}
       </Button>
 
-      {creating ? <SupportMethodSheet open onOpenChange={setCreating} /> : null}
-      {editing ? (
-        <SupportMethodSheet open onOpenChange={(o) => !o && setEditing(null)} method={editing} />
-      ) : null}
+      <SupportMethodSheet key={`new-${createKey}`} open={creating} onOpenChange={setCreating} />
+      <SupportMethodSheet
+        key={`edit-${editKey}`}
+        open={editing !== null}
+        onOpenChange={(o) => !o && setEditing(null)}
+        method={shownMethod ?? undefined}
+      />
     </div>
   )
 }

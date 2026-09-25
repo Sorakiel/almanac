@@ -33,17 +33,15 @@ export function SignOutItem() {
         center
         onClick={() => setConfirming(true)}
       />
-      {confirming ? (
-        <ConfirmSheet
-          open
-          onOpenChange={setConfirming}
-          title={t('settings.signOutConfirm')}
-          description={t('settings.signOutConfirmHint')}
-          confirmLabel={t('settings.signOut')}
-          pending={logOut.isPending}
-          onConfirm={() => void signOut()}
-        />
-      ) : null}
+      <ConfirmSheet
+        open={confirming}
+        onOpenChange={setConfirming}
+        title={t('settings.signOutConfirm')}
+        description={t('settings.signOutConfirmHint')}
+        confirmLabel={t('settings.signOut')}
+        pending={logOut.isPending}
+        onConfirm={() => void signOut()}
+      />
     </>
   )
 }

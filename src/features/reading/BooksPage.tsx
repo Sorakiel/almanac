@@ -11,6 +11,7 @@ import { BooksRail } from '@/features/reading/components/desktop/BooksRail'
 import { useBooks } from '@/features/reading/hooks/useBooks'
 import { useCreateIntent } from '@/hooks/useCreateIntent'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useOpenKey } from '@/hooks/useSheetKey'
 import { useT } from '@/hooks/useT'
 
 function BooksPage() {
@@ -20,7 +21,8 @@ function BooksPage() {
   const [formOpen, setFormOpen] = useCreateIntent()
 
   const openNew = () => setFormOpen(true)
-  const formSheet = formOpen ? <BookFormSheet open onOpenChange={setFormOpen} /> : null
+  const formKey = useOpenKey(formOpen)
+  const formSheet = <BookFormSheet key={formKey} open={formOpen} onOpenChange={setFormOpen} />
 
   if (isDesktop) {
     return (

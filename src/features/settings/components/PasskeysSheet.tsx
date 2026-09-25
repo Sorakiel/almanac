@@ -21,7 +21,7 @@ interface PasskeysSheetProps {
  */
 export function PasskeysSheet({ open, onOpenChange }: PasskeysSheetProps) {
   const { t } = useT()
-  const { passkeys, isLoading, register, rename, remove } = usePasskeys()
+  const { passkeys, isLoading, register, rename, remove } = usePasskeys(open)
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [draftName, setDraftName] = useState('')
 

@@ -252,6 +252,11 @@
       transform: translateX(-50%) scale(0.97);
     }
   }
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+    }
+  }
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -273,8 +278,20 @@
   .action-sheet-scrim[data-state='open'] {
     animation: fade-in 0.25s ease-out;
   }
+  /* …and slides back out: Radix keeps it mounted until this ends. */
+  .action-sheet[data-state='closed'] {
+    animation: action-sheet-out 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  }
+  .action-sheet-scrim[data-state='closed'] {
+    animation: fade-out 0.25s ease-in forwards;
+  }
   @keyframes action-sheet-in {
     from {
+      translate: 0 105%;
+    }
+  }
+  @keyframes action-sheet-out {
+    to {
       translate: 0 105%;
     }
   }
@@ -282,10 +299,15 @@
     .action-sheet[data-state='open'] {
       animation: fade-in 0.2s ease-out;
     }
+    .action-sheet[data-state='closed'] {
+      animation: fade-out 0.15s ease-in forwards;
+    }
   }
   @media (prefers-reduced-motion: reduce) {
     .action-sheet[data-state='open'],
-    .action-sheet-scrim[data-state='open'] {
+    .action-sheet-scrim[data-state='open'],
+    .action-sheet[data-state='closed'],
+    .action-sheet-scrim[data-state='closed'] {
       animation: none;
     }
   }
