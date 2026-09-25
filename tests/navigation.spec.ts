@@ -38,20 +38,21 @@ test('⌘K palette runs a command from the keyboard', async ({ page }) => {
   expect(errors).toEqual([])
 })
 
-// A dense dashboard on a big monitor stays a readable column (max-w-5xl, 1024px)
-// instead of running edge to edge — the owner's window is ~1970px wide.
-test('Progress and Profile keep a bounded column on a wide window', async ({ page }) => {
+// Every screen stays a readable column (the shell's max-w-5xl, 1024px) instead of
+// running edge to edge — the owner's window is ~1970px wide.
+test('screens keep a bounded column on a wide window', async ({ page }) => {
   await page.setViewportSize({ width: 1970, height: 1100 })
   await signIn(page)
   for (const [path, heading] of [
     ['/progress', 'Progress'],
     ['/profile', 'Profile'],
+    ['/reflect', 'Reflect'],
   ] as const) {
     await page.goto(path)
     await expect(page.getByText(heading, { exact: true }).first()).toBeVisible({ timeout: 20_000 })
     const widest = await page
-      .locator('main .lg\\:max-w-5xl')
-      .evaluateAll((els) => Math.max(...els.map((el) => el.getBoundingClientRect().width)))
+      .locator('main [data-page-column]')
+      .evaluate((el) => el.getBoundingClientRect().width)
     expect(widest, `${path} column width`).toBeLessThanOrEqual(1024)
     expect(widest, `${path} column width`).toBeGreaterThan(600)
   }

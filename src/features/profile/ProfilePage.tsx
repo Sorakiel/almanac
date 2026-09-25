@@ -73,12 +73,12 @@ function ProfilePage() {
         {t('profile.back')}
       </Link>
 
-      <header className="mb-6 hidden lg:mx-auto lg:block lg:max-w-5xl">
+      <header className="mb-6 hidden lg:block">
         <p className="text-callout text-muted">{t('profile.subtitle')}</p>
         <p className="text-large-title font-bold">{t('profile.title')}</p>
       </header>
 
-      <div className="lg:mx-auto lg:max-w-5xl wide:grid wide:grid-cols-profile wide:items-start wide:gap-6">
+      <div className="wide:grid wide:grid-cols-profile wide:items-start wide:gap-6">
         <div className="grid min-w-0 grid-cols-1 gap-6 lg:gap-3.5 wide:sticky wide:top-0">
           <div className="lg:rounded-card lg:bg-surface lg:p-5">
             <ProfileHero
