@@ -1445,6 +1445,7 @@ export const en = {
     nowActive: '▶ now · active',
   },
   celebrate: {
+    sealRim: 'DAY CLOSED · {date} · ALMANAC ·',
     nice: 'Nice',
     perfectDayTitle: 'Perfect day',
     perfectDayMessage: 'Every habit closed today. Momentum kept.',

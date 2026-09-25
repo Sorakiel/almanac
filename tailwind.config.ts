@@ -69,6 +69,8 @@ export default {
         // toasts over it.
         'nav-clearance': '104px',
         'capsule-clearance': '52px',
+        // Clear of the status bar / notch, never flush with the top edge.
+        'safe-top': 'max(env(safe-area-inset-top), 1rem)',
         // The profile avatar's ring on the phone (112 on desktop is `28`).
         avatar: '104px',
       },
@@ -115,6 +117,10 @@ export default {
       },
       transitionProperty: {
         rows: 'grid-template-rows',
+      },
+      zIndex: {
+        // Above sheets and toasts: a celebration is brief and never blocks input.
+        celebration: '60',
       },
       backdropBlur: {
         nav: '20px',
