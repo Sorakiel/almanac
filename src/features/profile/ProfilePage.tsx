@@ -37,7 +37,8 @@ function ProfilePage() {
   const { config: supportConfig } = useSupportConfig()
   const { dateKey } = useToday()
   const achievements = useAchievements()
-  const hasNewBadge = useBadgesStore((s) => s.unseen)
+  // The glint lasts until the achievements page has been opened.
+  const newestBadge = useBadgesStore((s) => (s.unseen ? s.newestId : null))
   const [sheet, setSheet] = useState<ProfileSheetId | null>(null)
 
   const joinedAt = profile?.created_at ?? user?.created_at ?? null
@@ -119,7 +120,7 @@ function ProfilePage() {
             </h2>
             <BadgeShelf
               achievements={achievements.achievements}
-              hasNew={hasNewBadge}
+              newestId={newestBadge}
               isLoading={achievements.isLoading}
               isError={achievements.isError}
               onRetry={achievements.refetch}
