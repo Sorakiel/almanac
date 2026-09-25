@@ -63,6 +63,9 @@ test('runs a live workout session and marks the workout done', async ({ page }) 
 
   await page.getByRole('button', { name: /session options/i }).click()
   await page.getByRole('button', { name: /finish workout/i }).click()
+  // No modal to dismiss: a quiet toast, and the runner steps back to the workout.
+  await expect(page).toHaveURL(new RegExp(`/train/${workout.id}$`))
+  await expect(page.getByText(/workout .* done/i)).toBeVisible()
 
   await expect
     .poll(

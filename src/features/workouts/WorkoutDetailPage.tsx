@@ -8,7 +8,6 @@ import { IconTile } from '@/components/common/IconTile'
 import { Tag } from '@/components/common/Tag'
 import { SectionLabel } from '@/components/common/SectionLabel'
 import { EmptyState } from '@/components/common/EmptyState'
-import { CelebrationModal } from '@/components/common/CelebrationModal'
 import { Rail } from '@/components/rail/Rail'
 import { ExerciseView } from '@/features/workouts/components/ExerciseView'
 import { WorkoutFormSheet } from '@/features/workouts/components/WorkoutFormSheet'
@@ -37,7 +36,9 @@ function WorkoutDetailPage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
-  const mutations = useSessionMutations(id)
+  const mutations = useSessionMutations(id, {
+    onFinished: () => toast(t('workouts.finishedToast', { name: workout?.name ?? '' })),
+  })
   const startSessionClock = useWorkoutSessionStore((s) => s.start)
   const hasActiveSession = useWorkoutSessionStore((s) => Boolean(s.sessions[id]))
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -163,13 +164,6 @@ function WorkoutDetailPage() {
         onOpenChange={setSettingsOpen}
         workout={workout}
         onDeleted={() => navigate('/train')}
-      />
-
-      <CelebrationModal
-        open={mutations.celebrate}
-        onOpenChange={(o) => !o && mutations.dismissCelebrate()}
-        title={t('workouts.workoutComplete')}
-        message={t('workouts.completeMessage', { name: workout.name })}
       />
     </>
   )

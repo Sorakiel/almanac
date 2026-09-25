@@ -8,7 +8,6 @@ import { Sheet } from '@/components/ui/sheet'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
-import { CelebrationModal } from '@/components/common/CelebrationModal'
 import { CurrentExercisePanel } from '@/features/workouts/components/session/CurrentExercisePanel'
 import { RestRing } from '@/features/workouts/components/session/RestRing'
 import { SessionQueue } from '@/features/workouts/components/session/SessionQueue'
@@ -33,7 +32,13 @@ function WorkoutSessionPage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
-  const mutations = useSessionMutations(id)
+  // Done is said once, quietly, and the runner steps aside — no modal to dismiss.
+  const wrapUp = () => {
+    toast(t('workouts.finishedToast', { name: workout?.name ?? '' }))
+    useWorkoutSessionStore.getState().end(id)
+    navigate(`/train/${id}`)
+  }
+  const mutations = useSessionMutations(id, { onFinished: wrapUp })
   const record = useWorkoutSessionStore((s) => s.sessions[id])
   const start = useWorkoutSessionStore((s) => s.start)
   const pause = useWorkoutSessionStore((s) => s.pause)
@@ -42,7 +47,6 @@ function WorkoutSessionPage() {
     useSessionClock(record)
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
-  const [finishing, setFinishing] = useState(false)
 
   // Deep-linking straight to the session (or a reload) starts the clock once,
   // but a paused session is left paused — the user resumes it explicitly. Read
@@ -98,14 +102,14 @@ function WorkoutSessionPage() {
   const togglePause = () => (running ? pause(id) : start(id))
   const leave = () => navigate(`/train/${id}`)
 
-  // Finish now — mark the workout done even if some sets are unticked, then
-  // reuse the celebration to bow out (its dismiss clears the clock + navigates).
+  // Finish now — mark the workout done even if some sets are unticked. Not
+  // awaited: offline the write queues and the runner still steps aside.
   const finishWorkout = () => {
     setMenuOpen(false)
     mutations.setCompleted.mutate(true, {
-      onSuccess: () => setFinishing(true),
       onError: (e) => toast.error(toUserError(e, t, 'workouts.session.finishFailed')),
     })
+    wrapUp()
   }
 
   // Abandon the live session: drop the timer, keep whatever sets were logged.
@@ -299,21 +303,6 @@ function WorkoutSessionPage() {
         description={t('workouts.session.discardHint')}
         confirmLabel={t('workouts.session.discard')}
         onConfirm={discardSession}
-      />
-
-      <CelebrationModal
-        open={mutations.celebrate || finishing}
-        onOpenChange={(o) => {
-          if (!o) {
-            mutations.dismissCelebrate()
-            setFinishing(false)
-            end(id)
-            navigate(`/train/${id}`)
-          }
-        }}
-        title={t('workouts.session.completeBang')}
-        message={t('workouts.sessionDoneMessage', { name: workout.name })}
-        actionLabel={t('workouts.session.finish')}
       />
     </div>
   )
