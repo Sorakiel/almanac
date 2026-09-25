@@ -94,7 +94,8 @@
   }
 
   /* Glass for the navigation layer only — never on content, never on glass.
-     Ported from the redesign prototype; Phase 3 adds refraction on top. */
+     Ported from the redesign prototype. Chromium also bends the backdrop at
+     the rim of the tab bar and "+" (useGlassLens, an inline backdrop-filter). */
   .lg {
     position: relative;
     background: var(--glass-tint);
@@ -127,7 +128,8 @@
     .lg {
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
-      background: rgb(var(--color-surface));
+      /* The prototype's card tone, so the solid bar still reads as a surface. */
+      background: rgb(var(--color-sheet));
     }
   }
 

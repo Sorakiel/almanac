@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { Plus } from 'lucide-react'
+import { useGlassLens } from '@/hooks/useGlassLens'
 import { useT } from '@/hooks/useT'
 import { useUiStore } from '@/stores/ui'
 
@@ -7,9 +9,12 @@ export function CreateButton() {
   const { t } = useT()
   const openCreate = useUiStore((s) => s.openCreate)
   const open = useUiStore((s) => s.create !== null)
+  const ref = useRef<HTMLButtonElement>(null)
+  useGlassLens(ref, 'glass-lens-plus')
 
   return (
     <button
+      ref={ref}
       type="button"
       onClick={() => openCreate()}
       aria-label={t('create.title')}
