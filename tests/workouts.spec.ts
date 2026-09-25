@@ -81,5 +81,82 @@ test('runs a live workout session and marks the workout done', async ({ page }) 
     )
     .toBe(true)
 
+  // The tick lands in the day's session; the plan rows stay a plan.
+  const { data: sessions } = await db
+    .from('workout_sessions')
+    .select('completed_at, set_logs(set_number, done)')
+    .eq('workout_id', workout.id)
+  expect(sessions).toHaveLength(1)
+  expect(sessions?.[0]?.completed_at).not.toBeNull()
+  expect(sessions?.[0]?.set_logs).toEqual([{ set_number: 1, done: true }])
+  const { data: plan } = await db
+    .from('set_logs')
+    .select('done')
+    .eq('workout_exercise_id', link.id)
+    .is('session_id', null)
+  expect(plan?.every((row) => !row.done)).toBe(true)
+
+  expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
+})
+
+test('a daily workout finished yesterday starts today unticked', async ({ page }) => {
+  const errors = watchConsole(page)
+  const db = await e2eClient()
+  const userId = await e2eUserId(db)
+
+  const yesterday = new Date(Date.now() - 36 * 60 * 60 * 1000)
+  const { data: workout, error: workoutError } = await db
+    .from('workouts')
+    .insert({
+      user_id: userId,
+      name: WORKOUT_NAME,
+      recurrence: 'daily',
+      completed_at: yesterday.toISOString(),
+    })
+    .select('id')
+    .single()
+  if (workoutError) throw workoutError
+  const { data: exercise, error: exerciseError } = await db
+    .from('exercises')
+    .insert({ user_id: userId, name: EXERCISE_NAME })
+    .select('id')
+    .single()
+  if (exerciseError) throw exerciseError
+  const { data: link, error: linkError } = await db
+    .from('workout_exercises')
+    .insert({ workout_id: workout.id, exercise_id: exercise.id, target_sets: 1, target_reps: 8 })
+    .select('id')
+    .single()
+  if (linkError) throw linkError
+  const { error: planError } = await db
+    .from('set_logs')
+    .insert({ workout_exercise_id: link.id, set_number: 1, reps: 8, weight: 40 })
+  if (planError) throw planError
+  const { data: session, error: sessionError } = await db
+    .from('workout_sessions')
+    .insert({
+      user_id: userId,
+      workout_id: workout.id,
+      date: yesterday.toISOString().slice(0, 10),
+      completed_at: yesterday.toISOString(),
+    })
+    .select('id')
+    .single()
+  if (sessionError) throw sessionError
+  const { error: logError } = await db.from('set_logs').insert({
+    workout_exercise_id: link.id,
+    set_number: 1,
+    reps: 8,
+    weight: 40,
+    done: true,
+    session_id: session.id,
+  })
+  if (logError) throw logError
+
+  await signIn(page)
+  await page.goto(`/train/${workout.id}/session`)
+  await expect(page.getByText(EXERCISE_NAME, { exact: false })).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByRole('button', { name: /complete set 1/i })).toBeVisible()
+
   expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
 })

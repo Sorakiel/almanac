@@ -19,8 +19,13 @@ import {
 import { habitKeys } from '@/features/habits/hooks/queryKeys'
 import type { Habit, HabitSubtask, HabitWithTodayLog } from '@/features/habits/types'
 import type { HabitFormInput } from '@/features/habits/hooks/useHabitMutations'
-import { updateSet } from '@/features/workouts/api/session.api'
-import { createWorkout, deleteWorkout, updateWorkout } from '@/features/workouts/api/workouts.api'
+import { logSet, updateSet } from '@/features/workouts/api/session.api'
+import {
+  createWorkout,
+  deleteWorkout,
+  setSessionDone,
+  updateWorkout,
+} from '@/features/workouts/api/workouts.api'
 import type { WorkoutFormInput } from '@/features/workouts/hooks/useWorkoutMutations'
 import type { SetLog, Workout } from '@/features/workouts/types'
 import {
@@ -75,11 +80,28 @@ export interface ToggleHabitVariables {
   date: string
 }
 
-export interface EditSetVariables {
+/** Log a planned set in the session of `date` (the plan row itself is not touched). */
+export interface LogSetVariables {
+  workoutId: string
+  /** The planned set's row, for the optimistic patch. */
+  id: string
+  workoutExerciseId: string
+  setNumber: number
+  date: string
+  reps: number | null
+  weight: number | null
+  done: boolean
+  restSeconds: number | null
+}
+
+/** Queued before sessions existed (0036): patched the plan row in place. */
+interface LegacyEditSetVariables {
   workoutId: string
   id: string
   patch: Partial<Pick<SetLog, 'reps' | 'weight' | 'done' | 'set_number' | 'rest_seconds'>>
 }
+
+export type EditSetVariables = LogSetVariables | LegacyEditSetVariables
 
 export interface ToggleFreezeVariables {
   userId: string
@@ -180,6 +202,8 @@ export interface ToggleWorkoutCompleteVariables {
   id: string
   userId: string
   done: boolean
+  /** The session day; absent only on a write queued before sessions existed. */
+  date?: string
 }
 
 export interface SaveReflectionVariables {
@@ -391,7 +415,8 @@ export function registerOfflineMutations(client: QueryClient): void {
 
   register(
     OFFLINE_MUTATION_KEYS.editSet,
-    ({ id, patch }) => updateSet(id, patch),
+    (variables) =>
+      'patch' in variables ? updateSet(variables.id, variables.patch) : logSet(variables),
     ({ workoutId }) => [workoutKeys.session(workoutId)],
   )
 
@@ -505,7 +530,10 @@ export function registerOfflineMutations(client: QueryClient): void {
   // underlying write, two call sites.
   register(
     OFFLINE_MUTATION_KEYS.toggleWorkoutComplete,
-    ({ id, done }) => updateWorkout(id, { completed_at: done ? new Date().toISOString() : null }),
+    ({ id, done, date }) =>
+      date
+        ? setSessionDone(id, date, done)
+        : updateWorkout(id, { completed_at: done ? new Date().toISOString() : null }),
     ({ id, userId }) => [workoutKeys.detail(id), workoutKeys.all(userId)],
     WORKOUTS,
   )

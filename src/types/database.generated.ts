@@ -680,6 +680,7 @@ export type Database = {
           logged_at: string | null
           reps: number | null
           rest_seconds: number | null
+          session_id: string | null
           set_number: number
           weight: number | null
           workout_exercise_id: string
@@ -690,6 +691,7 @@ export type Database = {
           logged_at?: string | null
           reps?: number | null
           rest_seconds?: number | null
+          session_id?: string | null
           set_number: number
           weight?: number | null
           workout_exercise_id: string
@@ -700,11 +702,19 @@ export type Database = {
           logged_at?: string | null
           reps?: number | null
           rest_seconds?: number | null
+          session_id?: string | null
           set_number?: number
           weight?: number | null
           workout_exercise_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "set_logs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "set_logs_workout_exercise_id_fkey"
             columns: ["workout_exercise_id"]
@@ -828,6 +838,44 @@ export type Database = {
           },
         ]
       }
+      workout_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          date: string
+          id: string
+          started_at: string
+          user_id: string
+          workout_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          started_at?: string
+          user_id: string
+          workout_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          started_at?: string
+          user_id?: string
+          workout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_sessions_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workouts: {
         Row: {
           completed_at: string | null
@@ -892,6 +940,10 @@ export type Database = {
           }
       admin_delete_user: { Args: { target: string }; Returns: undefined }
       are_friends: { Args: { a: string; b: string }; Returns: boolean }
+      ensure_workout_session: {
+        Args: { p_date: string; p_workout_id: string }
+        Returns: string
+      }
       is_admin: { Args: never; Returns: boolean }
       is_connected: { Args: { target: string }; Returns: boolean }
       is_owner: { Args: never; Returns: boolean }
@@ -902,6 +954,18 @@ export type Database = {
           longest_streak: number
           members: number
         }[]
+      }
+      log_workout_set: {
+        Args: {
+          p_date: string
+          p_done: boolean
+          p_reps: number
+          p_rest_seconds?: number
+          p_set_number: number
+          p_weight: number
+          p_workout_exercise_id: string
+        }
+        Returns: undefined
       }
       search_profiles: {
         Args: { q: string }
@@ -917,6 +981,26 @@ export type Database = {
           target: string
         }
         Returns: undefined
+      }
+      set_workout_session_done: {
+        Args: { p_date: string; p_done: boolean; p_workout_id: string }
+        Returns: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          name: string
+          recurrence: Database["public"]["Enums"]["workout_recurrence"]
+          recurrence_days: number[] | null
+          recurrence_interval: number | null
+          scheduled_date: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "workouts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {

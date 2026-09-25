@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useSession } from '@/hooks/useSession'
+import { useToday } from '@/hooks/useToday'
 import { useOfflineMutation } from '@/hooks/useOfflineMutation'
 import { useT } from '@/hooks/useT'
 import { patchQueryData, rollbackQueryData } from '@/lib/optimistic'
@@ -37,6 +38,7 @@ export function useWorkoutMutations() {
   const queryClient = useQueryClient()
   const { user } = useSession()
   const userId = user?.id ?? ''
+  const { dateKey } = useToday()
   const key = workoutKeys.all(userId)
 
   const create = useOfflineMutation(
@@ -92,7 +94,8 @@ export function useWorkoutMutations() {
   // Optimistic: completing a session flips its badge instantly, rolls back on error.
   const toggleComplete = useOfflineMutation(
     OFFLINE_MUTATION_KEYS.toggleWorkoutComplete,
-    (args: { id: string; done: boolean }) => ({ ...args, userId }),
+    // From a list the day is today; the session runner passes its own day instead.
+    (args: { id: string; done: boolean }) => ({ ...args, userId, date: dateKey }),
     {
       onMutate: ({ id, done }) =>
         patchQueryData<Workout[]>(queryClient, key, (previous) =>

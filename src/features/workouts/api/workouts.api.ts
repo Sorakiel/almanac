@@ -56,3 +56,14 @@ export async function deleteWorkout(id: string): Promise<void> {
   const { error } = await supabase.from('workouts').delete().eq('id', id)
   if (error) throw error
 }
+
+/** Finish or reopen a workout's session on a local day; returns the workout with its last finish. */
+export async function setSessionDone(id: string, date: string, done: boolean): Promise<Workout> {
+  const { data, error } = await supabase.rpc('set_workout_session_done', {
+    p_workout_id: id,
+    p_date: date,
+    p_done: done,
+  })
+  if (error) throw error
+  return data
+}

@@ -1,9 +1,11 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
+import { useToday } from '@/hooks/useToday'
 import { fetchWorkouts } from '@/features/workouts/api/workouts.api'
 import type { Workout, WorkoutView } from '@/features/workouts/types'
 import { workoutKeys } from '@/features/workouts/hooks/queryKeys'
+import { isCompletedOn } from '@/features/workouts/lib/recurrence'
 
 interface UseWorkoutsResult {
   workouts: WorkoutView[]
@@ -12,8 +14,9 @@ interface UseWorkoutsResult {
   refetch: () => void
 }
 
-function toView(w: Workout): WorkoutView {
-  const status = w.completed_at
+// A recurring workout is "completed" only on the day it was finished.
+function toView(w: Workout, dateKey: string, timezone: string): WorkoutView {
+  const status = isCompletedOn(w, dateKey, timezone)
     ? 'completed'
     : w.scheduled_date || w.recurrence !== 'none'
       ? 'scheduled'
@@ -25,6 +28,7 @@ function toView(w: Workout): WorkoutView {
 export function useWorkouts(): UseWorkoutsResult {
   const { user } = useSession()
   const userId = user?.id ?? ''
+  const { dateKey, timezone } = useToday()
 
   const query = useQuery({
     queryKey: workoutKeys.all(userId),
@@ -32,7 +36,10 @@ export function useWorkouts(): UseWorkoutsResult {
     enabled: Boolean(userId),
   })
 
-  const workouts = useMemo(() => (query.data ?? []).map(toView), [query.data])
+  const workouts = useMemo(
+    () => (query.data ?? []).map((w) => toView(w, dateKey, timezone)),
+    [query.data, dateKey, timezone],
+  )
 
   return {
     workouts,

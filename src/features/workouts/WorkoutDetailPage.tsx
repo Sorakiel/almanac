@@ -15,11 +15,12 @@ import { WorkoutSessionRail } from '@/features/workouts/components/desktop/Worko
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
 import { useWorkoutSessionStore } from '@/features/workouts/stores/workoutSession'
-import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
+import { isCompletedOn, recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import { dateFromKey } from '@/lib/date'
 import { intlLocale } from '@/lib/dateLocale'
 import { useOpenKey } from '@/hooks/useSheetKey'
 import { useT } from '@/hooks/useT'
+import { useToday } from '@/hooks/useToday'
 import { toUserError } from '@/lib/userError'
 
 /** Friendly label for a `YYYY-MM-DD` date, UTC-safe. */
@@ -36,6 +37,7 @@ function WorkoutDetailPage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
+  const { dateKey, timezone } = useToday()
   const mutations = useSessionMutations(id, {
     onFinished: () => toast(t('workouts.finishedToast', { name: workout?.name ?? '' })),
   })
@@ -61,7 +63,7 @@ function WorkoutDetailPage() {
     )
   }
 
-  const done = Boolean(workout.completed_at)
+  const done = isCompletedOn(workout, dateKey, timezone)
   const hasExercises = exercises.length > 0
   const subtitle =
     recurrenceLabel(workout, t) ??

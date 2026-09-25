@@ -26,3 +26,10 @@ export interface SessionExercise {
   sortOrder: number
   sets: SetLog[]
 }
+
+/** The exercises as shown for one session day. */
+export interface SessionData {
+  /** Local date of the session the ticks belong to. */
+  date: string
+  exercises: SessionExercise[]
+}

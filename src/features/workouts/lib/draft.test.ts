@@ -25,6 +25,7 @@ function makeSet(overrides: Partial<SetLog> = {}): SetLog {
   return {
     id: `s${setId}`,
     workout_exercise_id: 'we1',
+    session_id: null,
     set_number: 1,
     reps: 10,
     weight: 20,
