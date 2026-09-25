@@ -4,7 +4,7 @@ import { useTodaysWorkouts } from '@/features/workouts/hooks/useTodaysWorkouts'
 import { EVENING_HOUR, localHour } from '@/features/dashboard/lib/localHour'
 import { useT } from '@/hooks/useT'
 import { useToday } from '@/hooks/useToday'
-import { useModulesStore } from '@/stores/modules'
+import { useModulesStore, type OrderedModule } from '@/stores/modules'
 import { FocusModuleCard } from './FocusModuleCard'
 import { ReadingModuleCard } from './ReadingModuleCard'
 import { ReflectModuleCard } from './ReflectModuleCard'
@@ -18,6 +18,7 @@ import { WorkoutModuleCard } from './WorkoutModuleCard'
 export function TodayModules() {
   const { t } = useT()
   const enabled = useModulesStore((s) => s.enabled)
+  const order = useModulesStore((s) => s.order)
   const { timezone } = useToday()
   const { due } = useTodaysWorkouts()
   const { books } = useBooks()
@@ -26,13 +27,16 @@ export function TodayModules() {
   const book = books.find((b) => b.status === 'reading')
   const evening = localHour(timezone) >= EVENING_HOUR
 
-  const cards: ReactElement[] = []
-  if (enabled.workouts && workout) {
-    cards.push(<WorkoutModuleCard key="workouts" item={workout} />)
+  // In the order set in Customize; a module without a card (friends) is skipped.
+  const card = (key: OrderedModule): ReactElement | null => {
+    if (!enabled[key]) return null
+    if (key === 'workouts' && workout) return <WorkoutModuleCard key={key} item={workout} />
+    if (key === 'reading' && book) return <ReadingModuleCard key={key} book={book} />
+    if (key === 'flow') return <FocusModuleCard key={key} />
+    if (key === 'reflect' && evening) return <ReflectModuleCard key={key} />
+    return null
   }
-  if (enabled.reading && book) cards.push(<ReadingModuleCard key="reading" book={book} />)
-  if (enabled.flow) cards.push(<FocusModuleCard key="focus" />)
-  if (enabled.reflect && evening) cards.push(<ReflectModuleCard key="reflect" />)
+  const cards = order.map(card).filter((c): c is ReactElement => c !== null)
 
   if (cards.length === 0) return null
   return (

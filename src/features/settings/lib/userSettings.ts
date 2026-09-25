@@ -1,5 +1,12 @@
 import type { Locale } from '@/i18n'
-import { isPinnable, NAV_MODULES, type ModuleKey, type PinnableModule } from '@/stores/modules'
+import {
+  isPinnable,
+  NAV_MODULES,
+  normalizeOrder,
+  type ModuleKey,
+  type OrderedModule,
+  type PinnableModule,
+} from '@/stores/modules'
 import type { ThemePreference } from '@/stores/theme'
 import type { Json } from '@/types/database.generated'
 
@@ -11,6 +18,8 @@ export interface SyncedSettings {
   sound?: boolean
   /** The tab bar's pinned module; null is an explicit "none", not "no choice". */
   pinned?: PinnableModule | null
+  /** Module order on Today and in "My modules". */
+  order?: OrderedModule[]
 }
 
 /**
@@ -19,13 +28,14 @@ export interface SyncedSettings {
  */
 const NO_PIN = 'none'
 
-/** The row's columns this client writes. `home_order` arrives with the Customize screen. */
+/** The row's columns this client writes. */
 export interface UserSettingsPatch {
   modules?: Json
   theme?: string
   locale?: string
   sound?: boolean
   pinned_tab?: string
+  home_order?: string[]
 }
 
 /** A row as fetched, narrowed to the columns read here. */
@@ -35,6 +45,7 @@ export interface UserSettingsRow {
   locale: string | null
   sound: boolean | null
   pinned_tab: string | null
+  home_order: string[] | null
   updated_at: string
 }
 
@@ -54,6 +65,7 @@ export function fromRow(row: UserSettingsRow): SyncedSettings {
   if (row.sound !== null) out.sound = row.sound
   if (row.pinned_tab === NO_PIN) out.pinned = null
   else if (row.pinned_tab !== null && isPinnable(row.pinned_tab)) out.pinned = row.pinned_tab
+  if (row.home_order !== null) out.order = normalizeOrder(row.home_order)
   if (row.modules !== null && typeof row.modules === 'object' && !Array.isArray(row.modules)) {
     const modules: Partial<Record<ModuleKey, boolean>> = {}
     for (const [key, on] of Object.entries(row.modules)) {
@@ -72,6 +84,7 @@ export function toPatch(settings: SyncedSettings): UserSettingsPatch {
   if (settings.locale !== undefined) patch.locale = settings.locale
   if (settings.sound !== undefined) patch.sound = settings.sound
   if (settings.pinned !== undefined) patch.pinned_tab = settings.pinned ?? NO_PIN
+  if (settings.order !== undefined) patch.home_order = settings.order
   return patch
 }
 
@@ -93,6 +106,7 @@ export function changed(prev: SyncedSettings, next: SyncedSettings): SyncedSetti
   if (prev.locale !== next.locale) out.locale = next.locale
   if (prev.sound !== next.sound) out.sound = next.sound
   if (prev.pinned !== next.pinned) out.pinned = next.pinned
+  if (prev.order?.join() !== next.order?.join()) out.order = next.order
   return out
 }
 

@@ -25,6 +25,7 @@ const STATIC_ROUTES = [
   '/train',
   '/progress',
   '/more',
+  '/more/customize',
   '/reflect',
   '/reading',
   '/friends',
