@@ -133,6 +133,63 @@
     }
   }
 
+  /* Phone compact title (prototype .p-compact): the large title's words at
+     17px once it has scrolled away, over a blurred fade of the canvas that
+     masks out downwards — no hard edge on the content beneath. */
+  .compact-title {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 35;
+    height: calc(env(safe-area-inset-top) + 44px);
+    padding-top: env(safe-area-inset-top);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    font-weight: 600;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+      opacity 0.2s,
+      transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    background: linear-gradient(rgb(var(--color-bg)) 55%, rgb(var(--color-bg) / 0));
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    -webkit-mask-image: linear-gradient(#000 70%, transparent);
+    mask-image: linear-gradient(#000 70%, transparent);
+  }
+  .compact-title.is-on {
+    opacity: 1;
+    transform: none;
+  }
+  /* Desktop: the toolbar carries the title instead (prototype .dk-tool .ttl). */
+  .toolbar-title {
+    font-size: 15px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .toolbar-title.is-on {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .compact-title,
+    .toolbar-title {
+      transform: none;
+      transition: none;
+    }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .compact-title {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: rgb(var(--color-bg));
+    }
+  }
+
   /* Phone tab bar + the separate "+" beside it (iOS 26 layout), ported from the
      prototype's .p-tabbar / .p-tab / .p-lens / .p-plus. The row is centred and
      capped so a tablet never gets a stretched bar. */
