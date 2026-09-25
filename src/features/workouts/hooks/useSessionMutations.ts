@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useSession } from '@/hooks/useSession'
 import { useOfflineMutation } from '@/hooks/useOfflineMutation'
@@ -14,12 +14,24 @@ function allSetsDone(exercises: SessionExercise[]): boolean {
   return sets.length > 0 && sets.every((s) => s.done)
 }
 
+interface SessionMutationOptions {
+  /** Ticking the last remaining set finished the workout. */
+  onFinished?: () => void
+}
+
 /** Mutations for a workout's session — exercises, sets, and completion. */
-export function useSessionMutations(workoutId: string) {
+export function useSessionMutations(
+  workoutId: string,
+  { onFinished }: SessionMutationOptions = {},
+) {
   const queryClient = useQueryClient()
   const { user } = useSession()
   const userId = user?.id ?? ''
-  const [celebrate, setCelebrate] = useState(false)
+  // onMutate outlives the render that created it; it always reaches the latest callback.
+  const onFinishedRef = useRef(onFinished)
+  useEffect(() => {
+    onFinishedRef.current = onFinished
+  })
 
   const sessionKey = workoutKeys.session(workoutId)
 
@@ -51,13 +63,13 @@ export function useSessionMutations(workoutId: string) {
               sets: ex.sets.map((s) => (s.id === id ? { ...s, ...patch } : s)),
             })),
         )
-        // Ticking the last remaining set auto-completes the workout + celebrates.
+        // Ticking the last remaining set auto-completes the workout.
         if (patch.done === true) {
           const session = queryClient.getQueryData<SessionExercise[]>(sessionKey)
           const workout = queryClient.getQueryData<Workout>(workoutKeys.detail(workoutId))
           if (session && allSetsDone(session) && workout && !workout.completed_at) {
             setCompleted.mutate(true)
-            setCelebrate(true)
+            onFinishedRef.current?.()
           }
         }
         return context
@@ -66,11 +78,5 @@ export function useSessionMutations(workoutId: string) {
     },
   )
 
-  return {
-    editSet,
-    setCompleted,
-    /** True right after the final set is ticked — drives the congrats modal. */
-    celebrate,
-    dismissCelebrate: () => setCelebrate(false),
-  }
+  return { editSet, setCompleted }
 }
