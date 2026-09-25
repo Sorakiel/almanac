@@ -91,7 +91,9 @@ export const router = createBrowserRouter([
           { path: '/train', element: suspend(<WorkoutsPage />) },
           { path: '/train/:id', element: suspend(<WorkoutDetailPage />) },
           { path: '/train/:id/edit', element: suspend(<WorkoutEditPage />) },
-          { path: '/insights', element: suspend(<ProgressPage />) },
+          { path: '/progress', element: suspend(<ProgressPage />) },
+          // The screen was Insights until v0.6; old bookmarks and links land here.
+          { path: '/insights', element: <Navigate to="/progress" replace /> },
           { path: '/more', element: suspend(<ModulesPage />) },
           { path: '/admin', element: suspend(<AdminPage />) },
           { path: '/admin/user/:id', element: suspend(<AdminUserPage />) },

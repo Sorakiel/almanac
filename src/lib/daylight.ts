@@ -91,13 +91,12 @@ export function daylightGradient(minutes: number, theme: Theme): string {
 }
 
 /**
- * The desktop veil. The workspace frame is flat paper by measurement (Epic 0),
- * and that stays true: this is a 22%-tall wash at the very top, weak enough
- * that panels keep their edge against the canvas, present enough that the room
- * changes over a working day.
+ * The desktop glow: one radial pool rising above the window's top edge, the
+ * desktop prototype's `--p-glow` shape. It spans the whole window, so the glass
+ * sidebar and the workspace read as lit by the same light.
  */
 export function daylightVeil(minutes: number, theme: Theme): string {
-  return `linear-gradient(180deg, ${daylightColor(minutes, theme)} 0%, rgb(var(--color-bg)) 22%)`
+  return `radial-gradient(120% 60% at 50% -10%, ${daylightColor(minutes, theme)} 0%, rgb(var(--color-bg)) 60%)`
 }
 
 /** Minutes since local midnight for an instant. */

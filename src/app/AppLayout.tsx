@@ -114,16 +114,14 @@ export function AppLayout() {
             </div>
           </main>
 
-          {/* Today carries its own aside (desktop-prototype.html); the shell's rail would be a third column. */}
-          <aside
-            className={cn(
-              'app-scroll hidden w-[340px] flex-none flex-col overflow-y-auto border-l bg-chrome px-6 py-6',
-              pathname !== '/' && 'lg:flex',
-            )}
-          >
-            <RailActive />
-            <div ref={setRailEl} className="flex flex-1 flex-col" />
-          </aside>
+          {/* Today carries its own aside (desktop-prototype.html); the shell's rail would be a
+              third column. Elsewhere the rail shows only when something is in it (.context-rail). */}
+          {pathname === '/' ? null : (
+            <aside className="context-rail app-scroll w-[340px] flex-none flex-col overflow-y-auto border-l bg-chrome px-6 py-6">
+              <RailActive />
+              <div ref={setRailEl} className="flex flex-1 flex-col" />
+            </aside>
+          )}
         </div>
 
         {hideNav ? null : (

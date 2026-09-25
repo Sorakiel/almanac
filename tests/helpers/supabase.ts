@@ -13,8 +13,22 @@ const ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY ?? ''
  * down state the UI cannot reach quickly (resetting the onboarding flag,
  * deleting rows a spec created). It holds no admin rights — every write goes
  * through the same RLS the app does, so a spec can only touch its own data.
+ *
+ * Signed in once per worker and reused: every seed and cleanup used to sign in
+ * afresh, and a full run crossed staging's auth rate limit near its end. The
+ * session outlives a run (an hour), so no refresh is needed.
  */
-export async function e2eClient(): Promise<SupabaseClient<Database>> {
+let shared: Promise<SupabaseClient<Database>> | null = null
+
+export function e2eClient(): Promise<SupabaseClient<Database>> {
+  shared ??= signInClient().catch((error: unknown) => {
+    shared = null
+    throw error
+  })
+  return shared
+}
+
+async function signInClient(): Promise<SupabaseClient<Database>> {
   const client = createClient<Database>(URL, ANON_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   })

@@ -88,7 +88,7 @@ export function usePaletteCommands(): PaletteCommand[] {
       label: t('palette.open', { name: t('nav.progress') }),
       group: t('palette.groupGo'),
       icon: ChartNoAxesColumn,
-      run: go('/insights'),
+      run: go('/progress'),
     },
     {
       id: 'go:modules',
