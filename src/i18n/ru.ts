@@ -362,7 +362,7 @@ export const ru: Translations = {
     pinnedTab: 'Вкладка в панели',
     pinnedTabNote: 'Одно место, чтобы панель не разрасталась. Остальные модули всегда в «Модулях».',
     noTab: 'Без вкладки',
-    syncedEverywhere: 'Одинаково на телефоне, десктопе и Android',
+    syncedEverywhere: 'Одинаково на всех ваших устройствах',
     title: 'Модули',
     soonModules: { finances: 'Финансы', goals: 'Цели', sleep: 'Сон' },
     soonLine: 'Скоро: {list}.',

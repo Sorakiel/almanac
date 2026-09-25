@@ -315,7 +315,7 @@ export const en = {
     pinnedTab: 'Tab in the bar',
     pinnedTabNote: 'One slot, so the bar doesn’t grow. Every module is always in Modules.',
     noTab: 'No tab',
-    syncedEverywhere: 'The same on phone, desktop and Android',
+    syncedEverywhere: 'The same on all your devices',
     title: 'Modules',
     soonModules: { finances: 'Finances', goals: 'Goals', sleep: 'Sleep' },
     soonLine: 'Coming soon: {list}.',
