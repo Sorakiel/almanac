@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { ChartNoAxesColumn, House, LayoutGrid, type LucideIcon } from 'lucide-react'
 import { CreateButton } from '@/app/shell/CreateButton'
 import { NAV_MODULES, useModulesStore } from '@/stores/modules'
+import { useGlassLens } from '@/hooks/useGlassLens'
 import { useT } from '@/hooks/useT'
 
 interface Tab {
@@ -67,6 +68,7 @@ export function BottomNav() {
   const current = activeTab(pathname, pinned?.to ?? null)
 
   const barRef = useRef<HTMLDivElement>(null)
+  useGlassLens(barRef, 'glass-lens-tabbar')
   const [lens, setLens] = useState<LensBox | null>(null)
   useLayoutEffect(() => {
     const bar = barRef.current
