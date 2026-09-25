@@ -10,7 +10,11 @@ import { WeekDots } from '@/features/habits/components/WeekDots'
 import { useToggleHabit } from '@/features/habits/hooks/useToggleHabit'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
-import { habitNameTransition } from '@/features/habits/lib/transition'
+import {
+  claimHabitName,
+  HABIT_NAME_ATTR,
+  habitNameTransition,
+} from '@/features/habits/lib/transition'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
@@ -58,7 +62,10 @@ export function HabitCard({ habit }: HabitCardProps) {
           below sits above it (z-10) and keeps its own click. */}
       <button
         type="button"
-        onClick={() => navigate(`/habits/${habit.id}`, { viewTransition: true })}
+        onClick={(e) => {
+          claimHabitName(habit.id, e.currentTarget.parentElement)
+          navigate(`/habits/${habit.id}`, { viewTransition: true })
+        }}
         aria-label={t('habits.aria.open', { name: habit.name })}
         className="absolute inset-0 z-0 rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
       />
@@ -66,6 +73,7 @@ export function HabitCard({ habit }: HabitCardProps) {
         <IconTile icon={Icon} tone={color.tile} />
         <div className="min-w-0 flex-1">
           <p
+            {...{ [HABIT_NAME_ATTR]: '' }}
             style={habitNameTransition(habit.id)}
             className={cn(
               'truncate font-semibold',

@@ -16,6 +16,7 @@ import { CreateSheet } from '@/app/shell/CreateSheet'
 import { useCelebrationWatchers } from '@/app/hooks/useCelebrationWatchers'
 import { useDailyReminder } from '@/app/hooks/useDailyReminder'
 import { useGlobalShortcuts } from '@/app/hooks/useGlobalShortcuts'
+import { useRouteMotion } from '@/app/hooks/useRouteMotion'
 import { useNativeWidgetSync } from '@/app/hooks/useNativeWidgetSync'
 import { useUserSettingsSync } from '@/app/hooks/useUserSettingsSync'
 import { useSession } from '@/hooks/useSession'
@@ -55,6 +56,8 @@ export function AppLayout() {
   useUserSettingsSync()
   // ⌘K palette, ⌘N new habit.
   useGlobalShortcuts()
+  // Tab switch / push / pop for the route View Transition; entrance once per screen.
+  useRouteMotion(pathname)
 
   // Onboarding is gated on `profiles.onboarded` so it survives across devices.
   // Wait for the profile before deciding, so an already-onboarded user never
@@ -103,13 +106,12 @@ export function AppLayout() {
             )}
           >
             <DesktopToolbar />
-            {/* Keyed so the page remounts per route (replays the Cascade). The
-                cross-fade itself is the View Transition (see viewTransition on
-                the nav links + globals.css), so no per-route animation here.
-                hideNav routes stretch to fill main so their own `mt-auto`
-                bottom CTA reaches the true bottom instead of trailing content
-                with dead space below it — main is only flex-col in that case. */}
-            <div key={pathname} className={cn(hideNav && 'flex flex-1 flex-col')}>
+            {/* Not keyed by route: the move between screens is the View
+                Transition (useRouteMotion + globals.css), and a screen's
+                entrance cascade plays on its first visit only. hideNav routes
+                stretch to fill main so their own `mt-auto` bottom CTA reaches
+                the true bottom — main is only flex-col in that case. */}
+            <div className={cn(hideNav && 'flex flex-1 flex-col')}>
               <Outlet />
             </div>
           </main>

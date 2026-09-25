@@ -372,25 +372,73 @@
 }
 
 /* ── View Transitions ──────────────────────────────────────────────────────
-   Route changes cross-fade (opted in via React Router's `viewTransition` on the
-   nav links); theme switches wipe in as a circle growing from the toggle —
-   driven by --vt-x/--vt-y/--vt-r and `.theme-vt` on <html> (lib/viewTransition).
-   Gated on no-preference so reduced-motion users get an instant swap. */
+   Route changes move by kind (motion spec, HANDOFF §3; set on <html
+   data-route-motion> by useRouteMotion): a tab switch rises 8px and fades in,
+   a push slides in from the right over the previous screen as it drifts left
+   28% and dims, a pop reverses that. The tab bar and the sidebar are their own
+   layers and hold still. Theme switches wipe in as a circle growing from the
+   toggle — --vt-x/--vt-y/--vt-r and `.theme-vt` on <html> (lib/viewTransition).
+   Reduced motion keeps a short cross-fade: no travel, but no hard cut either. */
 /* The transition layer sits above the page; paint it in the canvas colour so
    nothing behind the snapshots — WebKit shows white there — can come through. */
 ::view-transition {
   background-color: rgb(var(--color-bg));
 }
 
+.tabbar-dock {
+  view-transition-name: tabbar;
+}
+.shell-sidebar {
+  view-transition-name: sidebar;
+}
+::view-transition-group(tabbar),
+::view-transition-group(sidebar) {
+  animation: none;
+}
+::view-transition-old(tabbar),
+::view-transition-old(sidebar) {
+  display: none;
+}
+::view-transition-new(tabbar),
+::view-transition-new(sidebar) {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  /* The old page stays fully opaque while the new one fades in over it. A
-     fade-out of the old running against a fade-in of the new dipped both
-     below full opacity mid-way, showing whatever was underneath. */
-  ::view-transition-old(root) {
+  /* Tab switch, as the prototype's `.pv.enter-fade`: the old screen is gone at
+     once and the new one rises out of the canvas. Two screens cross-fading
+     read as one on top of the other for a third of a second. */
+  html:not(.theme-vt)::view-transition-old(root) {
     animation: none;
+    opacity: 0;
   }
-  ::view-transition-new(root) {
-    animation: vt-fade-in 0.24s ease both;
+  html:not(.theme-vt)::view-transition-new(root) {
+    animation: vt-rise 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  /* Push: in from the right, the previous screen slides 28% under and dims. */
+  html[data-route-motion='push']:not(.theme-vt)::view-transition-new(root) {
+    animation: vt-push-in 0.42s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  html[data-route-motion='push']:not(.theme-vt)::view-transition-old(root) {
+    opacity: 1;
+    animation: vt-push-under 0.42s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  /* Pop: the top screen leaves to the right, above the one coming back. */
+  html[data-route-motion='pop']:not(.theme-vt)::view-transition-old(root) {
+    z-index: 1;
+    opacity: 1;
+    animation: vt-pop-out 0.36s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  html[data-route-motion='pop']:not(.theme-vt)::view-transition-new(root) {
+    animation: vt-pop-under 0.36s cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+  /* A shared element (the habit name) travels on the push curve. */
+  ::view-transition-group(*) {
+    animation-duration: 0.42s;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   /* Theme wipe: hold the old theme still while the new one clips in over it. */
@@ -402,9 +450,53 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*) {
+    animation-duration: 0.01s;
+  }
+  ::view-transition-old(root) {
+    animation: none;
+  }
+  ::view-transition-new(root) {
+    animation: vt-fade-in 0.15s linear both;
+  }
+}
+
 @keyframes vt-fade-in {
   from {
     opacity: 0;
+  }
+}
+@keyframes vt-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes vt-push-in {
+  from {
+    transform: translateX(100%);
+    box-shadow: -20px 0 40px rgb(0 0 0 / 0.25);
+  }
+  to {
+    box-shadow: -20px 0 40px rgb(0 0 0 / 0.25);
+  }
+}
+@keyframes vt-push-under {
+  to {
+    transform: translateX(-28%);
+    filter: brightness(0.8);
+  }
+}
+@keyframes vt-pop-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes vt-pop-under {
+  from {
+    transform: translateX(-28%);
+    filter: brightness(0.8);
   }
 }
 

@@ -81,7 +81,7 @@ export function Sidebar() {
   )
 
   return (
-    <aside className="lg fixed bottom-2 left-2 top-2 z-30 flex w-[236px] flex-col gap-0.5 rounded-[22px] px-3 pb-3 pt-3.5">
+    <aside className="shell-sidebar lg fixed bottom-2 left-2 top-2 z-30 flex w-[236px] flex-col gap-0.5 rounded-[22px] px-3 pb-3 pt-3.5">
       <button
         type="button"
         onClick={() => openCreate()}

@@ -18,6 +18,7 @@ function CustomizePage() {
       <div>
         <Link
           to="/more"
+          viewTransition
           className="-ml-1.5 inline-flex items-center gap-0.5 py-2 text-body text-accent"
         >
           <ChevronLeft className="h-6 w-6" strokeWidth={2.4} aria-hidden="true" />

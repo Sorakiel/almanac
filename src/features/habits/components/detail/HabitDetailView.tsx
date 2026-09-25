@@ -6,7 +6,7 @@ import { HabitStreakCard } from '@/features/habits/components/detail/HabitStreak
 import type { HabitDetailStats } from '@/features/habits/hooks/useHabitDetail'
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
-import { habitNameTransition } from '@/features/habits/lib/transition'
+import { habitHeaderTransition } from '@/features/habits/lib/transition'
 import type { Habit } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
 
@@ -50,7 +50,7 @@ export function HabitDetailView({ habit, stats, ...handlers }: HabitDetailViewPr
           className="h-[60px] w-[60px] rounded-[18px] [&>svg]:h-[30px] [&>svg]:w-[30px]"
         />
         <div className="min-w-0">
-          <h1 className="text-title font-bold" style={habitNameTransition(habit.id)}>
+          <h1 className="text-title font-bold" style={habitHeaderTransition(habit.id)}>
             {habit.name}
           </h1>
           {subtitle ? <p className="mt-[3px] text-callout text-muted">{subtitle}</p> : null}

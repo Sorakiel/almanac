@@ -31,7 +31,7 @@ function ModulesPage() {
           <p className="text-callout font-medium text-muted">{t('modulesPage.subtitle')}</p>
           <h1 className="text-large-title font-bold">{t('modulesPage.title')}</h1>
         </div>
-        <Link to="/more/customize" className="mods-link">
+        <Link to="/more/customize" viewTransition className="mods-link">
           {t('modulesPage.customize')}
         </Link>
       </header>
