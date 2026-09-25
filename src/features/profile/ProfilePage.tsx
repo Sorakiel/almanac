@@ -73,7 +73,7 @@ function ProfilePage() {
         {t('profile.back')}
       </Link>
 
-      <header className="mb-6 hidden lg:block">
+      <header className="mb-6 hidden lg:mx-auto lg:block lg:max-w-5xl">
         <p className="text-callout text-muted">{t('profile.subtitle')}</p>
         <p className="text-large-title font-bold">{t('profile.title')}</p>
       </header>
