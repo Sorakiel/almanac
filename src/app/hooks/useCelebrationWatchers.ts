@@ -6,6 +6,7 @@ import { useAchievements } from '@/features/achievements/hooks/useAchievements'
 import { crossedMilestones } from '@/features/habits/lib/milestones'
 import { useToday } from '@/hooks/useToday'
 import { celebrate } from '@/lib/celebration'
+import { haptic } from '@/lib/platform/haptics'
 import type { EvaluatedAchievement } from '@/features/achievements/types'
 import { useT } from '@/hooks/useT'
 import { achievementTitle } from '@/features/achievements/lib/text'
@@ -15,6 +16,8 @@ const PERFECT_KEY = 'almanac:perfect-day' // last celebrated calendar date
 const SEEN_ACH_KEY = 'almanac:seen-achievements' // JSON array of unlocked signatures
 /** Long enough to read a badge name and reach for the action. */
 const BADGE_TOAST_MS = 5000
+/** A milestone has no action to reach for — just a line to read. */
+const MILESTONE_TOAST_MS = 4000
 
 const achSignature = (a: EvaluatedAchievement): string => `${a.def.id}:${a.tierIndex}`
 
@@ -60,10 +63,12 @@ export function useCelebrationWatchers(): void {
       const hit = crossedMilestones(before, h.streak)
       if (hit.length === 0) continue
       const milestone = hit[hit.length - 1]!
-      celebrate({
-        kind: 'milestone',
-        title: t('celebrate.milestoneTitle', { count: milestone }),
-        message: t('celebrate.milestoneMessage', { count: milestone, name: h.name }),
+      // A quiet toast, like a badge: the milestone lands on the tap that
+      // closed the habit, and the list is exactly what the user is looking at.
+      haptic('medium')
+      toast.success(t('celebrate.milestoneTitle', { count: milestone }), {
+        description: t('celebrate.milestoneMessage', { count: milestone, name: h.name }),
+        duration: MILESTONE_TOAST_MS,
       })
     }
   }, [habits, t])
