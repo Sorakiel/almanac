@@ -3,6 +3,7 @@ import { HabitChecklist } from '@/features/habits/components/HabitChecklist'
 import { HabitCalendarCard } from '@/features/habits/components/detail/HabitCalendarCard'
 import { HabitDetailActions } from '@/features/habits/components/detail/HabitDetailActions'
 import { HabitStreakCard } from '@/features/habits/components/detail/HabitStreakCard'
+import { HabitTodayNote } from '@/features/habits/components/detail/HabitTodayNote'
 import type { HabitDetailStats } from '@/features/habits/hooks/useHabitDetail'
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
@@ -13,6 +14,7 @@ import { useT } from '@/hooks/useT'
 export interface HabitDetailHandlers {
   /** Today's count: the goal to mark done, 0 to clear, ±1 for a counted habit. */
   onSetCount: (count: number) => void
+  onSaveNote: (note: string) => void
   onToggleFreeze: () => void
   onEdit: () => void
   onArchive: () => void
@@ -70,6 +72,13 @@ export function HabitDetailView({ habit, stats, ...handlers }: HabitDetailViewPr
         habit={habit}
         onSetCount={handlers.onSetCount}
       />
+      {stats.todayCount > 0 ? (
+        <HabitTodayNote
+          key={`${habit.id}:${stats.todayKey}`}
+          note={stats.todayNote}
+          onSave={handlers.onSaveNote}
+        />
+      ) : null}
       <HabitCalendarCard stats={stats} />
 
       <dl className="grid grid-cols-3 gap-2">

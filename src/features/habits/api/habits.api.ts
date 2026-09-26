@@ -249,3 +249,23 @@ export async function setHabitCount({ userId, habitId, date, count }: SetLogArgs
     .upsert({ user_id: userId, habit_id: habitId, date, count }, { onConflict: 'habit_id,date' })
   if (error) throw error
 }
+
+interface SetNoteArgs {
+  habitId: string
+  date: string
+  note: string | null
+}
+
+/**
+ * The note on a day's mark. Only a marked day has a row to carry it, so on an
+ * unmarked day this updates nothing — and clearing the mark takes the note
+ * with it, the way the mark and its note belong together.
+ */
+export async function setHabitNote({ habitId, date, note }: SetNoteArgs): Promise<void> {
+  const { error } = await supabase
+    .from('habit_logs')
+    .update({ note })
+    .eq('habit_id', habitId)
+    .eq('date', date)
+  if (error) throw error
+}

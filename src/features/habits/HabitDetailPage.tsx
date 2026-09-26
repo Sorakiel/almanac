@@ -10,6 +10,7 @@ import { HabitDetailView } from '@/features/habits/components/detail/HabitDetail
 import { useHabitDetail } from '@/features/habits/hooks/useHabitDetail'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
 import { useSetTodayCount } from '@/features/habits/hooks/useSetTodayCount'
+import { useSetTodayNote } from '@/features/habits/hooks/useSetTodayNote'
 import { useToggleFreeze } from '@/features/habits/hooks/useToggleFreeze'
 import { useUiStore } from '@/stores/ui'
 import { toastWithUndo } from '@/lib/undoToast'
@@ -26,6 +27,7 @@ function HabitDetailPage() {
   const { archive, restore, remove } = useHabitMutations()
   const toggleFreeze = useToggleFreeze()
   const setTodayCount = useSetTodayCount(habit)
+  const setTodayNote = useSetTodayNote(habit)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   // Back to wherever the row was tapped (Today or Habits); a deep link has no
@@ -85,6 +87,11 @@ function HabitDetailPage() {
         onSetCount={(count) =>
           setTodayCount.mutate(count, {
             onError: (error) => toast.error(toUserError(error, t, 'habits.updateFailed')),
+          })
+        }
+        onSaveNote={(note) =>
+          setTodayNote.mutate(note, {
+            onError: (error) => toast.error(toUserError(error, t, 'habits.noteFailed')),
           })
         }
         onToggleFreeze={() =>

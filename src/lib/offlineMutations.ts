@@ -10,6 +10,7 @@ import {
   removeFreeze,
   restoreHabit,
   setHabitCount,
+  setHabitNote,
   setSubtaskCompletedDates,
   updateHabit,
   updateHabitOrder,
@@ -131,6 +132,13 @@ export interface SetHabitCountVariables {
   habitId: string
   date: string
   count: number
+}
+
+export interface SetHabitNoteVariables {
+  userId: string
+  habitId: string
+  date: string
+  note: string | null
 }
 
 export interface ReorderHabitsVariables {
@@ -294,6 +302,7 @@ export const OFFLINE_MUTATION_KEYS = {
   restoreHabit: offlineKey<void, RestoreHabitVariables>('restoreHabit'),
   deleteHabit: offlineKey<void, DeleteHabitVariables>('deleteHabit'),
   setHabitCount: offlineKey<void, SetHabitCountVariables>('setHabitCount'),
+  setHabitNote: offlineKey<void, SetHabitNoteVariables>('setHabitNote'),
   reorderHabits: offlineKey<void, ReorderHabitsVariables>('reorderHabits'),
   createSubtask: offlineKey<HabitSubtask, CreateSubtaskVariables>('createSubtask'),
   deleteSubtask: offlineKey<void, DeleteSubtaskVariables>('deleteSubtask'),
@@ -370,6 +379,12 @@ export function registerOfflineMutations(client: QueryClient): void {
   register(
     OFFLINE_MUTATION_KEYS.setHabitCount,
     (variables) => setHabitCount(variables),
+    ({ userId, habitId }) => [habitKeys.logsRoot(userId), habitKeys.history(habitId)],
+    HABITS,
+  )
+  register(
+    OFFLINE_MUTATION_KEYS.setHabitNote,
+    (variables) => setHabitNote(variables),
     ({ userId, habitId }) => [habitKeys.logsRoot(userId), habitKeys.history(habitId)],
     HABITS,
   )

@@ -29,6 +29,8 @@ export interface HabitDetailStats {
   todayDone: boolean
   /** Units logged today — the "3" of "3 of 8". */
   todayCount: number
+  /** The note on today's mark; null when there is none (or no mark). */
+  todayNote: string | null
   /** Today is protected by a streak freeze. */
   todayFrozen: boolean
 }
@@ -102,7 +104,7 @@ function computeStats(
   frozen: Set<string>,
   windowKeys: string[],
   createdKey: string,
-): Omit<HabitDetailStats, 'todayCount'> {
+): Omit<HabitDetailStats, 'todayCount' | 'todayNote'> {
   const todayKey = windowKeys.at(-1)!
   const heatmap = computeDayCells(habit, completed, frozen, windowKeys, todayKey, createdKey)
   const interval = intervalDays(habit)
@@ -168,8 +170,12 @@ export function useHabitDetail(habitId: string): UseHabitDetailResult {
     // The habit only "exists" from its creation day — days before it don't count
     // as misses. created_at is a UTC instant; resolve it in the user's zone.
     const createdKey = localDateKey(timezone, new Date(habit.created_at))
-    const todayCount = historyQuery.data.find((l) => l.date === dateKey)?.count ?? 0
-    stats = { ...computeStats(habit, completed, frozen, windowKeys, createdKey), todayCount }
+    const todayLog = historyQuery.data.find((l) => l.date === dateKey)
+    stats = {
+      ...computeStats(habit, completed, frozen, windowKeys, createdKey),
+      todayCount: todayLog?.count ?? 0,
+      todayNote: todayLog?.note ?? null,
+    }
   }
 
   return {
