@@ -6,7 +6,9 @@ const CI = Boolean(process.env.CI)
  * E2E config. Boots Vite in `e2e` mode and runs the suite against it.
  *
  * The specs share one pre-seeded Supabase account (E2E_EMAIL / E2E_PASSWORD)
- * and clean up after themselves, so they must not run in parallel — and they
+ * and clean up after themselves, so they must not run in parallel within a run.
+ * CI gets its speed from `--shard=N/2` instead: each shard is a separate job
+ * signed in as its own account, so the halves never share rows. And they
  * must never point at production. `--mode e2e` makes `.env.e2e.local` win over
  * `.env.local`, so the target project is explicit rather than whatever the
  * developer happens to have configured locally.
