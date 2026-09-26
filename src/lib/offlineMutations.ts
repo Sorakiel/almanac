@@ -94,7 +94,7 @@ export interface LogSetVariables {
   restSeconds: number | null
 }
 
-/** Queued before sessions existed (0037): patched the plan row in place. */
+/** Queued before sessions existed (0038): patched the plan row in place. */
 interface LegacyEditSetVariables {
   workoutId: string
   id: string
