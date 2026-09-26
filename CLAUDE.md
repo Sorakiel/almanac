@@ -215,7 +215,7 @@ toast instead of a confirm; an irreversible one gets the red `ConfirmSheet`.
 
 **E2E — Playwright.** Six specs in `/tests`, run on every PR by the `e2e` CI job. They drive a real browser against the **staging** Supabase project — never production, because they create and delete real rows. `--mode e2e` makes `.env.e2e.local` win over `.env.local` so the target is explicit rather than whatever a developer happens to have configured.
 
-The specs share **one pre-seeded staging account per shard** and clean up their own rows through ordinary RLS — no service_role key anywhere. CI splits the suite into two shards (`--shard=N/2`), each signed in as its own account (`E2E_EMAIL` / `E2E_EMAIL_2`); a final `e2e` job gates on both and merges their `screens` artifacts. Without `E2E_EMAIL_2`, shard 1 runs the whole suite. Consequences worth knowing before you touch them:
+The specs share **one pre-seeded staging account per shard** and clean up their own rows through ordinary RLS — no service_role key anywhere. CI splits the suite into two jobs by time — `screens.spec` alone, everything else beside it (`E2E_PART` in `playwright.config.ts`) — each signed in as its own account (`E2E_EMAIL` / `E2E_EMAIL_2`); a final `e2e` job gates on both and merges their `screens` artifacts. Without `E2E_EMAIL_2`, shard 1 runs the whole suite. Consequences worth knowing before you touch them:
 
 - Within a shard they must run serially (`workers: 1`). Each shard's job is serialised repo-wide by its own queue (`e2e-staging` for the first account, `e2e-staging-2` for the second).
 - A spec must never depend on another spec's rows: after sharding, the two may run under different accounts.

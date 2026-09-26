@@ -1,7 +1,9 @@
 import { Cascade } from '@/components/common/Cascade'
 import { AddFriend } from '@/features/social/components/AddFriend'
 import { ActivityFeed } from '@/features/social/components/ActivityFeed'
-import type { FeedItem, FriendsData } from '@/features/social/types'
+import { FriendsList } from '@/features/social/components/FriendsList'
+import { RequestsList } from '@/features/social/components/RequestsList'
+import type { FeedItem, Friend, FriendsData } from '@/features/social/types'
 import { useT } from '@/hooks/useT'
 
 interface SocialWorkspaceProps {
@@ -12,9 +14,18 @@ interface SocialWorkspaceProps {
   connectedIds: Set<string>
   onAdd: (userId: string) => void
   isAdding: boolean
+  onAccept: (friendshipId: string) => void
+  onRemove: (friendshipId: string) => void
+  busy: boolean
+  /** The friend open in the inspector, if any. */
+  selectedId: string | null
+  onOpen: (friend: Friend) => void
 }
 
-/** Desktop "Friends" workspace — add-a-friend plus the activity feed. */
+/**
+ * Desktop "Friends" workspace — add a friend, answer requests, the activity
+ * feed, then the circle; a friend opens in the inspector.
+ */
 export function SocialWorkspace({
   data,
   feed,
@@ -23,6 +34,11 @@ export function SocialWorkspace({
   connectedIds,
   onAdd,
   isAdding,
+  onAccept,
+  onRemove,
+  busy,
+  selectedId,
+  onOpen,
 }: SocialWorkspaceProps) {
   const { t } = useT()
   return (
@@ -41,10 +57,24 @@ export function SocialWorkspace({
             onAdd={onAdd}
             isAdding={isAdding}
           />
+          <RequestsList
+            incoming={data.incoming}
+            outgoing={data.outgoing}
+            onAccept={onAccept}
+            onRemove={onRemove}
+            busy={busy}
+          />
           <section className="flex flex-col gap-3">
             <p className="label-mono">{t('social.activity')}</p>
             <ActivityFeed feed={feed} todayKey={todayKey} hasFriends={data.friends.length > 0} />
           </section>
+          <FriendsList
+            friends={data.friends}
+            onRemove={onRemove}
+            busy={busy}
+            onOpen={onOpen}
+            selectedId={selectedId}
+          />
         </Cascade>
       </div>
     </div>

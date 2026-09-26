@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { groupBooks, libraryStats } from '@/features/reading/lib/library'
+import { groupBooks } from '@/features/reading/lib/library'
 import type { Book } from '@/features/reading/types'
 
 let seq = 0
@@ -36,21 +36,5 @@ describe('groupBooks', () => {
     expect(grouped.reading).toHaveLength(2)
     expect(grouped.to_read).toHaveLength(1)
     expect(grouped.finished).toHaveLength(2)
-  })
-})
-
-describe('libraryStats', () => {
-  it('counts totals and finished-this-year', () => {
-    const stats = libraryStats(BOOKS, '2026-07-13')
-    expect(stats.total).toBe(5)
-    expect(stats.reading).toBe(2)
-    expect(stats.finished).toBe(2)
-    // Only the 2026-02-10 finish falls in the 2026 window.
-    expect(stats.finishedThisYear).toBe(1)
-  })
-
-  it('is all-zero for an empty shelf', () => {
-    const stats = libraryStats([], '2026-07-13')
-    expect(stats).toEqual({ total: 0, reading: 0, finished: 0, finishedThisYear: 0 })
   })
 })

@@ -1,17 +1,18 @@
+import { useCallback, useState } from 'react'
 import { BookOpen, Plus } from 'lucide-react'
 import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
-import { Rail } from '@/components/rail/Rail'
+import { Inspector } from '@/components/inspector/Inspector'
 import { BookShelf } from '@/features/reading/components/BookShelf'
 import { BookFormSheet } from '@/features/reading/components/BookFormSheet'
 import { BooksWorkspace } from '@/features/reading/components/desktop/BooksWorkspace'
-import { BooksRail } from '@/features/reading/components/desktop/BooksRail'
+import { BookDetailPanel } from '@/features/reading/components/BookDetailPanel'
 import { useBooks } from '@/features/reading/hooks/useBooks'
 import { useCreateIntent } from '@/hooks/useCreateIntent'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { useOpenKey } from '@/hooks/useSheetKey'
+import { useLastValue, useOpenKey } from '@/hooks/useSheetKey'
 import { useT } from '@/hooks/useT'
 
 function BooksPage() {
@@ -19,6 +20,11 @@ function BooksPage() {
   const { books, isLoading, isError, refetch } = useBooks()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [formOpen, setFormOpen] = useCreateIntent()
+  // Desktop opens a book in the inspector; the last one stays rendered while
+  // the panel slides out.
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const shownId = useLastValue(selectedId)
+  const closeInspector = useCallback(() => setSelectedId(null), [])
 
   const openNew = () => setFormOpen(true)
   const formKey = useOpenKey(formOpen)
@@ -33,10 +39,16 @@ function BooksPage() {
           isError={isError}
           refetch={refetch}
           onNew={openNew}
+          selectedId={selectedId}
+          onSelect={(id) => setSelectedId((cur) => (cur === id ? null : id))}
         />
-        <Rail>
-          <BooksRail books={books} />
-        </Rail>
+        <Inspector
+          open={selectedId !== null}
+          onClose={closeInspector}
+          label={t('reading.inspector')}
+        >
+          {shownId ? <BookDetailPanel key={shownId} id={shownId} onGone={closeInspector} /> : null}
+        </Inspector>
         {formSheet}
       </>
     )

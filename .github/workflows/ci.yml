@@ -83,10 +83,11 @@ jobs:
             echo "### E2E skipped — secrets not available to this run" >> "$GITHUB_STEP_SUMMARY"
           elif [ -n "$E2E_EMAIL_2" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
-            echo "args=--shard=$SHARD/2" >> "$GITHUB_OUTPUT"
+            # Split by time: the screenshot walk on its own, everything else beside it.
+            if [ "$SHARD" = "1" ]; then echo "part=rest" >> "$GITHUB_OUTPUT"; else echo "part=screens" >> "$GITHUB_OUTPUT"; fi
           elif [ "$SHARD" = "1" ]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
-            echo "args=" >> "$GITHUB_OUTPUT"
+            echo "part=" >> "$GITHUB_OUTPUT"
             echo "### One staging account — the whole suite runs in shard 1" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
@@ -121,7 +122,8 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
           E2E_EMAIL: ${{ matrix.shard == 2 && secrets.E2E_EMAIL_2 || secrets.E2E_EMAIL }}
           E2E_PASSWORD: ${{ matrix.shard == 2 && secrets.E2E_PASSWORD_2 || secrets.E2E_PASSWORD }}
-        run: npm run test:e2e -- ${{ steps.config.outputs.args }}
+          E2E_PART: ${{ steps.config.outputs.part }}
+        run: npm run test:e2e
 
       - name: Upload screenshots
         if: always() && steps.config.outputs.run == 'true'

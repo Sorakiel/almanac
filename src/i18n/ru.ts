@@ -330,6 +330,8 @@ export const ru: Translations = {
     removeNameConfirm: 'Удалить {name} из друзей?',
     requestFailed: 'Не удалось отправить запрос',
     removeFriend: 'Удалить из друзей',
+    inspector: 'Друг',
+    friendSince: 'В круге с {date}',
     removeFriendHint:
       'Вы перестанете видеть активность друг друга. Добавить снова можно в любой момент.',
     accept: 'Принять',
@@ -561,6 +563,7 @@ export const ru: Translations = {
     focusDay: '{date} · {count} мин',
   },
   reading: {
+    inspector: 'Книга',
     title: 'Чтение',
     library: 'Библиотека',
     subtitle: 'Книги, прогресс и то, что вы из них вынесли.',
@@ -583,9 +586,6 @@ export const ru: Translations = {
     notes: 'Заметки',
     progress: 'Прогресс',
     status: 'Статус',
-    books: 'книг',
-    finishedLower: 'прочитано',
-    readingLower: 'читаю',
     statuses: { to_read: 'Прочитать', reading: 'Читаю', finished: 'Прочитано' },
     statusLabel: 'Статус чтения',
     started: 'Начата',
@@ -679,9 +679,6 @@ export const ru: Translations = {
     unitsIn: 'прочитано: {units}',
     noteLabel: 'заметка',
     shelfLabel: 'Ваша полка',
-    shelf: 'ваша полка',
-    snapshot: 'сводка',
-    finishedIn: 'прочитано в {year}',
   },
   workouts: {
     finishedToast: 'Тренировка «{name}» завершена',
