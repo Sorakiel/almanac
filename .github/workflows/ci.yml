@@ -40,14 +40,21 @@ jobs:
       - name: Build
         run: npm run build
 
-  e2e:
-    name: e2e
+  # Two shards, one staging account each: the suite still runs serially inside
+  # a shard (the account is shared by its specs and cleaned through RLS), but
+  # the halves run side by side. Until the second account's secrets exist,
+  # shard 1 runs the whole suite and shard 2 stands down — never half a suite.
+  e2e-shard:
+    name: e2e shard ${{ matrix.shard }}
     runs-on: ubuntu-latest
-    # The suite shares one staging account and cleans up after itself, so two
-    # runs at once would trip over each other. Queue them instead of cancelling:
-    # a cancelled run can leave the account mid-test.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    # One queue per account: two runs on the same account would trip over each
+    # other. Queue rather than cancel — a cancelled run can leave it mid-test.
     concurrency:
-      group: e2e-staging
+      group: e2e-staging-${{ matrix.shard }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
@@ -57,9 +64,6 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
-
       # Secrets are not exposed to pull requests from forks, so the suite has to
       # be able to stand down. It says so loudly rather than reporting a green
       # check for a run that tested nothing.
@@ -68,20 +72,34 @@ jobs:
         env:
           E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
           E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_EMAIL_2: ${{ secrets.E2E_EMAIL_2 }}
+          SHARD: ${{ matrix.shard }}
         run: |
-          if [ -n "$E2E_SUPABASE_URL" ] && [ -n "$E2E_EMAIL" ]; then
-            echo "configured=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "configured=false" >> "$GITHUB_OUTPUT"
+          if [ -z "$E2E_SUPABASE_URL" ] || [ -z "$E2E_EMAIL" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
             echo "::warning title=E2E skipped::E2E_SUPABASE_URL / E2E_EMAIL are not set, so no browser test ran."
             echo "### E2E skipped — secrets not available to this run" >> "$GITHUB_STEP_SUMMARY"
+          elif [ -n "$E2E_EMAIL_2" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "args=--shard=$SHARD/2" >> "$GITHUB_OUTPUT"
+          elif [ "$SHARD" = "1" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "args=" >> "$GITHUB_OUTPUT"
+            echo "### One staging account — the whole suite runs in shard 1" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "### Shard 2 idle — E2E_EMAIL_2 is not set, shard 1 ran everything" >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Install dependencies
+        if: steps.config.outputs.run == 'true'
+        run: npm install --no-audit --no-fund
 
       # `.env.e2e.local` beats `.env.local` in Vite's precedence, so `--mode e2e`
       # pins the dev server to the staging project. Production must never be the
       # target: these specs write real rows.
       - name: Write E2E environment
-        if: steps.config.outputs.configured == 'true'
+        if: steps.config.outputs.run == 'true'
         run: |
           {
             echo "VITE_SUPABASE_URL=${{ secrets.E2E_SUPABASE_URL }}"
@@ -89,31 +107,57 @@ jobs:
           } > .env.e2e.local
 
       - name: Install Playwright browser
-        if: steps.config.outputs.configured == 'true'
+        if: steps.config.outputs.run == 'true'
         run: npx playwright install --with-deps chromium
 
+      # Each shard signs in as its own account; the specs only ever read
+      # E2E_EMAIL / E2E_PASSWORD, so they need no idea which one.
       - name: E2E tests
-        if: steps.config.outputs.configured == 'true'
+        if: steps.config.outputs.run == 'true'
         env:
           VITE_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
-          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-        run: npm run test:e2e
+          E2E_EMAIL: ${{ matrix.shard == 2 && secrets.E2E_EMAIL_2 || secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ matrix.shard == 2 && secrets.E2E_PASSWORD_2 || secrets.E2E_PASSWORD }}
+        run: npm run test:e2e -- ${{ steps.config.outputs.args }}
 
       - name: Upload screenshots
-        if: always() && steps.config.outputs.configured == 'true'
+        if: always() && steps.config.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: screens
+          name: screens-shard-${{ matrix.shard }}
           path: screenshots/
           retention-days: 7
           if-no-files-found: ignore
 
       - name: Upload traces
-        if: failure() && steps.config.outputs.configured == 'true'
+        if: failure() && steps.config.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-traces
+          name: playwright-traces-${{ matrix.shard }}
           path: test-results/
           retention-days: 7
+
+  # The one check named `e2e`, as before: green only when every shard is, and
+  # the place the shards' screenshots come back together as one `screens`
+  # artifact for `gh run download -n screens`.
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    needs: e2e-shard
+    if: always()
+    steps:
+      - name: Shards passed
+        run: |
+          if [ "${{ needs.e2e-shard.result }}" != "success" ]; then
+            echo "::error::an e2e shard did not pass (${{ needs.e2e-shard.result }})"
+            exit 1
+          fi
+
+      - name: Merge screenshots
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: screens
+          pattern: screens-shard-*
+          delete-merged: true
+        continue-on-error: true

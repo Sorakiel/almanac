@@ -214,9 +214,10 @@ toast instead of a confirm; an irreversible one gets the red `ConfirmSheet`.
 
 **E2E — Playwright.** Six specs in `/tests`, run on every PR by the `e2e` CI job. They drive a real browser against the **staging** Supabase project — never production, because they create and delete real rows. `--mode e2e` makes `.env.e2e.local` win over `.env.local` so the target is explicit rather than whatever a developer happens to have configured.
 
-The specs share **one pre-seeded staging account** and clean up their own rows through ordinary RLS — no service_role key anywhere. Consequences worth knowing before you touch them:
+The specs share **one pre-seeded staging account per shard** and clean up their own rows through ordinary RLS — no service_role key anywhere. CI splits the suite into two shards (`--shard=N/2`), each signed in as its own account (`E2E_EMAIL` / `E2E_EMAIL_2`); a final `e2e` job gates on both and merges their `screens` artifacts. Without `E2E_EMAIL_2`, shard 1 runs the whole suite. Consequences worth knowing before you touch them:
 
-- They must run serially. The CI job is serialised repo-wide by `concurrency: e2e-staging`.
+- Within a shard they must run serially (`workers: 1`). Each shard's job is serialised repo-wide by `concurrency: e2e-staging-<shard>`, one queue per account.
+- A spec must never depend on another spec's rows: after sharding, the two may run under different accounts.
 - Leftover data from a failed run, or from a second Claude session working this repo, can turn a spec red for reasons unrelated to your diff. Check staging before debugging your own change.
 - Cleanup belongs in `afterEach`, **not** a `finally` inside the test: Playwright aborts the body on timeout and the `finally` may never run.
 - Pin anything environment-dependent. A spec that asserted "the timezone is not UTC" passed locally and failed on UTC runners, where "adopted the zone" and "wrote nothing" are the same string.
