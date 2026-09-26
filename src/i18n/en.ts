@@ -289,6 +289,8 @@ export const en = {
     removeNameConfirm: 'Remove {name}?',
     requestFailed: 'Couldn’t send the request',
     removeFriend: 'Remove friend',
+    inspector: 'Friend',
+    friendSince: 'In your circle since {date}',
     removeFriendHint: 'You’ll stop seeing each other’s activity. You can add them again later.',
     accept: 'Accept',
     decline: 'Decline',
