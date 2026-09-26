@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
-import { Rail } from '@/components/rail/Rail'
+import { Inspector } from '@/components/inspector/Inspector'
 import { DraftExerciseRow } from '@/features/workouts/components/edit/DraftExerciseRow'
 import { ExerciseLibraryRail } from '@/features/workouts/components/edit/ExerciseLibraryRail'
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
@@ -80,8 +80,14 @@ function DraftEditor({
     } else {
       actions.addExercise(pick)
     }
-    setLibraryOpen(false)
+    // The desktop inspector stays open for the next pick; a phone sheet closes.
+    if (!isDesktop) setLibraryOpen(false)
   }
+
+  const closeLibrary = useCallback(() => {
+    setLibraryOpen(false)
+    setSwappingId(null)
+  }, [])
 
   const startSwap = (id: string) => {
     setSwappingId(id)
@@ -189,16 +195,33 @@ function DraftEditor({
             </span>
           </div>
           <div className="mt-3">{draft.exercises.length === 0 ? emptyExercises : exerciseList}</div>
+          <Button
+            variant="surface"
+            className="mt-3"
+            aria-expanded={libraryOpen && !swappingId}
+            onClick={() => {
+              setSwappingId(null)
+              setLibraryOpen(true)
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            {t('workouts.editor.addExercise')}
+          </Button>
         </div>
 
-        <Rail>
+        {/* The library slides in over the right only while picking — no standing column. */}
+        <Inspector
+          open={libraryOpen || swappingId !== null}
+          onClose={closeLibrary}
+          label={swapName ? t('workouts.editor.swapExercise') : t('workouts.editor.addExercise')}
+        >
           <ExerciseLibraryRail
             draft={draft}
             onPick={handlePick}
             swapName={swapName}
             onCancelSwap={() => setSwappingId(null)}
           />
-        </Rail>
+        </Inspector>
         {discardSheet}
       </>
     )

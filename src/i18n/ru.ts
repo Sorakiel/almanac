@@ -722,6 +722,7 @@ export const ru: Translations = {
     restDay: 'На сегодня ничего не запланировано — день отдыха.',
     noDateSet: 'Дата не задана',
     edit: 'Изменить',
+    inspector: 'Тренировка',
     backToWorkouts: 'Назад к тренировкам',
     backToTraining: 'Назад к тренировкам',
     exercises: 'УПРАЖНЕНИЯ',

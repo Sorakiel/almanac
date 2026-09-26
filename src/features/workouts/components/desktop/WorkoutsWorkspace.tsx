@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
+import { RecentSessions } from '@/features/workouts/components/RecentSessions'
 import { WorkoutCard } from '@/features/workouts/components/WorkoutCard'
 import { WeekStrip } from '@/features/workouts/components/WeekStrip'
 import { TodaySessionCard } from '@/features/workouts/components/TodaySessionCard'
@@ -25,6 +26,8 @@ interface WorkoutsWorkspaceProps {
   isError: boolean
   refetch: () => void
   onNew: () => void
+  selectedId: string | null
+  onOpen: (id: string) => void
 }
 
 /** Friendly "Monday, 6 July" from a `YYYY-MM-DD` key, UTC-safe, in the UI language. */
@@ -44,6 +47,8 @@ export function WorkoutsWorkspace({
   isError,
   refetch,
   onNew,
+  selectedId,
+  onOpen,
 }: WorkoutsWorkspaceProps) {
   const { t, locale } = useT()
   const [selectedKey, setSelectedKey] = useState(overview.todayKey)
@@ -117,9 +122,21 @@ export function WorkoutsWorkspace({
               {t('workouts.allWorkouts')}
             </SectionLabel>
             {workouts.map((w) => (
-              <WorkoutCard key={w.id} workout={w} />
+              <WorkoutCard key={w.id} workout={w} onOpen={onOpen} selected={w.id === selectedId} />
             ))}
           </section>
+
+          {/* What the old right rail carried, in the flow of the page. */}
+          {overview.recent.length > 0 ? (
+            <section className="mt-8 flex flex-col gap-3">
+              <SectionLabel accessory={`${overview.completedCount}`}>
+                {t('workouts.recent')}
+              </SectionLabel>
+              <div className="rounded-card border bg-surface px-4 py-2">
+                <RecentSessions workouts={overview.recent} onOpen={onOpen} />
+              </div>
+            </section>
+          ) : null}
         </Cascade>
       )}
     </div>
