@@ -291,7 +291,7 @@ English and untranslated screens fall back to it, so a stage never regresses a s
 
 ## 14. Roadmap
 
-**Shipped:** auth + dashboard, habits (schedule-aware streaks, freezes, heatmap), workouts, reading, reflect, flow (deep-work), insights, achievements, friends, onboarding, admin/feedback — plus a motion & celebration layer (cascade entrances, view-transition theme wipe, confetti, streak flames, focus console, the Almanac narrator).
+**Shipped:** auth + dashboard, habits (schedule-aware streaks, freezes, heatmap), workouts, reading, reflect, flow (deep-work), insights, achievements, friends, onboarding, admin/feedback — plus a motion & celebration layer (cascade entrances, view-transition theme wipe, streak flames, focus console, the Almanac narrator).
 
 **v0.4 is closed:** timezone-correct days, bounded queries, e2e in CI, PostHog, a Grafana usage dashboard, Web Push reminders + weekly digest, PWA installability, offline reads _and_ writes, Russian across the member-facing UI, data export, passkeys (server-side off), and read-only Today widgets (Android AppWidget + macOS tray).
 
