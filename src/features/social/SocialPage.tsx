@@ -1,18 +1,19 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
 import { Cascade } from '@/components/common/Cascade'
-import { Rail } from '@/components/rail/Rail'
+import { Inspector } from '@/components/inspector/Inspector'
 import { AddFriend } from '@/features/social/components/AddFriend'
 import { ActivityFeed } from '@/features/social/components/ActivityFeed'
 import { RequestsList } from '@/features/social/components/RequestsList'
 import { FriendsList } from '@/features/social/components/FriendsList'
 import { SocialWorkspace } from '@/features/social/components/desktop/SocialWorkspace'
-import { SocialRail } from '@/features/social/components/desktop/SocialRail'
+import { FriendDetail } from '@/features/social/components/desktop/FriendDetail'
 import { useFriends } from '@/features/social/hooks/useFriends'
 import { useFriendActivity } from '@/features/social/hooks/useFriendActivity'
 import { useFriendMutations } from '@/features/social/hooks/useFriendMutations'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useLastValue } from '@/hooks/useSheetKey'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useT } from '@/hooks/useT'
@@ -28,6 +29,12 @@ function SocialPage() {
   const { feed } = useFriendActivity(friendIds)
   const { send, accept, remove } = useFriendMutations()
   const busy = send.isPending || accept.isPending || remove.isPending
+  // Desktop opens a friend in the inspector; the last one stays rendered while
+  // the panel slides out.
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const shownId = useLastValue(selectedId)
+  const closeInspector = useCallback(() => setSelectedId(null), [])
+  const shown = shownId ? (data.friends.find((f) => f.id === shownId) ?? null) : null
 
   // Everyone already linked (friend or pending, either way) — hidden from search.
   const connectedIds = useMemo(() => {
@@ -57,15 +64,31 @@ function SocialPage() {
           connectedIds={connectedIds}
           onAdd={(id) => send.mutate(id)}
           isAdding={send.isPending}
+          onAccept={(id) => accept.mutate(id)}
+          onRemove={(id) => remove.mutate(id)}
+          busy={busy}
+          selectedId={selectedId}
+          onOpen={(friend) => setSelectedId((cur) => (cur === friend.id ? null : friend.id))}
         />
-        <Rail>
-          <SocialRail
-            data={data}
-            onAccept={(id) => accept.mutate(id)}
-            onRemove={(id) => remove.mutate(id)}
-            busy={busy}
-          />
-        </Rail>
+        <Inspector
+          open={selectedId !== null && shown !== null}
+          onClose={closeInspector}
+          label={t('social.inspector')}
+        >
+          {shown ? (
+            <FriendDetail
+              key={shown.id}
+              friend={shown}
+              feed={feed}
+              todayKey={dateKey}
+              busy={busy}
+              onRemove={(id) => {
+                remove.mutate(id)
+                closeInspector()
+              }}
+            />
+          ) : null}
+        </Inspector>
       </>
     )
   }

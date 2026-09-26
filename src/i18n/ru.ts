@@ -330,6 +330,8 @@ export const ru: Translations = {
     removeNameConfirm: 'Удалить {name} из друзей?',
     requestFailed: 'Не удалось отправить запрос',
     removeFriend: 'Удалить из друзей',
+    inspector: 'Друг',
+    friendSince: 'В круге с {date}',
     removeFriendHint:
       'Вы перестанете видеть активность друг друга. Добавить снова можно в любой момент.',
     accept: 'Принять',
