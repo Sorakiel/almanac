@@ -370,6 +370,24 @@ for (const v of VARIANTS) {
       await shoot(page, `${v.name}-palette`, false)
       await page.keyboard.press('Escape')
       await expect(page.getByRole('dialog')).toBeHidden()
+
+      // Habits: a card opens the inspector over the list's right edge.
+      await page.goto('/habits')
+      await page
+        .getByRole('button', {
+          name: v.locale === 'ru' ? `Открыть «${SEED_HABIT}»` : `Open ${SEED_HABIT}`,
+        })
+        .click()
+      const inspector = page.getByRole('complementary', {
+        name: v.locale === 'ru' ? 'Привычка' : 'Habit',
+      })
+      await expect(inspector.getByRole('heading', { name: SEED_HABIT })).toBeVisible({
+        timeout: 20_000,
+      })
+      await page.waitForTimeout(600) // the slide-in
+      await shoot(page, `${v.name}-habits-inspector`, false)
+      await page.keyboard.press('Escape')
+      await expect(inspector).toBeHidden()
     }
 
     // Live session: working (ring shows elapsed + set progress), then resting

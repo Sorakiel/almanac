@@ -23,10 +23,14 @@ import { toUserError } from '@/lib/userError'
 
 interface HabitCardProps {
   habit: HabitWithTodayLog
+  /** Open the habit in place (the desktop inspector) instead of its page. */
+  onOpen?: () => void
+  /** The habit the inspector is showing. */
+  selected?: boolean
 }
 
 /** Rich habits-list card: icon, history stat, week dots, one-tap check. */
-export function HabitCard({ habit }: HabitCardProps) {
+export function HabitCard({ habit, onOpen, selected }: HabitCardProps) {
   const { t } = useT()
   const navigate = useNavigate()
   const toggle = useToggleHabit()
@@ -61,15 +65,22 @@ export function HabitCard({ habit }: HabitCardProps) {
   }
 
   return (
-    <Card className="relative flex h-full flex-col p-4 transition-colors hover:border-accent/30">
+    <Card
+      className={cn(
+        'relative flex h-full flex-col p-4 transition-colors hover:border-accent/30',
+        selected && 'border-accent/40 bg-accent/10',
+      )}
+    >
       {/* Stretched overlay: the whole card opens the habit, while the toggle
           below sits above it (z-10) and keeps its own click. */}
       <button
         type="button"
         onClick={(e) => {
+          if (onOpen) return onOpen()
           claimHabitName(habit.id, e.currentTarget.parentElement)
           navigate(`/habits/${habit.id}`, { viewTransition: true })
         }}
+        aria-expanded={onOpen ? Boolean(selected) : undefined}
         aria-label={t('habits.aria.open', { name: habit.name })}
         className="absolute inset-0 z-0 rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
       />
