@@ -49,6 +49,26 @@ async function createHabit(page: Page, name = HABIT_NAME): Promise<void> {
   await expect(page.getByRole('link', { name })).toBeVisible()
 }
 
+/**
+ * Wait for a habit made online to be on the server before the network goes.
+ * The form never waits for its write, so without this the offline step could
+ * catch the create still in flight: the tap then queues behind a create the
+ * test did not mean to take offline, and the run flaked into a retry.
+ */
+async function expectHabitSaved(name = HABIT_NAME): Promise<void> {
+  const db = await e2eClient()
+  const userId = await e2eUserId(db)
+  await expect
+    .poll(
+      async () => {
+        const { data } = await db.from('habits').select('id').eq('user_id', userId).eq('name', name)
+        return data?.length ?? 0
+      },
+      { timeout: 15_000 },
+    )
+    .toBe(1)
+}
+
 /** Confirm the tap actually persisted, not just that a request fired. */
 async function expectLoggedOnServer(): Promise<void> {
   const db = await e2eClient()
@@ -91,6 +111,7 @@ test('a habit tapped offline lands on the server once the connection returns', a
   const errors = watchConsole(page)
   await signIn(page)
   await createHabit(page)
+  await expectHabitSaved()
 
   await context.setOffline(true)
 
@@ -122,6 +143,7 @@ test('a tap survives the app being reloaded while still offline', async ({ page,
   const shell = await recordOfflineShell(context)
   await signIn(page)
   await createHabit(page)
+  await expectHabitSaved()
 
   await shell.offline()
   await completeButton(page).click()
@@ -145,6 +167,7 @@ test('a tap made after an offline cold start is kept, then synced', async ({ pag
   const shell = await recordOfflineShell(context)
   await signIn(page)
   await createHabit(page)
+  await expectHabitSaved()
 
   await shell.offline()
   await page.reload()
