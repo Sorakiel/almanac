@@ -33,7 +33,7 @@ const SCREENS = [
   '/progress',
   '/flow',
   '/profile',
-  '/social',
+  '/friends',
   '/habits',
   '/more',
   '/more/customize',
