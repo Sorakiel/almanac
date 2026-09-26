@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
@@ -22,7 +22,6 @@ import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
-import { Inspector } from '@/components/inspector/Inspector'
 import { DraftExerciseRow } from '@/features/workouts/components/edit/DraftExerciseRow'
 import { ExerciseLibraryRail } from '@/features/workouts/components/edit/ExerciseLibraryRail'
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
@@ -80,18 +79,12 @@ function DraftEditor({
     } else {
       actions.addExercise(pick)
     }
-    // The desktop inspector stays open for the next pick; a phone sheet closes.
-    if (!isDesktop) setLibraryOpen(false)
-  }
-
-  const closeLibrary = useCallback(() => {
     setLibraryOpen(false)
-    setSwappingId(null)
-  }, [])
+  }
 
   const startSwap = (id: string) => {
     setSwappingId(id)
-    if (!isDesktop) setLibraryOpen(true)
+    setLibraryOpen(true)
   }
 
   const save = () =>
@@ -101,6 +94,25 @@ function DraftEditor({
     })
 
   const cancel = () => (isDirty ? setDiscardOpen(true) : navigate(`/train/${workoutId}`))
+
+  // One library sheet on every width: the inspector belongs to habits alone.
+  const librarySheet = (
+    <Sheet
+      open={libraryOpen}
+      onOpenChange={setLibraryOpen}
+      title={swapName ? t('workouts.editor.swapExercise') : t('workouts.editor.addExercise')}
+      mono
+    >
+      <div className="max-h-[70vh]">
+        <ExerciseLibraryRail
+          draft={draft}
+          onPick={handlePick}
+          swapName={swapName}
+          onCancelSwap={() => setSwappingId(null)}
+        />
+      </div>
+    </Sheet>
+  )
 
   const exerciseList = (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
@@ -209,19 +221,7 @@ function DraftEditor({
           </Button>
         </div>
 
-        {/* The library slides in over the right only while picking — no standing column. */}
-        <Inspector
-          open={libraryOpen || swappingId !== null}
-          onClose={closeLibrary}
-          label={swapName ? t('workouts.editor.swapExercise') : t('workouts.editor.addExercise')}
-        >
-          <ExerciseLibraryRail
-            draft={draft}
-            onPick={handlePick}
-            swapName={swapName}
-            onCancelSwap={() => setSwappingId(null)}
-          />
-        </Inspector>
+        {librarySheet}
         {discardSheet}
       </>
     )
@@ -275,21 +275,7 @@ function DraftEditor({
         {t('workouts.editor.addExercise')}
       </Button>
 
-      <Sheet
-        open={libraryOpen}
-        onOpenChange={setLibraryOpen}
-        title={swapName ? t('workouts.editor.swapExercise') : t('workouts.editor.addExercise')}
-        mono
-      >
-        <div className="max-h-[70vh]">
-          <ExerciseLibraryRail
-            draft={draft}
-            onPick={handlePick}
-            swapName={swapName}
-            onCancelSwap={() => setSwappingId(null)}
-          />
-        </div>
-      </Sheet>
+      {librarySheet}
       {discardSheet}
     </section>
   )

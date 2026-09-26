@@ -69,6 +69,8 @@ export default {
         // toasts over it.
         'nav-clearance': '104px',
         'capsule-clearance': '52px',
+        // A sticky side column clears the desktop toolbar (60px) plus a gap.
+        'toolbar-clearance': '68px',
         // Clear of the status bar / notch, never flush with the top edge.
         'safe-top': 'max(env(safe-area-inset-top), 1rem)',
         // The profile avatar's ring on the phone (112 on desktop is `28`).
@@ -113,6 +115,8 @@ export default {
       // Profile on wide screens: identity column + settings.
       gridTemplateColumns: {
         profile: '360px minmax(0, 1fr)',
+        // Module screens (`.dk-mgrid`): content + a sticky 360px side column.
+        module: 'minmax(0, 1fr) 360px',
         // Progress bars: name · track · value (the prototype's `.p-hb`).
         'bar-row': '110px minmax(0, 1fr) 46px',
         'bar-row-wide': '170px minmax(0, 1fr) 46px',

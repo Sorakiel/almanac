@@ -432,23 +432,17 @@ for (const v of VARIANTS) {
       await page.keyboard.press('Escape')
       await expect(book).toBeHidden()
 
-      // Training: the list, then a workout opened in the inspector.
+      // Training: two columns (week, today, history | plan); a workout opens as a page.
       await page.goto('/train')
-      // The list row (it carries aria-expanded), not Today's session card above it.
-      const workoutRow = page.locator('button[aria-expanded]', { hasText: SESSION_WORKOUT })
+      const plan = page.getByRole('complementary', { name: v.locale === 'ru' ? 'План' : 'Plan' })
+      const workoutRow = plan.getByRole('button', { name: new RegExp(`^${SESSION_WORKOUT}`) })
       await expect(workoutRow).toBeVisible({ timeout: 20_000 })
       await shoot(page, `${v.name}-train`)
       await workoutRow.click()
-      const workoutInspector = page.getByRole('complementary', {
-        name: v.locale === 'ru' ? 'Тренировка' : 'Workout',
-      })
-      await expect(workoutInspector.getByRole('heading', { name: SESSION_WORKOUT })).toBeVisible({
+      await expect(page.getByRole('heading', { name: SESSION_WORKOUT })).toBeVisible({
         timeout: 20_000,
       })
-      await page.waitForTimeout(600) // the slide-in
-      await shoot(page, `${v.name}-train-inspector`, false)
-      await page.keyboard.press('Escape')
-      await expect(workoutInspector).toBeHidden()
+      await shoot(page, `${v.name}-train-workout`)
     }
 
     // Live session: working (compact "N of M" bar, no ring), then resting (the rest ring)

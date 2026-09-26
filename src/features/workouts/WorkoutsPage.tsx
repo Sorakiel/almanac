@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { Dumbbell, Plus } from 'lucide-react'
 import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
@@ -6,20 +6,18 @@ import { Button } from '@/components/ui/button'
 import { Cascade } from '@/components/common/Cascade'
 import { EmptyState } from '@/components/common/EmptyState'
 import { SectionLabel } from '@/components/common/SectionLabel'
-import { Inspector } from '@/components/inspector/Inspector'
 import { WorkoutCard } from '@/features/workouts/components/WorkoutCard'
 import { WorkoutFormSheet } from '@/features/workouts/components/WorkoutFormSheet'
 import { WeekStrip } from '@/features/workouts/components/WeekStrip'
 import { TodaySessionCard } from '@/features/workouts/components/TodaySessionCard'
 import { SessionResumeBanner } from '@/features/workouts/components/SessionResumeBanner'
 import { WorkoutsWorkspace } from '@/features/workouts/components/desktop/WorkoutsWorkspace'
-import { WorkoutDetailPanel } from '@/features/workouts/components/detail/WorkoutDetailPanel'
 import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
 import { useTrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import { dayStateFor, workoutForDay } from '@/features/workouts/lib/week'
 import { useCreateIntent } from '@/hooks/useCreateIntent'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { useLastValue, useOpenKey } from '@/hooks/useSheetKey'
+import { useOpenKey } from '@/hooks/useSheetKey'
 import { useT } from '@/hooks/useT'
 import { intlLocale } from '@/lib/dateLocale'
 
@@ -30,10 +28,6 @@ function WorkoutsPage() {
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const [formOpen, setFormOpen] = useCreateIntent()
   const [selectedKey, setSelectedKey] = useState(overview.todayKey)
-  // Desktop: the workout shown in the inspector; the last one stays while it slides out.
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const shownId = useLastValue(selectedId)
-  const closeInspector = useCallback(() => setSelectedId(null), [])
 
   const openNew = () => setFormOpen(true)
 
@@ -50,18 +44,7 @@ function WorkoutsPage() {
           isError={isError}
           refetch={refetch}
           onNew={openNew}
-          selectedId={selectedId}
-          onOpen={(id) => setSelectedId((current) => (current === id ? null : id))}
         />
-        <Inspector
-          open={selectedId !== null}
-          onClose={closeInspector}
-          label={t('workouts.inspector')}
-        >
-          {shownId ? (
-            <WorkoutDetailPanel key={shownId} id={shownId} onGone={closeInspector} compact />
-          ) : null}
-        </Inspector>
         {formSheet}
       </>
     )
@@ -72,9 +55,7 @@ function WorkoutsPage() {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
-  })
-    .format(new Date(`${selectedKey}T00:00:00Z`))
-    .toUpperCase()
+  }).format(new Date(`${selectedKey}T00:00:00Z`))
 
   return (
     <section className="flex flex-col gap-4">
@@ -113,9 +94,7 @@ function WorkoutsPage() {
 
           <div className="flex flex-col gap-2">
             <SectionLabel>
-              {selectedKey === overview.todayKey
-                ? t('workouts.todayLower').toUpperCase()
-                : selectedDayLabel}
+              {selectedKey === overview.todayKey ? t('workouts.todayLower') : selectedDayLabel}
             </SectionLabel>
             {selectedDay ? (
               <TodaySessionCard

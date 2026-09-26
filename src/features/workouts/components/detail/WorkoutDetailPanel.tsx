@@ -19,7 +19,6 @@ import { intlLocale } from '@/lib/dateLocale'
 import { useOpenKey } from '@/hooks/useSheetKey'
 import { useT } from '@/hooks/useT'
 import { useToday } from '@/hooks/useToday'
-import { cn } from '@/lib/utils'
 import { toUserError } from '@/lib/userError'
 
 /** Friendly label for a `YYYY-MM-DD` date, UTC-safe. */
@@ -37,20 +36,10 @@ interface WorkoutDetailPanelProps {
   onGone: () => void
   /** Leading control in the header row — the page's back arrow. */
   leading?: ReactNode
-  /** The inspector is narrow: actions stack instead of sitting in a row. */
-  compact?: boolean
 }
 
-/**
- * One workout with everything it can do, wired to its data: the workout page
- * and the desktop inspector are this same panel.
- */
-export function WorkoutDetailPanel({
-  id,
-  onGone,
-  leading,
-  compact = false,
-}: WorkoutDetailPanelProps) {
+/** One workout with everything it can do, wired to its data. */
+export function WorkoutDetailPanel({ id, onGone, leading }: WorkoutDetailPanelProps) {
   const { t, locale } = useT()
   const navigate = useNavigate()
   const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
@@ -105,9 +94,7 @@ export function WorkoutDetailPanel({
           {leading}
           <IconTile icon={Dumbbell} tone="bg-teal/15 text-teal" size="lg" />
           <div className="min-w-0 flex-1">
-            <h1 className={cn('truncate text-2xl', !compact && 'lg:text-[30px] lg:tracking-title')}>
-              {workout.name}
-            </h1>
+            <h1 className={'truncate text-2xl lg:text-[30px] lg:tracking-title'}>{workout.name}</h1>
             <p className="mt-0.5 flex items-center gap-2 text-sm text-muted">
               <span className="truncate">{subtitle}</span>
               {done ? <Tag tone="teal">{t('workouts.doneLower')}</Tag> : null}
@@ -121,14 +108,9 @@ export function WorkoutDetailPanel({
           >
             <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
           </button>
-          <Button
-            size="sm"
-            variant="surface"
-            onClick={() => navigate(`/train/${id}/edit`)}
-            aria-label={compact ? t('workouts.edit') : undefined}
-          >
+          <Button size="sm" variant="surface" onClick={() => navigate(`/train/${id}/edit`)}>
             <Pencil className="h-3.5 w-3.5" />
-            {compact ? null : t('workouts.edit')}
+            {t('workouts.edit')}
           </Button>
         </header>
 
@@ -145,11 +127,11 @@ export function WorkoutDetailPanel({
           )}
         </section>
 
-        <div className={cn('flex flex-col gap-3', !compact && 'sm:flex-row')}>
+        <div className={'flex flex-col gap-3 sm:flex-row'}>
           {hasExercises ? (
             <Button
               size="lg"
-              className={cn('w-full shadow-glow', !compact && 'sm:w-auto sm:min-w-[220px]')}
+              className={'w-full shadow-glow sm:w-auto sm:min-w-[220px]'}
               onClick={startSession}
             >
               <Play className="h-4 w-4" />
@@ -163,7 +145,7 @@ export function WorkoutDetailPanel({
           <Button
             size="lg"
             variant="surface"
-            className={cn('w-full', !compact && 'sm:w-auto sm:min-w-[200px]')}
+            className={'w-full sm:w-auto sm:min-w-[200px]'}
             disabled={mutations.setCompleted.isPending}
             onClick={toggleComplete}
           >
