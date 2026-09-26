@@ -13,6 +13,8 @@ interface ReflectionCardProps {
   reflection: Reflection
   /** The quote paired to this entry, resolved by the page (may be null). */
   quote: Quote | null
+  /** Called once the entry is deleted — the inspector closes on it. */
+  onDeleted?: () => void
 }
 
 /** Rating axes; labels come from `reflect.ratings.*` at render. */
@@ -23,7 +25,7 @@ const RATING_LABELS: { key: 'mood' | 'energy' | 'day_rating' }[] = [
 ]
 
 /** One past reflection: its ratings, body, and the quote it was written against. */
-export function ReflectionCard({ reflection, quote }: ReflectionCardProps) {
+export function ReflectionCard({ reflection, quote, onDeleted }: ReflectionCardProps) {
   const { t, locale } = useT()
   const dateLocale = intlLocale(locale)
   const { remove, restore } = useReflectionMutations()
@@ -34,6 +36,7 @@ export function ReflectionCard({ reflection, quote }: ReflectionCardProps) {
   const handleDelete = () => {
     remove.mutate(reflection.id)
     toastWithUndo(t('reflect.deleted'), t('common.undo'), () => restore.mutate(reflection))
+    onDeleted?.()
   }
 
   return (
@@ -58,7 +61,7 @@ export function ReflectionCard({ reflection, quote }: ReflectionCardProps) {
           {ratings.map((r) => (
             <span
               key={r.key}
-              className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-strong"
+              className="inline-flex items-center gap-1.5 text-caption text-muted-strong"
             >
               {t(`reflect.ratings.${r.key}`)}
               <RatingBars
@@ -73,7 +76,7 @@ export function ReflectionCard({ reflection, quote }: ReflectionCardProps) {
         </div>
       ) : null}
       {reflection.body ? (
-        <p className="whitespace-pre-wrap text-[14px] leading-relaxed">{reflection.body}</p>
+        <p className="whitespace-pre-wrap text-callout">{reflection.body}</p>
       ) : null}
       {quote ? (
         <details className="group -mx-1 mt-0.5">
@@ -84,7 +87,7 @@ export function ReflectionCard({ reflection, quote }: ReflectionCardProps) {
             />
             <span className="truncate">◇ {quote.author ?? t('reflect.unknownAuthor')}</span>
           </summary>
-          <blockquote className="mt-1.5 border-l-2 border-border pl-3 text-[13px] italic leading-relaxed text-muted-strong">
+          <blockquote className="mt-1.5 border-l-2 border-border pl-3 text-footnote italic text-muted-strong">
             {quote.text}
           </blockquote>
         </details>

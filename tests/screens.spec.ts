@@ -45,12 +45,22 @@ const SCREENS = [
  */
 const SEED_HABIT = 'E2E screens · daily pages'
 const SEED_DAYS = 120
+// A past journal entry for the Reflect inspector — on a date no real entry has,
+// so `unique(user_id, date)` never collides; Cyrillic, so the i18n spec stays quiet.
+const SEED_REFLECTION_DATE = '2001-01-02'
+const SEED_REFLECTION = 'Тихий день: прогулка, глава книги и ранний отбой.'
 
 async function dropSeed(): Promise<void> {
   const db = await e2eClient()
   const userId = await e2eUserId(db)
   const { error } = await db.from('habits').delete().eq('user_id', userId).eq('name', SEED_HABIT)
   if (error) throw new Error(`could not clear the screens seed: ${error.message}`)
+  const { error: reflectError } = await db
+    .from('reflections')
+    .delete()
+    .eq('user_id', userId)
+    .eq('date', SEED_REFLECTION_DATE)
+  if (reflectError) throw new Error(`could not clear the screens entry: ${reflectError.message}`)
 }
 
 async function seedHistory(): Promise<string> {
@@ -76,6 +86,15 @@ async function seedHistory(): Promise<string> {
     .map((i) => ({ user_id: userId, habit_id: data.id, date: day(i), count: 1 }))
   const { error: logError } = await db.from('habit_logs').insert(logs)
   if (logError) throw new Error(`could not seed the screens logs: ${logError.message}`)
+  const { error: reflectError } = await db.from('reflections').insert({
+    user_id: userId,
+    date: SEED_REFLECTION_DATE,
+    body: SEED_REFLECTION,
+    mood: 4,
+    energy: 3,
+    day_rating: 5,
+  })
+  if (reflectError) throw new Error(`could not seed the screens entry: ${reflectError.message}`)
   return data.id
 }
 
@@ -388,6 +407,18 @@ for (const v of VARIANTS) {
       await shoot(page, `${v.name}-habits-inspector`, false)
       await page.keyboard.press('Escape')
       await expect(inspector).toBeHidden()
+
+      // Reflect: a past entry opens whole in the inspector.
+      await page.goto('/reflect')
+      await page.getByRole('button', { name: new RegExp(SEED_REFLECTION.slice(0, 10)) }).click()
+      const entry = page.getByRole('complementary', {
+        name: v.locale === 'ru' ? 'Запись' : 'Entry',
+      })
+      await expect(entry.getByText(SEED_REFLECTION)).toBeVisible()
+      await page.waitForTimeout(600) // the slide-in
+      await shoot(page, `${v.name}-reflect-inspector`, false)
+      await page.keyboard.press('Escape')
+      await expect(entry).toBeHidden()
     }
 
     // Live session: working (ring shows elapsed + set progress), then resting
