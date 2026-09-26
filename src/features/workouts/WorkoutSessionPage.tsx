@@ -265,15 +265,18 @@ function WorkoutSessionPage() {
               </div>
 
               {/* Mobile queue (rail is desktop-only) */}
-              <div className="mt-9 lg:hidden">
-                <SessionQueue exercises={exercises} currentIndex={currentIndex} />
-              </div>
+              {exercises.length > 1 ? (
+                <div className="mt-9 lg:hidden">
+                  <SessionQueue exercises={exercises} currentIndex={currentIndex} />
+                </div>
+              ) : null}
             </>
           )}
         </div>
 
-        {/* Desktop queue rail */}
-        {exercises.length > 0 ? (
+        {/* Desktop queue rail — with a single exercise it would stand empty,
+            since the current one is never listed. */}
+        {exercises.length > 1 ? (
           <aside className="hidden w-[360px] flex-none overflow-y-auto border-l bg-chrome px-6 py-7 lg:block">
             <SessionQueue exercises={exercises} currentIndex={currentIndex} />
           </aside>

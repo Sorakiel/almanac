@@ -11,8 +11,7 @@ import { WorkoutCard } from '@/features/workouts/components/WorkoutCard'
 import { WeekStrip } from '@/features/workouts/components/WeekStrip'
 import { TodaySessionCard } from '@/features/workouts/components/TodaySessionCard'
 import { SessionResumeBanner } from '@/features/workouts/components/SessionResumeBanner'
-import { dayStateFor } from '@/features/workouts/lib/week'
-import { workoutForDay } from '@/features/workouts/lib/week'
+import { dayStateFor, workoutForDay } from '@/features/workouts/lib/week'
 import type { TrainingOverview } from '@/features/workouts/hooks/useTrainingOverview'
 import type { WorkoutView } from '@/features/workouts/types'
 import { useT } from '@/hooks/useT'
@@ -26,8 +25,6 @@ interface WorkoutsWorkspaceProps {
   isError: boolean
   refetch: () => void
   onNew: () => void
-  selectedId: string | null
-  onOpen: (id: string) => void
 }
 
 /** Friendly "Monday, 6 July" from a `YYYY-MM-DD` key, UTC-safe, in the UI language. */
@@ -39,7 +36,11 @@ function dayLabel(dateKey: string, locale: string): string {
   }).format(dateFromKey(dateKey))
 }
 
-/** Desktop training workspace: week strip, the selected day's session, sessions. */
+/**
+ * Desktop training, the prototype's `.dk-mgrid`: the week, the selected day's
+ * session and history on the left; the plan in a sticky 360px column on the
+ * right. A workout opens as its own page — the inspector is for habits alone.
+ */
 export function WorkoutsWorkspace({
   workouts,
   overview,
@@ -47,25 +48,22 @@ export function WorkoutsWorkspace({
   isError,
   refetch,
   onNew,
-  selectedId,
-  onOpen,
 }: WorkoutsWorkspaceProps) {
   const { t, locale } = useT()
   const [selectedKey, setSelectedKey] = useState(overview.todayKey)
   const selected = workoutForDay(overview.workouts, selectedKey, overview.timezone)
 
   return (
-    <div className="mx-auto w-full max-w-[900px]">
+    <div className="w-full">
       <header>
-        <p className="label-mono">{overview.week.label}</p>
-        <div className="mt-1.5 flex items-center justify-between gap-4">
-          <h1 className="text-[40px] leading-none tracking-title">{t('workouts.title')}</h1>
+        <p className="text-callout text-muted">{overview.week.label}</p>
+        <div className="mt-1 flex items-center justify-between gap-4">
+          <h1 className="text-large-title font-bold tracking-title">{t('workouts.title')}</h1>
           <Button onClick={onNew} className="flex-none shadow-glow">
             <Plus className="h-4 w-4" />
             {t('workouts.newWorkout')}
           </Button>
         </div>
-        <p className="mt-2 text-[15px] text-muted">{t('workouts.subtitle')}</p>
       </header>
 
       {isLoading ? (
@@ -87,57 +85,63 @@ export function WorkoutsWorkspace({
           />
         </div>
       ) : (
-        <Cascade>
-          <SessionResumeBanner workouts={overview.workouts} />
+        <div className="mt-6 grid grid-cols-module items-start gap-6">
+          <div className="grid min-w-0 content-start gap-3.5">
+            <Cascade>
+              <SessionResumeBanner workouts={overview.workouts} />
 
-          <section className="mt-7">
-            <WeekStrip
-              days={overview.week.days}
-              selectedKey={selectedKey}
-              onSelect={setSelectedKey}
-            />
-          </section>
-
-          <section className="mt-8">
-            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-strong">
-              {selectedKey === overview.todayKey
-                ? t('workouts.todayLower')
-                : dayLabel(selectedKey, intlLocale(locale))}
-            </p>
-            {selected ? (
-              <TodaySessionCard
-                workout={selected.workout}
-                doneToday={selected.done}
-                dayState={dayStateFor(selectedKey, overview.todayKey)}
+              <WeekStrip
+                days={overview.week.days}
+                selectedKey={selectedKey}
+                onSelect={setSelectedKey}
               />
-            ) : (
-              <div className="rounded-[22px] border border-dashed p-7 text-center">
-                <p className="text-sm text-muted">{t('workouts.restDay')}</p>
-              </div>
-            )}
-          </section>
 
-          <section className="mt-8 flex flex-col gap-3">
-            <SectionLabel accessory={`${workouts.length}`}>
-              {t('workouts.allWorkouts')}
-            </SectionLabel>
-            {workouts.map((w) => (
-              <WorkoutCard key={w.id} workout={w} onOpen={onOpen} selected={w.id === selectedId} />
-            ))}
-          </section>
+              <section className="flex flex-col gap-2">
+                <SectionLabel>
+                  {selectedKey === overview.todayKey
+                    ? t('workouts.todayLower')
+                    : dayLabel(selectedKey, intlLocale(locale))}
+                </SectionLabel>
+                {selected ? (
+                  <TodaySessionCard
+                    workout={selected.workout}
+                    doneToday={selected.done}
+                    dayState={dayStateFor(selectedKey, overview.todayKey)}
+                  />
+                ) : (
+                  <div className="rounded-card border border-dashed p-7 text-center">
+                    <p className="text-callout text-muted">{t('workouts.restDay')}</p>
+                  </div>
+                )}
+              </section>
 
-          {/* What the old right rail carried, in the flow of the page. */}
-          {overview.recent.length > 0 ? (
-            <section className="mt-8 flex flex-col gap-3">
-              <SectionLabel accessory={`${overview.completedCount}`}>
-                {t('workouts.recent')}
+              {overview.recent.length > 0 ? (
+                <section className="flex flex-col gap-2">
+                  <SectionLabel accessory={`${overview.completedCount}`}>
+                    {t('workouts.recent')}
+                  </SectionLabel>
+                  <div className="rounded-card border bg-surface px-4 py-2">
+                    <RecentSessions workouts={overview.recent} />
+                  </div>
+                </section>
+              ) : null}
+            </Cascade>
+          </div>
+
+          <aside
+            aria-label={t('workouts.allWorkouts')}
+            className="sticky top-toolbar-clearance grid min-w-0 content-start gap-3.5"
+          >
+            <section className="flex flex-col gap-2">
+              <SectionLabel accessory={`${workouts.length}`}>
+                {t('workouts.allWorkouts')}
               </SectionLabel>
-              <div className="rounded-card border bg-surface px-4 py-2">
-                <RecentSessions workouts={overview.recent} onOpen={onOpen} />
-              </div>
+              {workouts.map((w) => (
+                <WorkoutCard key={w.id} workout={w} />
+              ))}
             </section>
-          ) : null}
-        </Cascade>
+          </aside>
+        </div>
       )}
     </div>
   )
