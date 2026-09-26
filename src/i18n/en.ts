@@ -511,6 +511,7 @@ export const en = {
     focusDay: '{date} · {count} min',
   },
   reading: {
+    inspector: 'Book',
     title: 'Reading',
     library: 'Library',
     subtitle: 'Track books, progress, and what you learned.',
@@ -533,9 +534,6 @@ export const en = {
     notes: 'Notes',
     progress: 'Progress',
     status: 'Status',
-    books: 'books',
-    finishedLower: 'finished',
-    readingLower: 'reading',
     statuses: { to_read: 'To read', reading: 'Reading', finished: 'Finished' },
     statusLabel: 'Reading status',
     started: 'Started',
@@ -619,9 +617,6 @@ export const en = {
     unitsIn: '{units} in',
     noteLabel: 'note',
     shelfLabel: 'Your shelf',
-    shelf: 'your shelf',
-    snapshot: 'snapshot',
-    finishedIn: 'finished {year}',
   },
   workouts: {
     finishedToast: 'Workout “{name}” done',

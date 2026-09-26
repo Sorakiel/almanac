@@ -13,10 +13,21 @@ interface BooksWorkspaceProps {
   isError: boolean
   refetch: () => void
   onNew: () => void
+  /** The book open in the inspector, if any. */
+  selectedId: string | null
+  onSelect: (id: string) => void
 }
 
 /** Desktop "Reading" workspace — the library grouped by status. */
-export function BooksWorkspace({ books, isLoading, isError, refetch, onNew }: BooksWorkspaceProps) {
+export function BooksWorkspace({
+  books,
+  isLoading,
+  isError,
+  refetch,
+  onNew,
+  selectedId,
+  onSelect,
+}: BooksWorkspaceProps) {
   const { t } = useT()
   return (
     <div className="mx-auto max-w-[900px]">
@@ -50,7 +61,7 @@ export function BooksWorkspace({ books, isLoading, isError, refetch, onNew }: Bo
             }
           />
         ) : (
-          <BookShelf books={books} />
+          <BookShelf books={books} selectedId={selectedId} onSelect={onSelect} />
         )}
       </div>
     </div>
