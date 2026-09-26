@@ -249,6 +249,7 @@ export const en = {
     deleted: 'Reflection deleted',
     restoreFailed: 'Could not bring the reflection back',
     pastLabel: 'Past entries',
+    inspector: 'Entry',
     streakLine: {
       one: '◇ {count}-day reflection streak',
       other: '◇ {count}-day reflection streak',

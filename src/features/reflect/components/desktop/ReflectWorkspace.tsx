@@ -1,14 +1,29 @@
 import { ReflectionComposer } from '@/features/reflect/components/ReflectionComposer'
+import { ReflectHistory } from '@/features/reflect/components/desktop/ReflectHistory'
 import type { Reflection } from '@/features/reflect/types'
 import { useT } from '@/hooks/useT'
 
 interface ReflectWorkspaceProps {
   dateKey: string
   today: Reflection | null
+  past: Reflection[]
+  streak: number
+  selectedId: string | null
+  onSelect: (id: string) => void
 }
 
-/** Desktop "Reflect" workspace — the daily composer; history lives in the rail. */
-export function ReflectWorkspace({ dateKey, today }: ReflectWorkspaceProps) {
+/**
+ * Desktop "Reflect" workspace — the daily composer, then the past entries;
+ * one opens in the inspector.
+ */
+export function ReflectWorkspace({
+  dateKey,
+  today,
+  past,
+  streak,
+  selectedId,
+  onSelect,
+}: ReflectWorkspaceProps) {
   const { t } = useT()
   return (
     <div className="mx-auto max-w-[720px]">
@@ -19,6 +34,7 @@ export function ReflectWorkspace({ dateKey, today }: ReflectWorkspaceProps) {
       </header>
 
       <ReflectionComposer dateKey={dateKey} today={today} />
+      <ReflectHistory past={past} streak={streak} selectedId={selectedId} onSelect={onSelect} />
     </div>
   )
 }

@@ -273,6 +273,7 @@ export const ru: Translations = {
     deleted: 'Запись удалена',
     restoreFailed: 'Не удалось вернуть запись',
     pastLabel: 'Прошлые записи',
+    inspector: 'Запись',
     streakLine: {
       one: '◇ {count} день подряд с записями',
       few: '◇ {count} дня подряд с записями',

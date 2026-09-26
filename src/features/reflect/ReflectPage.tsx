@@ -1,14 +1,16 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
-import { Rail } from '@/components/rail/Rail'
+import { Inspector } from '@/components/inspector/Inspector'
 import { fetchQuotes, type Quote } from '@/features/dashboard/api/quotes.api'
 import { localizeQuotes } from '@/features/dashboard/lib/quotes'
 import { ReflectTimeline } from '@/features/reflect/components/ReflectTimeline'
 import { ReflectWorkspace } from '@/features/reflect/components/desktop/ReflectWorkspace'
-import { ReflectRail } from '@/features/reflect/components/desktop/ReflectRail'
+import { ReflectionCard } from '@/features/reflect/components/ReflectionCard'
 import { useReflections } from '@/features/reflect/hooks/useReflections'
+import { journalStreak } from '@/features/reflect/lib/format'
+import { useLastValue } from '@/hooks/useSheetKey'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useToday } from '@/hooks/useToday'
 import { useT } from '@/hooks/useT'
@@ -18,6 +20,11 @@ function ReflectPage() {
   const { reflections, isLoading, isError, refetch } = useReflections()
   const { dateKey } = useToday()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
+  // Desktop opens a past entry in the inspector; the last one stays rendered
+  // while the panel slides out.
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const shownId = useLastValue(selectedId)
+  const closeInspector = useCallback(() => setSelectedId(null), [])
 
   // Quotes are a tiny cached global; map them so each entry shows its pairing.
   const { data: quotes } = useQuery({
@@ -36,6 +43,8 @@ function ReflectPage() {
   )
   const past = useMemo(() => reflections.filter((r) => r.date !== dateKey), [reflections, dateKey])
 
+  const shown = shownId ? (past.find((r) => r.id === shownId) ?? null) : null
+
   if (isLoading) {
     return <LoadingState label={t('reflect.loading')} />
   }
@@ -47,10 +56,28 @@ function ReflectPage() {
   if (isDesktop) {
     return (
       <>
-        <ReflectWorkspace dateKey={dateKey} today={today} />
-        <Rail>
-          <ReflectRail reflections={reflections} past={past} dateKey={dateKey} />
-        </Rail>
+        <ReflectWorkspace
+          dateKey={dateKey}
+          today={today}
+          past={past}
+          streak={journalStreak(new Set(reflections.map((r) => r.date)), dateKey)}
+          selectedId={selectedId}
+          onSelect={(id) => setSelectedId((cur) => (cur === id ? null : id))}
+        />
+        <Inspector
+          open={selectedId !== null && shown !== null}
+          onClose={closeInspector}
+          label={t('reflect.inspector')}
+        >
+          {shown ? (
+            <ReflectionCard
+              key={shown.id}
+              reflection={shown}
+              quote={shown.quote_id ? (quoteById.get(shown.quote_id) ?? null) : null}
+              onDeleted={closeInspector}
+            />
+          ) : null}
+        </Inspector>
       </>
     )
   }
