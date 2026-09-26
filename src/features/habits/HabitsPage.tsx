@@ -1,15 +1,16 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { ListChecks, Plus } from 'lucide-react'
 import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/common/EmptyState'
-import { Rail } from '@/components/rail/Rail'
+import { Inspector } from '@/components/inspector/Inspector'
 import { HabitCard } from '@/features/habits/components/HabitCard'
 import { SortableHabitList } from '@/features/habits/components/SortableHabitList'
 import { TodayProgress } from '@/features/habits/components/TodayProgress'
 import { HabitsWorkspace } from '@/features/habits/components/desktop/HabitsWorkspace'
-import { HabitsRail } from '@/features/habits/components/desktop/HabitsRail'
+import { HabitDetailPanel } from '@/features/habits/components/detail/HabitDetailPanel'
+import { useLastValue } from '@/hooks/useSheetKey'
 import { useHabits } from '@/features/habits/hooks/useHabits'
 import { FILTERS } from '@/features/habits/lib/filters'
 import { riseStagger } from '@/lib/motion'
@@ -26,6 +27,11 @@ function HabitsPage() {
   // Reordering lives here, behind an explicit mode, so Today stays tap-only.
   const [reordering, setReordering] = useState(false)
   const isDesktop = useMediaQuery('(min-width: 1024px)')
+  // Desktop opens a habit in the inspector; the last one stays rendered while
+  // the panel slides out.
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const shownId = useLastValue(selectedId)
+  const closeInspector = useCallback(() => setSelectedId(null), [])
 
   const stagger = riseStagger()
 
@@ -41,10 +47,16 @@ function HabitsPage() {
           filterIndex={filterIndex}
           onFilter={setFilterIndex}
           onNew={openNewHabit}
+          selectedId={selectedId}
+          onSelect={(id) => setSelectedId((cur) => (cur === id ? null : id))}
         />
-        <Rail>
-          <HabitsRail habits={habits} />
-        </Rail>
+        <Inspector
+          open={selectedId !== null}
+          onClose={closeInspector}
+          label={t('habits.inspector')}
+        >
+          {shownId ? <HabitDetailPanel key={shownId} id={shownId} onGone={closeInspector} /> : null}
+        </Inspector>
       </>
     )
   }

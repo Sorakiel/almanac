@@ -1091,12 +1091,9 @@ export const ru: Translations = {
     inDays: 'через {count} дн',
     restingIn: 'отдыхает · через {count} дн',
     rail: {
-      thisWeek: 'на неделе',
-      completion: 'выполнение',
-      active: 'активных',
-      strongest: 'сильнейшая',
       statusToday: 'сегодня',
     },
+    inspector: 'Привычка',
     aria: {
       complete: 'Отметить «{name}» выполненной',
       markIncomplete: 'Снять отметку с «{name}»',

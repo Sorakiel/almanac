@@ -1005,12 +1005,9 @@ export const en = {
     inDays: 'in {count}d',
     restingIn: 'resting · in {count}d',
     rail: {
-      thisWeek: 'this week',
-      completion: 'completion',
-      active: 'active',
-      strongest: 'strongest',
       statusToday: 'today',
     },
+    inspector: 'Habit',
     aria: {
       complete: 'Complete {name}',
       markIncomplete: 'Mark {name} incomplete',

@@ -73,6 +73,16 @@ export default {
         'safe-top': 'max(env(safe-area-inset-top), 1rem)',
         // The profile avatar's ring on the phone (112 on desktop is `28`).
         avatar: '104px',
+        '4.5': '1.125rem',
+        // The desktop inspector panel (desktop-prototype.html `.dk-insp`).
+        inspector: '392px',
+      },
+      // Closed, the inspector waits just past the window's right edge.
+      translate: {
+        'inspector-hidden': 'calc(100% + 20px)',
+      },
+      transitionDuration: {
+        inspector: '450ms',
       },
       // 28 sheets and containers · 20 cards and groups · 14 controls · 10 inner.
       borderRadius: {
@@ -82,6 +92,7 @@ export default {
         control: '14px',
         inner: '10px',
         pill: '999px',
+        inspector: '24px',
       },
       letterSpacing: {
         label: '0.14em',
@@ -96,6 +107,8 @@ export default {
         avatar: '0 8px 24px -8px rgb(0 0 0 / 0.45)',
         medal: 'inset 0 1px 0 rgb(255 255 255 / 0.35), 0 6px 16px -6px rgb(0 0 0 / 0.4)',
         thumb: '0 1px 3px rgb(0 0 0 / 0.2)',
+        inspector:
+          '-24px 0 60px -20px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(var(--color-border) / var(--border-opacity))',
       },
       // Profile on wide screens: identity column + settings.
       gridTemplateColumns: {

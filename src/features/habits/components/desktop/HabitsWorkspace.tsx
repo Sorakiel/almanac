@@ -19,6 +19,9 @@ interface HabitsWorkspaceProps {
   filterIndex: number
   onFilter: (index: number) => void
   onNew: () => void
+  /** The habit open in the inspector, if any. */
+  selectedId: string | null
+  onSelect: (id: string) => void
 }
 
 /** Desktop "Habits" workspace: title, frequency pills, two-column card grid. */
@@ -31,6 +34,8 @@ export function HabitsWorkspace({
   filterIndex,
   onFilter,
   onNew,
+  selectedId,
+  onSelect,
 }: HabitsWorkspaceProps) {
   const { t } = useT()
   const filter = filters[filterIndex]!
@@ -110,7 +115,11 @@ export function HabitsWorkspace({
             const rise = stagger(i)
             return (
               <div key={habit.id} className={rise.className} style={rise.style}>
-                <HabitCard habit={habit} />
+                <HabitCard
+                  habit={habit}
+                  selected={habit.id === selectedId}
+                  onOpen={() => onSelect(habit.id)}
+                />
               </div>
             )
           })}

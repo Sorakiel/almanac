@@ -381,6 +381,12 @@
     }
   }
 
+  /* Inside the desktop inspector, cards step up to the nested tone — the
+     panel itself is the card level (desktop-prototype.html `.dk-insp`). */
+  .inspector-nest {
+    --color-surface: var(--color-sheet-fill);
+  }
+
   /* Keyboard hint chip (⌘K, ⌘N) — the prototype's .kbd. */
   .kbd {
     font-family: theme('fontFamily.mono');
