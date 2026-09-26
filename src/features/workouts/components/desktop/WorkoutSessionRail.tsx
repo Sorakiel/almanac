@@ -1,6 +1,8 @@
 import { Dumbbell } from 'lucide-react'
 import type { SessionExercise, Workout } from '@/features/workouts/types'
 import { useT } from '@/hooks/useT'
+import { useToday } from '@/hooks/useToday'
+import { isCompletedOn } from '@/features/workouts/lib/recurrence'
 import { RailCard, RailNote, RailRow } from '@/components/rail/RailCard'
 import { RailIdentity } from '@/components/rail/RailIdentity'
 
@@ -12,6 +14,7 @@ interface WorkoutSessionRailProps {
 /** Desktop rail for a workout session: progress and total volume lifted. */
 export function WorkoutSessionRail({ workout, exercises }: WorkoutSessionRailProps) {
   const { t } = useT()
+  const { dateKey, timezone } = useToday()
   const allSets = exercises.flatMap((e) => e.sets)
   const doneSets = allSets.filter((s) => s.done)
   const volume = doneSets.reduce((sum, s) => sum + (s.reps ?? 0) * (s.weight ?? 0), 0)
@@ -23,7 +26,9 @@ export function WorkoutSessionRail({ workout, exercises }: WorkoutSessionRailPro
         tone="bg-teal/15 text-teal"
         title={workout.name}
         subtitle={
-          workout.completed_at ? t('workouts.statusCompleted') : t('workouts.statusInProgress')
+          isCompletedOn(workout, dateKey, timezone)
+            ? t('workouts.statusCompleted')
+            : t('workouts.statusInProgress')
         }
       />
 

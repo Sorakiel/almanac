@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { isDoneOn, isDueOn, isRecurring, recurrenceLabel } from '@/features/workouts/lib/recurrence'
+import {
+  isCompletedOn,
+  isDoneOn,
+  isDueOn,
+  isRecurring,
+  recurrenceLabel,
+} from '@/features/workouts/lib/recurrence'
 import type { Workout } from '@/features/workouts/types'
 import { translate } from '@/i18n'
 import type { TFunction } from '@/hooks/useT'
@@ -103,5 +109,21 @@ describe('isRecurring', () => {
   it('is true for any schedule but a plain one-off', () => {
     expect(isRecurring(makeWorkout({ recurrence: 'none' }))).toBe(false)
     expect(isRecurring(makeWorkout({ recurrence: 'daily' }))).toBe(true)
+  })
+})
+
+describe('isCompletedOn', () => {
+  const finished = '2026-07-12T18:00:00Z'
+
+  it('a recurring workout finished yesterday is not done today', () => {
+    const w = makeWorkout({ recurrence: 'daily', completed_at: finished })
+    expect(isCompletedOn(w, '2026-07-12', 'UTC')).toBe(true)
+    expect(isCompletedOn(w, '2026-07-13', 'UTC')).toBe(false)
+  })
+
+  it('a one-off stays done once finished', () => {
+    const w = makeWorkout({ completed_at: finished })
+    expect(isCompletedOn(w, '2026-07-20', 'UTC')).toBe(true)
+    expect(isCompletedOn(makeWorkout(), '2026-07-20', 'UTC')).toBe(false)
   })
 })

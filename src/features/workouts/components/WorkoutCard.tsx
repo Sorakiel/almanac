@@ -38,7 +38,7 @@ export function WorkoutCard({ workout }: WorkoutCardProps) {
   const { t, locale } = useT()
   const navigate = useNavigate()
   const { toggleComplete } = useWorkoutMutations()
-  const done = Boolean(workout.completed_at)
+  const done = workout.status === 'completed'
   const subtitle =
     recurrenceLabel(workout, t) ??
     (workout.scheduled_date

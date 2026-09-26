@@ -53,3 +53,11 @@ export function isDoneOn(w: Workout, dateKey: string, timezone: string): boolean
 export function isRecurring(w: Workout): boolean {
   return w.recurrence !== 'none'
 }
+
+/**
+ * Whether the workout counts as done on a local day: a recurring one only if
+ * it was finished that day, a one-off once it is finished at all.
+ */
+export function isCompletedOn(w: Workout, dateKey: string, timezone: string): boolean {
+  return isRecurring(w) ? isDoneOn(w, dateKey, timezone) : Boolean(w.completed_at)
+}

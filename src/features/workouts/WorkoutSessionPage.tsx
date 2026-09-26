@@ -90,7 +90,7 @@ function WorkoutSessionPage() {
   const completeCurrentSet = () => {
     if (!currentSet) return
     mutations.editSet.mutate(
-      { id: currentSet.id, patch: { done: true } },
+      { set: currentSet, done: true },
       {
         onError: (e) => toast.error(toUserError(e, t, 'workouts.session.logFailed')),
       },
