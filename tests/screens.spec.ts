@@ -451,7 +451,7 @@ for (const v of VARIANTS) {
       await expect(workoutInspector).toBeHidden()
     }
 
-    // Live session: working (ring shows elapsed + set progress), then resting
+    // Live session: working (compact "N of M" bar, no ring), then resting (the rest ring)
     // after a set is ticked (ring counts the set's own rest down).
     await page.goto(`/train/${sessionId}/session`)
     const complete = page.getByRole('button', {
