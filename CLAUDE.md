@@ -216,7 +216,7 @@ toast instead of a confirm; an irreversible one gets the red `ConfirmSheet`.
 
 The specs share **one pre-seeded staging account per shard** and clean up their own rows through ordinary RLS — no service_role key anywhere. CI splits the suite into two shards (`--shard=N/2`), each signed in as its own account (`E2E_EMAIL` / `E2E_EMAIL_2`); a final `e2e` job gates on both and merges their `screens` artifacts. Without `E2E_EMAIL_2`, shard 1 runs the whole suite. Consequences worth knowing before you touch them:
 
-- Within a shard they must run serially (`workers: 1`). Each shard's job is serialised repo-wide by `concurrency: e2e-staging-<shard>`, one queue per account.
+- Within a shard they must run serially (`workers: 1`). Each shard's job is serialised repo-wide by its own queue (`e2e-staging` for the first account, `e2e-staging-2` for the second).
 - A spec must never depend on another spec's rows: after sharding, the two may run under different accounts.
 - Leftover data from a failed run, or from a second Claude session working this repo, can turn a spec red for reasons unrelated to your diff. Check staging before debugging your own change.
 - Cleanup belongs in `afterEach`, **not** a `finally` inside the test: Playwright aborts the body on timeout and the `finally` may never run.

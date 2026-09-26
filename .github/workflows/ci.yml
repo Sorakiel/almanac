@@ -53,8 +53,10 @@ jobs:
         shard: [1, 2]
     # One queue per account: two runs on the same account would trip over each
     # other. Queue rather than cancel — a cancelled run can leave it mid-test.
+    # Shard 1 keeps the old queue's name, so a branch still on the unsharded
+    # workflow waits in the same line for the first account.
     concurrency:
-      group: e2e-staging-${{ matrix.shard }}
+      group: e2e-staging${{ matrix.shard == 2 && '-2' || '' }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
