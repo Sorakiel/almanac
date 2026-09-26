@@ -909,6 +909,12 @@ export const en = {
   },
   habits: {
     title: 'Habits',
+    reminder: {
+      label: 'Reminder',
+      off: 'Off',
+      body: 'Time to check it off',
+      clear: 'No reminder',
+    },
     goal: {
       label: 'How much a day',
       once: 'Once',

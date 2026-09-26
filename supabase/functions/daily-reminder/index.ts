@@ -3,7 +3,9 @@
 // Invoke this every five minutes (see README.md for the pg_cron schedule). On
 // each run it finds users whose local time has just passed the reminder time
 // they chose, still have daily habits left to finish today, and pushes them a
-// nudge.
+// nudge. A second pass does the same per habit: a habit with its own
+// `reminder_at` ("water at 11:00") gets its own push at that time, unless it
+// is already done, skipped on purpose, or not asked for today.
 //
 // It used to run hourly and compare only the hour, which quietly discarded the
 // minute the user picked in Settings: 13:25 fired at 13:00. Matching a window
@@ -80,6 +82,33 @@ function localDateKey(timezone: string): string {
   }).format(new Date())
 }
 
+interface ReminderHabit {
+  id: string
+  user_id: string
+  name: string
+  frequency: string
+  daily_goal: number
+  reminder_at: number
+  reminder_sent_on: string | null
+}
+
+/** Saturday or Sunday for a YYYY-MM-DD key (the key is already local). */
+function isWeekendKey(key: string): boolean {
+  const day = new Date(`${key}T12:00:00Z`).getUTCDay()
+  return day === 0 || day === 6
+}
+
+/** The per-habit push, in the user's language (English unless they chose Russian). */
+function habitPayload(name: string, locale: string | null, url: string, habitId: string): string {
+  return JSON.stringify({
+    title: name,
+    body: locale === 'ru' ? 'Пора отметить' : 'Time to check it off',
+    url,
+    // One tag per habit: two reminders a day stack instead of replacing each other.
+    tag: `almanac-habit-${habitId}`,
+  })
+}
+
 // deno-lint-ignore no-explicit-any
 function statusOf(error: any): number | undefined {
   return typeof error?.statusCode === 'number' ? error.statusCode : undefined
@@ -112,6 +141,39 @@ Deno.serve(async () => {
 
   let sent = 0
   let pruned = 0
+
+  /** Push one payload to every browser a user has, pruning the dead ones. */
+  const deliver = async (
+    subscriptions: StoredSubscription[],
+    payload: string,
+  ): Promise<{ sent: number; pruned: number }> => {
+    let sent = 0
+    let pruned = 0
+    for (const sub of subscriptions) {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          payload,
+        )
+        sent += 1
+        await supabase
+          .from('push_subscriptions')
+          .update({ last_success_at: new Date().toISOString() })
+          .eq('id', sub.id)
+      } catch (err) {
+        const status = statusOf(err)
+        // 404/410 mean the browser threw the subscription away (uninstalled,
+        // cleared data). Keeping it would mean pushing into the void forever.
+        if (status === 404 || status === 410) {
+          await supabase.from('push_subscriptions').delete().eq('id', sub.id)
+          pruned += 1
+        } else {
+          console.error('push failed', status, String(err).slice(0, 200))
+        }
+      }
+    }
+    return { sent, pruned }
+  }
 
   for (const profile of (profiles ?? []) as ReminderProfile[]) {
     const timezone = profile.timezone || 'UTC'
@@ -161,28 +223,71 @@ Deno.serve(async () => {
     // minutes for the rest of the day.
     await supabase.from('profiles').update({ reminder_sent_on: today }).eq('id', profile.id)
 
-    for (const sub of subscriptions as StoredSubscription[]) {
-      try {
-        await webpush.sendNotification(
-          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-          payload,
-        )
-        sent += 1
-        await supabase
-          .from('push_subscriptions')
-          .update({ last_success_at: new Date().toISOString() })
-          .eq('id', sub.id)
-      } catch (err) {
-        const status = statusOf(err)
-        // 404/410 mean the browser threw the subscription away (uninstalled,
-        // cleared data). Keeping it would mean pushing into the void forever.
-        if (status === 404 || status === 410) {
-          await supabase.from('push_subscriptions').delete().eq('id', sub.id)
-          pruned += 1
-        } else {
-          console.error('push failed', status, String(err).slice(0, 200))
-        }
-      }
+    const result = await deliver(subscriptions as StoredSubscription[], payload)
+    sent += result.sent
+    pruned += result.pruned
+  }
+
+  // Per-habit reminders. Only habits with a time set are read, through a
+  // partial index, so this pass costs nothing for everyone else.
+  const { data: reminderHabits, error: habitsError } = await supabase
+    .from('habits')
+    .select('id, user_id, name, frequency, daily_goal, reminder_at, reminder_sent_on')
+    .not('reminder_at', 'is', null)
+    .is('archived_at', null)
+  if (habitsError) console.error('reminder habits query failed', habitsError)
+
+  const owners = [...new Set(((reminderHabits ?? []) as ReminderHabit[]).map((h) => h.user_id))]
+  if (owners.length > 0) {
+    const [{ data: owned }, { data: settings }] = await Promise.all([
+      supabase.from('profiles').select('id, timezone').in('id', owners),
+      supabase.from('user_settings').select('user_id, locale').in('user_id', owners),
+    ])
+    const zoneOf = new Map<string, string>((owned ?? []).map((p) => [p.id, p.timezone || 'UTC']))
+    const localeOf = new Map<string, string | null>(
+      (settings ?? []).map((u) => [u.user_id, u.locale]),
+    )
+
+    for (const habit of (reminderHabits ?? []) as ReminderHabit[]) {
+      const timezone = zoneOf.get(habit.user_id) ?? 'UTC'
+      const today = localDateKey(timezone)
+      if (habit.reminder_sent_on === today) continue
+      if (!isDue(localMinutes(timezone), habit.reminder_at)) continue
+      if (habit.frequency === 'weekdays' && isWeekendKey(today)) continue
+
+      const [{ data: log }, { data: freeze }] = await Promise.all([
+        supabase
+          .from('habit_logs')
+          .select('count')
+          .eq('habit_id', habit.id)
+          .eq('date', today)
+          .maybeSingle(),
+        supabase
+          .from('habit_freezes')
+          .select('id')
+          .eq('habit_id', habit.id)
+          .eq('date', today)
+          .maybeSingle(),
+      ])
+      if ((log?.count ?? 0) >= habit.daily_goal || freeze) continue
+
+      const { data: subscriptions } = await supabase
+        .from('push_subscriptions')
+        .select('id, endpoint, p256dh, auth')
+        .eq('user_id', habit.user_id)
+      if (!subscriptions || subscriptions.length === 0) continue
+
+      // Stamped before sending, as above: one attempt per habit per day.
+      await supabase.from('habits').update({ reminder_sent_on: today }).eq('id', habit.id)
+      const payload = habitPayload(
+        habit.name,
+        localeOf.get(habit.user_id) ?? null,
+        appUrl,
+        habit.id,
+      )
+      const result = await deliver(subscriptions as StoredSubscription[], payload)
+      sent += result.sent
+      pruned += result.pruned
     }
   }
 

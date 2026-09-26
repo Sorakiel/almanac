@@ -192,3 +192,54 @@ export async function clearScheduledReminders(): Promise<void> {
     console.debug('[notify] cancel failed', err)
   }
 }
+
+/** Per-habit reminder ids live in their own band, clear of REMINDER_ID. */
+const HABIT_ID_BASE = 2_000_000
+const HABIT_ID_SPAN = 1_000_000
+
+/** A stable notification id for a habit, so its reminder can be replaced. */
+export function habitReminderId(habitId: string): number {
+  let hash = 0
+  for (const ch of habitId) hash = (hash * 31 + ch.charCodeAt(0)) | 0
+  return HABIT_ID_BASE + (Math.abs(hash) % HABIT_ID_SPAN)
+}
+
+export interface HabitReminder {
+  id: number
+  title: string
+  body: string
+  /** The next moment it should fire — a one-shot, rescheduled as habits change. */
+  at: Date
+}
+
+/**
+ * Replace every pending per-habit reminder with `reminders` (Android). One-shot
+ * rather than repeating: the OS can't know a habit was already done today, so
+ * the app re-plans the next reminder each time the habits change instead of
+ * letting a daily schedule nag about a finished habit.
+ */
+export async function scheduleHabitReminders(reminders: HabitReminder[]): Promise<void> {
+  if (!isCapacitor()) return
+  try {
+    const { LocalNotifications } = await import('@capacitor/local-notifications')
+    const pending = await LocalNotifications.getPending()
+    const stale = pending.notifications.filter(
+      (n) => n.id >= HABIT_ID_BASE && n.id < HABIT_ID_BASE + HABIT_ID_SPAN,
+    )
+    if (stale.length > 0) {
+      await LocalNotifications.cancel({ notifications: stale.map((n) => ({ id: n.id })) })
+    }
+    if (reminders.length === 0) return
+    await LocalNotifications.schedule({
+      notifications: reminders.map(({ id, title, body, at }) => ({
+        id,
+        title,
+        body,
+        // Inexact on purpose, as for the daily reminder: no exact-alarm permission.
+        schedule: { at },
+      })),
+    })
+  } catch (err) {
+    console.debug('[notify] habit reminders failed', err)
+  }
+}

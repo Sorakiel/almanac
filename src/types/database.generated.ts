@@ -428,6 +428,8 @@ export type Database = {
           icon: string | null
           id: string
           name: string
+          reminder_at: number | null
+          reminder_sent_on: string | null
           sort_order: number
           target_count: number
           time_of_day: Database["public"]["Enums"]["habit_time_of_day"]
@@ -444,6 +446,8 @@ export type Database = {
           icon?: string | null
           id?: string
           name: string
+          reminder_at?: number | null
+          reminder_sent_on?: string | null
           sort_order?: number
           target_count?: number
           time_of_day?: Database["public"]["Enums"]["habit_time_of_day"]
@@ -460,6 +464,8 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+          reminder_at?: number | null
+          reminder_sent_on?: string | null
           sort_order?: number
           target_count?: number
           time_of_day?: Database["public"]["Enums"]["habit_time_of_day"]

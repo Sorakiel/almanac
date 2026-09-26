@@ -7,6 +7,7 @@ import { HabitTodayNote } from '@/features/habits/components/detail/HabitTodayNo
 import type { HabitDetailStats } from '@/features/habits/hooks/useHabitDetail'
 import { frequencyLabel, timeOfDayLabel } from '@/features/habits/lib/frequency'
 import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
+import { formatReminder } from '@/features/habits/lib/reminders'
 import { habitHeaderTransition } from '@/features/habits/lib/transition'
 import type { Habit } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
@@ -96,6 +97,11 @@ export function HabitDetailView({ habit, stats, ...handlers }: HabitDetailViewPr
           canFreeze={!stats.todayDone}
           frozen={stats.todayFrozen}
           onToggleFreeze={handlers.onToggleFreeze}
+          reminder={
+            habit.reminder_at === null
+              ? t('habits.reminder.off')
+              : formatReminder(habit.reminder_at)
+          }
           onEdit={handlers.onEdit}
           onArchive={handlers.onArchive}
           onDelete={handlers.onDelete}

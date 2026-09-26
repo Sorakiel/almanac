@@ -19,6 +19,7 @@ import {
 } from '@/lib/platform/notify'
 import { disablePush, enablePush, pushSupported } from '@/lib/platform/push'
 import { useSession } from '@/hooks/useSession'
+import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useT } from '@/hooks/useT'
 import { toUserError } from '@/lib/userError'
 
@@ -53,6 +54,8 @@ export function ReminderSheet({
   const { t } = useT()
   const { update, isPending } = useUpdateProfile()
   const { user } = useSession()
+  const { habits } = useHabits()
+  const habitReminders = habits.some((h) => h.reminder_at !== null)
   const [on, setOn] = useState(enabled)
   const [selectedHour, setSelectedHour] = useState(hour)
   const [selectedMinute, setSelectedMinute] = useState(minute)
@@ -84,7 +87,8 @@ export function ReminderSheet({
         }
       } else {
         await clearScheduledReminders()
-        if (!digestEnabled && !isTauri() && !isCapacitor() && pushSupported())
+        // A habit with its own reminder still needs this browser's subscription.
+        if (!digestEnabled && !habitReminders && !isTauri() && !isCapacitor() && pushSupported())
           await disablePush().catch(() => undefined)
       }
       await update({
