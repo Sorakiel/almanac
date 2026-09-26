@@ -30,12 +30,12 @@ export function timeOfDayLabel(value: HabitTimeOfDay, t: TFunction): string | nu
 }
 
 /**
- * How many taps mark the habit complete for one day. Interval cadences
- * (every_n_days / every_n_weeks) store the interval in target_count, so a
- * single completion is enough on a due day.
+ * How many units close one day: 1 for a plain check-off, 8 for "8 glasses".
+ * Its own column (0036) — target_count is the cadence's number (an interval,
+ * or times per week) and says nothing about a single day.
  */
-export function dailyTarget(habit: FreqHabit): number {
-  return isInterval(habit) ? 1 : habit.target_count
+export function dailyTarget(habit: Pick<Habit, 'daily_goal'>): number {
+  return Math.max(1, habit.daily_goal)
 }
 
 /** True for the "once every N days/weeks" cadences. */

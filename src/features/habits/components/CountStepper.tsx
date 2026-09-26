@@ -21,7 +21,7 @@ export function CountStepper({ value, onChange, min, max }: CountStepperProps) {
       >
         <Minus className="h-4 w-4" aria-hidden="true" />
       </button>
-      <span className="w-7 text-center font-mono tabular-nums">{value}</span>
+      <span className="num min-w-7 text-center">{value}</span>
       <button
         type="button"
         aria-label={t('habits.form.increase')}

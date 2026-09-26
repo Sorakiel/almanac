@@ -132,12 +132,14 @@ async function seedSession(): Promise<string> {
 
 /**
  * A representative day for Today: habits in each time-of-day group (one
- * already ticked, so "Done" has a row), a book in progress and a finished
+ * already ticked, so "Done" has a row, one counted up to a daily amount and
+ * part way there), a book in progress and a finished
  * focus block — so the rings and module cards are drawn with content rather
  * than hidden. The workout comes from `seedSession`, which recurs daily.
  */
 const TODAY_HABITS = [
   { name: 'E2E screens · утро вода', time_of_day: 'morning', done: true },
+  { name: 'E2E screens · стаканы', time_of_day: 'morning', done: false, goal: 8, count: 3 },
   { name: 'E2E screens · английский', time_of_day: 'afternoon', done: false },
   { name: 'E2E screens · читать', time_of_day: 'evening', done: false },
   { name: 'E2E screens · уборка', time_of_day: 'anytime', frequency: 'weekly', done: false },
@@ -178,15 +180,21 @@ async function seedToday(): Promise<void> {
         name: h.name,
         time_of_day: h.time_of_day,
         frequency: 'frequency' in h ? h.frequency : 'daily',
+        // Every row names every column: in a bulk insert PostgREST fills a key
+        // missing from one row with null, not with the column default.
+        daily_goal: 'goal' in h ? h.goal : 1,
+        unit: 'goal' in h ? 'glasses' : null,
         sort_order: 100 + i,
       })),
     )
     .select('id, name')
   if (error) throw new Error(`could not seed Today's habits: ${error.message}`)
-  const done = habits.filter((h) => TODAY_HABITS.find((t) => t.name === h.name)?.done)
-  const { error: logError } = await db
-    .from('habit_logs')
-    .insert(done.map((h) => ({ user_id: userId, habit_id: h.id, date: today, count: 1 })))
+  const logged = habits.flatMap((h) => {
+    const seed = TODAY_HABITS.find((t) => t.name === h.name)
+    const count = seed && 'count' in seed ? seed.count : seed?.done ? 1 : 0
+    return count > 0 ? [{ user_id: userId, habit_id: h.id, date: today, count }] : []
+  })
+  const { error: logError } = await db.from('habit_logs').insert(logged)
   if (logError) throw new Error(`could not tick Today's habit: ${logError.message}`)
   const { error: bookError } = await db.from('books').insert({
     user_id: userId,

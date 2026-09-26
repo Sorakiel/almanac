@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sheet } from '@/components/ui/sheet'
 import { CountStepper } from '@/features/habits/components/CountStepper'
+import { GoalField } from '@/features/habits/components/GoalField'
 import { InlineSelect } from '@/features/habits/components/InlineSelect'
 import { HabitChecklistEditor } from '@/features/habits/components/HabitChecklistEditor'
 import { useHabits } from '@/features/habits/hooks/useHabits'
@@ -19,6 +20,7 @@ import {
   type HabitColor,
   type HabitIcon,
 } from '@/features/habits/lib/habitVisuals'
+import { GOAL_MAX, GOAL_MIN, UNIT_MAX, normalizeUnit } from '@/features/habits/lib/goal'
 import type { Habit, HabitFrequency, HabitTimeOfDay } from '@/features/habits/types'
 import { useUiStore } from '@/stores/ui'
 import { toastWithUndo } from '@/lib/undoToast'
@@ -37,6 +39,8 @@ const schema = z.object({
   frequency: z.enum(['daily', 'weekly', 'weekdays', 'x_per_week', 'every_n_days', 'every_n_weeks']),
   target_count: z.number().int().min(1).max(50),
   time_of_day: z.enum(['anytime', 'morning', 'afternoon', 'evening']),
+  daily_goal: z.number().int().min(GOAL_MIN).max(GOAL_MAX),
+  unit: z.string().max(UNIT_MAX).nullable(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -49,6 +53,8 @@ const DEFAULTS: FormValues = {
   frequency: 'daily',
   target_count: 1,
   time_of_day: 'anytime',
+  daily_goal: 1,
+  unit: null,
 }
 
 // The "Repeats" control presents four presets; Custom expands into an
@@ -89,7 +95,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
 }
 
-/** Edit sheet for an existing habit: icon, colour, repeats, time of day, checklist. */
+/** Edit sheet for an existing habit: icon, colour, repeats, time of day, daily amount, checklist. */
 export function HabitFormSheet() {
   const { t } = useT()
   const habitForm = useUiStore((s) => s.habitForm)
@@ -130,6 +136,8 @@ export function HabitFormSheet() {
       frequency: editing.frequency,
       target_count: editing.target_count,
       time_of_day: editing.time_of_day ?? 'anytime',
+      daily_goal: editing.daily_goal,
+      unit: editing.unit,
     })
   }, [editing, reset])
 
@@ -162,6 +170,8 @@ export function HabitFormSheet() {
       frequency: v.frequency,
       target_count: isCustom ? v.target_count : 1,
       time_of_day: v.time_of_day,
+      daily_goal: v.daily_goal,
+      unit: v.daily_goal > 1 ? normalizeUnit(v.unit) : null,
     }
     // No "saved" toast: the change is on screen the moment the sheet closes.
     if (editing) update.mutate({ id: editing.id, input }, { onError: onSaveError })
@@ -325,6 +335,17 @@ export function HabitFormSheet() {
               }))}
             />
           </div>
+        </div>
+
+        <div className="flex flex-col rounded-2xl bg-surface p-4">
+          <GoalField
+            value={{ goal: values.daily_goal, unit: values.unit }}
+            onChange={({ goal, unit }) => {
+              setValue('daily_goal', goal)
+              setValue('unit', unit)
+            }}
+            labelClassName="label-mono mb-3"
+          />
         </div>
 
         {editing ? <HabitChecklistEditor habit={editing} /> : null}

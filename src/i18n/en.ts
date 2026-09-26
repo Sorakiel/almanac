@@ -880,6 +880,7 @@ export const en = {
     nudgeAction: 'Mark',
     details: 'Details ›',
     checked: '“{name}” done',
+    cleared: '“{name}” reset to zero',
     doneSection: 'Done',
     allClosed: 'Every habit for today is closed',
     allClosedHint: 'A perfect day. The streak goes on.',
@@ -905,6 +906,23 @@ export const en = {
   },
   habits: {
     title: 'Habits',
+    goal: {
+      label: 'How much a day',
+      once: 'Once',
+      custom: 'Custom',
+      presets: { glasses: '8 glasses', pages: '20 pages', minutes: '30 minutes' },
+      unit: 'Unit',
+      unitPlaceholder: 'times',
+      units: {
+        glasses: { one: 'glass', other: 'glasses' },
+        pages: { one: 'page', other: 'pages' },
+        minutes: { one: 'minute', other: 'minutes' },
+        times: { one: 'time', other: 'times' },
+      },
+      progress: '{count} of {goal}',
+      addOne: 'Add one to “{name}”, {count} of {goal}',
+      clear: 'Clear “{name}”, {goal} of {goal} done',
+    },
     detail: {
       daysInARow: { one: 'day in a row', other: 'days in a row' },
       startStreak: 'Start a streak today',

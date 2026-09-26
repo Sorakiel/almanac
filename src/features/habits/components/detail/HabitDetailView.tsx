@@ -11,7 +11,8 @@ import type { Habit } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
 
 export interface HabitDetailHandlers {
-  onToggleDone: () => void
+  /** Today's count: the goal to mark done, 0 to clear, ±1 for a counted habit. */
+  onSetCount: (count: number) => void
   onToggleFreeze: () => void
   onEdit: () => void
   onArchive: () => void
@@ -65,7 +66,9 @@ export function HabitDetailView({ habit, stats, ...handlers }: HabitDetailViewPr
         best={stats.best}
         todayDone={stats.todayDone}
         todayFrozen={stats.todayFrozen}
-        onToggleDone={handlers.onToggleDone}
+        todayCount={stats.todayCount}
+        habit={habit}
+        onSetCount={handlers.onSetCount}
       />
       <HabitCalendarCard stats={stats} />
 

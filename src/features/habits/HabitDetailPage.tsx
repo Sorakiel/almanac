@@ -9,7 +9,7 @@ import { ConfirmSheet } from '@/components/common/ConfirmSheet'
 import { HabitDetailView } from '@/features/habits/components/detail/HabitDetailView'
 import { useHabitDetail } from '@/features/habits/hooks/useHabitDetail'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
-import { useMarkHabitDone } from '@/features/habits/hooks/useMarkHabitDone'
+import { useSetTodayCount } from '@/features/habits/hooks/useSetTodayCount'
 import { useToggleFreeze } from '@/features/habits/hooks/useToggleFreeze'
 import { useUiStore } from '@/stores/ui'
 import { toastWithUndo } from '@/lib/undoToast'
@@ -25,7 +25,7 @@ function HabitDetailPage() {
   const { habit, stats, isLoading, isError } = useHabitDetail(id)
   const { archive, restore, remove } = useHabitMutations()
   const toggleFreeze = useToggleFreeze()
-  const markDone = useMarkHabitDone(habit)
+  const setTodayCount = useSetTodayCount(habit)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   // Back to wherever the row was tapped (Today or Habits); a deep link has no
@@ -82,8 +82,8 @@ function HabitDetailPage() {
       <HabitDetailView
         habit={habit}
         stats={stats}
-        onToggleDone={() =>
-          markDone.mutate(!stats.todayDone, {
+        onSetCount={(count) =>
+          setTodayCount.mutate(count, {
             onError: (error) => toast.error(toUserError(error, t, 'habits.updateFailed')),
           })
         }

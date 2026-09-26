@@ -422,6 +422,7 @@ export type Database = {
           archived_at: string | null
           color: string | null
           created_at: string
+          daily_goal: number
           description: string | null
           frequency: Database["public"]["Enums"]["habit_frequency"]
           icon: string | null
@@ -430,12 +431,14 @@ export type Database = {
           sort_order: number
           target_count: number
           time_of_day: Database["public"]["Enums"]["habit_time_of_day"]
+          unit: string | null
           user_id: string
         }
         Insert: {
           archived_at?: string | null
           color?: string | null
           created_at?: string
+          daily_goal?: number
           description?: string | null
           frequency?: Database["public"]["Enums"]["habit_frequency"]
           icon?: string | null
@@ -444,12 +447,14 @@ export type Database = {
           sort_order?: number
           target_count?: number
           time_of_day?: Database["public"]["Enums"]["habit_time_of_day"]
+          unit?: string | null
           user_id: string
         }
         Update: {
           archived_at?: string | null
           color?: string | null
           created_at?: string
+          daily_goal?: number
           description?: string | null
           frequency?: Database["public"]["Enums"]["habit_frequency"]
           icon?: string | null
@@ -458,6 +463,7 @@ export type Database = {
           sort_order?: number
           target_count?: number
           time_of_day?: Database["public"]["Enums"]["habit_time_of_day"]
+          unit?: string | null
           user_id?: string
         }
         Relationships: []

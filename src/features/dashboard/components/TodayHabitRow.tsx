@@ -4,6 +4,7 @@ import { Flame } from 'lucide-react'
 import { PendingSyncMark } from '@/components/common/PendingSyncMark'
 import { WeekDots } from '@/features/habits/components/WeekDots'
 import { frequencyLabel } from '@/features/habits/lib/frequency'
+import { isQuantitative, unitLabel } from '@/features/habits/lib/goal'
 import { resolveHabitColor } from '@/features/habits/lib/habitVisuals'
 import {
   claimHabitName,
@@ -23,6 +24,9 @@ interface TodayHabitRowProps {
   onToggle: (habit: HabitWithTodayLog) => void
 }
 
+/** Circumference of the 28px check's progress ring (r = 13). */
+const RING = 2 * Math.PI * 13
+
 function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
@@ -31,12 +35,16 @@ function capitalize(text: string): string {
  * One habit on Today: a 44px check with a 28px circle, the name, a meta line
  * (flame + streak, cadence) and the week as seven dots. Ticking fills the
  * circle with a spring, draws the check and sends a ripple out; the page then
- * holds the row for a moment and folds it into "Done".
+ * holds the row for a moment and folds it into "Done". A habit with a daily
+ * amount ("8 glasses") counts up one per tap, drawn as a ring round the circle.
  */
 export function TodayHabitRow({ habit, phase, onToggle }: TodayHabitRowProps) {
   const { t } = useT()
   const [ripples, setRipples] = useState(0)
   const hue = resolveHabitColor(habit.color).stroke
+  const counted = isQuantitative(habit)
+  const goal = habit.daily_goal
+  const shown = Math.min(habit.todayCount, goal)
 
   const toggle = () => {
     if (!habit.isComplete) setRipples((n) => n + 1)
@@ -55,11 +63,25 @@ export function TodayHabitRow({ habit, phase, onToggle }: TodayHabitRowProps) {
           onClick={toggle}
           aria-pressed={habit.isComplete}
           aria-label={
-            habit.isComplete
-              ? t('habits.aria.markIncomplete', { name: habit.name })
-              : t('habits.aria.complete', { name: habit.name })
+            counted
+              ? habit.isComplete
+                ? t('habits.goal.clear', { name: habit.name, goal })
+                : t('habits.goal.addOne', { name: habit.name, count: shown, goal })
+              : habit.isComplete
+                ? t('habits.aria.markIncomplete', { name: habit.name })
+                : t('habits.aria.complete', { name: habit.name })
           }
         >
+          {counted && !habit.isComplete ? (
+            <svg className="today-ring" viewBox="0 0 28 28" aria-hidden="true">
+              <circle
+                cx="14"
+                cy="14"
+                r="13"
+                style={{ strokeDasharray: RING, strokeDashoffset: RING * (1 - shown / goal) }}
+              />
+            </svg>
+          ) : null}
           <i>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M5 12.5l4.5 4.5L19 7.5" />
@@ -89,6 +111,14 @@ export function TodayHabitRow({ habit, phase, onToggle }: TodayHabitRowProps) {
               >
                 <Flame aria-hidden="true" />
                 <StreakOdometer value={habit.streak} />
+              </span>
+            ) : null}
+            {counted ? (
+              <span className="today-goal">
+                <span className="num">
+                  {shown}/{goal}
+                </span>{' '}
+                {unitLabel(habit.unit, goal, t)}
               </span>
             ) : null}
             <span>{capitalize(frequencyLabel(habit, t))}</span>

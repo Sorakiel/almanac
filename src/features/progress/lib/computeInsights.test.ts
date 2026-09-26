@@ -15,6 +15,8 @@ function dailyHabit(overrides: Partial<Habit> = {}): Habit {
     color: null,
     frequency: 'daily',
     target_count: 1,
+    daily_goal: 1,
+    unit: null,
     sort_order: 0,
     archived_at: null,
     time_of_day: 'anytime',

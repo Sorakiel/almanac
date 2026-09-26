@@ -20,6 +20,8 @@ export function withInput(habit: Habit, input: HabitFormInput): Habit {
     frequency: input.frequency ?? 'daily',
     target_count: input.target_count,
     time_of_day: input.time_of_day ?? 'anytime',
+    daily_goal: input.daily_goal ?? habit.daily_goal,
+    unit: input.unit === undefined ? habit.unit : input.unit,
   }
 }
 
@@ -34,6 +36,8 @@ export function draftHabit(id: string, userId: string, input: HabitFormInput): H
     color: null,
     frequency: input.frequency ?? 'daily',
     target_count: 1,
+    daily_goal: 1,
+    unit: null,
     time_of_day: 'anytime',
     sort_order: 0,
     archived_at: null,
