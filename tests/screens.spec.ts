@@ -419,6 +419,24 @@ for (const v of VARIANTS) {
       await shoot(page, `${v.name}-reflect-inspector`, false)
       await page.keyboard.press('Escape')
       await expect(entry).toBeHidden()
+
+      // Training: the list, then a workout opened in the inspector.
+      await page.goto('/train')
+      // The list row (it carries aria-expanded), not Today's session card above it.
+      const workoutRow = page.locator('button[aria-expanded]', { hasText: SESSION_WORKOUT })
+      await expect(workoutRow).toBeVisible({ timeout: 20_000 })
+      await shoot(page, `${v.name}-train`)
+      await workoutRow.click()
+      const workoutInspector = page.getByRole('complementary', {
+        name: v.locale === 'ru' ? 'Тренировка' : 'Workout',
+      })
+      await expect(workoutInspector.getByRole('heading', { name: SESSION_WORKOUT })).toBeVisible({
+        timeout: 20_000,
+      })
+      await page.waitForTimeout(600) // the slide-in
+      await shoot(page, `${v.name}-train-inspector`, false)
+      await page.keyboard.press('Escape')
+      await expect(workoutInspector).toBeHidden()
     }
 
     // Live session: working (ring shows elapsed + set progress), then resting

@@ -1,0 +1,185 @@
+import { useState, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
+import { Check, Dumbbell, Pencil, Play, SlidersHorizontal } from 'lucide-react'
+import { LoadingState } from '@/components/common/LoadingState'
+import { Button } from '@/components/ui/button'
+import { IconTile } from '@/components/common/IconTile'
+import { Tag } from '@/components/common/Tag'
+import { SectionLabel } from '@/components/common/SectionLabel'
+import { EmptyState } from '@/components/common/EmptyState'
+import { ExerciseView } from '@/features/workouts/components/ExerciseView'
+import { WorkoutFormSheet } from '@/features/workouts/components/WorkoutFormSheet'
+import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
+import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
+import { useWorkoutSessionStore } from '@/features/workouts/stores/workoutSession'
+import { isCompletedOn, recurrenceLabel } from '@/features/workouts/lib/recurrence'
+import { dateFromKey } from '@/lib/date'
+import { intlLocale } from '@/lib/dateLocale'
+import { useOpenKey } from '@/hooks/useSheetKey'
+import { useT } from '@/hooks/useT'
+import { useToday } from '@/hooks/useToday'
+import { cn } from '@/lib/utils'
+import { toUserError } from '@/lib/userError'
+
+/** Friendly label for a `YYYY-MM-DD` date, UTC-safe. */
+function formatDate(dateKey: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(dateFromKey(dateKey))
+}
+
+interface WorkoutDetailPanelProps {
+  id: string
+  /** The workout was deleted or failed to load — leave it. */
+  onGone: () => void
+  /** Leading control in the header row — the page's back arrow. */
+  leading?: ReactNode
+  /** The inspector is narrow: actions stack instead of sitting in a row. */
+  compact?: boolean
+}
+
+/**
+ * One workout with everything it can do, wired to its data: the workout page
+ * and the desktop inspector are this same panel.
+ */
+export function WorkoutDetailPanel({
+  id,
+  onGone,
+  leading,
+  compact = false,
+}: WorkoutDetailPanelProps) {
+  const { t, locale } = useT()
+  const navigate = useNavigate()
+  const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
+  const { dateKey, timezone } = useToday()
+  const mutations = useSessionMutations(id, {
+    onFinished: () => toast(t('workouts.finishedToast', { name: workout?.name ?? '' })),
+  })
+  const startSessionClock = useWorkoutSessionStore((s) => s.start)
+  const hasActiveSession = useWorkoutSessionStore((s) => Boolean(s.sessions[id]))
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const settingsKey = useOpenKey(settingsOpen)
+
+  if (isLoading) {
+    return <LoadingState label={t('workouts.loadingOne')} />
+  }
+
+  if (isError || !workout) {
+    return (
+      <EmptyState
+        title={t('workouts.loadOneFailed')}
+        action={
+          <Button size="sm" variant="surface" onClick={onGone}>
+            {t('workouts.backToWorkouts')}
+          </Button>
+        }
+      />
+    )
+  }
+
+  const done = isCompletedOn(workout, dateKey, timezone)
+  const hasExercises = exercises.length > 0
+  const subtitle =
+    recurrenceLabel(workout, t) ??
+    (workout.scheduled_date
+      ? formatDate(workout.scheduled_date, intlLocale(locale))
+      : t('workouts.noDateSet'))
+
+  const toggleComplete = () =>
+    mutations.setCompleted.mutate(!done, {
+      onError: (e) => toast.error(toUserError(e, t, 'workouts.updateFailed')),
+    })
+
+  const startSession = () => {
+    startSessionClock(id)
+    navigate(`/train/${id}/session`)
+  }
+
+  return (
+    <>
+      <div className="flex flex-col gap-6">
+        <header className="flex items-center gap-3">
+          {leading}
+          <IconTile icon={Dumbbell} tone="bg-teal/15 text-teal" size="lg" />
+          <div className="min-w-0 flex-1">
+            <h1 className={cn('truncate text-2xl', !compact && 'lg:text-[30px] lg:tracking-title')}>
+              {workout.name}
+            </h1>
+            <p className="mt-0.5 flex items-center gap-2 text-sm text-muted">
+              <span className="truncate">{subtitle}</span>
+              {done ? <Tag tone="teal">{t('workouts.doneLower')}</Tag> : null}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label={t('workouts.scheduleAndDelete')}
+            className="flex h-9 w-9 flex-none items-center justify-center rounded-[11px] border text-muted transition-colors hover:text-foreground"
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <Button
+            size="sm"
+            variant="surface"
+            onClick={() => navigate(`/train/${id}/edit`)}
+            aria-label={compact ? t('workouts.edit') : undefined}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            {compact ? null : t('workouts.edit')}
+          </Button>
+        </header>
+
+        <section className="flex flex-col gap-3">
+          <SectionLabel accessory={t('workouts.exerciseCount', { count: exercises.length })}>
+            {t('workouts.exercises')}
+          </SectionLabel>
+          {!hasExercises ? (
+            <p className="rounded-card border border-dashed bg-surface/40 px-4 py-8 text-center text-sm text-muted">
+              {t('workouts.noExercisesPlanned')}
+            </p>
+          ) : (
+            exercises.map((ex) => <ExerciseView key={ex.id} exercise={ex} />)
+          )}
+        </section>
+
+        <div className={cn('flex flex-col gap-3', !compact && 'sm:flex-row')}>
+          {hasExercises ? (
+            <Button
+              size="lg"
+              className={cn('w-full shadow-glow', !compact && 'sm:w-auto sm:min-w-[220px]')}
+              onClick={startSession}
+            >
+              <Play className="h-4 w-4" />
+              {hasActiveSession
+                ? t('workouts.resumeSession')
+                : done
+                  ? t('workouts.trainAgain')
+                  : t('workouts.startSession')}
+            </Button>
+          ) : null}
+          <Button
+            size="lg"
+            variant="surface"
+            className={cn('w-full', !compact && 'sm:w-auto sm:min-w-[200px]')}
+            disabled={mutations.setCompleted.isPending}
+            onClick={toggleComplete}
+          >
+            <Check className="h-4 w-4" />
+            {done ? t('workouts.completedTapToReopen') : t('workouts.markComplete')}
+          </Button>
+        </div>
+      </div>
+
+      <WorkoutFormSheet
+        key={settingsKey}
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        workout={workout}
+        onDeleted={onGone}
+      />
+    </>
+  )
+}

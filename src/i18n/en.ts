@@ -665,6 +665,7 @@ export const en = {
     restDay: 'No session scheduled — rest day.',
     noDateSet: 'No date set',
     edit: 'Edit',
+    inspector: 'Workout',
     backToWorkouts: 'Back to workouts',
     backToTraining: 'Back to training',
     exercises: 'EXERCISES',

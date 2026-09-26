@@ -16,6 +16,10 @@ import { toUserError } from '@/lib/userError'
 
 interface WorkoutCardProps {
   workout: WorkoutView
+  /** Desktop: open in the inspector instead of navigating to the page. */
+  onOpen?: (id: string) => void
+  /** This card is the one the inspector shows. */
+  selected?: boolean
 }
 
 const STATUS_TONE: Record<WorkoutStatus, 'teal' | 'accent' | 'muted'> = {
@@ -34,7 +38,7 @@ function formatDate(dateKey: string, locale: string): string {
 }
 
 /** A workout row: complete toggle, identity (tap to edit), status badge. */
-export function WorkoutCard({ workout }: WorkoutCardProps) {
+export function WorkoutCard({ workout, onOpen, selected = false }: WorkoutCardProps) {
   const { t, locale } = useT()
   const navigate = useNavigate()
   const { toggleComplete } = useWorkoutMutations()
@@ -55,7 +59,7 @@ export function WorkoutCard({ workout }: WorkoutCardProps) {
   }
 
   return (
-    <Card className="flex items-center gap-3 p-4">
+    <Card className={cn('flex items-center gap-3 p-4', selected && 'border-accent/50')}>
       <CompletionToggle
         done={done}
         onToggle={handleToggle}
@@ -68,7 +72,8 @@ export function WorkoutCard({ workout }: WorkoutCardProps) {
 
       <button
         type="button"
-        onClick={() => navigate(`/train/${workout.id}`)}
+        onClick={() => (onOpen ? onOpen(workout.id) : navigate(`/train/${workout.id}`))}
+        aria-expanded={onOpen ? selected : undefined}
         className="min-w-0 flex-1 text-left"
       >
         <p className={cn('truncate font-semibold', done && 'text-muted line-through')}>

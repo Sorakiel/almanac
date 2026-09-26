@@ -7,6 +7,8 @@ import { intlLocale } from '@/lib/dateLocale'
 
 interface RecentSessionsProps {
   workouts: WorkoutView[]
+  /** Desktop: open in the inspector instead of navigating to the page. */
+  onOpen?: (id: string) => void
 }
 
 /** Short "day · time" label from a completed_at instant, UTC-safe enough here. */
@@ -19,7 +21,7 @@ function completedLabel(iso: string, locale: string): string {
 }
 
 /** Compact list of recently completed sessions; each row opens its detail page. */
-export function RecentSessions({ workouts }: RecentSessionsProps) {
+export function RecentSessions({ workouts, onOpen }: RecentSessionsProps) {
   const { t, locale } = useT()
   const navigate = useNavigate()
   if (workouts.length === 0) {
@@ -31,7 +33,7 @@ export function RecentSessions({ workouts }: RecentSessionsProps) {
         <li key={w.id}>
           <button
             type="button"
-            onClick={() => navigate(`/train/${w.id}`)}
+            onClick={() => (onOpen ? onOpen(w.id) : navigate(`/train/${w.id}`))}
             className="flex w-full items-center gap-3 py-2.5 text-left"
           >
             <Check className="h-4 w-4 flex-none text-teal" aria-hidden="true" />
