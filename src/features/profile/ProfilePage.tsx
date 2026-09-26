@@ -79,8 +79,8 @@ function ProfilePage() {
         <p className="text-large-title font-bold">{t('profile.title')}</p>
       </header>
 
-      <div className="wide:grid wide:grid-cols-profile wide:items-start wide:gap-6">
-        <div className="grid min-w-0 grid-cols-1 gap-6 lg:gap-3.5 wide:sticky wide:top-0">
+      <div className="lg:grid lg:grid-cols-profile lg:items-start lg:gap-6">
+        <div className="grid min-w-0 grid-cols-1 gap-6 lg:sticky lg:top-0 lg:gap-3.5">
           <div className="lg:rounded-card lg:bg-surface lg:p-5">
             <ProfileHero
               name={name}
@@ -128,7 +128,7 @@ function ProfilePage() {
           </section>
         </div>
 
-        <div className="mt-6 grid min-w-0 grid-cols-1 gap-6 lg:gap-5 wide:mt-0">
+        <div className="mt-6 grid min-w-0 grid-cols-1 gap-6 lg:mt-0 lg:gap-5">
           <SettingsGroup>
             <FriendsRow />
           </SettingsGroup>
