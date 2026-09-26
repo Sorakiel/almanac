@@ -19,7 +19,7 @@ export interface TodayGroup {
 export interface TodayPlan {
   /** Still to do today, grouped by time of day; empty groups are dropped. */
   groups: TodayGroup[]
-  /** Closed today, in list order. */
+  /** Closed today, in list order: done first, then skipped on purpose. */
   done: HabitWithTodayLog[]
   /** Due today or already done — what the day is measured against. */
   dueCount: number
@@ -48,9 +48,15 @@ export function planToday(
 ): TodayPlan {
   const open = new Map<TodaySlot, HabitWithTodayLog[]>()
   const done: HabitWithTodayLog[] = []
+  const skipped: HabitWithTodayLog[] = []
   let dueCount = 0
 
   for (const habit of habits) {
+    // Closed for the day but never owed: out of the total, into "Done".
+    if (habit.skippedToday) {
+      skipped.push(habit)
+      continue
+    }
     if (!habit.dueToday && !habit.isComplete) continue
     dueCount += 1
     if (habit.isComplete && !settling.has(habit.id)) {
@@ -65,7 +71,7 @@ export function planToday(
     const list = open.get(slot)
     return list ? [{ slot, habits: list }] : []
   })
-  return { groups, done, dueCount }
+  return { groups, done: [...done, ...skipped], dueCount }
 }
 
 /**

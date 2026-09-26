@@ -167,6 +167,9 @@
   height: 44px;
   border-radius: 999px;
   -webkit-tap-highlight-color: transparent;
+  /* Holding the check means "skip": no iOS callout or text selection on top. */
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 .today-check:disabled {
   cursor: not-allowed;
@@ -202,6 +205,12 @@
 .today-row.is-done .today-check svg {
   stroke-dashoffset: 0;
   transition: stroke-dashoffset 0.3s 0.08s ease-out;
+}
+.today-row.is-skipped .today-check > i {
+  border-style: dashed;
+}
+.today-row.is-skipped .today-row-name {
+  color: var(--today-ink2);
 }
 .today-ring {
   position: absolute;

@@ -9,10 +9,11 @@ interface TodayHabitGroupProps {
   habits: HabitWithTodayLog[]
   phases: ReadonlyMap<string, SettlePhase>
   onToggle: (habit: HabitWithTodayLog) => void
+  onSkip: (habit: HabitWithTodayLog) => void
 }
 
 /** "Morning · 3" and its rows, on one card. */
-export function TodayHabitGroup({ slot, habits, phases, onToggle }: TodayHabitGroupProps) {
+export function TodayHabitGroup({ slot, habits, phases, onToggle, onSkip }: TodayHabitGroupProps) {
   const { t } = useT()
   const headingId = `today-${slot}`
   // Rows still folding away were already counted as done.
@@ -31,6 +32,7 @@ export function TodayHabitGroup({ slot, habits, phases, onToggle }: TodayHabitGr
             habit={habit}
             phase={phases.get(habit.id)}
             onToggle={onToggle}
+            onSkip={onSkip}
           />
         ))}
       </div>

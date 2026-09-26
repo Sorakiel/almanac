@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Snowflake } from 'lucide-react'
+import { CircleSlash } from 'lucide-react'
 import { PendingSyncMark } from '@/components/common/PendingSyncMark'
 import { Card } from '@/components/ui/card'
 import { CompletionToggle } from '@/components/common/CompletionToggle'
@@ -35,7 +35,7 @@ export function HabitCard({ habit }: HabitCardProps) {
   const timeLabel = timeOfDayLabel(habit.time_of_day, t)
   // Resting = an interval/weekday habit that isn't due today and isn't done —
   // it's locked and struck through until its next due date.
-  const resting = !habit.isComplete && !habit.dueToday
+  const resting = !habit.isComplete && !habit.dueToday && !habit.skippedToday
   const subtitle = [
     isQuantitative(habit) && !resting
       ? goalProgress(Math.min(habit.todayCount, habit.daily_goal), habit, t)
@@ -107,7 +107,7 @@ export function HabitCard({ habit }: HabitCardProps) {
               title={t('habits.frozenSafe')}
             >
               <span aria-hidden="true">· </span>
-              <Snowflake className="h-3 w-3" aria-hidden="true" />
+              <CircleSlash className="h-3 w-3" aria-hidden="true" />
               <span className="sr-only">{t('a11y.frozenToday')}</span>
             </span>
           ) : null}
@@ -149,7 +149,7 @@ interface CheckToggleProps {
 /** Habit completion checkbox used on cards and rows. Locked while resting. */
 export function CheckToggle({ habit, onToggle }: CheckToggleProps) {
   const { t } = useT()
-  const resting = !habit.isComplete && !habit.dueToday
+  const resting = !habit.isComplete && !habit.dueToday && !habit.skippedToday
   const label = resting
     ? habit.dueInDays > 0
       ? t('habits.aria.restingDays', { name: habit.name, count: habit.dueInDays })

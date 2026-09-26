@@ -37,7 +37,7 @@ function DashboardPage() {
   const enabled = useModulesStore((s) => s.enabled)
   const { due: workouts } = useTodaysWorkouts()
   const focusMinutes = useFocusToday(enabled.flow)
-  const { phases, onToggle } = useTodayToggle(habits)
+  const { phases, onToggle, onSkip } = useTodayToggle(habits)
 
   const plan = planToday(habits, new Set(phases.keys()))
   const completed = habits.filter((h) => h.isComplete).length
@@ -69,11 +69,12 @@ function DashboardPage() {
               habitCount={habits.length}
               phases={phases}
               onToggle={onToggle}
+              onSkip={onSkip}
             />
           </div>
           {plan.done.length > 0 ? (
             <div className="today-o-done">
-              <TodayDoneDisclosure habits={plan.done} onToggle={onToggle} />
+              <TodayDoneDisclosure habits={plan.done} onToggle={onToggle} onSkip={onSkip} />
             </div>
           ) : null}
         </div>

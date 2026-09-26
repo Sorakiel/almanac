@@ -34,7 +34,7 @@ export function HabitRow({ habit }: HabitRowProps) {
     )
   }
 
-  const resting = !habit.isComplete && !habit.dueToday
+  const resting = !habit.isComplete && !habit.dueToday && !habit.skippedToday
 
   return (
     <div className="flex items-center gap-3 py-1.5">

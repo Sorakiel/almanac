@@ -14,10 +14,17 @@ interface TodayHabitListProps {
   habitCount: number
   phases: ReadonlyMap<string, SettlePhase>
   onToggle: (habit: HabitWithTodayLog) => void
+  onSkip: (habit: HabitWithTodayLog) => void
 }
 
 /** What is left today, by time of day — or why there is nothing left. */
-export function TodayHabitList({ plan, habitCount, phases, onToggle }: TodayHabitListProps) {
+export function TodayHabitList({
+  plan,
+  habitCount,
+  phases,
+  onToggle,
+  onSkip,
+}: TodayHabitListProps) {
   const { t } = useT()
   const openNewHabit = useUiStore((s) => s.openNewHabit)
 
@@ -55,6 +62,7 @@ export function TodayHabitList({ plan, habitCount, phases, onToggle }: TodayHabi
           habits={group.habits}
           phases={phases}
           onToggle={onToggle}
+          onSkip={onSkip}
         />
       ))}
     </>
