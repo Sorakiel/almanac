@@ -10,105 +10,73 @@ interface RestRingProps {
   restTotalMs: number
   /** Identifies this rest, so a new one restarts the drain even at the same length. */
   restEndsAt: number | null
-  /** False while the session clock is paused. */
-  running: boolean
-  elapsedMs: number
-  doneSets: number
-  totalSets: number
   /** What comes after the rest, e.g. "подход 3 · 8 × 60 кг". */
   next: string | null
+  onSkip: () => void
   className?: string
 }
 
-const R = 52
+// Geometry of the prototype's 56px ring (r 24, stroke 5) on the 120 viewBox
+// DrainArc draws in.
+const R = 51
+const STROKE = 10.7
 const CIRCUMFERENCE = 2 * Math.PI * R
 
 /**
- * The session's one big number. Resting, it is the countdown, drained by an
- * accent ring, with the next set underneath — the two things you look up for
- * between sets. Working, it is the session clock, with a teal ring for the
- * share of sets done. The rest arc drains in one CSS animation per rest (see
- * DrainArc); the sets arc eases to each new share — no frame loop either way.
+ * The rest card: a small draining ring, the countdown, what comes next and
+ * Skip — the things you glance at between sets. Only while resting; working,
+ * the "N of M" bar above says enough. The arc drains in one CSS animation per
+ * rest (see DrainArc) — no frame loop.
  */
 export function RestRing({
   restMs,
   restTotalMs,
   restEndsAt,
-  running,
-  elapsedMs,
-  doneSets,
-  totalSets,
   next,
+  onSkip,
   className,
 }: RestRingProps) {
   const { t } = useT()
-  const resting = restMs !== null
-  const ratio = resting
-    ? Math.min(1, restMs / Math.max(restTotalMs, 1))
-    : totalSets > 0
-      ? doneSets / totalSets
-      : 0
-  const caption = resting
-    ? t('workouts.session.resting')
-    : running
-      ? t('workouts.session.inProgress')
-      : t('workouts.session.paused')
+  if (restMs === null) return null
 
   return (
-    <div className={cn('flex flex-col items-center justify-center gap-4', className)}>
-      <div className="relative h-56 w-56 lg:h-64 lg:w-64">
-        <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90" aria-hidden="true">
+    <div className={cn('overflow-hidden rounded-card bg-surface', className)}>
+      <div className="flex items-center gap-3.5 bg-teal/15 px-3.5 py-3">
+        <svg viewBox="0 0 120 120" className="h-14 w-14 flex-none -rotate-90" aria-hidden="true">
           <circle
             cx="60"
             cy="60"
             r={R}
             fill="none"
-            strokeWidth="7"
-            className="stroke-foreground/10"
+            strokeWidth={STROKE}
+            className="stroke-teal/20"
           />
-          {resting ? (
-            <DrainArc
-              key={`rest-${restEndsAt ?? 0}`}
-              r={R}
-              circumference={CIRCUMFERENCE}
-              remainingMs={restMs}
-              totalMs={restTotalMs}
-              className="stroke-accent"
-            />
-          ) : (
-            <circle
-              key="sets"
-              cx="60"
-              cy="60"
-              r={R}
-              fill="none"
-              strokeWidth="7"
-              strokeLinecap="round"
-              strokeDasharray={CIRCUMFERENCE}
-              // Its own element, keyed apart from the rest arc: one shared
-              // circle used to sweep across the whole ring on every switch
-              // between resting and working.
-              style={{ strokeDashoffset: CIRCUMFERENCE * (1 - ratio) }}
-              className="stroke-teal motion-safe:transition-all motion-safe:duration-500 motion-safe:ease-sheet"
-            />
-          )}
+          <DrainArc
+            key={`rest-${restEndsAt ?? 0}`}
+            r={R}
+            circumference={CIRCUMFERENCE}
+            remainingMs={restMs}
+            totalMs={restTotalMs}
+            strokeWidth={STROKE}
+            className="stroke-teal"
+          />
         </svg>
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center gap-1"
-          role="timer"
-          aria-label={caption}
-        >
-          <span className="num text-large-title font-semibold">
-            {formatClock(resting ? restMs : elapsedMs)}
+        <div className="min-w-0 flex-1" role="timer" aria-label={t('workouts.session.resting')}>
+          <span className="num block text-title font-medium tracking-tight">
+            {formatClock(restMs)}
           </span>
-          <span className="text-footnote text-muted">{caption}</span>
+          <span className="block truncate text-footnote text-muted">
+            {next ? t('workouts.session.restThen', { what: next }) : t('workouts.session.resting')}
+          </span>
         </div>
+        <button
+          type="button"
+          onClick={onSkip}
+          className="min-h-11 flex-none rounded-full bg-accent/15 px-3.5 text-callout font-semibold text-accent transition-transform active:scale-95"
+        >
+          {t('workouts.session.skipRest')}
+        </button>
       </div>
-      {resting && next ? (
-        <p className="max-w-full truncate text-callout text-muted">
-          {t('workouts.session.next', { what: next })}
-        </p>
-      ) : null}
     </div>
   )
 }

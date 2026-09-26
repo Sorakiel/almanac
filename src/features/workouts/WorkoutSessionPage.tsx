@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { EmptyState } from '@/components/common/EmptyState'
 import { ConfirmSheet } from '@/components/common/ConfirmSheet'
-import { ProgressBlocks } from '@/components/common/ProgressBlocks'
 import { CurrentExercisePanel } from '@/features/workouts/components/session/CurrentExercisePanel'
 import { RestRing } from '@/features/workouts/components/session/RestRing'
 import { SessionQueue } from '@/features/workouts/components/session/SessionQueue'
@@ -177,21 +176,39 @@ function WorkoutSessionPage() {
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* Workspace */}
         <div className="flex min-w-0 flex-1 flex-col px-5 py-6 lg:px-11 lg:py-9">
-          <div className="flex items-center gap-4">
-            <ProgressBlocks
-              value={progress.doneSets}
-              total={progress.totalSets}
-              blocks={14}
-              size="lg"
-              animated
+          {/* Compact "N of M" — no ring while working; rest gets its own card. */}
+          <div className="flex items-center gap-3">
+            <div
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={progress.totalSets}
+              aria-valuenow={progress.doneSets}
               aria-label={t('a11y.setsDone', {
                 done: progress.doneSets,
                 total: progress.totalSets,
               })}
-            />
-            <div className="flex-1" />
-            <span className="num text-headline font-semibold lg:text-title">{progress.pct}%</span>
+              className="h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/10"
+            >
+              <div
+                className="h-full rounded-full bg-teal motion-safe:transition-[width] motion-safe:duration-500 motion-safe:ease-sheet"
+                style={{ width: `${progress.pct}%` }}
+              />
+            </div>
+            <span className="text-footnote font-medium tabular-nums text-muted">
+              {t('workouts.session.setsOf', {
+                done: progress.doneSets,
+                total: progress.totalSets,
+              })}
+            </span>
           </div>
+          <RestRing
+            restMs={restMs}
+            restTotalMs={restTotalMs}
+            restEndsAt={restEndsAt}
+            next={nextSetLabel(exercises, t)}
+            onSkip={skipRest}
+            className="mt-2.5"
+          />
 
           {exercises.length === 0 ? (
             <div className="mt-10">
@@ -212,18 +229,6 @@ function WorkoutSessionPage() {
                   <CurrentExercisePanel exercise={currentExercise} currentSet={currentSet} />
                 ) : null}
               </div>
-
-              <RestRing
-                restMs={restMs}
-                restTotalMs={restTotalMs}
-                restEndsAt={restEndsAt}
-                running={running}
-                elapsedMs={elapsedMs}
-                doneSets={progress.doneSets}
-                totalSets={progress.totalSets}
-                next={nextSetLabel(exercises, t)}
-                className="mt-7 flex-none lg:mt-9 lg:min-h-0 lg:flex-1"
-              />
 
               {/* Action bar: persistent rest + complete */}
               <div className="mt-7 flex gap-3">

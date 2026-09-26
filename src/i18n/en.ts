@@ -710,9 +710,9 @@ export const en = {
       finishFailed: 'Could not finish the workout',
       completeSet: 'Complete set {number}',
       resting: 'rest',
-      inProgress: 'in the workout',
-      paused: 'paused',
-      next: 'Next: {what}',
+      restThen: 'Rest · next {what}',
+      skipRest: 'Skip',
+      setsOf: '{done} of {total}',
       railHint: 'Tick each set as you finish it — volume is reps × weight across completed sets.',
     },
     editor: {

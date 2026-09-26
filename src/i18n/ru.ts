@@ -771,9 +771,9 @@ export const ru: Translations = {
       finishFailed: 'Не удалось завершить тренировку',
       completeSet: 'Завершить подход {number}',
       resting: 'отдых',
-      inProgress: 'идёт тренировка',
-      paused: 'пауза',
-      next: 'Дальше: {what}',
+      restThen: 'Отдых · дальше {what}',
+      skipRest: 'Пропустить',
+      setsOf: '{done} из {total}',
       railHint:
         'Отмечайте каждый подход по мере выполнения — объём это повторения × вес по завершённым подходам.',
     },
