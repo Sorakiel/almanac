@@ -42,6 +42,12 @@ async function loggedCount(habitId: string): Promise<number> {
   return data?.[0]?.count ?? 0
 }
 
+async function loggedNote(habitId: string): Promise<string | null> {
+  const db = await e2eClient()
+  const { data } = await db.from('habit_logs').select('note').eq('habit_id', habitId)
+  return data?.[0]?.note ?? null
+}
+
 test('a counted habit fills one tap at a time and steps back on its page', async ({ page }) => {
   const errors = watchConsole(page)
   const id = await insertCountedHabit()
@@ -67,5 +73,11 @@ test('a counted habit fills one tap at a time and steps back on its page', async
   await page.getByRole('button', { name: /^decrease$/i }).click()
   await expect(page.getByText('2/3')).toBeVisible()
   await expect.poll(() => loggedCount(id), { timeout: 15_000 }).toBe(2)
+
+  // A marked day takes a note, saved when the field is left.
+  const note = page.getByLabel('Note for today')
+  await note.fill('In the rain')
+  await note.blur()
+  await expect.poll(() => loggedNote(id), { timeout: 15_000 }).toBe('In the rain')
   expect(errors).toEqual([])
 })
