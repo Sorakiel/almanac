@@ -130,6 +130,8 @@ export default {
       },
       transitionProperty: {
         rows: 'grid-template-rows',
+        // Visibility flips at the end of the slide out, so the closed panel is truly hidden.
+        inspector: 'transform, visibility',
       },
       zIndex: {
         // Above sheets and toasts: a celebration is brief and never blocks input.

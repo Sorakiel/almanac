@@ -39,8 +39,8 @@ export function Inspector({ open, onClose, label, children }: InspectorProps) {
       inert={!open}
       className={cn(
         'app-scroll fixed bottom-2 right-2 top-2 z-20 hidden w-inspector overflow-y-auto rounded-inspector bg-surface px-4.5 pb-6 pt-4 shadow-inspector lg:block',
-        'transition-transform duration-inspector ease-sheet motion-reduce:transition-none',
-        open ? 'translate-x-0' : 'translate-x-inspector-hidden',
+        'transition-inspector duration-inspector ease-sheet motion-reduce:transition-none',
+        open ? 'visible translate-x-0' : 'invisible translate-x-inspector-hidden',
       )}
     >
       <div className="mb-1.5 flex items-center justify-between">
