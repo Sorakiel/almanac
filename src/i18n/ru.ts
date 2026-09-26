@@ -993,6 +993,12 @@ export const ru: Translations = {
   },
   habits: {
     title: 'Привычки',
+    reminder: {
+      label: 'Напоминание',
+      off: 'Нет',
+      body: 'Пора отметить',
+      clear: 'Без напоминания',
+    },
     goal: {
       label: 'Сколько за день',
       once: 'Один раз',

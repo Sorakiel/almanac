@@ -3,6 +3,7 @@ import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sheet } from '@/components/ui/sheet'
@@ -21,6 +22,9 @@ import {
   type HabitIcon,
 } from '@/features/habits/lib/habitVisuals'
 import { GOAL_MAX, GOAL_MIN, UNIT_MAX, normalizeUnit } from '@/features/habits/lib/goal'
+import { formatReminder, parseReminder } from '@/features/habits/lib/reminders'
+import { ensureReminderDelivery } from '@/features/habits/lib/reminderDelivery'
+import { useSession } from '@/hooks/useSession'
 import type { Habit, HabitFrequency, HabitTimeOfDay } from '@/features/habits/types'
 import { useUiStore } from '@/stores/ui'
 import { toastWithUndo } from '@/lib/undoToast'
@@ -41,6 +45,7 @@ const schema = z.object({
   time_of_day: z.enum(['anytime', 'morning', 'afternoon', 'evening']),
   daily_goal: z.number().int().min(GOAL_MIN).max(GOAL_MAX),
   unit: z.string().max(UNIT_MAX).nullable(),
+  reminder_at: z.number().int().min(0).max(1439).nullable(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -55,6 +60,7 @@ const DEFAULTS: FormValues = {
   time_of_day: 'anytime',
   daily_goal: 1,
   unit: null,
+  reminder_at: null,
 }
 
 // The "Repeats" control presents four presets; Custom expands into an
@@ -102,6 +108,7 @@ export function HabitFormSheet() {
   const closeHabitForm = useUiStore((s) => s.closeHabitForm)
   const { habits } = useHabits()
   const { update, archive, restore } = useHabitMutations()
+  const { user } = useSession()
 
   // New habits are made in the Create sheet; this one only edits.
   const editing = habitForm ? (habits.find((h) => h.id === habitForm) ?? null) : null
@@ -138,6 +145,7 @@ export function HabitFormSheet() {
       time_of_day: editing.time_of_day ?? 'anytime',
       daily_goal: editing.daily_goal,
       unit: editing.unit,
+      reminder_at: editing.reminder_at,
     })
   }, [editing, reset])
 
@@ -172,9 +180,15 @@ export function HabitFormSheet() {
       time_of_day: v.time_of_day,
       daily_goal: v.daily_goal,
       unit: v.daily_goal > 1 ? normalizeUnit(v.unit) : null,
+      reminder_at: v.reminder_at,
     }
     // No "saved" toast: the change is on screen the moment the sheet closes.
     if (editing) update.mutate({ id: editing.id, input }, { onError: onSaveError })
+    // A new or moved reminder needs this device able to show it: permission,
+    // and on the web a push subscription. Not awaited — the sheet closes now.
+    if (v.reminder_at !== null && v.reminder_at !== editing?.reminder_at && user) {
+      void ensureReminderDelivery(user.id, t)
+    }
     closeHabitForm()
   })
 
@@ -346,6 +360,31 @@ export function HabitFormSheet() {
             }}
             labelClassName="label-mono mb-3"
           />
+        </div>
+
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface p-4">
+          <label htmlFor="habit-reminder" className="label-mono normal-case">
+            {t('habits.reminder.label')}
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              id="habit-reminder"
+              type="time"
+              value={values.reminder_at === null ? '' : formatReminder(values.reminder_at)}
+              onChange={(event) => setValue('reminder_at', parseReminder(event.target.value))}
+              className="num h-11 rounded-control bg-sheet-fill px-3 text-body text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            />
+            {values.reminder_at !== null ? (
+              <button
+                type="button"
+                onClick={() => setValue('reminder_at', null)}
+                aria-label={t('habits.reminder.clear')}
+                className="grid h-11 w-11 place-items-center rounded-full text-muted hover:text-foreground"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+            ) : null}
+          </div>
         </div>
 
         {editing ? <HabitChecklistEditor habit={editing} /> : null}

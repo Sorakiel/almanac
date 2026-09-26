@@ -10,6 +10,7 @@ import { weekdayLabels } from '@/lib/dateLocale'
 import { requestNotifyPermission } from '@/lib/platform/notify'
 import { disablePush, enablePush, pushSupported } from '@/lib/platform/push'
 import { useSession } from '@/hooks/useSession'
+import { useHabits } from '@/features/habits/hooks/useHabits'
 import { useT } from '@/hooks/useT'
 import { toUserError } from '@/lib/userError'
 
@@ -47,6 +48,8 @@ export function DigestSheet({
   const { t, locale } = useT()
   const { update, isPending } = useUpdateProfile()
   const { user } = useSession()
+  const { habits } = useHabits()
+  const habitReminders = habits.some((h) => h.reminder_at !== null)
   const [on, setOn] = useState(enabled)
   const [selectedDay, setSelectedDay] = useState(day)
   const [selectedHour, setSelectedHour] = useState(hour)
@@ -73,7 +76,7 @@ export function DigestSheet({
             toast.error(t('settings.digestSubscribeFailed'))
           }
         }
-      } else if (!reminderEnabled && pushSupported()) {
+      } else if (!reminderEnabled && !habitReminders && pushSupported()) {
         await disablePush().catch(() => undefined)
       }
       await update({

@@ -9,6 +9,8 @@ interface HabitDetailActionsProps {
   canFreeze: boolean
   frozen: boolean
   onToggleFreeze: () => void
+  /** "11:00", or the word for none — the row opens the edit sheet to change it. */
+  reminder: string
   onEdit: () => void
   onArchive: () => void
   onDelete: () => void
@@ -43,7 +45,7 @@ function ActionRow({
 const chevron = <ChevronRight aria-hidden="true" className="h-4 w-4 text-muted" />
 
 /**
- * Grouped actions (prototype .p-act): freeze and edit, then Archive in red —
+ * Grouped actions (prototype .p-act): skip, reminder and edit, then Archive in red —
  * reversible, so it goes at once with Undo. Deleting for good sits apart,
  * behind the red action sheet.
  */
@@ -51,6 +53,7 @@ export function HabitDetailActions({
   canFreeze,
   frozen,
   onToggleFreeze,
+  reminder,
   onEdit,
   onArchive,
   onDelete,
@@ -75,6 +78,17 @@ export function HabitDetailActions({
             canFreeze && 'border-t border-foreground/10',
           )}
         >
+          <ActionRow
+            onClick={onEdit}
+            trailing={
+              <span className="flex items-center gap-1 text-muted">
+                <span className={cn(/\d/.test(reminder) && 'num')}>{reminder}</span>
+                {chevron}
+              </span>
+            }
+          >
+            {t('habits.reminder.label')}
+          </ActionRow>
           <ActionRow onClick={onEdit} trailing={chevron}>
             {t('habits.edit')}
           </ActionRow>

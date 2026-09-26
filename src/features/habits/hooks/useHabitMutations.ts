@@ -31,6 +31,8 @@ export interface HabitFormInput {
   /** Units that close a day; omitted on a write that leaves it as it is. */
   daily_goal?: number
   unit?: string | null
+  /** Local minutes since midnight; null turns the habit's reminder off. */
+  reminder_at?: number | null
 }
 
 /** A create: the form's fields plus what only exists at creation time. */

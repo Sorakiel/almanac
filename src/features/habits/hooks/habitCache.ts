@@ -22,6 +22,7 @@ export function withInput(habit: Habit, input: HabitFormInput): Habit {
     time_of_day: input.time_of_day ?? 'anytime',
     daily_goal: input.daily_goal ?? habit.daily_goal,
     unit: input.unit === undefined ? habit.unit : input.unit,
+    reminder_at: input.reminder_at === undefined ? habit.reminder_at : input.reminder_at,
   }
 }
 
@@ -38,6 +39,8 @@ export function draftHabit(id: string, userId: string, input: HabitFormInput): H
     target_count: 1,
     daily_goal: 1,
     unit: null,
+    reminder_at: null,
+    reminder_sent_on: null,
     time_of_day: 'anytime',
     sort_order: 0,
     archived_at: null,

@@ -15,6 +15,7 @@ import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
 import { CreateSheet } from '@/app/shell/CreateSheet'
 import { useCelebrationWatchers } from '@/app/hooks/useCelebrationWatchers'
 import { useDailyReminder } from '@/app/hooks/useDailyReminder'
+import { useHabitReminders } from '@/app/hooks/useHabitReminders'
 import { useGlobalShortcuts } from '@/app/hooks/useGlobalShortcuts'
 import { useRouteMotion } from '@/app/hooks/useRouteMotion'
 import { useCompactTitle } from '@/app/hooks/useCompactTitle'
@@ -47,6 +48,7 @@ export function AppLayout() {
 
   // Drive the native/foreground daily habit reminder from the saved preference.
   useDailyReminder()
+  useHabitReminders()
 
   // Keep the Android widget / macOS tray glance in sync with today's habits.
   useNativeWidgetSync()
