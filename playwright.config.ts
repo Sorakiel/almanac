@@ -3,18 +3,29 @@ import { defineConfig, devices } from '@playwright/test'
 const CI = Boolean(process.env.CI)
 
 /**
+ * CI's two e2e jobs split the suite by time, not by count: the screenshot walk
+ * alone takes as long as every other spec together, and `--shard` (which
+ * counts tests in file order) always put it in the second half with a third
+ * of the suite on top. `E2E_PART=screens` runs just that file, `rest` the
+ * others; unset — a local run — runs everything.
+ */
+const HEAVY = ['**/screens.spec.ts']
+const PART = process.env.E2E_PART
+
+/**
  * E2E config. Boots Vite in `e2e` mode and runs the suite against it.
  *
  * The specs share one pre-seeded Supabase account (E2E_EMAIL / E2E_PASSWORD)
  * and clean up after themselves, so they must not run in parallel within a run.
- * CI gets its speed from `--shard=N/2` instead: each shard is a separate job
- * signed in as its own account, so the halves never share rows. And they
+ * CI gets its speed from two jobs instead (see E2E_PART), each signed in as
+ * its own account, so the halves never share rows. And they
  * must never point at production. `--mode e2e` makes `.env.e2e.local` win over
  * `.env.local`, so the target project is explicit rather than whatever the
  * developer happens to have configured locally.
  */
 export default defineConfig({
   testDir: './tests',
+  ...(PART === 'screens' ? { testMatch: HEAVY } : PART === 'rest' ? { testIgnore: HEAVY } : {}),
   fullyParallel: false,
   workers: 1,
   retries: CI ? 1 : 0,
