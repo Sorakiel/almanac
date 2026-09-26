@@ -176,7 +176,7 @@ function WorkoutSessionPage() {
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* Workspace */}
         <div className="flex min-w-0 flex-1 flex-col px-5 py-6 lg:px-11 lg:py-9">
-          {/* Compact "N of M": the big ring belongs to rest alone. */}
+          {/* Compact "N of M" — no ring while working; rest gets its own card. */}
           <div className="flex items-center gap-3">
             <div
               role="progressbar"
@@ -201,6 +201,14 @@ function WorkoutSessionPage() {
               })}
             </span>
           </div>
+          <RestRing
+            restMs={restMs}
+            restTotalMs={restTotalMs}
+            restEndsAt={restEndsAt}
+            next={nextSetLabel(exercises, t)}
+            onSkip={skipRest}
+            className="mt-2.5"
+          />
 
           {exercises.length === 0 ? (
             <div className="mt-10">
@@ -221,14 +229,6 @@ function WorkoutSessionPage() {
                   <CurrentExercisePanel exercise={currentExercise} currentSet={currentSet} />
                 ) : null}
               </div>
-
-              <RestRing
-                restMs={restMs}
-                restTotalMs={restTotalMs}
-                restEndsAt={restEndsAt}
-                next={nextSetLabel(exercises, t)}
-                className="mt-7 flex-none lg:mt-9 lg:min-h-0 lg:flex-1"
-              />
 
               {/* Action bar: persistent rest + complete */}
               <div className="mt-7 flex gap-3">
