@@ -74,8 +74,8 @@ simple to reason about:
   **The Almanac** — a narrator that reads your day from your own data.
 - 👥 **Friends** — a privacy-safe activity feed to stay accountable together.
 - ✨ **Alive, not static** — cascade entrances, view-transition theme wipes,
-  celebration confetti, living streak flames, and perfect-day moments (all
-  respecting reduced-motion).
+  living streak flames, and quiet toasts for milestones (all respecting
+  reduced-motion).
 - 🔐 **Private accounts** — email sign-in, each user's data isolated from everyone
   else's.
 - 🎨 **Two themes** — dark and coffee, switchable anytime; accessible and legible

@@ -153,11 +153,6 @@ export default {
           '20%': { opacity: '0.9' },
           '100%': { transform: 'translateX(240%) skewX(-12deg)', opacity: '0' },
         },
-        // Confetti piece — flies out along per-piece CSS vars, then fades.
-        'confetti-burst': {
-          '0%': { transform: 'translate(0, 0) rotate(0deg)', opacity: '1' },
-          '100%': { transform: 'translate(var(--tx), var(--ty)) rotate(var(--rot))', opacity: '0' },
-        },
         // Hard on/off blink for the terminal caret.
         'caret-blink': {
           '0%, 49%': { opacity: '1' },
@@ -215,7 +210,6 @@ export default {
         ripple: 'ripple 0.6s ease-out',
         shimmer: 'shimmer 1.6s ease-in-out infinite',
         shine: 'shine 0.9s ease-out',
-        'confetti-burst': 'confetti-burst 0.9s ease-out forwards',
         'caret-blink': 'caret-blink 1.1s step-end infinite',
         // `both` fill: the item holds at opacity 0 through its stagger delay,
         // so nothing flashes before its turn.
