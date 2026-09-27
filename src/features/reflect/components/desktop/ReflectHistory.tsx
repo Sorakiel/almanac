@@ -1,28 +1,38 @@
-import { ChevronRight } from 'lucide-react'
-import { reflectionDateShortLabel } from '@/features/reflect/lib/format'
+import { useState } from 'react'
+import { Trash2 } from 'lucide-react'
+import { reflectionDateLabel } from '@/features/reflect/lib/format'
+import { moodFor } from '@/features/reflect/lib/moods'
+import { useReflectionMutations } from '@/features/reflect/hooks/useReflectionMutations'
 import type { Reflection } from '@/features/reflect/types'
 import { useT } from '@/hooks/useT'
 import { intlLocale } from '@/lib/dateLocale'
+import { toastWithUndo } from '@/lib/undoToast'
 import { cn } from '@/lib/utils'
 
 interface ReflectHistoryProps {
   past: Reflection[]
-  /** Consecutive days with an entry, ending today or yesterday. */
-  streak: number
-  selectedId: string | null
-  onSelect: (id: string) => void
 }
 
 /**
- * Desktop "Reflect" history under the composer: one row per past entry, which
- * opens it whole in the inspector.
+ * Desktop "Reflect" history under the composer: a mood dot, the date and two
+ * lines of the entry; a tap opens it whole in place (the prototype's
+ * `.m-entry`), with delete + Undo once open.
  */
-export function ReflectHistory({ past, streak, selectedId, onSelect }: ReflectHistoryProps) {
+export function ReflectHistory({ past }: ReflectHistoryProps) {
   const { t, locale } = useT()
   const dateLocale = intlLocale(locale)
+  const { remove, restore } = useReflectionMutations()
+  const [openId, setOpenId] = useState<string | null>(null)
+
+  // One tap, no confirm: the row leaves at once and Undo puts the same row back.
+  const handleDelete = (reflection: Reflection) => {
+    remove.mutate(reflection.id)
+    toastWithUndo(t('reflect.deleted'), t('common.undo'), () => restore.mutate(reflection))
+    setOpenId(null)
+  }
 
   return (
-    <section className="mt-8" aria-label={t('reflect.pastLabel')}>
+    <section aria-label={t('reflect.pastLabel')}>
       <h2 className="mx-1.5 mb-2 text-callout font-semibold text-muted">
         {t('reflect.pastLabel')}
       </h2>
@@ -30,33 +40,53 @@ export function ReflectHistory({ past, streak, selectedId, onSelect }: ReflectHi
       {past.length > 0 ? (
         <ul className="divide-y overflow-hidden rounded-card bg-surface">
           {past.map((reflection) => {
-            const selected = reflection.id === selectedId
+            const open = reflection.id === openId
+            const mood = moodFor(reflection.mood)
+            const date = reflectionDateLabel(reflection.date, dateLocale)
             return (
-              <li key={reflection.id}>
+              <li key={reflection.id} className="relative">
                 <button
                   type="button"
-                  onClick={() => onSelect(reflection.id)}
-                  aria-expanded={selected}
-                  className={cn(
-                    'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent',
-                    selected && 'bg-accent/10 hover:bg-accent/10',
-                  )}
+                  onClick={() => setOpenId(open ? null : reflection.id)}
+                  aria-expanded={open}
+                  className="block w-full px-4 py-3 text-left transition-colors hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
                 >
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-footnote text-muted">
-                      {reflectionDateShortLabel(reflection.date, dateLocale)}
+                  <span className="flex items-center gap-2 text-footnote font-medium text-muted">
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        'h-2.5 w-2.5 flex-none rounded-full',
+                        mood ? mood.dot : 'bg-foreground/15',
+                      )}
+                    />
+                    <span className="first-letter:uppercase">
+                      {mood ? `${date} · ${t(`dashboard.modules.moods.${mood.key}`)}` : date}
                     </span>
-                    {reflection.body ? (
-                      <span className="mt-0.5 line-clamp-2 block text-callout">
-                        {reflection.body}
-                      </span>
-                    ) : null}
                   </span>
-                  <ChevronRight
-                    className="h-4 w-4 flex-none text-muted-strong"
-                    aria-hidden="true"
-                  />
+                  {reflection.body ? (
+                    <span
+                      className={cn(
+                        'mt-1 block text-callout',
+                        open ? 'whitespace-pre-wrap' : 'line-clamp-2',
+                      )}
+                    >
+                      {reflection.body}
+                    </span>
+                  ) : null}
                 </button>
+                {open ? (
+                  <div className="flex justify-end px-2 pb-2">
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(reflection)}
+                      aria-label={t('reflect.deleteAria', { date })}
+                      className="flex h-11 items-center gap-1.5 rounded-control px-3 text-footnote text-muted transition-colors hover:text-danger"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      {t('reflect.delete')}
+                    </button>
+                  </div>
+                ) : null}
               </li>
             )
           })}
@@ -64,12 +94,6 @@ export function ReflectHistory({ past, streak, selectedId, onSelect }: ReflectHi
       ) : (
         <p className="mx-1.5 text-footnote text-muted">{t('reflect.pastEmptyShort')}</p>
       )}
-
-      {streak > 0 ? (
-        <p className="mt-3 text-center text-footnote text-muted">
-          {t('reflect.streakLine', { count: streak })}
-        </p>
-      ) : null}
     </section>
   )
 }

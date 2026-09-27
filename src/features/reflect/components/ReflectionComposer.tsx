@@ -15,13 +15,15 @@ interface ReflectionComposerProps {
   dateKey: string
   /** Today's existing reflection, or null to compose a fresh one. */
   today: Reflection | null
+  /** Leave the quote out — desktop shows it in the side column. */
+  hideQuote?: boolean
 }
 
 /** Rating axes; labels come from `reflect.ratings.*` at render. */
 const RATINGS = [{ key: 'mood' }, { key: 'energy' }, { key: 'day_rating' }] as const
 
 /** Today's entry: quote of the day, mood/energy/day ratings, and a reflection. */
-export function ReflectionComposer({ dateKey, today }: ReflectionComposerProps) {
+export function ReflectionComposer({ dateKey, today, hideQuote = false }: ReflectionComposerProps) {
   const { t } = useT()
   const { quote } = useDailyQuote()
   const { save } = useReflectionMutations()
@@ -60,7 +62,7 @@ export function ReflectionComposer({ dateKey, today }: ReflectionComposerProps) 
 
   return (
     <Card className="flex flex-col gap-4 p-4">
-      {quote ? (
+      {quote && !hideQuote ? (
         <div className="flex gap-2.5 border-b pb-3">
           <span aria-hidden="true" className="text-sm leading-relaxed text-accent">
             ◇
