@@ -462,7 +462,7 @@ for (const v of VARIANTS) {
       name: v.locale === 'ru' ? 'Читаю сейчас' : 'Reading now',
     })
     await expect(hero.getByRole('link', { name: TODAY_BOOK })).toBeVisible({ timeout: 20_000 })
-    await expect(page.getByText(READING_QUEUE[0].title)).toBeVisible()
+    await expect(page.getByRole('link', { name: new RegExp(READING_QUEUE[0].title) })).toBeVisible()
     await shoot(page, `${v.name}-reading`)
     await hero.getByRole('link', { name: TODAY_BOOK }).click()
     await expect(page.getByRole('heading', { name: TODAY_BOOK })).toBeVisible({ timeout: 20_000 })

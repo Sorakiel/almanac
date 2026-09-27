@@ -166,7 +166,7 @@ function BookBody({ book, onGone }: { book: Book; onGone: () => void }) {
         ) : null}
       </div>
 
-      <NoteSheet key={noteKey} book={book} open={noteOpen} onOpenChange={setNoteOpen} />
+      <NoteSheet key={`note-${noteKey}`} book={book} open={noteOpen} onOpenChange={setNoteOpen} />
       <ConfirmSheet
         open={finishOpen}
         onOpenChange={setFinishOpen}
@@ -178,7 +178,7 @@ function BookBody({ book, onGone }: { book: Book; onGone: () => void }) {
       {/* Remounted on each opening (the key), so the form starts from the book
           as it is now, while staying mounted through the close for its exit. */}
       <BookFormSheet
-        key={editKey}
+        key={`edit-${editKey}`}
         open={editOpen}
         onOpenChange={setEditOpen}
         book={book}
