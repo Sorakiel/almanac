@@ -1,0 +1,15 @@
+/* The prototype's `.m-hero::before`: a teal glow from the top-right corner. */
+.w-hero {
+  position: relative;
+  overflow: hidden;
+}
+.w-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(90% 70% at 100% 0%, rgb(var(--color-teal) / 0.22), transparent 70%);
+  pointer-events: none;
+}
+.w-hero > * {
+  position: relative;
+}

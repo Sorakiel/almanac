@@ -19,8 +19,8 @@ export interface WeekDay {
 }
 
 export interface WeekView {
-  /** Header label, e.g. "JUL · WEEK 28". */
-  label: string
+  /** ISO week number of the strip, e.g. 28. */
+  weekNumber: number
   days: WeekDay[]
 }
 
@@ -36,7 +36,6 @@ export function buildWeek(
   workouts: WorkoutView[],
   timezone: string,
   t: TFunction,
-  locale: string,
 ): WeekView {
   // weekdayOfKey is 0=Sun … 6=Sat; step back to this week's Monday.
   const mondayOffset = (weekdayOfKey(todayKey) + 6) % 7
@@ -55,11 +54,7 @@ export function buildWeek(
     }
   })
 
-  const monthDate = parseISO(`${monday}T00:00:00`)
-  const month = new Intl.DateTimeFormat(locale, { month: 'short' }).format(monthDate).toUpperCase()
-  const label = t('workouts.weekLabel', { month, week: getISOWeek(monthDate) })
-
-  return { label, days }
+  return { weekNumber: getISOWeek(parseISO(`${monday}T00:00:00`)), days }
 }
 
 /** Where a day sits relative to today — gates the "start session" action. */
@@ -81,4 +76,19 @@ export function workoutForDay(
   const workout = due.find((w) => !isDoneOn(w, dateKey, timezone)) ?? due[0]
   if (!workout) return null
   return { workout, done: isDoneOn(workout, dateKey, timezone) }
+}
+
+/** How far ahead the next occurrence is looked for; further than that reads as "not planned". */
+const NEXT_HORIZON_DAYS = 14
+
+/**
+ * Days until the workout is next due and not yet done, counting today as 0;
+ * null when nothing falls within the horizon.
+ */
+export function daysUntilNext(w: WorkoutView, todayKey: string, timezone: string): number | null {
+  for (let i = 0; i <= NEXT_HORIZON_DAYS; i++) {
+    const key = addDaysToKey(todayKey, i)
+    if (isDueOn(w, key) && !isDoneOn(w, key, timezone)) return i
+  }
+  return null
 }

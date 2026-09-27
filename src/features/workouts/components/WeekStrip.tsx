@@ -9,11 +9,15 @@ interface WeekStripProps {
   onSelect: (dateKey: string) => void
 }
 
-/** Monday-anchored 7-day strip; each day is selectable, today/selected accented. */
+/**
+ * Monday-anchored 7-day strip (the prototype's `.m-week`): weekday and date in
+ * one tile, a teal dot for a planned day (solid once done), today outlined in
+ * teal. Picking another day shows its plan below.
+ */
 export function WeekStrip({ days, selectedKey, onSelect }: WeekStripProps) {
   const { t } = useT()
   return (
-    <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
+    <div className="grid grid-cols-7 gap-1.5">
       {days.map((day) => {
         const selected = day.dateKey === selectedKey
         const vars = { weekday: day.weekday, day: day.dayOfMonth }
@@ -22,42 +26,34 @@ export function WeekStrip({ days, selectedKey, onSelect }: WeekStripProps) {
             ? t('workouts.dayRest', vars)
             : t('workouts.daySessions', { ...vars, count: day.dueCount })
         return (
-          <div key={day.dateKey} className="min-w-0 text-center">
-            <div
+          <button
+            key={day.dateKey}
+            type="button"
+            onClick={() => onSelect(day.dateKey)}
+            aria-pressed={selected}
+            aria-current={day.isToday ? 'date' : undefined}
+            aria-label={label}
+            className={cn(
+              'grid min-w-0 justify-items-center gap-1.5 rounded-2xl bg-surface pb-2.5 pt-2 text-footnote font-medium text-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+              day.isToday
+                ? 'bg-teal/15 ring-2 ring-inset ring-teal'
+                : selected && 'ring-1 ring-inset ring-foreground/30',
+            )}
+          >
+            {day.weekday}
+            <b className="text-body font-semibold text-foreground">{day.dayOfMonth}</b>
+            <i
+              aria-hidden="true"
               className={cn(
-                'font-mono text-[10px] uppercase tracking-label',
-                selected ? 'text-accent' : 'text-muted-strong',
+                'h-1.5 w-1.5 rounded-full',
+                day.dueCount === 0
+                  ? 'bg-transparent'
+                  : day.doneCount >= day.dueCount
+                    ? 'bg-teal'
+                    : 'bg-teal/45',
               )}
-            >
-              {day.weekday}
-            </div>
-            <button
-              type="button"
-              onClick={() => onSelect(day.dateKey)}
-              aria-pressed={selected}
-              aria-current={day.isToday ? 'date' : undefined}
-              aria-label={label}
-              className={cn(
-                'mt-2 flex h-[62px] w-full flex-col items-center justify-center gap-2 rounded-[15px] border transition-colors sm:h-[70px]',
-                selected
-                  ? 'border-accent/40 bg-gradient-to-br from-accent/15 to-panel'
-                  : 'border-transparent bg-panel hover:border-border/25',
-              )}
-            >
-              <span
-                className={cn('text-base font-semibold tabular-nums', selected && 'text-accent')}
-              >
-                {day.dayOfMonth}
-              </span>
-              <span
-                aria-hidden="true"
-                className={cn(
-                  'h-1.5 w-1.5 rounded-full',
-                  day.dueCount > 0 ? 'bg-accent' : 'bg-muted-strong/40',
-                )}
-              />
-            </button>
-          </div>
+            />
+          </button>
         )
       })}
     </div>
