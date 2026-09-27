@@ -481,6 +481,14 @@
   font-weight: 500;
   color: var(--today-ink2);
 }
+.today-mod-link {
+  border-radius: 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+.today-mod-link:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 2px;
+}
 .today-mod-v {
   overflow-wrap: anywhere;
   font-size: 17px;

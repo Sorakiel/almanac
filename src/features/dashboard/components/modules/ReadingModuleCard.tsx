@@ -39,6 +39,7 @@ export function ReadingModuleCard({ book }: ReadingModuleCardProps) {
       icon={BookOpen}
       hue="amber"
       kicker={t('dashboard.modules.reading')}
+      to="/reading"
       value={book.title}
       action={
         goalMet ? (

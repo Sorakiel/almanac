@@ -938,7 +938,7 @@ export const en = {
       focusRunning: 'Focus on · {label}',
       startFocus: 'Start',
       stop: 'Stop',
-      evening: 'This evening',
+      evening: 'This evening · reflect',
       howWasDay: 'How was the day?',
       dayLogged: 'Day logged',
       moods: { rough: 'Rough', meh: 'Meh', okay: 'Okay', good: 'Good', great: 'Great' },

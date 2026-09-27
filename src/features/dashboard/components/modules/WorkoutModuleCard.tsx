@@ -22,6 +22,7 @@ export function WorkoutModuleCard({ item }: WorkoutModuleCardProps) {
       icon={Dumbbell}
       hue="teal"
       kicker={t('dashboard.modules.trainingToday')}
+      to="/train"
       value={workout.name}
       action={
         doneToday ? (
