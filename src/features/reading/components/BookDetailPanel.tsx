@@ -26,10 +26,7 @@ interface BookDetailPanelProps {
   onGone: () => void
 }
 
-/**
- * One book with everything it can do, wired to its data: the phone's book
- * page and the desktop inspector are this same panel.
- */
+/** One book with everything it can do, wired to its data. */
 export function BookDetailPanel({ id, onGone }: BookDetailPanelProps) {
   const { t, locale } = useT()
   const navigate = useNavigate()
