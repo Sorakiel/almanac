@@ -95,26 +95,27 @@ function WorkoutSessionPage() {
         {t('workouts.title')}
       </button>
 
-      {/* Phone header: name, the running clock, the sets list toggle. */}
-      <div className="mx-0.5 mb-2.5 flex items-center justify-between gap-2.5 lg:hidden">
+      {/* One header, one <h1> (the shell's compact title watches it): on the
+          phone the name, the clock and the sets toggle in a row; on the
+          desktop "Session in progress" over the large title. */}
+      <header className="mx-0.5 mb-2.5 flex items-center justify-between gap-2.5 lg:mb-4 lg:mt-2 lg:block">
         <div className="min-w-0">
-          <h1 className="truncate text-headline font-bold tracking-title">{run.workout.name}</h1>
-          <p className="num text-footnote font-medium text-muted">{elapsed}</p>
+          <p className="hidden text-callout font-medium text-muted lg:block">
+            {t('workouts.session.inProgress')}
+          </p>
+          <h1 className="truncate text-headline font-bold tracking-title lg:text-large-title">
+            {run.workout.name}
+          </h1>
+          <p className="num text-footnote font-medium text-muted lg:hidden">{elapsed}</p>
         </div>
         <button
           type="button"
           onClick={run.toggleSets}
           aria-expanded={run.showSets}
-          className="flex-none rounded-full bg-accent/15 px-3.5 py-2 text-callout font-semibold text-accent transition-transform active:scale-95"
+          className="flex-none rounded-full bg-accent/15 px-3.5 py-2 text-callout font-semibold text-accent transition-transform active:scale-95 lg:hidden"
         >
           {run.showSets ? t('workouts.session.hideSets') : t('workouts.session.allSets')}
         </button>
-      </div>
-
-      {/* Desktop header, as the other module pages. */}
-      <header className="mx-0.5 mb-4 mt-2 hidden lg:block">
-        <p className="text-callout font-medium text-muted">{t('workouts.session.inProgress')}</p>
-        <h1 className="text-large-title font-bold tracking-title">{run.workout.name}</h1>
       </header>
 
       <div className="flex flex-col lg:grid lg:grid-cols-module lg:items-start lg:gap-6">
@@ -126,7 +127,7 @@ function WorkoutSessionPage() {
                 style={{ width: `${total ? (done / total) * 100 : 0}%` }}
               />
             </div>
-            <span className="num">
+            <span>
               {t('workouts.session.setsOf', { done, total })}
               <span className="hidden lg:inline"> · {elapsed}</span>
             </span>

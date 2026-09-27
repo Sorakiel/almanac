@@ -65,6 +65,9 @@ export function useSessionRunner(id: string) {
   const [overrides, setOverrides] = useState<Overrides>({})
   const [justDone, setJustDone] = useState(false)
   const [showSets, setShowSets] = useState(false)
+  // What the rest names as next — fixed at the tap: once the set lands the
+  // cursor has already moved on, and "next" would skip a set.
+  const [restNext, setRestNext] = useState<string | null>(null)
   const doneOrder = useRef<string[]>([])
 
   // A deep link or reload starts the clock once; the store keeps its place.
@@ -113,6 +116,7 @@ export function useSessionRunner(id: string) {
         { onError: (e) => toast.error(toUserError(e, t, 'workouts.session.logFailed')) },
       )
       if (preferred === cursor.exercise && next?.kind !== 'set') setPreferred(null)
+      setRestNext(nextLabel(next, t, loc))
       if (next) clock.startRest(set.rest_seconds ?? DEFAULT_REST_SECONDS)
     }, DONE_BEAT_MS)
   }
@@ -169,7 +173,7 @@ export function useSessionRunner(id: string) {
     values,
     last,
     record: values ? isRecord(values, last) : false,
-    next: cursor ? nextLabel(nextUp(exercises, cursor, overrides), t, loc) : null,
+    next: restNext,
     finished: exercises.length > 0 && cursor === null,
     totals,
     sessionRecord: sessionRecord(exercises, overrides, lastOf),

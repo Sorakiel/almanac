@@ -510,6 +510,10 @@ for (const v of VARIANTS) {
     await setDone.click()
     const ready = page.getByRole('button', { name: v.locale === 'ru' ? 'Я готов' : 'I’m ready' })
     await expect(ready).toBeVisible()
+    // "Next" names the set that is actually next — the second, not the third.
+    await expect(
+      page.getByText(v.locale === 'ru' ? 'Присед · подход 2' : 'Присед · set 2'),
+    ).toBeVisible()
     await page.waitForTimeout(1200) // the water settles to its level
     await shoot(page, `${v.name}-session-rest`, false)
     const allSets = page.getByRole('button', {
