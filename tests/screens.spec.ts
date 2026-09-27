@@ -328,6 +328,15 @@ for (const v of VARIANTS) {
     else await expect(year).toBeHidden()
     await shoot(page, `${v.name}-insights-open`)
 
+    // The focus card's heatmap fits the card: half a year, no horizontal scroll.
+    const focus = page.getByRole('region', { name: v.locale === 'ru' ? 'Фокус' : 'Flow' })
+    const focusDisclose = focus.getByRole('button', { expanded: false })
+    if (await focusDisclose.isVisible()) await focusDisclose.click()
+    await focus.scrollIntoViewIfNeeded()
+    await expect(focus.getByText(v.locale === 'ru' ? 'меньше' : 'less')).toBeVisible()
+    await page.waitForTimeout(700)
+    await focus.screenshot({ path: `${OUT}/${v.name}-progress-focus.png` })
+
     // The custom-length stepper only exists once "custom" is picked.
     await page.goto('/flow')
     await page.getByRole('radio', { name: v.locale === 'ru' ? 'Своя' : 'Custom' }).click()
