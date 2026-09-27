@@ -314,14 +314,18 @@ for (const v of VARIANTS) {
       if (path === '/') await shoot(page, `${v.name}-${slug}-fold`, false)
     }
 
-    // Progress with the habits card open — the year strip lives inside it.
+    // Progress with the habits card open — on the phone the year strip lives
+    // inside it; the desktop card has none (desktop-prototype.html).
     await page.goto('/progress')
     const habits = page.getByRole('region', { name: v.locale === 'ru' ? 'Привычки' : 'Habits' })
     await expect(habits).toBeVisible()
     // The phone opens details on tap; the desktop shows them without a button.
     const disclose = habits.getByRole('button', { expanded: false })
-    if (await disclose.isVisible()) await disclose.click()
-    await expect(habits.getByRole('group', { name: /2\d{3}/ })).toBeVisible()
+    const phone = await disclose.isVisible()
+    if (phone) await disclose.click()
+    const year = habits.getByRole('group', { name: /2\d{3}/ })
+    if (phone) await expect(year).toBeVisible()
+    else await expect(year).toBeHidden()
     await shoot(page, `${v.name}-insights-open`)
 
     // The custom-length stepper only exists once "custom" is picked.
