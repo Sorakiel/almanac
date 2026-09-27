@@ -538,6 +538,34 @@ for (const v of VARIANTS) {
 }
 
 /**
+ * The liveliness layer on a real screen, for the side-by-side with the
+ * prototype: /reading recorded for a full aurora cycle (16 s), then the
+ * "+15" tap with its sparks. Saved next to the screenshots as .webm.
+ */
+for (const v of [VARIANTS[0], VARIANTS[4]]) {
+  test(`screens · ${v.name}-reading-motion`, async ({ browser }) => {
+    test.setTimeout(90_000)
+    const size = { width: v.width, height: v.height }
+    const context = await browser.newContext({
+      viewport: size,
+      recordVideo: { dir: `test-results/video-${v.name}`, size },
+    })
+    const page = await context.newPage()
+    await signIn(page)
+    await applyPrefs(page, v.theme, v.locale)
+    await page.goto('/reading')
+    const hero = page.getByRole('region', { name: 'Читаю сейчас' })
+    await expect(hero.getByRole('link', { name: TODAY_BOOK })).toBeVisible({ timeout: 20_000 })
+    await page.waitForTimeout(17_000)
+    await hero.getByRole('button', { name: '+15 стр' }).click()
+    await page.waitForTimeout(2_500)
+    const video = page.video()
+    await context.close()
+    await video?.saveAs(`${OUT}/${v.name}-reading-motion.webm`)
+  })
+}
+
+/**
  * Today at the prototype's own desktop size (desktop-prototype.html is drawn at
  * 1280×800), for the side-by-side check — folded, then with "Done" open.
  */
