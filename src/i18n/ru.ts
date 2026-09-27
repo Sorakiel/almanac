@@ -1072,7 +1072,7 @@ export const ru: Translations = {
       focusRunning: 'Фокус идёт · {label}',
       startFocus: 'Старт',
       stop: 'Стоп',
-      evening: 'Вечером',
+      evening: 'Вечером · рефлексия',
       howWasDay: 'Как прошёл день?',
       dayLogged: 'День записан',
       moods: {
