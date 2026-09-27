@@ -88,7 +88,7 @@ export function TodaySessionCard({ workout, doneToday, dayState, dateKey }: Toda
           : { label: t('workouts.hero.start'), onClick: startSession }
 
   return (
-    <div className="w-hero grid gap-3 rounded-3xl bg-surface p-4.5">
+    <div className="hero-glow grid gap-3 rounded-3xl bg-surface p-4.5">
       <p className="text-footnote font-medium text-muted">{kicker}</p>
       <button
         type="button"

@@ -25,7 +25,6 @@ import { useCreateIntent } from '@/hooks/useCreateIntent'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useOpenKey } from '@/hooks/useSheetKey'
 import { useT } from '@/hooks/useT'
-import '@/features/workouts/workouts.css'
 
 /** History rows shown on the page; the chart reads further back. */
 const HISTORY_ROWS = 6

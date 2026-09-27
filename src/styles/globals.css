@@ -63,6 +63,30 @@
 }
 
 @layer components {
+  /* A hero card's glow from the top-right corner (the prototypes' `.m-hero::before`),
+     tinted by the module: `--hero-tint` is an rgb triplet token, teal by default. */
+  .hero-glow {
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-glow::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      90% 70% at 100% 0%,
+      rgb(var(--hero-tint, var(--color-teal)) / 0.22),
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+  .hero-glow > * {
+    position: relative;
+  }
+  .hero-glow-accent {
+    --hero-tint: var(--color-accent);
+  }
+
   /* A toast: one glass capsule, sans, 44px tall (the redesign's .p-toast). */
   .toast-capsule {
     @apply relative mx-auto flex min-h-11 w-fit items-center gap-2.5 overflow-hidden rounded-pill py-1.5 pl-4 pr-4 text-callout font-medium text-foreground;

@@ -29,10 +29,9 @@ import {
 import type { WorkoutFormInput } from '@/features/workouts/hooks/useWorkoutMutations'
 import type { SetLog, Workout } from '@/features/workouts/types'
 import {
-  createReflection,
   deleteReflection,
   restoreReflection,
-  updateReflection,
+  upsertReflection,
 } from '@/features/reflect/api/reflections.api'
 import {
   createBook,
@@ -544,18 +543,18 @@ export function registerOfflineMutations(client: QueryClient): void {
   const REFLECTIONS = { id: 'reflections' }
   register(
     OFFLINE_MUTATION_KEYS.saveReflection,
-    ({ id, date, body, quoteId, mood, energy, dayRating, userId }) =>
-      id
-        ? updateReflection(id, { body, mood, energy, day_rating: dayRating })
-        : createReflection({
-            user_id: userId,
-            date,
-            body,
-            quote_id: quoteId,
-            mood,
-            energy,
-            day_rating: dayRating,
-          }),
+    // Keyed by the day, not the id: the create and every autosave after it
+    // (and Today's mood chips) all write the one row the day has.
+    ({ date, body, quoteId, mood, energy, dayRating, userId }) =>
+      upsertReflection({
+        user_id: userId,
+        date,
+        body,
+        quote_id: quoteId,
+        mood,
+        energy,
+        day_rating: dayRating,
+      }),
     reflectionList,
     REFLECTIONS,
   )

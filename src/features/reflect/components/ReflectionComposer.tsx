@@ -1,14 +1,12 @@
-import { useState } from 'react'
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
-import { StarRating } from '@/components/common/StarRating'
+import { Check } from 'lucide-react'
 import { useDailyQuote } from '@/features/dashboard/hooks/useDailyQuote'
-import { useReflectionMutations } from '@/features/reflect/hooks/useReflectionMutations'
+import { useAutosaveReflection } from '@/features/reflect/hooks/useAutosaveReflection'
+import { MOODS } from '@/features/reflect/lib/moods'
 import type { Reflection } from '@/features/reflect/types'
 import { useT } from '@/hooks/useT'
-import { toUserError } from '@/lib/userError'
+import { dateFromKey } from '@/lib/date'
+import { intlLocale } from '@/lib/dateLocale'
+import { cn } from '@/lib/utils'
 
 interface ReflectionComposerProps {
   /** The user's local date key — the day this entry belongs to. */
@@ -19,93 +17,108 @@ interface ReflectionComposerProps {
   hideQuote?: boolean
 }
 
-/** Rating axes; labels come from `reflect.ratings.*` at render. */
-const RATINGS = [{ key: 'mood' }, { key: 'energy' }, { key: 'day_rating' }] as const
+const ENERGY_LEVELS = [1, 2, 3, 4, 5] as const
 
-/** Today's entry: quote of the day, mood/energy/day ratings, and a reflection. */
+/**
+ * Today's entry, the prototype's reflect editor: "How was the day?", five
+ * mood buttons, energy as five dots, the text — and no Save button: it
+ * writes itself (see useAutosaveReflection).
+ */
 export function ReflectionComposer({ dateKey, today, hideQuote = false }: ReflectionComposerProps) {
-  const { t } = useT()
+  const { t, locale } = useT()
   const { quote } = useDailyQuote()
-  const { save } = useReflectionMutations()
-  const [body, setBody] = useState(today?.body ?? '')
-  const [mood, setMood] = useState<number | null>(today?.mood ?? null)
-  const [energy, setEnergy] = useState<number | null>(today?.energy ?? null)
-  const [day, setDay] = useState<number | null>(today?.day_rating ?? null)
-
-  const setters = { mood: setMood, energy: setEnergy, day_rating: setDay } as const
-  const values = { mood, energy, day_rating: day }
-
-  const trimmed = body.trim()
-  const changed =
-    trimmed !== (today?.body ?? '') ||
-    mood !== (today?.mood ?? null) ||
-    energy !== (today?.energy ?? null) ||
-    day !== (today?.day_rating ?? null)
-  const hasContent = trimmed.length > 0 || mood !== null || energy !== null || day !== null
-
-  const handleSave = () => {
-    save.mutate(
-      {
-        id: today?.id ?? null,
-        date: dateKey,
-        body: trimmed,
-        quoteId: today?.quote_id ?? quote?.id ?? null,
-        mood,
-        energy,
-        dayRating: day,
-      },
-      {
-        onError: (error) => toast.error(toUserError(error, t, 'reflect.saveFailed')),
-      },
-    )
-  }
+  const { draft, update, state } = useAutosaveReflection(dateKey, today, quote?.id ?? null)
+  const dateLabel = new Intl.DateTimeFormat(intlLocale(locale), {
+    timeZone: 'UTC',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(dateFromKey(dateKey))
 
   return (
-    <Card className="flex flex-col gap-4 p-4">
-      {quote && !hideQuote ? (
-        <div className="flex gap-2.5 border-b pb-3">
-          <span aria-hidden="true" className="text-sm leading-relaxed text-accent">
-            ◇
-          </span>
-          <div>
-            <blockquote className="text-[14px] italic leading-relaxed">“{quote.text}”</blockquote>
-            <p className="label-mono mt-1 text-muted-strong">
-              — {quote.author ?? t('reflect.unknownAuthor')}
-            </p>
-          </div>
-        </div>
-      ) : null}
+    <section className="hero-glow hero-glow-accent grid gap-3 rounded-3xl bg-surface p-4.5">
+      <p className="text-footnote font-medium text-muted first-letter:uppercase">{dateLabel}</p>
+      <h2 className="-mt-1 text-headline font-semibold tracking-title">{t('reflect.prompt')}</h2>
 
-      <div className="flex flex-col gap-2.5">
-        {RATINGS.map(({ key }) => (
-          <div key={key} className="flex items-center justify-between gap-3">
-            <span className="label-mono text-muted-strong">{t(`reflect.ratings.${key}`)}</span>
-            <StarRating
-              value={values[key]}
-              onChange={setters[key]}
-              size="md"
-              aria-label={t('reflect.ratingAria', { name: t(`reflect.ratings.${key}`) })}
-            />
-          </div>
-        ))}
+      <div role="group" aria-label={t('reflect.ratings.mood')} className="grid grid-cols-5 gap-1.5">
+        {MOODS.map((m) => {
+          const on = draft.mood === m.value
+          return (
+            <button
+              key={m.value}
+              type="button"
+              aria-pressed={on}
+              onClick={() => update({ mood: on ? null : m.value })}
+              className={cn(
+                'grid min-w-0 justify-items-center gap-1.5 rounded-2xl px-0.5 pb-2 pt-2.5 text-caption font-medium transition-transform',
+                on ? '-translate-y-0.5 bg-foreground text-bg' : 'bg-sheet-fill text-foreground',
+              )}
+            >
+              <i aria-hidden="true" className={cn('h-6.5 w-6.5 rounded-full', m.dot)} />
+              <span className="max-w-full truncate">{t(`dashboard.modules.moods.${m.key}`)}</span>
+            </button>
+          )
+        })}
       </div>
 
-      <Textarea
-        value={body}
-        onChange={(event) => setBody(event.target.value)}
+      <div className="flex items-center gap-2.5 text-callout font-medium text-muted">
+        {t('reflect.ratings.energy')}
+        <div role="group" aria-label={t('reflect.ratings.energy')} className="flex gap-1.5">
+          {ENERGY_LEVELS.map((level) => (
+            // A 30px dot, as drawn, inside a 44px-tall hit area.
+            <button
+              key={level}
+              type="button"
+              aria-label={t('reflect.energyLevel', { value: level })}
+              aria-pressed={draft.energy !== null && level <= draft.energy}
+              onClick={() => update({ energy: draft.energy === level ? null : level })}
+              className="grid h-11 w-7.5 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'h-7.5 w-7.5 rounded-full transition-colors',
+                  draft.energy !== null && level <= draft.energy ? 'bg-amber' : 'bg-sheet-fill',
+                )}
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <textarea
+        value={draft.body}
+        onChange={(event) => update({ body: event.target.value })}
         placeholder={t('reflect.placeholder')}
         aria-label={t('reflect.today')}
-        rows={4}
+        className="min-h-30 w-full resize-none rounded-2xl bg-sheet-fill px-3.5 py-3 text-body leading-normal placeholder:text-muted-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       />
 
-      <div className="flex items-center justify-between">
-        <span className="label-mono text-muted-strong">
-          {today ? t('reflect.savedToday') : t('reflect.todayShort')}
-        </span>
-        <Button size="sm" onClick={handleSave} disabled={!hasContent || !changed || save.isPending}>
-          {today ? t('reflect.update') : t('reflect.save')}
-        </Button>
-      </div>
-    </Card>
+      <p
+        aria-live="polite"
+        className={cn(
+          'flex min-h-4.5 items-center gap-1.5 text-footnote font-medium',
+          state === 'saved' ? 'text-success' : 'text-muted-strong',
+        )}
+      >
+        {state === 'saved' ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : null}
+        {state === 'saving'
+          ? t('reflect.autosave.saving')
+          : state === 'saved'
+            ? t('reflect.autosave.saved')
+            : t('reflect.autosave.hint')}
+      </p>
+
+      {quote && !hideQuote ? (
+        <figure className="border-t pt-3">
+          <blockquote className="text-callout italic leading-relaxed text-muted">
+            «{quote.text}»
+          </blockquote>
+          <figcaption className="mt-1 text-footnote font-medium text-muted-strong">
+            {quote.author ?? t('reflect.unknownAuthor')}
+          </figcaption>
+        </figure>
+      ) : null}
+    </section>
   )
 }
