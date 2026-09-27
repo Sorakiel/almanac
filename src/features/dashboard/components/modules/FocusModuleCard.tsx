@@ -49,6 +49,7 @@ export function FocusModuleCard() {
     <ModuleCard
       icon={Timer}
       hue="accent"
+      to="/flow"
       kicker={
         running
           ? t('dashboard.modules.focusRunning', { label: label ?? t('dashboard.focusSession') })
