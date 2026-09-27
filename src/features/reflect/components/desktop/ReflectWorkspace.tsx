@@ -42,13 +42,13 @@ export function ReflectWorkspace({
       </header>
 
       <div className="grid grid-cols-module items-start gap-6">
-        <div className="grid min-w-0 content-start gap-3.5">
+        <div className="grid min-w-0 grid-cols-1 content-start gap-3.5">
           <ReflectionComposer dateKey={dateKey} today={today} hideQuote />
           <ReflectHistory past={past} />
         </div>
         <aside
           aria-label={t('reflect.moodMonth')}
-          className="sticky top-toolbar-clearance grid min-w-0 content-start gap-3.5"
+          className="sticky top-toolbar-clearance grid min-w-0 grid-cols-1 content-start gap-3.5"
         >
           <MoodMonth todayKey={dateKey} reflections={reflections} />
           <DailyQuote />

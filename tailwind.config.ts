@@ -122,7 +122,9 @@ export default {
       // Profile on wide screens: identity column + settings.
       gridTemplateColumns: {
         profile: '360px minmax(0, 1fr)',
-        // Module screens (`.dk-mgrid`): content + a sticky 360px side column.
+        // Module screens (`.dk-mgrid`): content + a sticky 360px side column. Each
+        // column's own grid needs `grid-cols-1` (minmax(0,1fr)), or its implicit
+        // auto track grows to the content and pushes past 360px.
         module: 'minmax(0, 1fr) 360px',
         // Progress bars: name · track · value (the prototype's `.p-hb`).
         'bar-row': '110px minmax(0, 1fr) 46px',
