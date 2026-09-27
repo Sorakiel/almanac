@@ -844,29 +844,16 @@
 }
 
 /* ── Liveliness layer (HANDOFF §3.1) ───────────────────────────────────────
-   Aurora: two soft radial blobs in the module tint drift under a hero card
-   (the prototype's `.m-hero::before/::after`, 16 s / 20 s alternate) or a
-   session stage (`.m-stage::before`, 14 s). Tints are RGB triplets, so a
-   screen sets `--aurora-tint` / `--aurora-tint2` to its module's colour. */
-.aurora {
-  --aurora-tint: var(--color-teal);
-  --aurora-tint2: var(--color-amber);
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-}
-.aurora > * {
-  position: relative;
-}
-.aurora::before {
-  content: '';
-  position: absolute;
+   Aurora: every hero card (`.hero-glow`, the prototype's `.m-hero`) gets its
+   glow drifting (16 s) plus a second soft blob from the bottom-left in
+   `--hero-tint2` (20 s), both alternate — `.m-hero::before/::after`. A
+   session stage takes `.aurora-stage` (`.m-stage::before`, 14 s). Tints are
+   RGB triplets: `--hero-tint` (teal by default), `--hero-tint2` (amber). */
+.hero-glow::before {
   inset: -20%;
-  background: radial-gradient(90% 70% at 100% 0%, rgb(var(--aurora-tint) / 0.22), transparent 70%);
-  pointer-events: none;
   animation: aurora-drift 16s ease-in-out infinite alternate;
 }
-.aurora::after {
+.hero-glow::after {
   content: '';
   position: absolute;
   width: 70%;
@@ -874,19 +861,39 @@
   left: -25%;
   bottom: -55%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(var(--aurora-tint2) / 0.14), transparent 68%);
+  background: radial-gradient(
+    circle,
+    rgb(var(--hero-tint2, var(--color-amber)) / 0.14),
+    transparent 68%
+  );
   pointer-events: none;
   animation: aurora-drift-2 20s ease-in-out infinite alternate;
 }
+.aurora-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.aurora-stage > * {
+  position: relative;
+}
 .aurora-stage::before {
+  content: '';
+  position: absolute;
   inset: -30%;
   background:
-    radial-gradient(50% 40% at 80% 10%, rgb(var(--aurora-tint) / 0.2), transparent 70%),
-    radial-gradient(40% 35% at 10% 90%, rgb(var(--aurora-tint2) / 0.12), transparent 70%);
-  animation-duration: 14s;
-}
-.aurora-stage::after {
-  content: none;
+    radial-gradient(
+      50% 40% at 80% 10%,
+      rgb(var(--hero-tint, var(--color-teal)) / 0.2),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 35% at 10% 90%,
+      rgb(var(--hero-tint2, var(--color-accent)) / 0.12),
+      transparent 70%
+    );
+  pointer-events: none;
+  animation: aurora-drift 14s ease-in-out infinite alternate;
 }
 
 @keyframes aurora-drift {
@@ -942,8 +949,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aurora::before,
-  .aurora::after,
+  .hero-glow::before,
+  .hero-glow::after,
+  .aurora-stage::before,
   .burst > i {
     animation: none !important;
   }
