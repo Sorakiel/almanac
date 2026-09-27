@@ -182,6 +182,9 @@ async function seedSession(): Promise<string> {
         reps: ex.reps,
         weight: ex.weight,
         rest_seconds: 90,
+        // Spelled out: a bulk insert with mixed keys sends null, not the default.
+        done: false,
+        session_id: null,
       })),
       // …and what was lifted a week ago.
       ...numbers.map((n) => ({
@@ -189,6 +192,7 @@ async function seedSession(): Promise<string> {
         set_number: n,
         reps: ex.last.reps,
         weight: ex.last.weight,
+        rest_seconds: 90,
         done: true,
         session_id: past.id,
       })),
