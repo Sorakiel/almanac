@@ -505,6 +505,11 @@ for (const v of VARIANTS) {
       name: v.locale === 'ru' ? 'Подход сделан' : 'Set done',
     })
     await expect(setDone).toBeVisible({ timeout: 20_000 })
+    // "Last time" comes from the session history, a query of its own: wait
+    // for it, or the first variant catches the line mid-entrance, invisible.
+    await expect(
+      page.getByText(v.locale === 'ru' ? 'В прошлый раз 87,5 × 5' : 'Last time 87.5 × 5'),
+    ).toBeVisible({ timeout: 20_000 })
     await expectNoHorizontalScroll(page, `${v.name} session`)
     await shoot(page, `${v.name}-session`, false)
     await setDone.click()
