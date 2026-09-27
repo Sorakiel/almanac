@@ -13,19 +13,16 @@ export async function fetchReflections(userId: string): Promise<Reflection[]> {
   return data
 }
 
-export async function createReflection(input: ReflectionInsert): Promise<Reflection> {
-  const { data, error } = await supabase.from('reflections').insert(input).select().single()
-  if (error) throw error
-  return data
-}
-
-export type ReflectionPatch = Partial<Pick<Reflection, 'body' | 'mood' | 'energy' | 'day_rating'>>
-
-export async function updateReflection(id: string, patch: ReflectionPatch): Promise<Reflection> {
+/**
+ * Write the day's reflection, creating it or overwriting it — one row per
+ * user and day (`unique(user_id, date)`). Autosave and Today's mood chips both
+ * write the same day, often before either has read the other's insert back;
+ * keyed by the day, they all land on the one row instead of a 409.
+ */
+export async function upsertReflection(row: Omit<ReflectionInsert, 'id'>): Promise<Reflection> {
   const { data, error } = await supabase
     .from('reflections')
-    .update(patch)
-    .eq('id', id)
+    .upsert(row, { onConflict: 'user_id,date' })
     .select()
     .single()
   if (error) throw error

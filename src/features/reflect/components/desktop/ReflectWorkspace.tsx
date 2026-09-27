@@ -5,6 +5,22 @@ import { ReflectHistory } from '@/features/reflect/components/desktop/ReflectHis
 import type { Reflection } from '@/features/reflect/types'
 import { useT } from '@/hooks/useT'
 
+/** Dictionary keys for "in <month>", January first. */
+const MONTH_KEYS = [
+  'jan',
+  'feb',
+  'mar',
+  'apr',
+  'may',
+  'jun',
+  'jul',
+  'aug',
+  'sep',
+  'oct',
+  'nov',
+  'dec',
+] as const
+
 interface ReflectWorkspaceProps {
   dateKey: string
   today: Reflection | null
@@ -28,16 +44,19 @@ export function ReflectWorkspace({
   const { t } = useT()
   const month = dateKey.slice(0, 7)
   const monthCount = reflections.filter((r) => r.date.startsWith(month)).length
+  const monthName = t(
+    `reflect.head.monthsIn.${MONTH_KEYS[Number(dateKey.slice(5, 7)) - 1] ?? 'jan'}`,
+  )
   const summary = [
     streak > 0 ? t('reflect.head.streak', { count: streak }) : null,
-    monthCount > 0 ? t('reflect.head.month', { count: monthCount }) : null,
+    t('reflect.head.month', { count: monthCount, month: monthName }),
   ]
     .filter(Boolean)
     .join(' · ')
   return (
     <div className="w-full">
       <header className="mx-0.5 mb-4 mt-2">
-        <p className="text-callout font-medium text-muted">{summary || t('reflect.subtitle')}</p>
+        <p className="text-callout font-medium text-muted">{summary}</p>
         <h1 className="text-large-title font-bold tracking-title">{t('reflect.title')}</h1>
       </header>
 

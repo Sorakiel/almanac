@@ -83,6 +83,9 @@ export default {
         // The profile avatar's ring on the phone (112 on desktop is `28`).
         avatar: '104px',
         '4.5': '1.125rem',
+        '6.5': '1.625rem',
+        '7.5': '1.875rem',
+        '30': '7.5rem',
         // The desktop inspector panel (desktop-prototype.html `.dk-insp`).
         inspector: '392px',
       },

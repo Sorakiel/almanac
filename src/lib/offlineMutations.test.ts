@@ -9,10 +9,9 @@ import {
 } from '@/features/habits/api/habits.api'
 import { updateWorkout } from '@/features/workouts/api/workouts.api'
 import {
-  createReflection,
   deleteReflection,
   restoreReflection,
-  updateReflection,
+  upsertReflection,
 } from '@/features/reflect/api/reflections.api'
 import { updateBook } from '@/features/reading/api/books.api'
 import { createReadingSession } from '@/features/reading/api/sessions.api'
@@ -50,8 +49,7 @@ vi.mock('@/features/workouts/api/workouts.api', () => ({
   deleteWorkout: vi.fn(async () => undefined),
 }))
 vi.mock('@/features/reflect/api/reflections.api', () => ({
-  createReflection: vi.fn(async () => ({ id: 'new-reflection' })),
-  updateReflection: vi.fn(async () => ({ id: 'r1' })),
+  upsertReflection: vi.fn(async () => ({ id: 'r1' })),
   deleteReflection: vi.fn(async () => undefined),
   restoreReflection: vi.fn(async () => undefined),
 }))
@@ -387,10 +385,31 @@ describe('offline mutation resume', () => {
     await client.resumePausedMutations()
     await pending
 
-    expect(createReflection).toHaveBeenCalledWith(
-      expect.objectContaining({ user_id: 'u1', body: 'offline entry' }),
+    expect(upsertReflection).toHaveBeenCalledWith(
+      expect.objectContaining({ user_id: 'u1', date: '2026-08-05', body: 'offline entry' }),
     )
-    expect(updateReflection).not.toHaveBeenCalled()
+  })
+
+  it("writes an edit onto the day's row, whatever id it carries", async () => {
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    const mutation = client
+      .getMutationCache()
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.saveReflection })
+    await mutation.execute({
+      id: 'r1',
+      date: '2026-08-05',
+      body: 'draft',
+      quoteId: null,
+      mood: 4,
+      energy: 2,
+      dayRating: null,
+      userId: 'u1',
+    })
+
+    expect(upsertReflection).toHaveBeenCalledWith(
+      expect.objectContaining({ user_id: 'u1', date: '2026-08-05', body: 'draft' }),
+    )
   })
 
   it('resumes a reading progress log, capping to total_units and moving status', async () => {
