@@ -3,17 +3,13 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, ShieldMinus, ShieldPlus, Trash2 } from 'lucide-react'
 import { EmptyState } from '@/components/common/EmptyState'
 import { LoadingState } from '@/components/common/LoadingState'
-import { SectionLabel } from '@/components/common/SectionLabel'
-import { Rail } from '@/components/rail/Rail'
 import { Button } from '@/components/ui/button'
 import { AwardAchievements } from '@/features/achievements/components/AwardAchievements'
 import { AdminStat } from '@/features/admin/components/AdminStat'
-import { AdminUserRail } from '@/features/admin/components/AdminUserRail'
+import { AdminMemberCard } from '@/features/admin/components/AdminMemberCard'
 import { DeleteMemberConfirm } from '@/features/admin/components/DeleteMemberConfirm'
 import { FeedbackManager } from '@/features/admin/components/FeedbackManager'
-import { RoleTag } from '@/features/admin/components/RoleTag'
 import { useAdminUser } from '@/features/admin/hooks/useAdminUser'
-import { useJoinedLabel } from '@/features/admin/hooks/useJoinedLabel'
 import { useMemberActions } from '@/features/admin/hooks/useMemberActions'
 import type { AdminUserDetail } from '@/features/admin/types'
 import { frequencyLabel } from '@/features/habits/lib/frequency'
@@ -57,111 +53,112 @@ function AdminUserView({ data, isOwner }: { data: AdminUserDetail; isOwner: bool
   const navigate = useNavigate()
   const { user } = useSession()
   const { dateKey } = useToday()
-  const joined = useJoinedLabel()
   const actions = useMemberActions(data, isOwner, user?.id ?? '')
   const [confirmDelete, setConfirmDelete] = useState(false)
 
+  // The module layout (`.dk-mgrid`): the member's data on the left, who they
+  // are in a sticky 360px column on the right; the phone stacks them.
   return (
-    <>
-      <div className="mx-auto flex w-full max-w-[900px] flex-col gap-6">
-        <header className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate('/admin')}
-            aria-label={t('admin.backToConsole')}
-            className="rounded-full p-1 text-muted hover:text-foreground"
+    <section className="w-full">
+      <header className="mx-0.5 mb-4 mt-2 flex flex-wrap items-end gap-3">
+        <button
+          type="button"
+          onClick={() => navigate('/admin')}
+          aria-label={t('admin.backToConsole')}
+          className="rounded-full p-1 text-muted hover:text-foreground"
+        >
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+        </button>
+        <div className="min-w-0 flex-1">
+          <p className="text-callout font-medium text-muted">{t('admin.memberLabel')}</p>
+          <h1 className="truncate text-large-title font-bold tracking-title">{data.name}</h1>
+        </div>
+        {actions.canManageRole ? (
+          <Button
+            variant="surface"
+            size="sm"
+            onClick={() => void actions.toggleAdmin()}
+            disabled={actions.isSettingRole}
           >
-            <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-          </button>
-          <div className="min-w-0 flex-1">
-            <p className="label-mono text-accent">{t('admin.memberLabel')}</p>
-            <h1 className="truncate text-2xl lg:text-[32px] lg:tracking-title">{data.name}</h1>
-            <p className="mt-1 flex items-center gap-2 font-mono text-[11px] text-muted-strong">
-              <RoleTag role={data.role} />
-              {t('admin.joinedLine', { when: joined(data.joinedAt, dateKey) })}
-              {data.timezone ? ` · ${data.timezone.replace(/_/g, ' ')}` : ''}
-            </p>
-          </div>
-          {actions.canManageRole ? (
-            <Button
-              variant="surface"
-              size="sm"
-              onClick={() => void actions.toggleAdmin()}
-              disabled={actions.isSettingRole}
-            >
-              {data.role === 'admin' ? (
-                <ShieldMinus className="h-4 w-4" />
-              ) : (
-                <ShieldPlus className="h-4 w-4" />
-              )}
-              {data.role === 'admin' ? t('admin.removeAdmin') : t('admin.makeAdmin')}
-            </Button>
-          ) : null}
-          {actions.canDelete ? (
-            <Button
-              variant="surface"
-              size="sm"
-              className="text-accent"
-              onClick={() => setConfirmDelete(true)}
-            >
-              <Trash2 className="h-4 w-4" /> {t('admin.delete')}
-            </Button>
-          ) : null}
-        </header>
+            {data.role === 'admin' ? (
+              <ShieldMinus className="h-4 w-4" />
+            ) : (
+              <ShieldPlus className="h-4 w-4" />
+            )}
+            {data.role === 'admin' ? t('admin.removeAdmin') : t('admin.makeAdmin')}
+          </Button>
+        ) : null}
+        {actions.canDelete ? (
+          <Button
+            variant="surface"
+            size="sm"
+            className="text-danger"
+            onClick={() => setConfirmDelete(true)}
+          >
+            <Trash2 className="h-4 w-4" /> {t('admin.delete')}
+          </Button>
+        ) : null}
+      </header>
 
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <AdminStat label={t('admin.habits')} value={String(data.stats.habits)} accent />
-          <AdminStat
-            label={t('admin.active30d')}
-            value={t('admin.daysValue', { count: data.stats.activeDays30 })}
-          />
-          <AdminStat label={t('admin.completion')} value={`${data.stats.completionPct}%`} />
-          <AdminStat label={t('admin.logs30d')} value={String(data.stats.logs)} />
+      <div className="grid gap-5 lg:grid-cols-module lg:items-start lg:gap-6">
+        <div className="grid min-w-0 grid-cols-1 content-start gap-5">
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+            <AdminStat label={t('admin.habits')} value={String(data.stats.habits)} accent />
+            <AdminStat
+              label={t('admin.active30d')}
+              value={t('admin.daysValue', { count: data.stats.activeDays30 })}
+            />
+            <AdminStat label={t('admin.completion')} value={`${data.stats.completionPct}%`} />
+            <AdminStat label={t('admin.logs30d')} value={String(data.stats.logs)} />
+          </div>
+
+          <section>
+            <p className="label-mono mx-1 mb-2">{t('admin.habitsSection')}</p>
+            {data.habits.length === 0 ? (
+              <p className="rounded-card bg-surface px-4 py-6 text-center text-callout text-muted">
+                {t('admin.noHabits')}
+              </p>
+            ) : (
+              <div className="divide-y overflow-hidden rounded-card bg-surface">
+                {data.habits.map((h) => (
+                  <div
+                    key={h.id}
+                    className="flex items-center justify-between gap-3 px-4 py-3 text-callout"
+                  >
+                    <span className="min-w-0 flex-1 truncate">{h.name}</span>
+                    <span className="text-footnote text-muted">
+                      {frequencyLabel(h.frequency, t)}
+                    </span>
+                    <span className="num text-footnote text-accent">{h.doneLast30}/30</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section>
+            <p className="label-mono mx-1 mb-2">{t('admin.feedbackSection')}</p>
+            <FeedbackManager items={data.feedback} todayKey={dateKey} hideAuthor />
+          </section>
         </div>
 
-        <section className="flex flex-col gap-3">
-          <SectionLabel>{t('admin.habitsSection')}</SectionLabel>
-          {data.habits.length === 0 ? (
-            <p className="rounded-card border bg-surface px-4 py-6 text-center text-sm text-muted">
-              {t('admin.noHabits')}
-            </p>
-          ) : (
-            <div className="overflow-hidden rounded-card border bg-surface">
-              {data.habits.map((h) => (
-                <div
-                  key={h.id}
-                  className="flex items-center justify-between gap-3 border-b px-4 py-3 text-sm last:border-b-0"
-                >
-                  <span className="min-w-0 flex-1 truncate">{h.name}</span>
-                  <span className="font-mono text-[10px] uppercase tracking-label text-muted-strong">
-                    {frequencyLabel(h.frequency, t)}
-                  </span>
-                  <span className="font-mono text-[11px] text-accent">{h.doneLast30}/30</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="flex flex-col gap-3">
-          <SectionLabel>{t('admin.feedbackSection')}</SectionLabel>
-          <FeedbackManager items={data.feedback} todayKey={dateKey} hideAuthor />
-        </section>
-
-        {isOwner ? <AwardAchievements userId={data.id} userName={data.name} /> : null}
-
-        <DeleteMemberConfirm
-          name={data.name}
-          open={confirmDelete}
-          onOpenChange={setConfirmDelete}
-          pending={actions.isRemoving}
-          onConfirm={() => void actions.remove(() => navigate('/admin'))}
-        />
+        <aside
+          aria-label={t('admin.account')}
+          className="grid min-w-0 grid-cols-1 content-start gap-5 lg:sticky lg:top-toolbar-clearance"
+        >
+          <AdminMemberCard user={data} todayKey={dateKey} />
+          {isOwner ? <AwardAchievements userId={data.id} userName={data.name} /> : null}
+        </aside>
       </div>
-      <Rail>
-        <AdminUserRail user={data} todayKey={dateKey} />
-      </Rail>
-    </>
+
+      <DeleteMemberConfirm
+        name={data.name}
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        pending={actions.isRemoving}
+        onConfirm={() => void actions.remove(() => navigate('/admin'))}
+      />
+    </section>
   )
 }
 
