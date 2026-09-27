@@ -248,13 +248,13 @@ export const en = {
     deleteFailed: 'Could not delete the reflection',
     deleted: 'Reflection deleted',
     restoreFailed: 'Could not bring the reflection back',
-    pastLabel: 'Past entries',
-    inspector: 'Entry',
-    streakLine: {
-      one: '◇ {count}-day reflection streak',
-      other: '◇ {count}-day reflection streak',
+    pastLabel: 'Earlier',
+    delete: 'Delete',
+    moodMonth: 'mood',
+    head: {
+      streak: { one: '{count}-day streak', other: '{count}-day streak' },
+      month: { one: '{count} entry this month', other: '{count} entries this month' },
     },
-    journalLabel: 'Daily journal',
   },
   social: {
     today: 'Today',

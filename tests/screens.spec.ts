@@ -408,17 +408,14 @@ for (const v of VARIANTS) {
       await page.keyboard.press('Escape')
       await expect(inspector).toBeHidden()
 
-      // Reflect: a past entry opens whole in the inspector.
+      // Reflect: two columns (composer, history | mood month, quote); an entry opens in place.
       await page.goto('/reflect')
-      await page.getByRole('button', { name: new RegExp(SEED_REFLECTION.slice(0, 10)) }).click()
-      const entry = page.getByRole('complementary', {
-        name: v.locale === 'ru' ? 'Запись' : 'Entry',
-      })
-      await expect(entry.getByText(SEED_REFLECTION)).toBeVisible()
-      await page.waitForTimeout(600) // the slide-in
-      await shoot(page, `${v.name}-reflect-inspector`, false)
-      await page.keyboard.press('Escape')
-      await expect(entry).toBeHidden()
+      const entry = page.getByRole('button', { name: new RegExp(SEED_REFLECTION.slice(0, 10)) })
+      await expect(entry).toBeVisible({ timeout: 20_000 })
+      await shoot(page, `${v.name}-reflect`)
+      await entry.click()
+      await expect(entry).toHaveAttribute('aria-expanded', 'true')
+      await shoot(page, `${v.name}-reflect-entry`, false)
 
       // Reading: a book opens in the inspector instead of its own page.
       await page.goto('/reading')

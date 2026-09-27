@@ -53,17 +53,17 @@ export function MoodMonth({ todayKey, reflections }: MoodMonthProps) {
             : dayLabel.format(dateFromKey(key))
           return (
             <span
-                key={key}
-                role="img"
-                aria-label={label}
-                title={label}
-                className={cn(
-                  'aspect-square rounded-inner',
-                  mood ? mood.dot : 'bg-foreground/5',
-                  key > todayKey && 'opacity-35',
-                  key === todayKey && 'ring-2 ring-inset ring-foreground',
-                )}
-              />
+              key={key}
+              role="img"
+              aria-label={label}
+              title={label}
+              className={cn(
+                'aspect-square rounded-inner',
+                mood ? mood.dot : 'bg-foreground/5',
+                key > todayKey && 'opacity-35',
+                key === todayKey && 'ring-2 ring-inset ring-foreground',
+              )}
+            />
           )
         })}
       </div>

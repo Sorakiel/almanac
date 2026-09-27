@@ -11,8 +11,6 @@ import { cn } from '@/lib/utils'
 
 interface ReflectHistoryProps {
   past: Reflection[]
-  /** Consecutive days with an entry, ending today or yesterday. */
-  streak: number
 }
 
 /**
@@ -20,7 +18,7 @@ interface ReflectHistoryProps {
  * lines of the entry; a tap opens it whole in place (the prototype's
  * `.m-entry`), with delete + Undo once open.
  */
-export function ReflectHistory({ past, streak }: ReflectHistoryProps) {
+export function ReflectHistory({ past }: ReflectHistoryProps) {
   const { t, locale } = useT()
   const dateLocale = intlLocale(locale)
   const { remove, restore } = useReflectionMutations()
@@ -85,7 +83,7 @@ export function ReflectHistory({ past, streak }: ReflectHistoryProps) {
                       className="flex h-11 items-center gap-1.5 rounded-control px-3 text-footnote text-muted transition-colors hover:text-danger"
                     >
                       <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                      {t('common.delete')}
+                      {t('reflect.delete')}
                     </button>
                   </div>
                 ) : null}
@@ -96,12 +94,6 @@ export function ReflectHistory({ past, streak }: ReflectHistoryProps) {
       ) : (
         <p className="mx-1.5 text-footnote text-muted">{t('reflect.pastEmptyShort')}</p>
       )}
-
-      {streak > 0 ? (
-        <p className="mt-3 text-center text-footnote text-muted">
-          {t('reflect.streakLine', { count: streak })}
-        </p>
-      ) : null}
     </section>
   )
 }

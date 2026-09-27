@@ -272,15 +272,23 @@ export const ru: Translations = {
     deleteFailed: 'Не удалось удалить запись',
     deleted: 'Запись удалена',
     restoreFailed: 'Не удалось вернуть запись',
-    pastLabel: 'Прошлые записи',
-    inspector: 'Запись',
-    streakLine: {
-      one: '◇ {count} день подряд с записями',
-      few: '◇ {count} дня подряд с записями',
-      many: '◇ {count} дней подряд с записями',
-      other: '◇ {count} дня подряд с записями',
+    pastLabel: 'Раньше',
+    delete: 'Удалить',
+    moodMonth: 'настроение',
+    head: {
+      streak: {
+        one: 'Серия {count} день',
+        few: 'Серия {count} дня',
+        many: 'Серия {count} дней',
+        other: 'Серия {count} дня',
+      },
+      month: {
+        one: '{count} запись в этом месяце',
+        few: '{count} записи в этом месяце',
+        many: '{count} записей в этом месяце',
+        other: '{count} записи в этом месяце',
+      },
     },
-    journalLabel: 'Ежедневный дневник',
   },
   social: {
     today: 'Сегодня',
