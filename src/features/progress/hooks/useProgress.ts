@@ -4,7 +4,6 @@ import { fetchReadingInsightsData } from '@/features/progress/api/readingInsight
 import { fetchReflectInsightsData } from '@/features/progress/api/reflectInsights.api'
 import { fetchWorkoutInsightsData } from '@/features/progress/api/workoutInsights.api'
 import { useInsights } from '@/features/progress/hooks/useInsights'
-import { computeFocusInsights } from '@/features/progress/lib/computeFocusInsights'
 import {
   focusPeriod,
   periodStart,
@@ -16,7 +15,7 @@ import {
   type ReflectPeriod,
   type WorkoutPeriod,
 } from '@/features/progress/lib/period'
-import type { FocusDay, InsightRange, Insights } from '@/features/progress/types'
+import type { InsightRange, Insights } from '@/features/progress/types'
 import { useSession } from '@/hooks/useSession'
 import { useToday } from '@/hooks/useToday'
 import { useModulesStore } from '@/stores/modules'
@@ -26,7 +25,7 @@ export interface ProgressData {
   /** Null when the module is switched off; zeros when it's on but empty. */
   workouts: WorkoutPeriod | null
   reading: ReadingPeriod | null
-  focus: (FocusPeriod & { heatmap: FocusDay[] }) | null
+  focus: FocusPeriod | null
   reflect: ReflectPeriod | null
 }
 
@@ -45,7 +44,7 @@ interface UseProgressResult {
  */
 export function useProgress(range: InsightRange): UseProgressResult {
   const { user } = useSession()
-  const { dateKey } = useToday()
+  const { dateKey, timezone } = useToday()
   const userId = user?.id ?? ''
   const enabled = useModulesStore((s) => s.enabled)
   const start = periodStart(dateKey, range)
@@ -81,13 +80,7 @@ export function useProgress(range: InsightRange): UseProgressResult {
     workouts: enabled.workouts && workoutsQ.data ? workoutPeriod(workoutsQ.data, start) : null,
     reading:
       enabled.reading && readingQ.data ? readingPeriod(readingQ.data, start, dateKey, range) : null,
-    focus:
-      enabled.flow && focusQ.data
-        ? {
-            ...focusPeriod(focusQ.data, start),
-            heatmap: computeFocusInsights(focusQ.data, dateKey).heatmap,
-          }
-        : null,
+    focus: enabled.flow && focusQ.data ? focusPeriod(focusQ.data, start, timezone) : null,
     reflect: enabled.reflect && reflectQ.data ? reflectPeriod(reflectQ.data, start) : null,
   }
 
