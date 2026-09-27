@@ -508,8 +508,6 @@ export const en = {
     emptyHint: 'Add your first habit and start checking it off — your trends will build up here.',
     addFirstHabit: 'Add your first habit',
     weekShort: 'W{n}',
-    heatmapLess: 'less',
-    heatmapMore: 'more',
     focusDay: '{date} · {count} min',
   },
   reading: {
@@ -1328,6 +1326,8 @@ export const en = {
     recordNote: 'Period record: {name}, {weight} kg × {reps}.',
     forecastNote: 'At this pace “{title}” is done by {date}.',
     focusNote: 'Average session: {m} min.',
+    focusBest: 'Best time: {part}. Average session: {m} min.',
+    dayParts: { morning: 'morning', afternoon: 'afternoon', evening: 'evening' },
     reflectNote: 'Entries on {days} of {total} days.',
     readingBars: 'Pages per day',
     expand: 'Show details: {name}',

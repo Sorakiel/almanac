@@ -566,8 +566,6 @@ export const ru: Translations = {
     emptyHint: 'Добавьте первую привычку и начните отмечать — тренды соберутся здесь.',
     addFirstHabit: 'Добавить первую привычку',
     weekShort: 'Н{n}',
-    heatmapLess: 'меньше',
-    heatmapMore: 'больше',
     focusDay: '{date} · {count} мин',
   },
   reading: {
@@ -1477,6 +1475,8 @@ export const ru: Translations = {
     recordNote: 'Рекорд периода: {name}, {weight} кг × {reps}.',
     forecastNote: 'При таком темпе «{title}» закончится {date}.',
     focusNote: 'Средняя сессия — {m} мин.',
+    focusBest: 'Лучшее время — {part}, средняя сессия {m} мин.',
+    dayParts: { morning: 'утро', afternoon: 'день', evening: 'вечер' },
     reflectNote: 'Записи в {days} из {total} дней.',
     readingBars: 'Страниц в день',
     expand: 'Подробнее: {name}',

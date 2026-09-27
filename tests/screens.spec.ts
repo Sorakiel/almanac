@@ -328,12 +328,14 @@ for (const v of VARIANTS) {
     else await expect(year).toBeHidden()
     await shoot(page, `${v.name}-insights-open`)
 
-    // The focus card's heatmap fits the card: half a year, no horizontal scroll.
+    // The focus card is one line (desktop prototype): the best time and the typical session.
     const focus = page.getByRole('region', { name: v.locale === 'ru' ? 'Фокус' : 'Flow' })
     const focusDisclose = focus.getByRole('button', { expanded: false })
     if (await focusDisclose.isVisible()) await focusDisclose.click()
     await focus.scrollIntoViewIfNeeded()
-    await expect(focus.getByText(v.locale === 'ru' ? 'меньше' : 'less')).toBeVisible()
+    await expect(
+      focus.getByText(v.locale === 'ru' ? /средняя сессия/i : /average session/i),
+    ).toBeVisible()
     await page.waitForTimeout(700)
     await focus.screenshot({ path: `${OUT}/${v.name}-progress-focus.png` })
 
