@@ -58,7 +58,7 @@ export function BooksWorkspace({ books, isLoading, isError, refetch, onNew }: Bo
         </div>
       ) : (
         <div className="mt-6 grid grid-cols-module items-start gap-6">
-          <div className="grid min-w-0 content-start gap-5">
+          <div className="grid min-w-0 grid-cols-1 content-start gap-5">
             <Shelf title={t('reading.readingNow')} books={grouped.reading} wide />
             <Shelf title={t('reading.finishedSection')} books={grouped.finished} wide />
             {grouped.reading.length === 0 && grouped.finished.length === 0 ? (
@@ -70,7 +70,7 @@ export function BooksWorkspace({ books, isLoading, isError, refetch, onNew }: Bo
 
           <aside
             aria-label={t('reading.upNext')}
-            className="sticky top-toolbar-clearance grid min-w-0 content-start gap-3.5"
+            className="sticky top-toolbar-clearance grid min-w-0 grid-cols-1 content-start gap-3.5"
           >
             {grouped.to_read.length > 0 ? (
               <Shelf title={t('reading.upNext')} books={grouped.to_read} />
