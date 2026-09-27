@@ -266,7 +266,14 @@ export const ru: Translations = {
     delete: 'Удалить',
     moodMonth: 'настроение',
     prompt: 'Как прошёл день?',
-    energyLevel: 'Энергия {value} из 5',
+    energyNames: {
+      drained: 'Выжат',
+      low: 'Мало сил',
+      okay: 'Норм',
+      good: 'Бодро',
+      charged: 'Заряжен',
+    },
+    energyUnset: 'Не отмечено',
     autosave: {
       saving: 'Сохраняю…',
       saved: 'Сохранено',
