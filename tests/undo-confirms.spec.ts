@@ -10,7 +10,7 @@ const HABIT_NAME = 'E2E habit to delete'
 const BOOK_TITLE = 'E2E book to delete'
 const WORKOUT_NAME = 'E2E workout to delete'
 
-// The reflection list is the phone layout.
+// The phone layout: the reflect history and the habit rows as a phone shows them.
 test.use({ viewport: { width: 390, height: 844 } })
 
 async function clearRows(): Promise<void> {
@@ -67,12 +67,11 @@ test('a deleted reflection disappears at once and Undo brings it back', async ({
   const body = page.getByText(REFLECTION_BODY)
   await expect(body).toBeVisible({ timeout: 20_000 })
 
-  // The innermost element holding both the body and a delete button is the card.
-  const card = page
-    .locator('div', { hasText: REFLECTION_BODY })
-    .filter({ has: page.getByRole('button', { name: /delete reflection/i }) })
-    .last()
-  await card.getByRole('button', { name: /delete reflection/i }).click()
+  // An entry opens in place; delete lives on the opened row.
+  const entry = page.getByRole('button', { name: new RegExp(REFLECTION_BODY) })
+  const remove = page.getByRole('button', { name: /delete reflection/i })
+  await entry.click()
+  await remove.click()
   await expect(body).toHaveCount(0)
 
   await undo(page).click()
@@ -80,7 +79,8 @@ test('a deleted reflection disappears at once and Undo brings it back', async ({
   await expect.poll(() => rowExists('reflections', id), { timeout: 15_000 }).toBe(true)
 
   // Without Undo the delete stands.
-  await card.getByRole('button', { name: /delete reflection/i }).click()
+  await entry.click()
+  await remove.click()
   await expect(body).toHaveCount(0)
   await expect.poll(() => rowExists('reflections', id), { timeout: 15_000 }).toBe(false)
   expect(errors).toEqual([])

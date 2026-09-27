@@ -13,8 +13,6 @@ interface ReflectionComposerProps {
   dateKey: string
   /** Today's existing reflection, or null to compose a fresh one. */
   today: Reflection | null
-  /** Leave the quote out — desktop shows it in the side column. */
-  hideQuote?: boolean
 }
 
 const ENERGY_LEVELS = [1, 2, 3, 4, 5] as const
@@ -24,7 +22,7 @@ const ENERGY_LEVELS = [1, 2, 3, 4, 5] as const
  * mood buttons, energy as five dots, the text — and no Save button: it
  * writes itself (see useAutosaveReflection).
  */
-export function ReflectionComposer({ dateKey, today, hideQuote = false }: ReflectionComposerProps) {
+export function ReflectionComposer({ dateKey, today }: ReflectionComposerProps) {
   const { t, locale } = useT()
   const { quote } = useDailyQuote()
   const { draft, update, state } = useAutosaveReflection(dateKey, today, quote?.id ?? null)
@@ -108,17 +106,6 @@ export function ReflectionComposer({ dateKey, today, hideQuote = false }: Reflec
             ? t('reflect.autosave.saved')
             : t('reflect.autosave.hint')}
       </p>
-
-      {quote && !hideQuote ? (
-        <figure className="border-t pt-3">
-          <blockquote className="text-callout italic leading-relaxed text-muted">
-            «{quote.text}»
-          </blockquote>
-          <figcaption className="mt-1 text-footnote font-medium text-muted-strong">
-            {quote.author ?? t('reflect.unknownAuthor')}
-          </figcaption>
-        </figure>
-      ) : null}
     </section>
   )
 }
