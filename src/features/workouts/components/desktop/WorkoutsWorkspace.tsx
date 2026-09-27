@@ -72,7 +72,7 @@ export function WorkoutsWorkspace({
         />
       ) : (
         <div className="grid grid-cols-module items-start gap-6">
-          <div className="grid min-w-0 content-start gap-3.5">
+          <div className="grid min-w-0 grid-cols-1 content-start gap-3.5">
             <Cascade>
               <SessionResumeBanner workouts={overview.workouts} />
               <WeekStrip
@@ -101,7 +101,7 @@ export function WorkoutsWorkspace({
 
           <aside
             aria-label={t('workouts.allWorkouts')}
-            className="sticky top-toolbar-clearance grid min-w-0 content-start gap-3.5"
+            className="sticky top-toolbar-clearance grid min-w-0 grid-cols-1 content-start gap-3.5"
           >
             <section>
               <SectionHead aside={t('workouts.plan.templates', { count: workouts.length })}>
