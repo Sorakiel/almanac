@@ -39,7 +39,7 @@ export function MoodMonth({ todayKey, reflections }: MoodMonthProps) {
 
       <div className="grid grid-cols-7 gap-1.5">
         {Array.from({ length: 7 }, (_, i) => (
-          <span key={i} className="text-center text-caption text-muted-strong">
+          <span key={i} className="text-center text-caption capitalize text-muted-strong">
             {weekday.format(dateFromKey(addDaysToKey(A_MONDAY, i)))}
           </span>
         ))}
