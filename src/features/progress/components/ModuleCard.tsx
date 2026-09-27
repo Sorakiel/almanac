@@ -41,8 +41,14 @@ export function ModuleCard({ icon: Icon, tone, title, summary, wide, children }:
         <Icon className="h-5 w-5" strokeWidth={1.9} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-footnote text-muted">{title}</span>
-        <span className="block text-body font-semibold">{summary}</span>
+        {/* Phone: a quiet name over the metric. Desktop (`.dk-card .hd`): the
+            name leads and the metric sits under it, small and grey. */}
+        <span className="block text-footnote text-muted lg:text-body lg:font-semibold lg:text-foreground">
+          {title}
+        </span>
+        <span className="block text-body font-semibold lg:text-footnote lg:font-normal lg:text-muted">
+          {summary}
+        </span>
       </span>
     </>
   )

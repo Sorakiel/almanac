@@ -470,19 +470,28 @@
   background-color: rgb(var(--color-bg));
 }
 
-.tabbar-dock {
+/* On the glass itself, not on the dock around it: in Chromium an element with
+   a view-transition-name is a Backdrop Root, so glass inside it blurs only
+   what the dock paints (nothing) and the page shows through sharp. */
+.tabbar {
   view-transition-name: tabbar;
+}
+.tabbar-plus {
+  view-transition-name: tabbar-plus;
 }
 .shell-sidebar {
   view-transition-name: sidebar;
 }
 ::view-transition-group(tabbar),
+::view-transition-group(tabbar-plus),
 ::view-transition-group(sidebar) {
   animation: none;
 }
 ::view-transition-old(tabbar),
+::view-transition-old(tabbar-plus),
 ::view-transition-old(sidebar),
 ::view-transition-new(tabbar),
+::view-transition-new(tabbar-plus),
 ::view-transition-new(sidebar) {
   animation: none;
 }
