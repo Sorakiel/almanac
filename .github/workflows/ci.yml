@@ -40,12 +40,27 @@ jobs:
       - name: Build
         run: npm run build
 
-  # Two shards, one staging account each: the suite still runs serially inside
-  # a shard (the account is shared by its specs and cleaned through RLS), but
-  # the halves run side by side. Until the second account's secrets exist,
-  # shard 1 runs the whole suite and shard 2 stands down — never half a suite.
+  # Eight staging accounts, four lanes of two. A run picks its lane from
+  # run_id mod 4 — deterministic per run, no coordination between branches —
+  # so up to four PRs' e2e can be in flight at once instead of serializing
+  # behind a single pair of accounts. Within a lane, the suite still splits
+  # by time (screens.spec alone, the rest beside it) across its two accounts,
+  # so one PR's own run is no slower than the old two-account design.
+  pick-lane:
+    runs-on: ubuntu-latest
+    outputs:
+      idx1: ${{ steps.pick.outputs.idx1 }}
+      idx2: ${{ steps.pick.outputs.idx2 }}
+    steps:
+      - id: pick
+        run: |
+          LANE=$(( ${{ github.run_id }} % 4 ))
+          echo "idx1=$(( LANE * 2 + 1 ))" >> "$GITHUB_OUTPUT"
+          echo "idx2=$(( LANE * 2 + 2 ))" >> "$GITHUB_OUTPUT"
+
   e2e-shard:
     name: e2e shard ${{ matrix.shard }}
+    needs: pick-lane
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -53,10 +68,8 @@ jobs:
         shard: [1, 2]
     # One queue per account: two runs on the same account would trip over each
     # other. Queue rather than cancel — a cancelled run can leave it mid-test.
-    # Shard 1 keeps the old queue's name, so a branch still on the unsharded
-    # workflow waits in the same line for the first account.
     concurrency:
-      group: e2e-staging${{ matrix.shard == 2 && '-2' || '' }}
+      group: e2e-staging-${{ matrix.shard == 1 && needs.pick-lane.outputs.idx1 || needs.pick-lane.outputs.idx2 }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
@@ -68,30 +81,25 @@ jobs:
 
       # Secrets are not exposed to pull requests from forks, so the suite has to
       # be able to stand down. It says so loudly rather than reporting a green
-      # check for a run that tested nothing.
+      # check for a run that tested nothing. `idx` (1..8) is this shard's account
+      # in its lane; account 1 keeps the unsuffixed secret names from before
+      # sharding existed, 2..8 are `_N`.
       - name: Check E2E configuration
         id: config
         env:
           E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
-          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
-          E2E_EMAIL_2: ${{ secrets.E2E_EMAIL_2 }}
+          IDX: ${{ matrix.shard == 1 && needs.pick-lane.outputs.idx1 || needs.pick-lane.outputs.idx2 }}
+          ACCOUNT_EMAIL: ${{ (matrix.shard == 1 && needs.pick-lane.outputs.idx1 || needs.pick-lane.outputs.idx2) == '1' && secrets.E2E_EMAIL || secrets[format('E2E_EMAIL_{0}', matrix.shard == 1 && needs.pick-lane.outputs.idx1 || needs.pick-lane.outputs.idx2)] }}
           SHARD: ${{ matrix.shard }}
         run: |
-          if [ -z "$E2E_SUPABASE_URL" ] || [ -z "$E2E_EMAIL" ]; then
+          if [ -z "$E2E_SUPABASE_URL" ] || [ -z "$ACCOUNT_EMAIL" ]; then
             echo "run=false" >> "$GITHUB_OUTPUT"
-            echo "::warning title=E2E skipped::E2E_SUPABASE_URL / E2E_EMAIL are not set, so no browser test ran."
+            echo "::warning title=E2E skipped::E2E_SUPABASE_URL / account $IDX email are not set, so no browser test ran."
             echo "### E2E skipped — secrets not available to this run" >> "$GITHUB_STEP_SUMMARY"
-          elif [ -n "$E2E_EMAIL_2" ]; then
+          else
             echo "run=true" >> "$GITHUB_OUTPUT"
             # Split by time: the screenshot walk on its own, everything else beside it.
             if [ "$SHARD" = "1" ]; then echo "part=rest" >> "$GITHUB_OUTPUT"; else echo "part=screens" >> "$GITHUB_OUTPUT"; fi
-          elif [ "$SHARD" = "1" ]; then
-            echo "run=true" >> "$GITHUB_OUTPUT"
-            echo "part=" >> "$GITHUB_OUTPUT"
-            echo "### One staging account — the whole suite runs in shard 1" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "run=false" >> "$GITHUB_OUTPUT"
-            echo "### Shard 2 idle — E2E_EMAIL_2 is not set, shard 1 ran everything" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Install dependencies
@@ -120,8 +128,8 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-          E2E_EMAIL: ${{ matrix.shard == 2 && secrets.E2E_EMAIL_2 || secrets.E2E_EMAIL }}
-          E2E_PASSWORD: ${{ matrix.shard == 2 && secrets.E2E_PASSWORD_2 || secrets.E2E_PASSWORD }}
+          E2E_EMAIL: ${{ (matrix.shard == 1 && needs.pick-lane.outputs.idx1 || needs.pick-lane.outputs.idx2) == '1' && secrets.E2E_EMAIL || secrets[format('E2E_EMAIL_{0}', matrix.shard == 1 && needs.pick-lane.outputs.idx1 || needs.pick-lane.outputs.idx2)] }}
+          E2E_PASSWORD: ${{ (matrix.shard == 1 && needs.pick-lane.outputs.idx1 || needs.pick-lane.outputs.idx2) == '1' && secrets.E2E_PASSWORD || secrets[format('E2E_PASSWORD_{0}', matrix.shard == 1 && needs.pick-lane.outputs.idx1 || needs.pick-lane.outputs.idx2)] }}
           E2E_PART: ${{ steps.config.outputs.part }}
         run: npm run test:e2e
 

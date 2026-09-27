@@ -111,20 +111,62 @@ export function readingPeriod(
   return { pages, perDay, finished, daily, forecast }
 }
 
+export type DayPart = 'morning' | 'afternoon' | 'evening'
+
 export interface FocusPeriod {
   minutes: number
   sessions: number
   /** Average session length in minutes, rounded; 0 with no sessions. */
   average: number
+  /** The part of the day with the most focused minutes; null below two sessions. */
+  bestPart: DayPart | null
 }
 
-export function focusPeriod(rows: FocusInsightsRow[], start: string | null): FocusPeriod {
+/** Fewer sessions than this and "your best time" would be a guess. */
+const BEST_PART_MIN_SESSIONS = 2
+const MS_PER_MINUTE = 60_000
+
+/** Morning 05–12, afternoon 12–18, evening (and the night) after that. */
+function dayPartOf(hour: number): DayPart {
+  if (hour >= 5 && hour < 12) return 'morning'
+  if (hour >= 12 && hour < 18) return 'afternoon'
+  return 'evening'
+}
+
+/** The local hour a session started: logged at its end, so step back its length. */
+function startHour(row: FocusInsightsRow, timezone: string): number {
+  const started = new Date(Date.parse(row.created_at) - row.minutes * MS_PER_MINUTE)
+  const hour = new Intl.DateTimeFormat('en-GB', {
+    timeZone: timezone,
+    hour: '2-digit',
+    hourCycle: 'h23',
+  }).format(started)
+  return Number(hour)
+}
+
+export function focusPeriod(
+  rows: FocusInsightsRow[],
+  start: string | null,
+  timezone: string,
+): FocusPeriod {
   const within = rows.filter((r) => inPeriod(r.date, start))
   const minutes = within.reduce((sum, r) => sum + r.minutes, 0)
+  const byPart = new Map<DayPart, number>()
+  for (const r of within) {
+    const part = dayPartOf(startHour(r, timezone))
+    byPart.set(part, (byPart.get(part) ?? 0) + r.minutes)
+  }
+  let bestPart: DayPart | null = null
+  if (within.length >= BEST_PART_MIN_SESSIONS) {
+    for (const [part, sum] of byPart) {
+      if (bestPart === null || sum > (byPart.get(bestPart) ?? 0)) bestPart = part
+    }
+  }
   return {
     minutes,
     sessions: within.length,
     average: within.length > 0 ? Math.round(minutes / within.length) : 0,
+    bestPart,
   }
 }
 
