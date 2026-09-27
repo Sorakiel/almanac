@@ -230,6 +230,12 @@ export default {
           '0%': { transform: 'scale(1)', opacity: '0.6' },
           '75%, 100%': { transform: 'scale(1.5)', opacity: '0' },
         },
+        // Number pop (HANDOFF §3.1): a changed value swells and settles.
+        'num-pop': {
+          '0%': { transform: 'scale(1)' },
+          '40%': { transform: 'scale(1.14)' },
+          '100%': { transform: 'scale(1)' },
+        },
         'medal-sheen': {
           '0%, 55%': { transform: 'translateX(-120%)' },
           '85%, 100%': { transform: 'translateX(120%)' },
@@ -251,6 +257,7 @@ export default {
         'radar-sweep': 'radar-sweep 4.5s linear infinite',
         scanline: 'scanline 4.5s linear infinite',
         beacon: 'beacon 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'num-pop': 'num-pop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1)',
         // The newest badge's periodic glint (motion.html: 2.8 s loop, newest only).
         'medal-sheen': 'medal-sheen 2.8s ease-in-out 1s infinite',
       },
