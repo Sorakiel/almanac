@@ -41,7 +41,7 @@ import {
 } from '@/features/reading/api/books.api'
 import { createBookNote, deleteBookNote } from '@/features/reading/api/notes.api'
 import { logBookRatingEvent } from '@/features/reading/api/ratings.api'
-import { createReadingSession } from '@/features/reading/api/sessions.api'
+import { createReadingSession, deleteReadingSession } from '@/features/reading/api/sessions.api'
 import { progressPatch } from '@/features/reading/lib/progress'
 import {
   acceptFriendRequest,
@@ -233,6 +233,15 @@ export interface LogReadingProgressVariables {
   minutes: number
   userId: string
   dateKey: string
+  /** Client id of the session row, so an Undo can remove exactly it. */
+  sessionId?: string
+}
+
+export interface UndoReadingProgressVariables {
+  /** The book as it was before the "+N" — its fields are written back. */
+  book: Book
+  sessionId: string
+  userId: string
 }
 
 export interface RateBookVariables {
@@ -339,6 +348,7 @@ export const OFFLINE_MUTATION_KEYS = {
   deleteReflection: offlineKey<void, DeleteReflectionVariables>('deleteReflection'),
   restoreReflection: offlineKey<void, RestoreReflectionVariables>('restoreReflection'),
   logReadingProgress: offlineKey<void, LogReadingProgressVariables>('logReadingProgress'),
+  undoReadingProgress: offlineKey<void, UndoReadingProgressVariables>('undoReadingProgress'),
   rateBook: offlineKey<void, RateBookVariables>('rateBook'),
   createBook: offlineKey<Book, CreateBookVariables>('createBook'),
   updateBook: offlineKey<Book, UpdateBookVariables>('updateBook'),
@@ -576,11 +586,12 @@ export function registerOfflineMutations(client: QueryClient): void {
   const BOOKS = { id: 'books' }
   register(
     OFFLINE_MUTATION_KEYS.logReadingProgress,
-    async ({ book, nextUnit, minutes, userId, dateKey }) => {
+    async ({ book, nextUnit, minutes, userId, dateKey, sessionId }) => {
       const { patch, delta } = progressPatch(book, nextUnit, dateKey)
       await updateBook(book.id, patch)
       if (delta > 0 || minutes > 0) {
         await createReadingSession({
+          ...(sessionId ? { id: sessionId } : {}),
           user_id: userId,
           book_id: book.id,
           minutes,
@@ -602,6 +613,27 @@ export function registerOfflineMutations(client: QueryClient): void {
       readingKeys.books(userId),
       readingKeys.book(book.id),
       readingKeys.sessions(book.id),
+      readingKeys.recent(userId),
+    ],
+    BOOKS,
+  )
+  // After the log in the same scope, so the row it removes already exists.
+  register(
+    OFFLINE_MUTATION_KEYS.undoReadingProgress,
+    async ({ book, sessionId }) => {
+      await updateBook(book.id, {
+        current_unit: book.current_unit,
+        status: book.status,
+        started_on: book.started_on,
+        finished_on: book.finished_on,
+      })
+      await deleteReadingSession(sessionId)
+    },
+    ({ book, userId }) => [
+      readingKeys.books(userId),
+      readingKeys.book(book.id),
+      readingKeys.sessions(book.id),
+      readingKeys.recent(userId),
     ],
     BOOKS,
   )
