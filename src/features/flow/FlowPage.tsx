@@ -1,260 +1,155 @@
-import { useEffect, useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { BookOpen, Timer } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Segmented } from '@/components/ui/segmented'
-import { IconTile } from '@/components/common/IconTile'
-import { SectionLabel } from '@/components/common/SectionLabel'
-import { useHabits } from '@/features/habits/hooks/useHabits'
-import { setHabitCount } from '@/features/habits/api/habits.api'
-import { dailyTarget } from '@/features/habits/lib/frequency'
-import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
-import { useBooks } from '@/features/reading/hooks/useBooks'
+import { useState } from 'react'
+import { ChevronRight, Sparkles } from 'lucide-react'
+import { ErrorState } from '@/components/common/ErrorState'
+import { SectionHead } from '@/features/workouts/components/SectionHead'
+import { DurationControls } from '@/features/flow/components/DurationControls'
 import { FlowReadingRunner } from '@/features/flow/components/FlowReadingRunner'
-import { DurationPicker } from '@/features/flow/components/DurationPicker'
-import { FocusConsole } from '@/features/flow/components/FocusConsole'
-import { useLogFocusSession } from '@/features/flow/hooks/useLogFocusSession'
-import { useSession } from '@/hooks/useSession'
-import { useToday } from '@/hooks/useToday'
-import { useFocusStore } from '@/stores/focus'
-import { useModulesStore } from '@/stores/modules'
-import { cn } from '@/lib/utils'
-import { useT } from '@/hooks/useT'
+import { FocusDial } from '@/features/flow/components/FocusDial'
+import { FocusRecent } from '@/features/flow/components/FocusRecent'
+import {
+  FocusTargetSheet,
+  type FocusTargetChoice,
+} from '@/features/flow/components/FocusTargetSheet'
+import { FocusWeek } from '@/features/flow/components/FocusWeek'
+import { useFinishFocus } from '@/features/flow/hooks/useFinishFocus'
+import { useFocusWeek } from '@/features/flow/hooks/useFocusWeek'
+import { FOCUS_GOAL_MIN, isFocusChip } from '@/features/flow/lib/duration'
+import { focusMinutesOn } from '@/features/flow/lib/week'
 import { useNow } from '@/hooks/useNow'
-import { habitKeys } from '@/features/habits/hooks/queryKeys'
-import { toUserError } from '@/lib/userError'
+import { useT } from '@/hooks/useT'
+import { useToday } from '@/hooks/useToday'
+import { focusMsLeft, useFocusStore } from '@/stores/focus'
+import '@/features/flow/flow.css'
 
-type Mode = 'habit' | 'book' | 'custom'
+/** The length the dial opens on. */
+const DEFAULT_MIN = 25
 
 /**
- * Flow — a standalone deep-work module. Pick a habit to focus on, a book to
- * read, or describe a custom task, choose a length, and run a device-local
- * timer. Workouts run their own live session under Train, not here.
+ * Flow (v0.6 §2.8, prototype `MOD.focus` / `.dk-focus`): a watch face with
+ * sand inside. Idle — pick a length (chips, «Своё», the knob or typing on the
+ * time) and what it's for, then «Начать». Running — the arc drains, Пауза /
+ * Завершить. Below or beside: the week's bars and the latest blocks.
  */
 function FlowPage() {
   const { t } = useT()
-  const { habits } = useHabits()
-  const { books } = useBooks()
-  const readingEnabled = useModulesStore((s) => s.enabled.reading)
-  const { user } = useSession()
-  const { dateKey } = useToday()
-  const queryClient = useQueryClient()
-  const { endsAt, durationMin, label, habitId, bookId, start, stop } = useFocusStore()
-  const logFocus = useLogFocusSession()
-  const [mode, setMode] = useState<Mode>('habit')
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [selectedBookId, setSelectedBookId] = useState<string | null>(null)
-  const [customLabel, setCustomLabel] = useState('')
-  const [duration, setDuration] = useState(25)
-
-  // If Reading was just disabled, fall back to Habit.
-  if (mode === 'book' && !readingEnabled) {
-    setMode('habit')
-  }
-
+  const { dateKey, timezone } = useToday()
+  const { endsAt, durationMin, label, bookId, pausedAt, start, pause, resume } = useFocusStore()
   const running = endsAt !== null && durationMin !== null
-  const now = useNow(running)
-  const dueHabits = habits.filter((h) => h.dueToday && !h.isComplete)
-  const openBooks = books.filter((b) => b.status !== 'finished')
-  const selectedHabit = habits.find((h) => h.id === selectedId) ?? null
-  const selectedBook = books.find((b) => b.id === selectedBookId) ?? null
-  const targetLabel =
-    mode === 'habit'
-      ? (selectedHabit?.name ?? null)
-      : mode === 'book'
-        ? (selectedBook?.title ?? null)
-        : customLabel.trim() || null
+  const now = useNow(running && pausedAt === null)
+  const { finishEarly } = useFinishFocus(now)
+  const week = useFocusWeek()
+  const [minutes, setMinutes] = useState(DEFAULT_MIN)
+  const [custom, setCustom] = useState(false)
+  const [target, setTarget] = useState<FocusTargetChoice | null>(null)
+  const [picking, setPicking] = useState(false)
 
-  // Mark the session's habit done (if any), then end. "End" just stops.
-  const completeSession = async (minutes: number) => {
-    logFocus(minutes, label)
-    const habit = habitId ? habits.find((h) => h.id === habitId) : null
-    if (habit && user) {
-      try {
-        await setHabitCount({
-          userId: user.id,
-          habitId: habit.id,
-          date: dateKey,
-          count: dailyTarget(habit),
-        })
-        void queryClient.invalidateQueries({ queryKey: habitKeys.history(habit.id) })
-        void queryClient.invalidateQueries({ queryKey: ['habits'] })
-        void queryClient.invalidateQueries({ queryKey: ['habitLogs'] })
-      } catch (error) {
-        toast.error(toUserError(error, t, 'flow.completeFailed'))
-        return
-      }
-    }
-    stop()
-    toast.success(t('flow.doneShort'))
+  const todayMin = focusMinutesOn(week.rows, dateKey)
+  const secondsLeft = running ? focusMsLeft({ endsAt, pausedAt }, now) / 1000 : null
+  const pick = (next: number, isCustom: boolean) => {
+    setMinutes(next)
+    setCustom(isCustom || !isFocusChip(next))
   }
 
-  useEffect(() => {
-    if (running && endsAt - now <= 0) {
-      // Ran the full block to completion — log the whole planned duration.
-      logFocus(durationMin, label)
-      stop()
-      toast.success(t('flow.done'))
-    }
-  }, [running, endsAt, now, durationMin, label, logFocus, stop, t])
-
-  if (running) {
-    const msLeft = Math.max(endsAt - now, 0)
-    const elapsedMin = durationMin - msLeft / 60_000
-    const focusedMin = Math.max(0, Math.round(elapsedMin))
-    const pct = durationMin ? Math.round((elapsedMin / durationMin) * 100) : 0
-    const endSession = () => {
-      logFocus(focusedMin, label)
-      stop()
-    }
-
-    return (
-      <div className="flex flex-col gap-5 lg:mx-auto lg:max-w-xl">
-        <header>
-          <p className="label-mono text-accent">{t('flow.inSessionLabel')}</p>
-          <h1 className="mt-1 text-2xl">{t('flow.title')}</h1>
-        </header>
-
-        <FocusConsole
-          label={label ?? t('flow.focusSession')}
-          msLeft={msLeft}
-          durationMin={durationMin}
-          elapsedMin={elapsedMin}
-          pct={pct}
-          onEnd={endSession}
-          onComplete={bookId ? undefined : () => void completeSession(focusedMin)}
-          completeLabel={habitId ? t('flow.complete') : t('flow.doneLabel')}
-        />
-
-        {bookId ? (
-          <FlowReadingRunner bookId={bookId} minutes={durationMin} onFinish={endSession} />
-        ) : null}
-      </div>
-    )
-  }
-
-  return (
-    <div className="flex flex-col gap-5 lg:mx-auto lg:max-w-xl">
-      <header>
-        <p className="label-mono">{t('flow.deepWork')}</p>
-        <h1 className="mt-1 text-2xl">{t('flow.title')}</h1>
-      </header>
-
-      <Segmented
-        aria-label={t('flow.flowTarget')}
-        value={mode}
-        onChange={setMode}
-        options={[
-          { value: 'habit' as const, label: t('flow.modeHabit') },
-          ...(readingEnabled ? [{ value: 'book' as const, label: t('flow.modeRead') }] : []),
-          { value: 'custom' as const, label: t('flow.describe') },
-        ]}
+  const dialbox = (
+    <div className="flow-dialbox w-full">
+      <FocusDial
+        minutes={running ? durationMin : minutes}
+        secondsLeft={secondsLeft}
+        paused={pausedAt !== null}
+        caption={label ?? t('flow.defaultSessionLabel')}
+        onPick={(m) => pick(m, !isFocusChip(m))}
       />
-
-      {mode === 'habit' ? (
-        <div className="flex flex-col gap-3">
-          <SectionLabel>{t('flow.dueToday')}</SectionLabel>
-          {dueHabits.length === 0 ? (
-            <p className="rounded-card border border-dashed p-4 text-sm text-muted">
-              {t('flow.nothingDue')}
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {dueHabits.map((habit) => {
-                const color = resolveHabitColor(habit.color)
-                const Icon = resolveHabitIcon(habit.icon)
-                const active = selectedId === habit.id
-                return (
-                  <li key={habit.id}>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedId(habit.id)}
-                      aria-pressed={active}
-                      className={cn(
-                        'flex w-full items-center gap-3 rounded-card border p-3 text-left transition-colors',
-                        active ? 'border-accent bg-accent/10' : 'hover:border-accent/40',
-                      )}
-                    >
-                      <IconTile icon={Icon} tone={color.tile} size="sm" />
-                      <span className="font-medium">{habit.name}</span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </div>
-      ) : mode === 'book' ? (
-        <div className="flex flex-col gap-3">
-          <SectionLabel>{t('flow.pickBook')}</SectionLabel>
-          {openBooks.length === 0 ? (
-            <p className="rounded-card border border-dashed p-4 text-sm text-muted">
-              {t('flow.noBooks')}
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {openBooks.map((book) => {
-                const active = selectedBookId === book.id
-                return (
-                  <li key={book.id}>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedBookId(book.id)}
-                      aria-pressed={active}
-                      className={cn(
-                        'flex w-full items-center gap-3 rounded-card border p-3 text-left transition-colors',
-                        active ? 'border-accent bg-accent/10' : 'hover:border-accent/40',
-                      )}
-                    >
-                      <IconTile icon={BookOpen} tone="bg-amber/15 text-amber" size="sm" />
-                      <span className="min-w-0">
-                        <span className="block truncate font-medium">{book.title}</span>
-                        {book.author ? (
-                          <span className="block truncate text-[12px] text-muted">
-                            {book.author}
-                          </span>
-                        ) : null}
-                      </span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
+      {running ? (
+        <div className="flow-row2">
+          <button
+            type="button"
+            className="flow-cta is-ghost"
+            onClick={pausedAt === null ? pause : resume}
+          >
+            {pausedAt === null ? t('flow.pause') : t('flow.resume')}
+          </button>
+          <button type="button" className="flow-cta is-accent" onClick={finishEarly}>
+            {t('flow.end')}
+          </button>
         </div>
       ) : (
-        <label className="flex flex-col gap-1.5">
-          <span className="label-mono">{t('flow.focusPrompt')}</span>
-          <Input
-            placeholder={t('flow.focusPlaceholder')}
-            value={customLabel}
-            onChange={(event) => setCustomLabel(event.target.value)}
-          />
-        </label>
+        <>
+          <DurationControls minutes={minutes} custom={custom} onChange={pick} />
+          <button type="button" className="flow-target" onClick={() => setPicking(true)}>
+            <span className="flow-target-ic" aria-hidden="true">
+              <Sparkles />
+            </span>
+            <span className="min-w-0 flex-1">
+              <small>{t('flow.targetLabel')}</small>
+              <b>{target?.label ?? t('flow.targetNone')}</b>
+            </span>
+            <span className="flow-target-go">
+              {t('flow.targetChange')}
+              <ChevronRight aria-hidden="true" />
+            </span>
+          </button>
+          <button
+            type="button"
+            className="flow-cta is-accent"
+            onClick={() =>
+              start(minutes, target?.label, {
+                habitId: target?.kind === 'habit' ? target.id : null,
+                bookId: target?.kind === 'book' ? target.id : null,
+              })
+            }
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            {t('flow.startFor', { count: minutes })}
+          </button>
+        </>
       )}
+      {running && bookId ? (
+        <FlowReadingRunner bookId={bookId} minutes={durationMin} onFinish={finishEarly} />
+      ) : null}
+    </div>
+  )
 
-      <div className="flex flex-col gap-2">
-        <SectionLabel>{t('flow.length')}</SectionLabel>
-        <DurationPicker value={duration} onChange={setDuration} />
+  return (
+    <div className="w-full">
+      <header className="mx-0.5 mb-4 mt-2">
+        <p className="text-callout font-medium text-muted">
+          {t('flow.todayOf', { count: todayMin, goal: FOCUS_GOAL_MIN })}
+        </p>
+        <h1 className="text-large-title font-bold tracking-title">{t('flow.title')}</h1>
+      </header>
+
+      <div className="grid items-start gap-6 lg:grid-cols-module">
+        <div className="grid min-w-0 justify-items-center lg:rounded-card lg:bg-surface lg:p-7">
+          {dialbox}
+        </div>
+        <aside className="grid min-w-0 content-start gap-3.5 lg:sticky lg:top-toolbar-clearance">
+          {week.isError ? (
+            <ErrorState title={t('flow.weekFailed')} onRetry={week.refetch} />
+          ) : (
+            <>
+              <section>
+                <div className="lg:hidden">
+                  <SectionHead>{t('flow.rhythm')}</SectionHead>
+                </div>
+                <FocusWeek rows={week.rows} todayKey={dateKey} />
+              </section>
+              <section>
+                <SectionHead>{t('flow.recent')}</SectionHead>
+                <FocusRecent rows={week.rows} todayKey={dateKey} timezone={timezone} />
+              </section>
+            </>
+          )}
+        </aside>
       </div>
 
-      <Button
-        size="lg"
-        className={cn('w-full', targetLabel && 'shadow-glow')}
-        disabled={!targetLabel}
-        onClick={() =>
-          targetLabel &&
-          start(duration, targetLabel, {
-            habitId: mode === 'habit' ? (selectedHabit?.id ?? null) : null,
-            bookId: mode === 'book' ? (selectedBook?.id ?? null) : null,
-          })
-        }
-      >
-        <Timer className="h-4 w-4" />
-        {t('flow.start')}
-      </Button>
+      <FocusTargetSheet
+        open={picking}
+        onOpenChange={setPicking}
+        value={target}
+        onPick={setTarget}
+      />
     </div>
   )
 }
