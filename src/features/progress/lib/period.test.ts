@@ -120,11 +120,31 @@ describe('readingPeriod', () => {
 describe('focusPeriod / reflectPeriod', () => {
   it('averages focus sessions in the window', () => {
     const rows = [
-      { date: '2026-09-25', minutes: 50 },
-      { date: '2026-09-24', minutes: 25 },
-      { date: '2026-07-01', minutes: 90 },
+      { date: '2026-09-25', minutes: 50, created_at: '2026-09-25T07:00:00Z' },
+      { date: '2026-09-24', minutes: 25, created_at: '2026-09-24T19:30:00Z' },
+      { date: '2026-07-01', minutes: 90, created_at: '2026-07-01T09:00:00Z' },
     ]
-    expect(focusPeriod(rows, '2026-09-19')).toEqual({ minutes: 75, sessions: 2, average: 38 })
+    expect(focusPeriod(rows, '2026-09-19', 'UTC')).toEqual({
+      minutes: 75,
+      sessions: 2,
+      average: 38,
+      bestPart: 'morning',
+    })
+  })
+
+  it('reads the best part of the day in the user timezone, from the start', () => {
+    // Logged 13:10 UTC after 40 min: started 12:30 UTC = 21:30 in Tokyo.
+    const rows = [
+      { date: '2026-09-25', minutes: 40, created_at: '2026-09-25T13:10:00Z' },
+      { date: '2026-09-24', minutes: 40, created_at: '2026-09-24T13:10:00Z' },
+    ]
+    expect(focusPeriod(rows, null, 'UTC').bestPart).toBe('afternoon')
+    expect(focusPeriod(rows, null, 'Asia/Tokyo').bestPart).toBe('evening')
+  })
+
+  it('does not name a best time from a single session', () => {
+    const rows = [{ date: '2026-09-25', minutes: 25, created_at: '2026-09-25T08:00:00Z' }]
+    expect(focusPeriod(rows, null, 'UTC').bestPart).toBeNull()
   })
 
   it('averages only rated reflections', () => {

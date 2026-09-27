@@ -29,6 +29,7 @@ export interface NavModule {
   core?: boolean
 }
 
+/** In the prototype's order: it is also the default Today / sidebar order (DEFAULT_ORDER). */
 export const NAV_MODULES: NavModule[] = [
   {
     key: 'habits',
@@ -48,6 +49,11 @@ export const NAV_MODULES: NavModule[] = [
     to: '/train',
   },
   {
+    key: 'reading',
+    icon: BookOpen,
+    to: '/reading',
+  },
+  {
     key: 'flow',
     icon: Timer,
     to: '/flow',
@@ -56,11 +62,6 @@ export const NAV_MODULES: NavModule[] = [
     key: 'reflect',
     icon: NotebookPen,
     to: '/reflect',
-  },
-  {
-    key: 'reading',
-    icon: BookOpen,
-    to: '/reading',
   },
   {
     key: 'social',
