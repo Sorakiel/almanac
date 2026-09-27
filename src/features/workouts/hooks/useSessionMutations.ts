@@ -70,14 +70,14 @@ export function useSessionMutations(
     {
       onMutate: async (variables) => {
         if ('patch' in variables) return undefined
-        const { id, done } = variables
+        const { id, done, reps, weight } = variables
         const context = await patchQueryData<SessionData>(queryClient, sessionKey, (previous) =>
           previous
             ? {
                 ...previous,
                 exercises: previous.exercises.map((ex) => ({
                   ...ex,
-                  sets: ex.sets.map((s) => (s.id === id ? { ...s, done } : s)),
+                  sets: ex.sets.map((s) => (s.id === id ? { ...s, done, reps, weight } : s)),
                 })),
               }
             : previous,

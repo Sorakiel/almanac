@@ -1,0 +1,154 @@
+/*
+ * The live session, ported from the prototypes (`MOD.session`, `wStage`,
+ * `waveRing`, `wTrack`): the one card that holds the set, the rest water, the
+ * finish medal. Everything that moves stops under prefers-reduced-motion.
+ */
+
+/* Entering a new set: the stage's rows rise in, a beat apart (`.m-stage.enter`). */
+.ws-enter > * {
+  animation: ws-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.ws-enter > *:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.ws-enter > *:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.ws-enter > *:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.ws-enter > *:nth-child(5) {
+  animation-delay: 0.16s;
+}
+@keyframes ws-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* "Set done": a glint crosses the button every 3.6 s. */
+.ws-done {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 24px -12px rgb(var(--color-teal));
+}
+.ws-done::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  left: -60%;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.28), transparent);
+  animation: ws-shine 3.6s ease-in-out infinite;
+}
+@keyframes ws-shine {
+  0%,
+  60% {
+    left: -60%;
+  }
+  100% {
+    left: 130%;
+  }
+}
+
+/* Rest: teal water in the ring, two waves drifting at different speeds. */
+.ws-water {
+  transition: transform 1s linear;
+}
+.ws-water path {
+  fill: rgb(var(--color-teal));
+}
+.ws-water .w1 {
+  opacity: 0.85;
+  animation: ws-wave 3.2s linear infinite;
+}
+.ws-water .w2 {
+  opacity: 0.4;
+  animation: ws-wave 5.5s linear infinite reverse;
+  transform: translateY(-5px);
+}
+@keyframes ws-wave {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: -100px 0;
+  }
+}
+.ws-rest-time {
+  text-shadow: 0 1px 12px rgb(var(--color-surface) / 0.7);
+}
+
+/* The track scrolls sideways on the phone without a bar. */
+.ws-track {
+  scrollbar-width: none;
+}
+.ws-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* The track: the current set's dot breathes inside a teal ring. */
+.ws-dot-current {
+  box-shadow:
+    0 0 0 2px rgb(var(--color-surface)),
+    0 0 0 3.5px rgb(var(--color-teal));
+  animation: ws-dot 1.6s ease-in-out infinite;
+}
+@keyframes ws-dot {
+  50% {
+    transform: scale(1.3);
+  }
+}
+
+/* Finished: the medal spins in, then its check draws. */
+.ws-medal {
+  background: conic-gradient(
+    from 200deg,
+    rgb(var(--color-amber)),
+    rgb(var(--color-gold-light)),
+    rgb(var(--color-accent)),
+    rgb(var(--color-amber))
+  );
+  box-shadow: 0 14px 30px -12px rgb(var(--color-amber));
+  animation: ws-medal 0.8s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+.ws-medal svg {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: ws-draw 0.5s 0.45s ease-out forwards;
+}
+@keyframes ws-medal {
+  from {
+    transform: scale(0.2) rotate(-120deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes ws-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-enter > *,
+  .ws-done::after,
+  .ws-water path,
+  .ws-dot-current,
+  .ws-medal {
+    animation: none !important;
+  }
+  .ws-medal svg {
+    animation: none !important;
+    stroke-dashoffset: 0;
+  }
+}

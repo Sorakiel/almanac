@@ -67,8 +67,15 @@ export async function fetchSessionExercises(
       .sort((a, b) => a.set_number - b.set_number)
       .map((planned) => {
         const log = logged.get(`${ex.id}:${planned.set_number}`)
-        // The plan row keeps its id and targets; only the record comes from the log.
-        return { ...planned, done: log?.done ?? false, logged_at: log?.logged_at ?? null }
+        // The plan row keeps its id; what was logged — done, when, and the
+        // numbers actually lifted (the runner's steppers) — comes from the log.
+        return {
+          ...planned,
+          done: log?.done ?? false,
+          logged_at: log?.logged_at ?? null,
+          reps: log?.reps ?? planned.reps,
+          weight: log?.weight ?? planned.weight,
+        }
       }),
   }))
   return { date: session?.date ?? today, exercises }

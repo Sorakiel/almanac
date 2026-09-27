@@ -1,6 +1,5 @@
 import { lazy, Suspense, type ComponentType, type ReactElement } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
-import { LoadingState } from '@/components/common/LoadingState'
 import { AppLayout } from '@/app/AppLayout'
 import { ProtectedRoute } from '@/app/ProtectedRoute'
 import { RouteFallback } from '@/app/shell/RouteFallback'
@@ -64,15 +63,6 @@ function suspend(element: ReactElement): ReactElement {
   return <Suspense fallback={<RouteFallback />}>{element}</Suspense>
 }
 
-/**
- * Full-screen focused fallback for shell-less routes (e.g. the live session):
- * a centered spinner rather than the workspace skeleton, which would look
- * broken spanning the whole viewport with no nav rail around it.
- */
-function suspendFocused(element: ReactElement): ReactElement {
-  return <Suspense fallback={<LoadingState fullScreen className="bg-bg" />}>{element}</Suspense>
-}
-
 export const router = createBrowserRouter([
   { path: '/auth', element: <AuthPage />, errorElement: <RouteError /> },
   { path: '/auth/reset', element: suspend(<ResetPasswordPage />), errorElement: <RouteError /> },
@@ -81,7 +71,6 @@ export const router = createBrowserRouter([
     errorElement: <RouteError />,
     children: [
       { path: '/welcome', element: suspend(<OnboardingPage />) },
-      { path: '/train/:id/session', element: suspendFocused(<WorkoutSessionPage />) },
       {
         element: <AppLayout />,
         children: [
@@ -92,6 +81,7 @@ export const router = createBrowserRouter([
           { path: '/train', element: suspend(<WorkoutsPage />) },
           { path: '/train/:id', element: suspend(<WorkoutDetailPage />) },
           { path: '/train/:id/edit', element: suspend(<WorkoutEditPage />) },
+          { path: '/train/:id/session', element: suspend(<WorkoutSessionPage />) },
           { path: '/progress', element: suspend(<ProgressPage />) },
           // The screen was Insights until v0.6; old bookmarks and links land here.
           { path: '/insights', element: <Navigate to="/progress" replace /> },
