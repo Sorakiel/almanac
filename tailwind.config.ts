@@ -69,6 +69,10 @@ export default {
         callout: ['15px', { lineHeight: '20px' }],
         footnote: ['13px', { lineHeight: '18px' }],
         caption: ['11px', { lineHeight: '13px' }],
+        // The session's one big number set (the prototypes' `.m-big` / `.m-wave b`).
+        stage: ['58px', { lineHeight: '1', letterSpacing: '-0.05em' }],
+        'stage-lg': ['76px', { lineHeight: '1', letterSpacing: '-0.05em' }],
+        rest: ['52px', { lineHeight: '1', letterSpacing: '-0.04em' }],
       },
       spacing: {
         // Floating layers above the phone's glass bottom nav (toasts, the sync
@@ -86,6 +90,20 @@ export default {
         '6.5': '1.625rem',
         '7.5': '1.875rem',
         '30': '7.5rem',
+        // Session: the set dots (7 / 9px) and the rest ring (230 / 260px).
+        '1.75': '0.4375rem',
+        '2.25': '0.5625rem',
+        '57.5': '14.375rem',
+        '65': '16.25rem',
+        // The session's done button (58px) and its desktop cap (420px).
+        '14.5': '3.625rem',
+        '105': '26.25rem',
+        // Session medal (92px), finish stats gap (22px), list action rows (50px).
+        '23': '5.75rem',
+        '5.5': '1.375rem',
+        '12.5': '3.125rem',
+        // The desktop stage's inner padding (the prototype's 10 + 24).
+        '8.5': '2.125rem',
         // The desktop inspector panel (desktop-prototype.html `.dk-insp`).
         inspector: '392px',
       },
@@ -134,6 +152,8 @@ export default {
         'bar-row-wide': '170px minmax(0, 1fr) 46px',
       },
       // iOS-like overshoot for switches and toggles.
+      // The prototypes' press-downs: .97 on a tap, .96 held after a set lands.
+      scale: { '96': '0.96', '97': '0.97' },
       transitionTimingFunction: {
         spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
         // iOS sheet curve — detents, disclosures, anything that opens in place.

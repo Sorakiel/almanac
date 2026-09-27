@@ -18,6 +18,8 @@ interface SessionClock {
   startRest: (seconds?: number) => void
   /** Cancel any running rest countdown. */
   skipRest: () => void
+  /** Move the running rest's end by `seconds` (−15 / +15); ending it if that runs it out. */
+  adjustRest: (seconds: number) => void
 }
 
 /**
@@ -37,6 +39,18 @@ export function useSessionClock(record: SessionRecord | null | undefined): Sessi
 
   const skipRest = useCallback(() => setRestEndsAt(null), [])
 
+  const adjustRest = useCallback((seconds: number) => {
+    setRestEndsAt((endsAt) => {
+      if (endsAt === null) return null
+      const next = endsAt + seconds * 1000
+      const left = next - Date.now()
+      // Under a second left reads as done: the ring would only flash empty.
+      if (left <= 1000) return null
+      setRestTotalMs((total) => Math.max(total, left))
+      return next
+    })
+  }, [])
+
   // The rest timer reads as null once it passes its target — no effect needed
   // to reset state, which keeps renders from cascading.
   return {
@@ -47,5 +61,6 @@ export function useSessionClock(record: SessionRecord | null | undefined): Sessi
     restEndsAt,
     startRest,
     skipRest,
+    adjustRest,
   }
 }

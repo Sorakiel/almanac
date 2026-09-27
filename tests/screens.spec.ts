@@ -99,18 +99,32 @@ async function seedHistory(): Promise<string> {
 }
 
 /**
- * A planned workout for the live-session screen: one exercise, three sets, so
- * the ring has progress to draw and "next" has something to name.
+ * A planned workout for the live-session screen, the prototype's own "Ноги"
+ * (`MS.w.today`): squat 5 × 90×5, Romanian deadlift 3 × 70×10, lunges
+ * 3 × 20×12 — plus one finished session a week earlier, so "last time" and
+ * the record have something to compare with, as in the prototype.
  */
 const SESSION_WORKOUT = 'E2E screens · session'
-const SESSION_EXERCISE = 'E2E screens · squat'
+const SESSION_EXERCISES = [
+  { name: 'Присед', sets: 5, weight: 90, reps: 5, last: { weight: 87.5, reps: 5 } },
+  { name: 'Румынская тяга', sets: 3, weight: 70, reps: 10, last: { weight: 65, reps: 10 } },
+  { name: 'Выпады', sets: 3, weight: 20, reps: 12, last: { weight: 20, reps: 12 } },
+] as const
+const SESSION_TOTAL_SETS = SESSION_EXERCISES.reduce((n, e) => n + e.sets, 0)
 
 async function dropSession(): Promise<void> {
   const db = await e2eClient()
   const userId = await e2eUserId(db)
   // Workout first: its workout_exercises cascade, and they restrict the exercise delete.
   await db.from('workouts').delete().eq('user_id', userId).eq('name', SESSION_WORKOUT)
-  await db.from('exercises').delete().eq('user_id', userId).eq('name', SESSION_EXERCISE)
+  await db
+    .from('exercises')
+    .delete()
+    .eq('user_id', userId)
+    .in(
+      'name',
+      SESSION_EXERCISES.map((e) => e.name),
+    )
 }
 
 async function seedSession(): Promise<string> {
@@ -124,28 +138,63 @@ async function seedSession(): Promise<string> {
     .select('id')
     .single()
   if (error) throw new Error(`could not seed the session workout: ${error.message}`)
-  const { data: exercise, error: exerciseError } = await db
-    .from('exercises')
-    .insert({ user_id: userId, name: SESSION_EXERCISE })
+
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  const { data: past, error: pastError } = await db
+    .from('workout_sessions')
+    .insert({
+      user_id: userId,
+      workout_id: workout.id,
+      date: weekAgo.toISOString().slice(0, 10),
+      started_at: new Date(weekAgo.getTime() - 28 * 60 * 1000).toISOString(),
+      completed_at: weekAgo.toISOString(),
+    })
     .select('id')
     .single()
-  if (exerciseError) throw new Error(`could not seed the exercise: ${exerciseError.message}`)
-  const { data: link, error: linkError } = await db
-    .from('workout_exercises')
-    .insert({ workout_id: workout.id, exercise_id: exercise.id, target_sets: 3, target_reps: 5 })
-    .select('id')
-    .single()
-  if (linkError) throw new Error(`could not attach the exercise: ${linkError.message}`)
-  const { error: setsError } = await db.from('set_logs').insert(
-    [1, 2, 3].map((n) => ({
-      workout_exercise_id: link.id,
-      set_number: n,
-      reps: 5,
-      weight: 80,
-      rest_seconds: 120,
-    })),
-  )
-  if (setsError) throw new Error(`could not seed the sets: ${setsError.message}`)
+  if (pastError) throw new Error(`could not seed the past session: ${pastError.message}`)
+
+  for (const [order, ex] of SESSION_EXERCISES.entries()) {
+    const { data: exercise, error: exerciseError } = await db
+      .from('exercises')
+      .insert({ user_id: userId, name: ex.name })
+      .select('id')
+      .single()
+    if (exerciseError) throw new Error(`could not seed the exercise: ${exerciseError.message}`)
+    const { data: link, error: linkError } = await db
+      .from('workout_exercises')
+      .insert({
+        workout_id: workout.id,
+        exercise_id: exercise.id,
+        target_sets: ex.sets,
+        target_reps: ex.reps,
+        target_weight: ex.weight,
+        sort_order: order,
+      })
+      .select('id')
+      .single()
+    if (linkError) throw new Error(`could not attach the exercise: ${linkError.message}`)
+    const numbers = Array.from({ length: ex.sets }, (_, k) => k + 1)
+    const { error: setsError } = await db.from('set_logs').insert([
+      // The plan rows…
+      ...numbers.map((n) => ({
+        workout_exercise_id: link.id,
+        set_number: n,
+        reps: ex.reps,
+        weight: ex.weight,
+        rest_seconds: 90,
+      })),
+      // …and what was lifted a week ago.
+      ...numbers.map((n) => ({
+        workout_exercise_id: link.id,
+        set_number: n,
+        reps: ex.last.reps,
+        weight: ex.last.weight,
+        done: true,
+        session_id: past.id,
+      })),
+    ])
+    if (setsError) throw new Error(`could not seed the sets: ${setsError.message}`)
+  }
   return workout.id
 }
 
@@ -289,7 +338,8 @@ async function shoot(page: Page, file: string, fullPage = true): Promise<void> {
 
 for (const v of VARIANTS) {
   test(`screens · ${v.name}`, async ({ page }) => {
-    test.setTimeout(120_000)
+    // The session walk ticks the whole plan through to the medal.
+    test.setTimeout(180_000)
     const errors = watchConsole(page)
     await page.setViewportSize({ width: v.width, height: v.height })
     await signIn(page)
@@ -445,22 +495,34 @@ for (const v of VARIANTS) {
       await shoot(page, `${v.name}-train-workout`)
     }
 
-    // Live session: working (compact "N of M" bar, no ring), then resting (the rest ring)
-    // after a set is ticked (ring counts the set's own rest down).
+    // Live session, one set at a time: work, rest, the sets list, finished.
     await page.goto(`/train/${sessionId}/session`)
-    const complete = page.getByRole('button', {
-      name: v.locale === 'ru' ? 'Завершить подход 1' : 'Complete set 1',
+    const setDone = page.getByRole('button', {
+      name: v.locale === 'ru' ? 'Подход сделан' : 'Set done',
     })
-    await expect(complete).toBeVisible({ timeout: 20_000 })
+    await expect(setDone).toBeVisible({ timeout: 20_000 })
     await expectNoHorizontalScroll(page, `${v.name} session`)
-    await shoot(page, `${v.name}-session`)
-    await complete.click()
+    await shoot(page, `${v.name}-session`, false)
+    await setDone.click()
+    const ready = page.getByRole('button', { name: v.locale === 'ru' ? 'Я готов' : 'I’m ready' })
+    await expect(ready).toBeVisible()
+    await page.waitForTimeout(1200) // the water settles to its level
+    await shoot(page, `${v.name}-session-rest`, false)
+    const allSets = page.getByRole('button', {
+      name: v.locale === 'ru' ? 'Все подходы' : 'All sets',
+    })
+    if (await allSets.isVisible()) await allSets.click()
+    await shoot(page, `${v.name}-session-sets`)
+    // Through the rest of the plan to the medal.
+    for (let n = 1; n < SESSION_TOTAL_SETS; n++) {
+      await ready.click()
+      await setDone.click()
+    }
     await expect(
-      page.getByRole('button', {
-        name: v.locale === 'ru' ? 'Завершить подход 2' : 'Complete set 2',
-      }),
+      page.getByText(v.locale === 'ru' ? 'Тренировка закрыта' : 'Workout closed'),
     ).toBeVisible()
-    await shoot(page, `${v.name}-session-rest`)
+    await page.waitForTimeout(1400) // the medal lands, the check draws
+    await shoot(page, `${v.name}-session-done`, false)
 
     expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
   })

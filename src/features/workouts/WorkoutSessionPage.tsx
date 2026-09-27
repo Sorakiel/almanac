@@ -1,318 +1,173 @@
-import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { toast } from 'sonner'
-import { Ban, Check, ChevronLeft, EllipsisVertical, Flag, Pause, Play, Timer } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
+import { EmptyState } from '@/components/common/EmptyState'
 import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
-import { Sheet } from '@/components/ui/sheet'
-import { EmptyState } from '@/components/common/EmptyState'
-import { ConfirmSheet } from '@/components/common/ConfirmSheet'
-import { CurrentExercisePanel } from '@/features/workouts/components/session/CurrentExercisePanel'
-import { RestRing } from '@/features/workouts/components/session/RestRing'
-import { SessionQueue } from '@/features/workouts/components/session/SessionQueue'
-import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
-import { useSessionMutations } from '@/features/workouts/hooks/useSessionMutations'
-import { useSessionClock } from '@/features/workouts/hooks/useSessionClock'
-import { useWorkoutSessionStore } from '@/features/workouts/stores/workoutSession'
-import {
-  currentExerciseIndex,
-  currentSet as firstUndoneSet,
-  formatClock,
-  nextSetLabel,
-  sessionProgress,
-} from '@/features/workouts/lib/session'
-import { cn } from '@/lib/utils'
+import { SectionHead } from '@/features/workouts/components/SectionHead'
+import { DoneSets } from '@/features/workouts/components/session/DoneSets'
+import { ExerciseTrack } from '@/features/workouts/components/session/ExerciseTrack'
+import { FinishedStage } from '@/features/workouts/components/session/FinishedStage'
+import { RestStage } from '@/features/workouts/components/session/RestStage'
+import { WorkStage } from '@/features/workouts/components/session/WorkStage'
+import { useSessionRunner } from '@/features/workouts/hooks/useSessionRunner'
+import { formatTimer } from '@/features/workouts/lib/sessionRun'
 import { useT } from '@/hooks/useT'
-import { toUserError } from '@/lib/userError'
+import { cn } from '@/lib/utils'
+import '@/features/workouts/components/session/session.css'
 
-/** Focused live-session runner (no app shell) — spec-board screen 08. */
+/**
+ * The live session, one set at a time (`MOD.session`; desktop `MOD.desk('session')`).
+ * One tree for every width: on the phone the header, bar, stage, track and
+ * (on demand) the sets list stack; on the desktop the bar and stage take the
+ * left column, the track and the always-open "Done" list a sticky right one.
+ */
 function WorkoutSessionPage() {
   const { t } = useT()
   const { id = '' } = useParams()
   const navigate = useNavigate()
-  const { workout, exercises, isLoading, isError } = useWorkoutDetail(id)
-  // Done is said once, quietly, and the runner steps aside — no modal to dismiss.
-  const wrapUp = () => {
-    toast(t('workouts.finishedToast', { name: workout?.name ?? '' }))
-    useWorkoutSessionStore.getState().end(id)
-    navigate(`/train/${id}`)
-  }
-  const mutations = useSessionMutations(id, { onFinished: wrapUp })
-  const record = useWorkoutSessionStore((s) => s.sessions[id])
-  const start = useWorkoutSessionStore((s) => s.start)
-  const pause = useWorkoutSessionStore((s) => s.pause)
-  const end = useWorkoutSessionStore((s) => s.end)
-  const { elapsedMs, running, restMs, restTotalMs, restEndsAt, startRest, skipRest } =
-    useSessionClock(record)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [confirmDiscard, setConfirmDiscard] = useState(false)
+  const run = useSessionRunner(id)
 
-  // Deep-linking straight to the session (or a reload) starts the clock once,
-  // but a paused session is left paused — the user resumes it explicitly. Read
-  // the store imperatively (not via the `record` dep) so clearing the session
-  // on finish/discard doesn't immediately re-create it before we navigate away.
-  useEffect(() => {
-    if (id && !useWorkoutSessionStore.getState().sessions[id]) start(id)
-  }, [id, start])
+  if (run.isLoading) return <LoadingState label={t('workouts.loadingSession')} />
 
-  if (isLoading) {
-    return <LoadingState label={t('workouts.loadingSession')} fullScreen />
-  }
-
-  if (isError || !workout) {
+  if (run.isError || !run.workout) {
     return (
-      <div className="mx-auto flex min-h-dvh max-w-md items-center px-5">
-        <EmptyState
-          title={t('workouts.loadSessionFailed')}
-          action={
-            <Button size="sm" variant="surface" onClick={() => navigate('/train')}>
-              {t('workouts.backToTraining')}
-            </Button>
-          }
-        />
-      </div>
+      <EmptyState
+        title={t('workouts.loadSessionFailed')}
+        action={
+          <Button size="sm" variant="surface" onClick={() => navigate('/train')}>
+            {t('workouts.backToTraining')}
+          </Button>
+        }
+      />
     )
   }
 
-  const progress = sessionProgress(exercises)
-  const currentIndex = currentExerciseIndex(exercises)
-  const currentExercise = currentIndex >= 0 ? exercises[currentIndex] : null
-  const currentSet = currentExercise ? firstUndoneSet(currentExercise) : null
-  const exerciseLabel =
-    exercises.length > 0
-      ? t('workouts.exerciseOf', {
-          n: Math.min(currentIndex + 1, exercises.length),
-          total: exercises.length,
-        })
-      : t('workouts.noExercisesShort')
+  const { exercises, clock, cursor, exercise, values } = run
+  const done = run.totals.sets
+  const total = exercises.reduce((sum, e) => sum + e.sets.length, 0)
+  const elapsed = formatTimer(clock.elapsedMs)
+  const stageKey = run.finished
+    ? 'fin'
+    : clock.restMs !== null
+      ? 'rest'
+      : `${cursor?.exercise}-${cursor?.set}`
 
-  const completeCurrentSet = () => {
-    if (!currentSet) return
-    mutations.editSet.mutate(
-      { set: currentSet, done: true },
-      {
-        onError: (e) => toast.error(toUserError(e, t, 'workouts.session.logFailed')),
-      },
-    )
-    // The set's own rest if it has one, the standard interval otherwise.
-    startRest(currentSet.rest_seconds ?? undefined)
-  }
-
-  const togglePause = () => (running ? pause(id) : start(id))
-  const leave = () => navigate(`/train/${id}`)
-
-  // Finish now — mark the workout done even if some sets are unticked. Not
-  // awaited: offline the write queues and the runner still steps aside.
-  const finishWorkout = () => {
-    setMenuOpen(false)
-    mutations.setCompleted.mutate(true, {
-      onError: (e) => toast.error(toUserError(e, t, 'workouts.session.finishFailed')),
-    })
-    wrapUp()
-  }
-
-  // Abandon the live session: drop the timer, keep whatever sets were logged.
-  const discardSession = () => {
-    end(id)
-    setConfirmDiscard(false)
-    toast(t('workouts.session.discarded'))
-    navigate(`/train/${id}`)
-  }
+  const stage = run.finished ? (
+    <FinishedStage
+      elapsedMs={clock.elapsedMs}
+      sets={run.totals.sets}
+      volume={run.totals.volume}
+      record={run.sessionRecord}
+      onSave={run.onSave}
+    />
+  ) : clock.restMs !== null ? (
+    <RestStage
+      restMs={clock.restMs}
+      restTotalMs={clock.restTotalMs}
+      next={run.next}
+      onAdjust={clock.adjustRest}
+      onReady={clock.skipRest}
+    />
+  ) : exercise && cursor && values ? (
+    <WorkStage
+      exerciseName={exercise.name}
+      setIndex={cursor.set}
+      setTotal={exercise.sets.length}
+      values={values}
+      last={run.last}
+      record={run.record}
+      onAdjust={run.onAdjust}
+      onDone={run.onDone}
+      justDone={run.justDone}
+    />
+  ) : (
+    <p className="text-callout text-muted">{t('workouts.session.noExercises')}</p>
+  )
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg text-foreground">
-      {/* Focused top bar (replaces the nav shell) */}
-      <header className="flex h-14 flex-none items-center justify-between gap-3 border-b bg-chrome px-4 pt-[env(safe-area-inset-top)] lg:px-6">
-        <div className="flex min-w-0 items-center gap-3">
-          <button
-            type="button"
-            onClick={leave}
-            aria-label={t('workouts.session.leave')}
-            className="-ml-1 rounded-full p-1 text-muted hover:text-foreground"
-          >
-            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-          </button>
-          <span className="min-w-0 truncate text-footnote font-semibold">{workout.name}</span>
-          <span
-            className={cn(
-              'flex flex-none items-center gap-1.5 text-footnote',
-              running ? 'text-accent' : 'text-muted-strong',
-            )}
-          >
-            <Timer className="h-3.5 w-3.5" aria-hidden="true" />
-            <span className="num">{formatClock(elapsedMs)}</span>
-            <span className="hidden sm:inline">
-              {running ? t('workouts.clockElapsed') : t('workouts.clockPaused')}
-            </span>
-          </span>
-          <button
-            type="button"
-            onClick={togglePause}
-            aria-label={running ? t('workouts.pauseSession') : t('workouts.resumeSession')}
-            className="flex h-7 w-7 flex-none items-center justify-center rounded-full border text-muted transition-colors hover:text-foreground"
-          >
-            {running ? (
-              <Pause className="h-3.5 w-3.5" aria-hidden="true" />
-            ) : (
-              <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-            )}
-          </button>
+    <section className="w-full">
+      <button
+        type="button"
+        onClick={() => navigate('/train')}
+        className="-ml-1 mb-1 flex items-center gap-0.5 text-body text-accent"
+      >
+        <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+        {t('workouts.title')}
+      </button>
+
+      {/* Phone header: name, the running clock, the sets list toggle. */}
+      <div className="mx-0.5 mb-2.5 flex items-center justify-between gap-2.5 lg:hidden">
+        <div className="min-w-0">
+          <h1 className="truncate text-headline font-bold tracking-title">{run.workout.name}</h1>
+          <p className="num text-footnote font-medium text-muted">{elapsed}</p>
         </div>
-        <div className="flex flex-none items-center gap-2">
-          <span className="rounded-full bg-surface px-3.5 py-1.5 text-footnote text-muted">
-            {exerciseLabel}
-          </span>
-          <button
-            type="button"
-            onClick={() => setMenuOpen(true)}
-            aria-label={t('workouts.session.options')}
-            className="flex h-8 w-8 items-center justify-center rounded-full border text-muted transition-colors hover:text-foreground"
-          >
-            <EllipsisVertical className="h-4 w-4" aria-hidden="true" />
-          </button>
-        </div>
-      </header>
-
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        {/* Workspace */}
-        <div className="flex min-w-0 flex-1 flex-col px-5 py-6 lg:px-11 lg:py-9">
-          {/* Compact "N of M" — no ring while working; rest gets its own card. */}
-          <div className="flex items-center gap-3">
-            <div
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={progress.totalSets}
-              aria-valuenow={progress.doneSets}
-              aria-label={t('a11y.setsDone', {
-                done: progress.doneSets,
-                total: progress.totalSets,
-              })}
-              className="h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/10"
-            >
-              <div
-                className="h-full rounded-full bg-teal motion-safe:transition-[width] motion-safe:duration-500 motion-safe:ease-sheet"
-                style={{ width: `${progress.pct}%` }}
-              />
-            </div>
-            <span className="text-footnote font-medium tabular-nums text-muted">
-              {t('workouts.session.setsOf', {
-                done: progress.doneSets,
-                total: progress.totalSets,
-              })}
-            </span>
-          </div>
-          <RestRing
-            restMs={restMs}
-            restTotalMs={restTotalMs}
-            restEndsAt={restEndsAt}
-            next={nextSetLabel(exercises, t)}
-            onSkip={skipRest}
-            className="mt-2.5"
-          />
-
-          {exercises.length === 0 ? (
-            <div className="mt-10">
-              <EmptyState
-                title={t('workouts.session.noExercises')}
-                description={t('workouts.planFirst')}
-                action={
-                  <Button size="sm" onClick={leave}>
-                    {t('workouts.planThisWorkout')}
-                  </Button>
-                }
-              />
-            </div>
-          ) : (
-            <>
-              <div className="mt-8">
-                {currentExercise ? (
-                  <CurrentExercisePanel exercise={currentExercise} currentSet={currentSet} />
-                ) : null}
-              </div>
-
-              {/* Action bar: persistent rest + complete */}
-              <div className="mt-7 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => (restMs !== null ? skipRest() : startRest())}
-                  className={cn(
-                    'flex-none whitespace-nowrap rounded-control border px-4 text-footnote transition-colors sm:min-w-[120px]',
-                    restMs !== null
-                      ? 'border-accent/40 bg-accent/10 text-accent'
-                      : 'bg-surface text-muted hover:text-foreground',
-                  )}
-                >
-                  <span className="flex items-center justify-center gap-1.5 py-[18px]">
-                    <Timer className="h-3.5 w-3.5" aria-hidden="true" />
-                    {restMs !== null ? (
-                      <span className="num">{formatClock(restMs)}</span>
-                    ) : (
-                      t('workouts.restDefault')
-                    )}
-                  </span>
-                </button>
-                <Button
-                  size="lg"
-                  className="h-auto flex-1 py-[18px] text-base shadow-glow"
-                  disabled={!currentSet}
-                  onClick={completeCurrentSet}
-                >
-                  <Check className="h-4 w-4" />
-                  {currentSet
-                    ? t('workouts.session.completeSet', { number: currentSet.set_number })
-                    : t('workouts.session.complete')}
-                </Button>
-              </div>
-
-              {/* Mobile queue (rail is desktop-only) */}
-              {exercises.length > 1 ? (
-                <div className="mt-9 lg:hidden">
-                  <SessionQueue exercises={exercises} currentIndex={currentIndex} />
-                </div>
-              ) : null}
-            </>
-          )}
-        </div>
-
-        {/* Desktop queue rail — with a single exercise it would stand empty,
-            since the current one is never listed. */}
-        {exercises.length > 1 ? (
-          <aside className="hidden w-[360px] flex-none overflow-y-auto border-l bg-chrome px-6 py-7 lg:block">
-            <SessionQueue exercises={exercises} currentIndex={currentIndex} />
-          </aside>
-        ) : null}
+        <button
+          type="button"
+          onClick={run.toggleSets}
+          aria-expanded={run.showSets}
+          className="flex-none rounded-full bg-accent/15 px-3.5 py-2 text-callout font-semibold text-accent transition-transform active:scale-95"
+        >
+          {run.showSets ? t('workouts.session.hideSets') : t('workouts.session.allSets')}
+        </button>
       </div>
 
-      <Sheet open={menuOpen} onOpenChange={setMenuOpen} title={t('workouts.session.title')} mono>
-        <div className="flex flex-col gap-3">
-          <Button size="lg" disabled={mutations.setCompleted.isPending} onClick={finishWorkout}>
-            <Flag className="h-4 w-4" />
-            {t('workouts.session.finishWorkout')}
-          </Button>
-          <Button
-            size="lg"
-            variant="ghost"
-            className="text-accent"
-            onClick={() => {
-              setMenuOpen(false)
-              setConfirmDiscard(true)
-            }}
-          >
-            <Ban className="h-4 w-4" />
-            {t('workouts.session.discard')}
-          </Button>
-        </div>
-      </Sheet>
+      {/* Desktop header, as the other module pages. */}
+      <header className="mx-0.5 mb-4 mt-2 hidden lg:block">
+        <p className="text-callout font-medium text-muted">{t('workouts.session.inProgress')}</p>
+        <h1 className="text-large-title font-bold tracking-title">{run.workout.name}</h1>
+      </header>
 
-      <ConfirmSheet
-        open={confirmDiscard}
-        onOpenChange={setConfirmDiscard}
-        title={t('workouts.session.discardConfirm')}
-        description={t('workouts.session.discardHint')}
-        confirmLabel={t('workouts.session.discard')}
-        onConfirm={discardSession}
-      />
-    </div>
+      <div className="flex flex-col lg:grid lg:grid-cols-module lg:items-start lg:gap-6">
+        <div className="contents lg:grid lg:min-w-0 lg:grid-cols-1 lg:content-start lg:gap-3.5">
+          <div className="mx-0.5 flex items-center gap-2.5 text-footnote font-medium text-muted">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/10">
+              <div
+                className="h-full rounded-full bg-teal motion-safe:transition-[width] motion-safe:duration-500 motion-safe:ease-spring"
+                style={{ width: `${total ? (done / total) * 100 : 0}%` }}
+              />
+            </div>
+            <span className="num">
+              {t('workouts.session.setsOf', { done, total })}
+              <span className="hidden lg:inline"> · {elapsed}</span>
+            </span>
+          </div>
+
+          <div
+            key={stageKey}
+            aria-live="polite"
+            className={cn(
+              'mt-3 grid justify-items-center gap-3 overflow-hidden rounded-sheet bg-surface px-4.5 pb-4.5 pt-5.5 text-center lg:mt-0 lg:px-8.5 lg:pb-8.5 lg:pt-10',
+              stageKey !== 'rest' && stageKey !== 'fin' && 'ws-enter',
+            )}
+          >
+            {stage}
+          </div>
+        </div>
+
+        <aside
+          aria-label={t('workouts.session.exercises')}
+          className="contents lg:sticky lg:top-toolbar-clearance lg:grid lg:min-w-0 lg:grid-cols-1 lg:content-start lg:gap-3.5"
+        >
+          <section className="mt-3 lg:mt-0">
+            <div className="hidden lg:block">
+              <SectionHead>{t('workouts.session.exercises')}</SectionHead>
+            </div>
+            <ExerciseTrack exercises={exercises} cursor={cursor} onPick={run.onPick} />
+          </section>
+          <section className={cn('mt-5.5 lg:mt-0 lg:block', !run.showSets && 'hidden')}>
+            <div className="hidden lg:block">
+              <SectionHead>{t('workouts.session.doneList')}</SectionHead>
+            </div>
+            <DoneSets
+              exercises={exercises}
+              overrides={run.overrides}
+              onUndoLast={run.onUndoLast}
+              onFinishEarly={run.onFinishEarly}
+            />
+          </section>
+        </aside>
+      </div>
+    </section>
   )
 }
 
