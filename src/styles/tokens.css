@@ -39,6 +39,12 @@
   --color-border: 255 255 255; /* used at low opacity for hairlines */
   --color-teal: 42 157 143; /* #2A9D8F */
   --color-amber: 199 154 58; /* #C79A3A */
+  /* Reflect mood scale, 1 (rough) → 5 (great): the prototype's dots, shared by both themes. */
+  --color-mood-1: 140 107 181; /* #8C6BB5 */
+  --color-mood-2: 107 143 216; /* #6B8FD8 */
+  --color-mood-3: 154 154 160; /* #9A9AA0 */
+  --color-mood-4: 63 184 168; /* #3FB8A8 */
+  --color-mood-5: 224 170 69; /* #E0AA45 */
   /* Red is destructive + errors only — never the accent (handoff §0 #4). Bright
      enough on dark to clear AA as text on surface (5.4:1); dark ink on the
      fill (6.9:1), since white on this red fails. */
@@ -99,6 +105,12 @@
   --color-border: 42 32 24; /* espresso hairline on light */
   --color-teal: 42 157 143;
   --color-amber: 199 154 58;
+  /* Reflect mood scale, 1 (rough) → 5 (great): the prototype's dots, shared by both themes. */
+  --color-mood-1: 140 107 181; /* #8C6BB5 */
+  --color-mood-2: 107 143 216; /* #6B8FD8 */
+  --color-mood-3: 154 154 160; /* #9A9AA0 */
+  --color-mood-4: 63 184 168; /* #3FB8A8 */
+  --color-mood-5: 224 170 69; /* #E0AA45 */
   /* A step deeper than the handoff's #C8372C, which reads 4.1:1 on the card
      surface: this one clears AA as text on canvas and cards alike (5.2 / 4.7:1)
      and carries the paper-colored ink on its fill (5.2:1). */

@@ -40,6 +40,13 @@ export default {
         border: withOpacity('--color-border'),
         teal: withOpacity('--color-teal'),
         amber: withOpacity('--color-amber'),
+        mood: {
+          1: withOpacity('--color-mood-1'),
+          2: withOpacity('--color-mood-2'),
+          3: withOpacity('--color-mood-3'),
+          4: withOpacity('--color-mood-4'),
+          5: withOpacity('--color-mood-5'),
+        },
         danger: withOpacity('--color-danger'),
         'on-danger': withOpacity('--color-on-danger'),
         success: withOpacity('--color-success'),
