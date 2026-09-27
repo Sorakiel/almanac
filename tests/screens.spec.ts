@@ -420,17 +420,16 @@ for (const v of VARIANTS) {
       await page.keyboard.press('Escape')
       await expect(entry).toBeHidden()
 
-      // Reading: a book opens in the inspector instead of its own page.
+      // Reading: two columns (reading now, finished | up next); a book opens as a page.
       await page.goto('/reading')
-      await page.getByRole('button', { name: new RegExp(TODAY_BOOK) }).click()
-      const book = page.getByRole('complementary', {
-        name: v.locale === 'ru' ? 'Книга' : 'Book',
+      const bookCard = page.getByRole('link', { name: new RegExp(TODAY_BOOK) })
+      await expect(bookCard).toBeVisible({ timeout: 20_000 })
+      await shoot(page, `${v.name}-reading`)
+      await bookCard.click()
+      await expect(page.getByRole('heading', { name: TODAY_BOOK })).toBeVisible({
+        timeout: 20_000,
       })
-      await expect(book.getByRole('heading', { name: TODAY_BOOK })).toBeVisible()
-      await page.waitForTimeout(600) // the slide-in
-      await shoot(page, `${v.name}-reading-inspector`, false)
-      await page.keyboard.press('Escape')
-      await expect(book).toBeHidden()
+      await shoot(page, `${v.name}-reading-book`)
 
       // Training: two columns (week, today, history | plan); a workout opens as a page.
       await page.goto('/train')
