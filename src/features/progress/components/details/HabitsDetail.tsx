@@ -42,7 +42,12 @@ export function HabitsDetail({ habits, yearDays, todayKey }: HabitsDetailProps) 
           })}
         </DetailNote>
       ) : null}
-      <YearStrip days={yearDays} todayKey={todayKey} className="mt-1 bg-sheet-fill dark:bg-bg" />
+      {/* Phone only — the desktop card has no year ruler (desktop-prototype.html). */}
+      <YearStrip
+        days={yearDays}
+        todayKey={todayKey}
+        className="mt-1 bg-sheet-fill lg:hidden dark:bg-bg"
+      />
     </>
   )
 }

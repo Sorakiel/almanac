@@ -19,14 +19,18 @@ interface ModuleCardsProps {
   days: number
 }
 
-/** One card per module that's switched on, habits first and wide. */
+/**
+ * One card per module that's switched on, habits first and wide. Desktop
+ * (`.dk-cards`): three columns — habits span two with workouts beside them,
+ * the rest fill the row below.
+ */
 export function ModuleCards({ data, yearDays, todayKey, days }: ModuleCardsProps) {
   const { t, locale } = useT()
   const { habits, workouts, reading, focus, reflect } = data
   const number = (n: number): string => n.toLocaleString(intlLocale(locale))
 
   return (
-    <div className="grid gap-2.5 lg:grid-cols-2 lg:gap-3.5 wide:grid-cols-3">
+    <div className="grid gap-2.5 lg:grid-cols-3 lg:gap-3.5">
       {habits?.hasData ? (
         <ModuleCard
           icon={ListChecks}

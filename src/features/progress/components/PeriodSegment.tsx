@@ -20,7 +20,7 @@ export function PeriodSegment({ value, onChange, className }: PeriodSegmentProps
     <div
       role="tablist"
       aria-label={t('progress.rangeAria')}
-      className={cn('flex rounded-inner bg-sheet-fill p-0.5 dark:bg-foreground/[0.08]', className)}
+      className={cn('flex rounded-inner bg-sheet-fill p-0.5', className)}
     >
       {options.map((option) => {
         const active = option.value === value
@@ -34,9 +34,7 @@ export function PeriodSegment({ value, onChange, className }: PeriodSegmentProps
             className={cn(
               'flex-1 rounded-lg px-3 py-1.5 text-footnote font-medium transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-              active
-                ? 'bg-surface shadow-thumb dark:bg-bg'
-                : 'text-foreground/80 hover:text-foreground',
+              active ? 'bg-surface shadow-thumb' : 'text-foreground/80 hover:text-foreground',
             )}
           >
             {option.label}
