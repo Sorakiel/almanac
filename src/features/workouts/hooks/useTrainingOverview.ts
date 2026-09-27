@@ -4,7 +4,6 @@ import { useWorkouts } from '@/features/workouts/hooks/useWorkouts'
 import { buildWeek, type WeekView } from '@/features/workouts/lib/week'
 import type { WorkoutView } from '@/features/workouts/types'
 import { useT } from '@/hooks/useT'
-import { intlLocale } from '@/lib/dateLocale'
 
 export interface TrainingOverview {
   week: WeekView
@@ -28,12 +27,12 @@ export interface TrainingOverview {
 
 /** Everything the training week page needs: the strip, today's card, recents. */
 export function useTrainingOverview(): TrainingOverview {
-  const { t, locale } = useT()
+  const { t } = useT()
   const { workouts, isLoading, isError, refetch } = useWorkouts()
   const { dateKey, timezone } = useToday()
 
   return useMemo(() => {
-    const week = buildWeek(dateKey, workouts, timezone, t, intlLocale(locale))
+    const week = buildWeek(dateKey, workouts, timezone, t)
 
     const completed = workouts.filter((w) => w.completed_at)
     const recent = [...completed]
@@ -56,5 +55,5 @@ export function useTrainingOverview(): TrainingOverview {
       isError,
       refetch,
     }
-  }, [workouts, dateKey, timezone, isLoading, isError, refetch, t, locale])
+  }, [workouts, dateKey, timezone, isLoading, isError, refetch, t])
 }

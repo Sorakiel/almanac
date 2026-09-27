@@ -1,15 +1,13 @@
 import { useNavigate } from 'react-router-dom'
-import { Check, Dumbbell, Layers, Play, Timer, TrendingUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { IconTile } from '@/components/common/IconTile'
+import { Play } from 'lucide-react'
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { useWorkoutSessionStore } from '@/features/workouts/stores/workoutSession'
-import { estimateMinutes, plannedVolume } from '@/features/workouts/lib/session'
-import { muscleLabel } from '@/features/workouts/lib/muscles'
-import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
+import { estimateMinutes, plannedSetCount } from '@/features/workouts/lib/session'
 import type { SessionExercise, WorkoutView } from '@/features/workouts/types'
-import { useT, type TFunction } from '@/hooks/useT'
+import { useT } from '@/hooks/useT'
 import { intlLocale } from '@/lib/dateLocale'
+import { dateFromKey } from '@/lib/date'
+import { cn } from '@/lib/utils'
 
 interface TodaySessionCardProps {
   workout: WorkoutView
@@ -17,56 +15,58 @@ interface TodaySessionCardProps {
   doneToday: boolean
   /** Where the selected day sits relative to today — only today can start. */
   dayState: 'today' | 'past' | 'future'
+  /** The selected day, `YYYY-MM-DD`. */
+  dateKey: string
 }
 
-/** Unique muscle groups across the session, e.g. "CHEST · SHOULDERS". */
-function muscleSummary(exercises: SessionExercise[], t: TFunction): string | null {
-  const groups = [...new Set(exercises.map((e) => e.muscleGroup).filter(Boolean))]
-  return groups.length
-    ? groups
-        .map((g) => muscleLabel(g as string, t))
-        .join(' · ')
-        .toUpperCase()
-    : null
+/** "Присед 5×5" — the prototype's exercise chip. */
+function chipLabel(e: SessionExercise): string {
+  const sets = e.targetSets ?? e.sets.length
+  return sets && e.targetReps ? `${e.name} ${sets}×${e.targetReps}` : e.name
 }
 
-function Meta({ icon: Icon, children }: { icon: typeof Layers; children: string }) {
+function Meta({ value, label }: { value: string; label: string }) {
   return (
-    <span className="flex items-center gap-1.5 font-mono text-[12.5px] tabular-nums text-muted">
-      <Icon className="h-3.5 w-3.5 text-muted-strong" aria-hidden="true" />
-      {children}
-    </span>
+    <div className="text-footnote text-muted">
+      <b className="num block text-callout font-medium text-foreground">{value}</b>
+      {label}
+    </div>
   )
 }
 
-/** Right-aligned status tag for a non-today day. */
-function DayStatus({ dayState, done }: { dayState: 'past' | 'future'; done: boolean }) {
-  const { t } = useT()
-  const text = t(
-    done
-      ? 'workouts.statuses.completed'
-      : dayState === 'future'
-        ? 'workouts.statuses.scheduled'
-        : 'workouts.dayMissed',
-  )
-  const tone = done ? 'text-teal' : dayState === 'future' ? 'text-muted' : 'text-muted-strong'
-  return <span className={`font-mono text-[10px] uppercase tracking-label ${tone}`}>{text}</span>
-}
-
-/** The selected day's session card — the warm spec-board "today" panel. */
-export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionCardProps) {
+/**
+ * The selected day's plan — the prototype's `.m-hero`: what it is, when it was
+ * last done, its exercises as chips, three numbers and one full-width teal
+ * action. Only today starts a session.
+ */
+export function TodaySessionCard({ workout, doneToday, dayState, dateKey }: TodaySessionCardProps) {
   const { t, locale } = useT()
+  const dateLocale = intlLocale(locale)
   const navigate = useNavigate()
   const start = useWorkoutSessionStore((s) => s.start)
   const hasActiveSession = useWorkoutSessionStore((s) => Boolean(s.sessions[workout.id]))
   const { exercises } = useWorkoutDetail(workout.id)
   const hasPlan = exercises.length > 0
-  const volume = plannedVolume(exercises)
-  const overline =
-    muscleSummary(exercises, t) ??
-    recurrenceLabel(workout, t)?.toUpperCase() ??
-    t('workouts.session.title').toUpperCase()
   const isToday = dayState === 'today'
+  const dayMonth = new Intl.DateTimeFormat(dateLocale, { day: 'numeric', month: 'long' })
+
+  const kicker = [
+    isToday
+      ? t('workouts.hero.today')
+      : t('workouts.hero.day', {
+          date: new Intl.DateTimeFormat(dateLocale, {
+            timeZone: 'UTC',
+            weekday: 'short',
+            day: 'numeric',
+            month: 'long',
+          }).format(dateFromKey(dateKey)),
+        }),
+    workout.completed_at
+      ? t('workouts.hero.lastTime', { date: dayMonth.format(new Date(workout.completed_at)) })
+      : null,
+  ]
+    .filter(Boolean)
+    .join(' · ')
 
   const openDetail = () => navigate(`/train/${workout.id}`)
   const startSession = () => {
@@ -74,87 +74,69 @@ export function TodaySessionCard({ workout, doneToday, dayState }: TodaySessionC
     navigate(`/train/${workout.id}/session`)
   }
 
+  const sets = plannedSetCount(exercises)
+  const minutes = estimateMinutes(exercises)
+  const primary = isToday && hasPlan && !doneToday
+  const action = !isToday
+    ? { label: t('workouts.viewPlan'), onClick: openDetail }
+    : !hasPlan
+      ? { label: t('workouts.planSession'), onClick: openDetail }
+      : hasActiveSession
+        ? { label: t('workouts.hero.resume'), onClick: startSession }
+        : doneToday
+          ? { label: t('workouts.doneTrainAgain'), onClick: startSession }
+          : { label: t('workouts.hero.start'), onClick: startSession }
+
   return (
-    <div className="border-accent/28 rounded-[22px] border bg-gradient-to-br from-accent/[0.12] to-surface p-6 lg:p-7">
-      {/* The card body previews the plan; the action button is separate below. */}
+    <div className="w-hero grid gap-3 rounded-3xl bg-surface p-4.5">
+      <p className="text-footnote font-medium text-muted">{kicker}</p>
       <button
         type="button"
         onClick={openDetail}
         aria-label={t('a11y.viewPlan', { name: workout.name })}
-        className="group block w-full text-left"
+        className="-mt-1 text-left"
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-accent">
-              {overline}
-            </p>
-            <h3 className="mt-2 truncate text-[22px] font-semibold tracking-title decoration-accent/40 underline-offset-4 group-hover:underline lg:text-[26px]">
-              {workout.name}
-            </h3>
-          </div>
-          <div className="flex flex-none items-center gap-3">
-            {!isToday ? <DayStatus dayState={dayState} done={doneToday} /> : null}
-            <IconTile icon={Dumbbell} tone="bg-accent/16 text-accent" size="lg" />
-          </div>
-        </div>
-
-        {hasPlan ? (
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5">
-            <Meta icon={Layers}>{t('workouts.exerciseCount', { count: exercises.length })}</Meta>
-            <Meta icon={Timer}>
-              {t('workouts.estimateMin', { count: estimateMinutes(exercises) })}
-            </Meta>
-            {volume > 0 ? (
-              <Meta icon={TrendingUp}>
-                {t('units.kgValue', { value: volume.toLocaleString(intlLocale(locale)) })}
-              </Meta>
-            ) : null}
-          </div>
-        ) : (
-          <p className="mt-4 text-sm text-muted">{t('workouts.noExercisesToStart')}</p>
-        )}
+        <h2 className="text-title font-bold leading-tight tracking-title">{workout.name}</h2>
       </button>
 
-      <div className="mt-5">
-        {!isToday ? (
-          <Button
-            variant="surface"
-            className="w-full sm:w-auto sm:min-w-[220px]"
-            onClick={openDetail}
-          >
-            <Layers className="h-4 w-4" />
-            {t('workouts.viewPlan')}
-          </Button>
-        ) : !hasPlan ? (
-          <Button
-            variant="surface"
-            className="w-full sm:w-auto sm:min-w-[220px]"
-            onClick={openDetail}
-          >
-            <Layers className="h-4 w-4" />
-            {t('workouts.planSession')}
-          </Button>
-        ) : hasActiveSession ? (
-          <Button className="w-full shadow-glow sm:w-auto sm:min-w-[220px]" onClick={startSession}>
-            <Play className="h-4 w-4 fill-current" />
-            {t('workouts.resumeSession')}
-          </Button>
-        ) : doneToday ? (
-          <Button
-            variant="surface"
-            className="w-full sm:w-auto sm:min-w-[220px]"
-            onClick={startSession}
-          >
-            <Check className="h-4 w-4" />
-            {t('workouts.doneTrainAgain')}
-          </Button>
-        ) : (
-          <Button className="w-full shadow-glow sm:w-auto sm:min-w-[220px]" onClick={startSession}>
-            <Play className="h-4 w-4" />
-            {t('workouts.startSession')}
-          </Button>
+      {hasPlan ? (
+        <>
+          <ul className="flex flex-wrap gap-1.5">
+            {exercises.map((e) => (
+              <li
+                key={e.id}
+                className="rounded-full bg-sheet-fill px-2.5 py-1.5 text-footnote font-medium"
+              >
+                {chipLabel(e)}
+              </li>
+            ))}
+          </ul>
+          <div className="flex gap-4">
+            <Meta
+              value={`${exercises.length}`}
+              label={t('workouts.hero.exercises', { count: exercises.length })}
+            />
+            <Meta value={`${sets}`} label={t('workouts.hero.sets', { count: sets })} />
+            <Meta value={`~${minutes}`} label={t('workouts.hero.minutes', { count: minutes })} />
+          </div>
+        </>
+      ) : (
+        <p className="text-callout text-muted">{t('workouts.noExercisesToStart')}</p>
+      )}
+
+      <button
+        type="button"
+        onClick={action.onClick}
+        className={cn(
+          'flex h-12 w-full items-center justify-center gap-2 rounded-full text-body font-semibold transition-transform active:scale-95',
+          primary || hasActiveSession ? 'bg-teal text-white' : 'bg-sheet-fill text-foreground',
         )}
-      </div>
+      >
+        {primary || hasActiveSession ? (
+          <Play className="h-4.5 w-4.5 fill-current" aria-hidden="true" />
+        ) : null}
+        {action.label}
+      </button>
     </div>
   )
 }
