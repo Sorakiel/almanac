@@ -712,6 +712,7 @@ export const ru: Translations = {
       minusOne: 'На одну назад',
       plusOne: 'На одну вперёд',
       dailyGoal: 'Дневная цель',
+      goalShort: { pages: '{count} стр', chapters: '{count} гл.' },
       noGoal: 'нет',
       editBook: 'Изменить книгу',
       markFinished: 'Отметить прочитанной',

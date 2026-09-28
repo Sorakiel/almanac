@@ -638,6 +638,7 @@ export const en = {
       minusOne: 'One back',
       plusOne: 'One forward',
       dailyGoal: 'Daily goal',
+      goalShort: { pages: '{count} pages', chapters: '{count} ch.' },
       noGoal: 'none',
       editBook: 'Edit book',
       markFinished: 'Mark as finished',
