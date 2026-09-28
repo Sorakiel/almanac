@@ -39,7 +39,6 @@ function lazyWithReload<T extends ComponentType<unknown>>(factory: () => Promise
 const ResetPasswordPage = lazyWithReload(() => import('@/features/auth/ResetPasswordPage'))
 const OnboardingPage = lazyWithReload(() => import('@/features/onboarding/OnboardingPage'))
 const DashboardPage = lazyWithReload(() => import('@/features/dashboard/DashboardPage'))
-const HabitsPage = lazyWithReload(() => import('@/features/habits/HabitsPage'))
 const HabitDetailPage = lazyWithReload(() => import('@/features/habits/HabitDetailPage'))
 const FlowPage = lazyWithReload(() => import('@/features/flow/FlowPage'))
 const ProgressPage = lazyWithReload(() => import('@/features/progress/ProgressPage'))
@@ -75,7 +74,8 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: '/', element: suspend(<DashboardPage />) },
-          { path: '/habits', element: suspend(<HabitsPage />) },
+          // Habits are Today itself (S2); old links and bookmarks land there.
+          { path: '/habits', element: <Navigate to="/" replace /> },
           { path: '/habits/:id', element: suspend(<HabitDetailPage />) },
           { path: '/flow', element: suspend(<FlowPage />) },
           { path: '/train', element: suspend(<WorkoutsPage />) },

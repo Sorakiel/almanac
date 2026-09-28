@@ -16,7 +16,7 @@ test.describe('phone', () => {
     await expect(tabs.nth(1)).toHaveAttribute('aria-current', 'page')
 
     // A module opened from the hub still belongs to the Modules tab.
-    await page.goto('/habits')
+    await page.goto('/train')
     await expect(tabs.nth(2)).toHaveAttribute('aria-current', 'page')
 
     await expect(page.getByRole('button', { name: 'Create', exact: true })).toBeVisible()

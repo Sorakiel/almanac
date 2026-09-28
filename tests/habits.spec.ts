@@ -43,25 +43,17 @@ async function runHabitJourney(page: Page): Promise<void> {
   const errors = watchConsole(page)
   await signIn(page)
 
-  // Create from /habits, not the dashboard. The dashboard only offers an
-  // "Add habit" button inside its empty state — with any habit present it
-  // shows "Capture" instead — whereas the habits page keeps its create
-  // affordance in the header either way.
-  await page.goto('/habits')
+  // Create through "Create" → Habit: the one create path, on any account
+  // (there is no separate habits screen any more — habits are Today, S2).
+  await page.getByRole('button', { name: 'Create', exact: true }).click()
   await page
-    .getByRole('button', { name: /new habit|add habit/i })
-    .first()
+    .getByRole('dialog', { name: 'Create' })
+    .getByRole('button', { name: /^habit/i })
     .click()
-  await page.getByLabel('Name').fill(HABIT_NAME)
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: /^create$/i })
-    .click()
-
-  // Habit cards on /habits are buttons ("Open <name>"); on the dashboard the
-  // same habit is a link. Assert each in its own vocabulary rather than
-  // porting one locator across.
-  await expect(page.getByRole('button', { name: `Open ${HABIT_NAME}` })).toBeVisible()
+  const form = page.getByRole('dialog', { name: 'New habit' })
+  await form.getByLabel('Habit name').fill(HABIT_NAME)
+  await form.getByRole('button', { name: /^create$/i }).click()
+  await expect(form).toBeHidden({ timeout: 3_000 })
 
   // Complete it on the dashboard — that's the one-tap surface the optimistic
   // update exists for.

@@ -13,6 +13,7 @@ import {
 } from '@/features/habits/lib/transition'
 import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
+import { useUiStore } from '@/stores/ui'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import type { SettlePhase } from '@/features/dashboard/hooks/useSettlingRows'
 import { StreakOdometer } from './StreakOdometer'
@@ -25,6 +26,9 @@ interface TodayHabitRowProps {
   /** Long-press (or right-click) on the check: skip today on purpose, or undo that. */
   onSkip?: (habit: HabitWithTodayLog) => void
 }
+
+/** Where the habit panel opens over Today instead of a page (the shell's desktop). */
+const DESKTOP_QUERY = '(min-width: 1024px)'
 
 /** How long a press on the check has to hold before it means "skip", not "tick". */
 const LONG_PRESS_MS = 500
@@ -47,6 +51,7 @@ function capitalize(text: string): string {
  */
 export function TodayHabitRow({ habit, phase, onToggle, onSkip }: TodayHabitRowProps) {
   const { t } = useT()
+  const inspectHabit = useUiStore((s) => s.inspectHabit)
   const [ripples, setRipples] = useState(0)
   const hue = resolveHabitColor(habit.color).stroke
   const counted = isQuantitative(habit)
@@ -143,7 +148,16 @@ export function TodayHabitRow({ habit, phase, onToggle, onSkip }: TodayHabitRowP
         <Link
           to={`/habits/${habit.id}`}
           viewTransition
-          onClick={(e) => claimHabitName(habit.id, e.currentTarget)}
+          onClick={(e) => {
+            // Wide screens open the habit panel over Today, in place; the phone
+            // goes to the full habit screen (the prototypes' openInsp / push).
+            if (window.matchMedia(DESKTOP_QUERY).matches) {
+              e.preventDefault()
+              inspectHabit(habit.id)
+              return
+            }
+            claimHabitName(habit.id, e.currentTarget)
+          }}
           className="today-row-main"
         >
           <span

@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import {
   DndContext,
   KeyboardSensor,
@@ -18,7 +19,8 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 import { toast } from 'sonner'
-import { HabitRow } from '@/features/habits/components/HabitRow'
+import { frequencyLabel } from '@/features/habits/lib/frequency'
+import { resolveHabitColor, resolveHabitIcon } from '@/features/habits/lib/habitVisuals'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
 import { cn } from '@/lib/utils'
 import type { HabitWithTodayLog } from '@/features/habits/types'
@@ -29,7 +31,11 @@ interface SortableHabitListProps {
   habits: HabitWithTodayLog[]
 }
 
-/** The habit list in reorder mode: drag-and-drop by the handle (persists sort_order). */
+/**
+ * The habits in Today's order, dragged by the handle (or arrow keys on it) —
+ * Modules → Customize, now that there is no separate habits screen (S2).
+ * Persists `sort_order`.
+ */
 export function SortableHabitList({ habits }: SortableHabitListProps) {
   const { t } = useT()
   const { reorder } = useHabitMutations()
@@ -56,7 +62,7 @@ export function SortableHabitList({ habits }: SortableHabitListProps) {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={habits.map((h) => h.id)} strategy={verticalListSortingStrategy}>
-        <ul className="divide-y divide-border/10">
+        <ul className="mods-group">
           {habits.map((habit) => (
             <SortableRow key={habit.id} habit={habit} />
           ))}
@@ -66,30 +72,40 @@ export function SortableHabitList({ habits }: SortableHabitListProps) {
   )
 }
 
+/** A habit as Customize lists it: the grip, its icon in its colour, name and cadence. */
 function SortableRow({ habit }: { habit: HabitWithTodayLog }) {
   const { t } = useT()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: habit.id,
   })
+  const Icon = resolveHabitIcon(habit.icon)
 
   return (
     <li
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={cn('flex items-center gap-1', isDragging && 'relative z-10 opacity-80')}
+      style={
+        {
+          transform: CSS.Transform.toString(transform),
+          transition,
+          '--hue': resolveHabitColor(habit.color).stroke,
+        } as CSSProperties
+      }
+      className={cn('mods-row', isDragging && 'is-dragging')}
     >
       <button
         type="button"
+        className="mods-handle"
         aria-label={t('habits.aria.reorder', { name: habit.name })}
         {...attributes}
         {...listeners}
-        className="cursor-grab touch-none rounded p-1 text-muted-strong hover:text-foreground active:cursor-grabbing"
       >
-        <GripVertical className="h-4 w-4" aria-hidden="true" />
+        <GripVertical aria-hidden="true" />
       </button>
-      <div className="min-w-0 flex-1">
-        <HabitRow habit={habit} />
-      </div>
+      <span className="mods-ic is-small" aria-hidden="true">
+        <Icon strokeWidth={1.9} />
+      </span>
+      <span className="mods-row-name">{habit.name}</span>
+      <span className="flex-none pr-4 text-footnote text-muted">{frequencyLabel(habit, t)}</span>
     </li>
   )
 }

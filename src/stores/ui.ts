@@ -17,6 +17,9 @@ interface UiState {
   /** The ⌘K command palette. */
   paletteOpen: boolean
   setPaletteOpen: (open: boolean) => void
+  /** Desktop: the habit shown in the inspector over Today, or null when it is closed. */
+  inspectedHabit: string | null
+  inspectHabit: (habitId: string | null) => void
   /** The sync capsule is on screen — phone toasts stack above it instead of under it. */
   syncCapsuleVisible: boolean
   setSyncCapsuleVisible: (visible: boolean) => void
@@ -32,6 +35,8 @@ export const useUiStore = create<UiState>((set) => ({
   openNewHabit: () => set({ create: 'habit' }),
   paletteOpen: false,
   setPaletteOpen: (open) => set({ paletteOpen: open }),
+  inspectedHabit: null,
+  inspectHabit: (habitId) => set({ inspectedHabit: habitId }),
   syncCapsuleVisible: false,
   setSyncCapsuleVisible: (visible) => set({ syncCapsuleVisible: visible }),
 }))

@@ -36,13 +36,8 @@
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Habits",
-      "url": "/habits",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Insights",
-      "url": "/insights",
+      "name": "Progress",
+      "url": "/progress",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
