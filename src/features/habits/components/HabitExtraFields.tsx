@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { GoalField } from '@/features/habits/components/GoalField'
 import { HabitChecklistDraftEditor } from '@/features/habits/components/HabitChecklistDraftEditor'
 import {
@@ -23,12 +24,14 @@ export interface HabitExtras {
 interface HabitExtraFieldsProps {
   value: HabitExtras
   onChange: (value: HabitExtras) => void
+  /** Edit sheet: the live checklist (and anything after it) instead of the draft one. */
+  checklistSlot?: ReactNode
 }
 
 const LABEL = 'mx-1 mb-2 mt-4 text-footnote font-medium text-muted'
 
 /** "More options" in the quick habit form: a daily amount, colour, icon, a note, a checklist. */
-export function HabitExtraFields({ value, onChange }: HabitExtraFieldsProps) {
+export function HabitExtraFields({ value, onChange, checklistSlot }: HabitExtraFieldsProps) {
   const { t } = useT()
   const set = (patch: Partial<HabitExtras>) => onChange({ ...value, ...patch })
 
@@ -92,10 +95,12 @@ export function HabitExtraFields({ value, onChange }: HabitExtraFieldsProps) {
       </label>
 
       <div className="mt-4">
-        <HabitChecklistDraftEditor
-          items={value.checklist}
-          onChange={(checklist) => set({ checklist })}
-        />
+        {checklistSlot ?? (
+          <HabitChecklistDraftEditor
+            items={value.checklist}
+            onChange={(checklist) => set({ checklist })}
+          />
+        )}
       </div>
     </>
   )

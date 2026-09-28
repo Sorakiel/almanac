@@ -1069,7 +1069,6 @@ export const en = {
     },
     editHabit: 'Edit habit',
     deleteForever: 'Delete forever',
-    archiveHabit: 'Archive habit',
     back: 'Back',
     backToHabits: 'Back to habits',
     edit: 'Edit',
