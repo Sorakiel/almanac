@@ -91,7 +91,7 @@ function OnboardingPage() {
     }
     dismissLocally()
     persistOnboarded()
-    navigate(chosen.length > 0 || openForm ? '/habits' : '/')
+    navigate('/')
     if (openForm) openNewHabit()
   }
 

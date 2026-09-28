@@ -34,7 +34,6 @@ const SCREENS = [
   '/flow',
   '/profile',
   '/friends',
-  '/habits',
   '/more',
   '/more/customize',
 ] as const
@@ -541,23 +540,28 @@ for (const v of VARIANTS) {
       await page.keyboard.press('Escape')
       await expect(page.getByRole('dialog')).toBeHidden()
 
-      // Habits: a card opens the inspector over the list's right edge.
-      await page.goto('/habits')
-      await page
-        .getByRole('button', {
-          name: v.locale === 'ru' ? `Открыть «${SEED_HABIT}»` : `Open ${SEED_HABIT}`,
-        })
-        .click()
+      // Habits live on Today: a row opens the habit panel in place, no page change.
+      await page.goto('/')
+      // An undone one, so its row is in the open list rather than folded into "Done".
+      const openHabit = TODAY_HABITS[2].name
+      await page.getByRole('link', { name: openHabit }).click()
       const inspector = page.getByRole('complementary', {
         name: v.locale === 'ru' ? 'Привычка' : 'Habit',
       })
-      await expect(inspector.getByRole('heading', { name: SEED_HABIT })).toBeVisible({
+      await expect(inspector.getByRole('heading', { name: openHabit })).toBeVisible({
         timeout: 20_000,
       })
+      await expect(page).toHaveURL(/\/$/)
       await page.waitForTimeout(600) // the slide-in
       await shoot(page, `${v.name}-habits-inspector`, false)
       await page.keyboard.press('Escape')
       await expect(inspector).toBeHidden()
+
+      // Modules → Customize carries the habits' order now.
+      await page.goto('/more/customize')
+      await expect(
+        page.getByRole('heading', { name: v.locale === 'ru' ? 'Порядок привычек' : 'Habit order' }),
+      ).toBeVisible()
 
       // Reflect: two columns (composer, history | mood month, quote); an entry opens in place.
       await page.goto('/reflect')
