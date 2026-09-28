@@ -33,7 +33,7 @@ function BookDetailPage() {
         {queue.length > 0 ? (
           <aside
             aria-label={t('reading.upNext')}
-            className="sticky top-toolbar-clearance hidden min-w-0 content-start gap-3.5 lg:grid"
+            className="sticky top-toolbar-clearance hidden min-w-0 grid-cols-1 content-start gap-3.5 lg:grid"
           >
             <Shelf title={t('reading.upNext')} books={queue} />
           </aside>

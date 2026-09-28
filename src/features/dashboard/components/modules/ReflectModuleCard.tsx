@@ -58,6 +58,7 @@ export function ReflectModuleCard() {
       icon={NotebookPen}
       hue="teal"
       kicker={t('dashboard.modules.evening')}
+      to="/reflect"
       value={mood !== null ? t('dashboard.modules.dayLogged') : t('dashboard.modules.howWasDay')}
     >
       <div className="today-mood" role="group" aria-label={t('reflect.ratings.mood')}>

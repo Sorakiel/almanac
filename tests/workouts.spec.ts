@@ -55,17 +55,20 @@ test('runs a live workout session and marks the workout done', async ({ page }) 
 
   await signIn(page)
   await page.goto(`/train/${workout.id}/session`)
-  await expect(page.getByText(EXERCISE_NAME, { exact: false })).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByRole('heading', { name: EXERCISE_NAME })).toBeVisible({ timeout: 20_000 })
 
-  // Tick the first set, then finish from the session menu.
-  await page.getByRole('button', { name: /complete set 1/i }).click()
-  await expect(page.getByRole('button', { name: /complete set 2/i })).toBeVisible()
+  // Tick the first set; rest starts, then finish early from the sets list.
+  await expect(page.getByText(/set 1 of 2/i)).toBeVisible()
+  await page.getByRole('button', { name: /^set done$/i }).click()
+  await page.getByRole('button', { name: /i’m ready/i }).click()
+  await expect(page.getByText(/set 2 of 2/i)).toBeVisible()
 
-  await page.getByRole('button', { name: /session options/i }).click()
-  await page.getByRole('button', { name: /finish workout/i }).click()
-  // No modal to dismiss: a quiet toast, and the runner steps back to the workout.
-  await expect(page).toHaveURL(new RegExp(`/train/${workout.id}$`))
-  await expect(page.getByText(/workout .* done/i)).toBeVisible()
+  const allSets = page.getByRole('button', { name: /^all sets$/i })
+  if (await allSets.isVisible()) await allSets.click()
+  await page.getByRole('button', { name: /finish early/i }).click()
+  // No modal to dismiss: a quiet toast with Undo, and the runner steps back to training.
+  await expect(page).toHaveURL(/\/train$/)
+  await expect(page.getByText(/workout saved/i)).toBeVisible()
 
   await expect
     .poll(
@@ -155,8 +158,9 @@ test('a daily workout finished yesterday starts today unticked', async ({ page }
 
   await signIn(page)
   await page.goto(`/train/${workout.id}/session`)
-  await expect(page.getByText(EXERCISE_NAME, { exact: false })).toBeVisible({ timeout: 20_000 })
-  await expect(page.getByRole('button', { name: /complete set 1/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: EXERCISE_NAME })).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByText(/set 1 of 1/i)).toBeVisible()
+  await expect(page.getByRole('button', { name: /^set done$/i })).toBeVisible()
 
   expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
 })

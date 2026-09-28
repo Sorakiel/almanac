@@ -51,6 +51,8 @@
   --color-energy-3: 224 170 69; /* #E0AA45 */
   --color-energy-4: 156 203 90; /* #9CCB5A */
   --color-energy-5: 82 196 138; /* #52C48A */
+  /* The session medal's light middle stop, between amber and the accent. */
+  --color-gold-light: 243 211 138; /* #F3D38A */
   /* Red is destructive + errors only — never the accent (handoff §0 #4). Bright
      enough on dark to clear AA as text on surface (5.4:1); dark ink on the
      fill (6.9:1), since white on this red fails. */
@@ -123,6 +125,8 @@
   --color-energy-3: 224 170 69; /* #E0AA45 */
   --color-energy-4: 156 203 90; /* #9CCB5A */
   --color-energy-5: 82 196 138; /* #52C48A */
+  /* The session medal's light middle stop, between amber and the accent. */
+  --color-gold-light: 243 211 138; /* #F3D38A */
   /* A step deeper than the handoff's #C8372C, which reads 4.1:1 on the card
      surface: this one clears AA as text on canvas and cards alike (5.2 / 4.7:1)
      and carries the paper-colored ink on its fill (5.2:1). */
