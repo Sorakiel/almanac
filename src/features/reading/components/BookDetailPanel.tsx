@@ -15,7 +15,6 @@ import { useBook } from '@/features/reading/hooks/useBook'
 import { useBookMutations } from '@/features/reading/hooks/useBookMutations'
 import { useQuickRead, READING_SESSION_MIN } from '@/features/reading/hooks/useQuickRead'
 import { useReadingProgress } from '@/features/reading/hooks/useReadingProgress'
-import { unitCount } from '@/features/reading/lib/progress'
 import type { Book } from '@/features/reading/types'
 import { useOpenKey } from '@/hooks/useSheetKey'
 import { useT } from '@/hooks/useT'
@@ -152,7 +151,11 @@ function BookBody({ book, onGone }: { book: Book; onGone: () => void }) {
         <ActRow
           onClick={() => setEditOpen(true)}
           chevron
-          value={book.daily_goal ? unitCount(mode, book.daily_goal, t) : t('reading.screen.noGoal')}
+          value={
+            book.daily_goal
+              ? t(`reading.screen.goalShort.${mode}`, { count: book.daily_goal })
+              : t('reading.screen.noGoal')
+          }
         >
           {t('reading.screen.dailyGoal')}
         </ActRow>
