@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import { createElement, type CSSProperties } from 'react'
 import {
   DndContext,
   KeyboardSensor,
@@ -78,7 +78,6 @@ function SortableRow({ habit }: { habit: HabitWithTodayLog }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: habit.id,
   })
-  const Icon = resolveHabitIcon(habit.icon)
 
   return (
     <li
@@ -102,7 +101,7 @@ function SortableRow({ habit }: { habit: HabitWithTodayLog }) {
         <GripVertical aria-hidden="true" />
       </button>
       <span className="mods-ic is-small" aria-hidden="true">
-        <Icon strokeWidth={1.9} />
+        {createElement(resolveHabitIcon(habit.icon), { strokeWidth: 1.9 })}
       </span>
       <span className="mods-row-name">{habit.name}</span>
       <span className="flex-none pr-4 text-footnote text-muted">{frequencyLabel(habit, t)}</span>
