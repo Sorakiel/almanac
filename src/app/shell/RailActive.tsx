@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ProgressBlocks } from '@/components/common/ProgressBlocks'
-import { useFocusStore } from '@/stores/focus'
+import { focusMsLeft, useFocusStore } from '@/stores/focus'
 import { useNow } from '@/hooks/useNow'
 import { useT } from '@/hooks/useT'
 
@@ -12,13 +12,13 @@ import { useT } from '@/hooks/useT'
  */
 export function RailActive() {
   const { t } = useT()
-  const { endsAt, durationMin, label } = useFocusStore()
+  const { endsAt, durationMin, label, pausedAt } = useFocusStore()
   const running = endsAt !== null && durationMin !== null
   const now = useNow(running)
 
   if (endsAt === null || durationMin === null) return null
 
-  const msLeft = Math.max(endsAt - now, 0)
+  const msLeft = focusMsLeft({ endsAt, pausedAt }, now)
   const minLeft = Math.ceil(msLeft / 60_000)
   const elapsedMin = durationMin - msLeft / 60_000
 

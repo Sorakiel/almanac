@@ -811,25 +811,6 @@
   }
 }
 
-/* The rest ring drains in one continuous animation over the whole rest rather
-   than a step per clock tick. Duration and the (negative) delay come in as
-   custom properties, so a ring mounted mid-rest picks up where the rest is.
-   Reduced motion keeps the inline per-second offset instead. */
-@media (prefers-reduced-motion: no-preference) {
-  .ring-drain {
-    animation: ring-drain var(--drain-ms) linear var(--drain-delay) forwards;
-  }
-}
-
-@keyframes ring-drain {
-  from {
-    stroke-dashoffset: 0;
-  }
-  to {
-    stroke-dashoffset: var(--ring-c);
-  }
-}
-
 /* "День закрыт" — the perfect-day seal (motion.html, showSeal): the stamp
    lands with a turn, 14 sparks fly out in the module colours, a warm glow
    rises and everything fades by 2.1 s. Reduced motion shows the seal still
