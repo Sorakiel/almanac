@@ -511,6 +511,19 @@ for (const v of VARIANTS) {
     await shoot(page, `${v.name}-habit-detail`)
     await page.getByRole('radio', { name: v.locale === 'ru' ? 'Год' : 'Year' }).click()
     await shoot(page, `${v.name}-habit-detail-year`)
+    // «Изменить привычку»: the Create sheet's fields, filled in; then «Ещё параметры».
+    await page
+      .getByRole('button', { name: v.locale === 'ru' ? 'Изменить' : 'Edit', exact: true })
+      .click()
+    const edit = page.getByRole('dialog')
+    await expect(edit.getByRole('textbox').first()).toHaveValue(SEED_HABIT)
+    await shoot(page, `${v.name}-habit-edit`, false)
+    await edit
+      .getByRole('button', { name: v.locale === 'ru' ? 'Ещё параметры' : 'More options' })
+      .click()
+    await shoot(page, `${v.name}-habit-edit-more`, false)
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toBeHidden()
     await page
       .getByRole('button', { name: v.locale === 'ru' ? 'Удалить навсегда' : 'Delete forever' })
       .click()
