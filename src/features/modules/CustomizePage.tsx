@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
+import { SortableHabitList } from '@/features/habits/components/SortableHabitList'
+import { useHabits } from '@/features/habits/hooks/useHabits'
 import { HomeModulesList } from '@/features/modules/components/HomeModulesList'
 import { PinnedTabPicker } from '@/features/modules/components/PinnedTabPicker'
 import { useT } from '@/hooks/useT'
@@ -7,12 +9,14 @@ import '@/features/modules/modules.css'
 
 /**
  * Modules → Customize: which modules are on Today (and in the sidebar), in
- * what order, and which one takes the tab bar's spare slot. Every change lands
+ * what order, the habits' own order on Today, and which module takes the tab
+ * bar's spare slot. Every change lands
  * at once — Today and the bars read the same store — and follows the account
  * to its other devices through `user_settings`.
  */
 function CustomizePage() {
   const { t } = useT()
+  const { habits } = useHabits()
   return (
     <div className="mods flex flex-col gap-6 lg:max-w-2xl">
       <div>
@@ -34,6 +38,17 @@ function CustomizePage() {
         <HomeModulesList />
         <p className="mods-note">{t('modulesPage.onHomeNote')}</p>
       </section>
+
+      {/* Habits are Today itself; their order is set here since /habits is gone (S2). */}
+      {habits.length > 1 ? (
+        <section aria-labelledby="customize-habits">
+          <h2 id="customize-habits" className="mods-sec-h">
+            {t('modulesPage.habitOrder')}
+          </h2>
+          <SortableHabitList habits={habits} />
+          <p className="mods-note">{t('modulesPage.habitOrderNote')}</p>
+        </section>
+      ) : null}
 
       {/* The tab bar is the phone's; the desktop sidebar lists every module already. */}
       <section aria-labelledby="customize-tab" className="lg:hidden">

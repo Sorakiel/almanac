@@ -27,6 +27,12 @@ export interface NavModule {
    * added/removed from the nav via the hub switches.
    */
   core?: boolean
+  /**
+   * Only a tile in the Modules hub, never a row under "My modules" or a tab
+   * (desktop-prototype `renderSide`: the sidebar is Today · Progress · Modules
+   * plus the modules on Today). Habits *are* Today; friends are a hub tile.
+   */
+  hubOnly?: boolean
 }
 
 /** In the prototype's order: it is also the default Today / sidebar order (DEFAULT_ORDER). */
@@ -34,8 +40,10 @@ export const NAV_MODULES: NavModule[] = [
   {
     key: 'habits',
     icon: ListChecks,
-    to: '/habits',
+    // The hub tile goes to Today — there is no separate habits screen (S2).
+    to: '/',
     core: true,
+    hubOnly: true,
   },
   {
     key: 'insights',
@@ -67,6 +75,7 @@ export const NAV_MODULES: NavModule[] = [
     key: 'social',
     icon: Users,
     to: '/friends',
+    hubOnly: true,
   },
 ]
 
@@ -75,12 +84,18 @@ export const CORE_MODULES: NavModule[] = NAV_MODULES.filter((m) => m.core)
 /** Toggleable modules — surfaced under "Modules" once enabled. */
 export const OPTIONAL_MODULES: NavModule[] = NAV_MODULES.filter((m) => !m.core)
 
+/** The modules listed under "My modules" in the sidebar, in NAV order. */
+export const SIDEBAR_MODULES: NavModule[] = NAV_MODULES.filter(
+  (m) => m.key !== 'insights' && !m.hubOnly,
+)
+
 /**
- * Modules that can take the tab bar's optional fourth tab. Insights is already
- * there as «Прогресс», so pinning it would show the same screen twice.
+ * Modules that can take the tab bar's optional fourth tab — the same ones as
+ * "My modules": Insights is already «Прогресс», habits are Today itself, and
+ * friends stay a hub tile.
  */
-export type PinnableModule = Exclude<ModuleKey, 'insights'>
-export const PINNABLE_MODULES: NavModule[] = NAV_MODULES.filter((m) => m.key !== 'insights')
+export type PinnableModule = Exclude<ModuleKey, 'insights' | 'habits' | 'social'>
+export const PINNABLE_MODULES: NavModule[] = SIDEBAR_MODULES
 
 export function isPinnable(key: string): key is PinnableModule {
   return PINNABLE_MODULES.some((m) => m.key === key)

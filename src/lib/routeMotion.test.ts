@@ -4,12 +4,12 @@ import { hasEntered, markEntered, routeMotion } from '@/lib/routeMotion'
 describe('routeMotion', () => {
   it('switches tabs between top-level screens', () => {
     expect(routeMotion('/', '/progress')).toBe('tab')
-    expect(routeMotion('/more', '/habits')).toBe('tab')
+    expect(routeMotion('/more', '/train')).toBe('tab')
   })
 
   it('pushes deeper and pops back out', () => {
-    expect(routeMotion('/habits', '/habits/abc')).toBe('push')
-    expect(routeMotion('/habits/abc', '/habits')).toBe('pop')
+    expect(routeMotion('/train', '/train/abc')).toBe('push')
+    expect(routeMotion('/train/abc', '/train')).toBe('pop')
     expect(routeMotion('/more', '/more/customize')).toBe('push')
     expect(routeMotion('/more/customize', '/more')).toBe('pop')
   })

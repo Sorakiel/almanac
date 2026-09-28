@@ -5,7 +5,7 @@ import { useHabits } from '@/features/habits/hooks/useHabits'
 import { avatarBackground, avatarColorKey, monogram } from '@/features/profile/lib/avatarColors'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useSession } from '@/hooks/useSession'
-import { NAV_MODULES, useModulesStore } from '@/stores/modules'
+import { SIDEBAR_MODULES, useModulesStore } from '@/stores/modules'
 import { useUiStore } from '@/stores/ui'
 import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
@@ -79,10 +79,12 @@ export function Sidebar() {
     { to: '/progress', label: t('nav.progress'), icon: ChartNoAxesColumn },
     { to: '/more', label: t('nav.modules'), icon: LayoutGrid, end: true },
   ]
-  // Progress already has its own row above; the rest are the modules that are on.
-  const mine: NavEntry[] = NAV_MODULES.filter((m) => m.key !== 'insights' && enabled[m.key]).map(
-    (m) => ({ to: m.to, label: t(`modules.${m.key}.label`), icon: m.icon }),
-  )
+  // Progress already has its own row above; habits are Today, friends a hub tile.
+  const mine: NavEntry[] = SIDEBAR_MODULES.filter((m) => enabled[m.key]).map((m) => ({
+    to: m.to,
+    label: t(`modules.${m.key}.label`),
+    icon: m.icon,
+  }))
 
   return (
     <aside className="shell-sidebar lg fixed bottom-2 left-2 top-2 z-30 flex w-[236px] flex-col gap-0.5 rounded-[22px] px-3 pb-3 pt-3.5">

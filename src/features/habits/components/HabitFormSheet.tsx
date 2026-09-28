@@ -298,7 +298,7 @@ export function HabitFormSheet() {
                     option.value === 'custom' ? selectCustom() : selectSimplePreset(option.value)
                   }
                   className={cn(
-                    'rounded-tile border px-4 py-2.5 text-sm font-medium transition-colors',
+                    'whitespace-nowrap rounded-tile border px-4 py-2.5 text-sm font-medium transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
                     'lg:flex-1 lg:border-0 lg:py-3 lg:text-center lg:text-[13.5px]',
                     active

@@ -14,6 +14,8 @@ interface LogProgressInput {
   nextUnit: number
   /** Minutes spent this session — 0 for a plain progress edit. */
   minutes?: number
+  /** Client id for the session row — pass one to be able to undo this log. */
+  sessionId?: string
 }
 
 interface Snapshot {
@@ -39,15 +41,16 @@ export function useReadingProgress() {
 
   return useOfflineMutation(
     OFFLINE_MUTATION_KEYS.logReadingProgress,
-    ({ book, nextUnit, minutes = 0 }: LogProgressInput) => ({
+    ({ book, nextUnit, minutes = 0, sessionId }: LogProgressInput) => ({
       book,
       nextUnit,
       minutes,
       userId,
       dateKey,
+      sessionId: sessionId ?? crypto.randomUUID(),
     }),
     {
-      onMutate: async ({ book, nextUnit, minutes }): Promise<Snapshot> => {
+      onMutate: async ({ book, nextUnit, minutes, sessionId }): Promise<Snapshot> => {
         const keys = {
           book: readingKeys.book(book.id),
           books: readingKeys.books(userId),
@@ -69,7 +72,7 @@ export function useReadingProgress() {
         )
         if (delta > 0 || minutes > 0) {
           const draft: ReadingSession = {
-            id: `pending-${Date.now()}`,
+            id: sessionId ?? `pending-${Date.now()}`,
             user_id: userId,
             book_id: book.id,
             date: dateKey,
@@ -78,6 +81,9 @@ export function useReadingProgress() {
             created_at: new Date().toISOString(),
           }
           queryClient.setQueryData<ReadingSession[]>(keys.sessions, (list) =>
+            list ? [draft, ...list] : list,
+          )
+          queryClient.setQueryData<ReadingSession[]>(readingKeys.recent(userId), (list) =>
             list ? [draft, ...list] : list,
           )
         }
@@ -91,6 +97,32 @@ export function useReadingProgress() {
       },
       onSuccess: (_data, { book }) =>
         trackEvent('reading_progress_logged', { mode: book.progress_mode }),
+    },
+  )
+}
+
+/**
+ * Undo a "+N": the book goes back to how it was and the session the tap
+ * wrote is removed — on screen at once, on the server in order after the log.
+ */
+export function useUndoReadingProgress() {
+  const queryClient = useQueryClient()
+  const { user } = useSession()
+  const userId = user?.id ?? ''
+
+  return useOfflineMutation(
+    OFFLINE_MUTATION_KEYS.undoReadingProgress,
+    ({ book, sessionId }: { book: Book; sessionId: string }) => ({ book, sessionId, userId }),
+    {
+      onMutate: ({ book, sessionId }) => {
+        const drop = (list: ReadingSession[] | undefined) => list?.filter((s) => s.id !== sessionId)
+        queryClient.setQueryData<Book>(readingKeys.book(book.id), (b) => (b ? book : b))
+        queryClient.setQueryData<Book[]>(readingKeys.books(userId), (list) =>
+          list?.map((b) => (b.id === book.id ? book : b)),
+        )
+        queryClient.setQueryData<ReadingSession[]>(readingKeys.sessions(book.id), drop)
+        queryClient.setQueryData<ReadingSession[]>(readingKeys.recent(userId), drop)
+      },
     },
   )
 }

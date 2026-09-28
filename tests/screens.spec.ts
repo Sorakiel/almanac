@@ -34,7 +34,6 @@ const SCREENS = [
   '/flow',
   '/profile',
   '/friends',
-  '/habits',
   '/more',
   '/more/customize',
 ] as const
@@ -217,6 +216,16 @@ const TODAY_HABITS = [
   { name: 'E2E screens · уборка', time_of_day: 'anytime', frequency: 'weekly', done: false },
 ] as const
 const TODAY_BOOK = 'E2E screens · книга'
+// The reading screen drawn with the prototype's data: a queue, one finished
+// book with a rating, and two weeks of pages behind the book in hand.
+const READING_QUEUE = [
+  { title: 'E2E screens · Мастер и Маргарита', author: 'М. Булгаков' },
+  { title: 'E2E screens · Sapiens', author: 'Ю. Харари' },
+  { title: 'E2E screens · Думай медленно', author: 'Д. Канеман' },
+] as const
+const READING_DONE = { title: 'E2E screens · Глубокая работа', author: 'Кэл Ньюпорт' }
+// Oldest first, ending yesterday; today is left for the "+15" tap.
+const READING_PAGES = [18, 12, 0, 20, 15, 9, 22, 17, 0, 14, 19, 21, 12, 16] as const
 const TODAY_FOCUS = 'E2E screens · фокус'
 
 async function dropToday(): Promise<void> {
@@ -230,7 +239,12 @@ async function dropToday(): Promise<void> {
       'name',
       TODAY_HABITS.map((h) => h.name),
     )
-  await db.from('books').delete().eq('user_id', userId).eq('title', TODAY_BOOK)
+  // Sessions go with their book (on delete cascade).
+  await db
+    .from('books')
+    .delete()
+    .eq('user_id', userId)
+    .in('title', [TODAY_BOOK, READING_DONE.title, ...READING_QUEUE.map((b) => b.title)])
   await db.from('focus_sessions').delete().eq('user_id', userId).eq('label', TODAY_FOCUS)
 }
 
@@ -268,16 +282,70 @@ async function seedToday(): Promise<void> {
   })
   const { error: logError } = await db.from('habit_logs').insert(logged)
   if (logError) throw new Error(`could not tick Today's habit: ${logError.message}`)
-  const { error: bookError } = await db.from('books').insert({
-    user_id: userId,
-    title: TODAY_BOOK,
-    status: 'reading',
-    progress_mode: 'pages',
-    current_unit: 212,
-    total_units: 320,
-    daily_goal: 15,
-  })
+  const dayOffset = (days: number): string => {
+    const d = new Date(`${today}T00:00:00Z`)
+    d.setUTCDate(d.getUTCDate() + days)
+    return d.toISOString().slice(0, 10)
+  }
+  const { data: book, error: bookError } = await db
+    .from('books')
+    .insert({
+      user_id: userId,
+      title: TODAY_BOOK,
+      author: 'Джеймс Клир',
+      status: 'reading',
+      progress_mode: 'pages',
+      current_unit: 212,
+      total_units: 320,
+      daily_goal: 15,
+      started_on: dayOffset(-28),
+    })
+    .select('id')
+    .single()
   if (bookError) throw new Error(`could not seed the book: ${bookError.message}`)
+  const { error: shelfError } = await db.from('books').insert([
+    ...READING_QUEUE.map((b) => ({
+      user_id: userId,
+      title: b.title,
+      author: b.author,
+      status: 'to_read' as const,
+      progress_mode: 'pages' as const,
+      current_unit: 0,
+      total_units: 300,
+      daily_goal: 15,
+      rating: null,
+      finished_on: null,
+    })),
+    {
+      user_id: userId,
+      title: READING_DONE.title,
+      author: READING_DONE.author,
+      status: 'finished' as const,
+      progress_mode: 'pages' as const,
+      current_unit: 296,
+      total_units: 296,
+      daily_goal: 15,
+      rating: 5,
+      finished_on: dayOffset(-28),
+    },
+  ])
+  if (shelfError) throw new Error(`could not seed the shelf: ${shelfError.message}`)
+  const { error: pagesError } = await db.from('reading_sessions').insert(
+    READING_PAGES.flatMap((units, i) =>
+      units > 0
+        ? [
+            {
+              user_id: userId,
+              book_id: book.id,
+              date: dayOffset(i - READING_PAGES.length),
+              units_read: units,
+              minutes: 0,
+            },
+          ]
+        : [],
+    ),
+  )
+  if (pagesError) throw new Error(`could not seed reading sessions: ${pagesError.message}`)
   const { error: focusError } = await db
     .from('focus_sessions')
     .insert({ user_id: userId, date: today, minutes: 25, label: TODAY_FOCUS })
@@ -393,9 +461,9 @@ for (const v of VARIANTS) {
     await page.waitForTimeout(700)
     await focus.screenshot({ path: `${OUT}/${v.name}-progress-focus.png` })
 
-    // The custom-length stepper only exists once "custom" is picked.
+    // The custom-length stepper only exists once «Своё» is picked.
     await page.goto('/flow')
-    await page.getByRole('radio', { name: v.locale === 'ru' ? 'Своя' : 'Custom' }).click()
+    await page.getByRole('button', { name: v.locale === 'ru' ? 'Своё' : 'Custom' }).click()
     await expect(
       page.getByRole('spinbutton', {
         name: v.locale === 'ru' ? 'Своя длительность в минутах' : 'Custom length in minutes',
@@ -451,6 +519,19 @@ for (const v of VARIANTS) {
     await page.keyboard.press('Escape')
     await expect(page.getByRole('dialog')).toBeHidden()
 
+    // Reading (`MOD.reading`): the hero with its cover, queue, rhythm and
+    // finished; a book opens as its own page. Every width — one tree.
+    await page.goto('/reading')
+    const hero = page.getByRole('region', {
+      name: v.locale === 'ru' ? 'Читаю сейчас' : 'Reading now',
+    })
+    await expect(hero.getByRole('link', { name: TODAY_BOOK })).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByRole('link', { name: new RegExp(READING_QUEUE[0].title) })).toBeVisible()
+    await shoot(page, `${v.name}-reading`)
+    await hero.getByRole('link', { name: TODAY_BOOK }).click()
+    await expect(page.getByRole('heading', { name: TODAY_BOOK })).toBeVisible({ timeout: 20_000 })
+    await shoot(page, `${v.name}-reading-book`)
+
     // ⌘K palette — desktop only; the phone has no keyboard shortcut to show.
     if (v.width >= 1024) {
       await page.goto('/')
@@ -459,23 +540,28 @@ for (const v of VARIANTS) {
       await page.keyboard.press('Escape')
       await expect(page.getByRole('dialog')).toBeHidden()
 
-      // Habits: a card opens the inspector over the list's right edge.
-      await page.goto('/habits')
-      await page
-        .getByRole('button', {
-          name: v.locale === 'ru' ? `Открыть «${SEED_HABIT}»` : `Open ${SEED_HABIT}`,
-        })
-        .click()
+      // Habits live on Today: a row opens the habit panel in place, no page change.
+      await page.goto('/')
+      // An undone one, so its row is in the open list rather than folded into "Done".
+      const openHabit = TODAY_HABITS[2].name
+      await page.getByRole('link', { name: openHabit }).click()
       const inspector = page.getByRole('complementary', {
         name: v.locale === 'ru' ? 'Привычка' : 'Habit',
       })
-      await expect(inspector.getByRole('heading', { name: SEED_HABIT })).toBeVisible({
+      await expect(inspector.getByRole('heading', { name: openHabit })).toBeVisible({
         timeout: 20_000,
       })
+      await expect(page).toHaveURL(/\/$/)
       await page.waitForTimeout(600) // the slide-in
       await shoot(page, `${v.name}-habits-inspector`, false)
       await page.keyboard.press('Escape')
       await expect(inspector).toBeHidden()
+
+      // Modules → Customize carries the habits' order now.
+      await page.goto('/more/customize')
+      await expect(
+        page.getByRole('heading', { name: v.locale === 'ru' ? 'Порядок привычек' : 'Habit order' }),
+      ).toBeVisible()
 
       // Reflect: two columns (composer, history | mood month, quote); an entry opens in place.
       await page.goto('/reflect')
@@ -485,17 +571,6 @@ for (const v of VARIANTS) {
       await entry.click()
       await expect(entry).toHaveAttribute('aria-expanded', 'true')
       await shoot(page, `${v.name}-reflect-entry`, false)
-
-      // Reading: two columns (reading now, finished | up next); a book opens as a page.
-      await page.goto('/reading')
-      const bookCard = page.getByRole('link', { name: new RegExp(TODAY_BOOK) })
-      await expect(bookCard).toBeVisible({ timeout: 20_000 })
-      await shoot(page, `${v.name}-reading`)
-      await bookCard.click()
-      await expect(page.getByRole('heading', { name: TODAY_BOOK })).toBeVisible({
-        timeout: 20_000,
-      })
-      await shoot(page, `${v.name}-reading-book`)
 
       // Training: two columns (week, today, history | plan); a workout opens as a page.
       await page.goto('/train')
@@ -549,6 +624,34 @@ for (const v of VARIANTS) {
     await shoot(page, `${v.name}-session-done`, false)
 
     expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
+  })
+}
+
+/**
+ * The liveliness layer on a real screen, for the side-by-side with the
+ * prototype: /reading recorded for a full aurora cycle (16 s), then the
+ * "+15" tap with its sparks. Saved next to the screenshots as .webm.
+ */
+for (const v of [VARIANTS[0], VARIANTS[4]]) {
+  test(`screens · ${v.name}-reading-motion`, async ({ browser }) => {
+    test.setTimeout(90_000)
+    const size = { width: v.width, height: v.height }
+    const context = await browser.newContext({
+      viewport: size,
+      recordVideo: { dir: `test-results/video-${v.name}`, size },
+    })
+    const page = await context.newPage()
+    await signIn(page)
+    await applyPrefs(page, v.theme, v.locale)
+    await page.goto('/reading')
+    const hero = page.getByRole('region', { name: 'Читаю сейчас' })
+    await expect(hero.getByRole('link', { name: TODAY_BOOK })).toBeVisible({ timeout: 20_000 })
+    await page.waitForTimeout(17_000)
+    await hero.getByRole('button', { name: '+15 стр' }).click()
+    await page.waitForTimeout(2_500)
+    const video = page.video()
+    await context.close()
+    await video?.saveAs(`${OUT}/${v.name}-reading-motion.webm`)
   })
 }
 

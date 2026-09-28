@@ -1,6 +1,6 @@
 /**
  * Maps a rating to a red → orange → green tier so its severity reads at a
- * glance, shared by the StarRating input and the RatingBars display twin.
+ * glance, used by the StarRating input.
  * Low ratings are danger-red, the midpoint is brand-orange, high ratings are
  * success-green. Tiers are on the value/max ratio so it holds for any scale.
  */

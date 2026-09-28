@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { ChartNoAxesColumn, House, LayoutGrid, type LucideIcon } from 'lucide-react'
 import { CreateButton } from '@/app/shell/CreateButton'
-import { NAV_MODULES, useModulesStore } from '@/stores/modules'
+import { NAV_MODULES, PINNABLE_MODULES, useModulesStore } from '@/stores/modules'
 import { useGlassLens } from '@/hooks/useGlassLens'
 import { useT } from '@/hooks/useT'
 import { useTabClick } from '@/app/hooks/useTabClick'
@@ -33,7 +33,10 @@ function activeTab(pathname: string, pinnedTo: string | null): string | null {
   if (pathname === '/') return 'today'
   if (startsWith(pathname, '/progress')) return 'progress'
   if (pinnedTo && startsWith(pathname, pinnedTo)) return 'pinned'
-  if (startsWith(pathname, '/more') || NAV_MODULES.some((m) => startsWith(pathname, m.to)))
+  if (
+    startsWith(pathname, '/more') ||
+    NAV_MODULES.some((m) => m.to !== '/' && startsWith(pathname, m.to))
+  )
     return 'modules'
   return null
 }
@@ -50,7 +53,7 @@ export function BottomNav() {
   const pinnedKey = useModulesStore((s) => s.pinned)
   const enabled = useModulesStore((s) => s.enabled)
   // A pin outlives its module being switched off; the tab only shows while it is on.
-  const pinned = NAV_MODULES.find((m) => m.key === pinnedKey && enabled[m.key]) ?? null
+  const pinned = PINNABLE_MODULES.find((m) => m.key === pinnedKey && enabled[m.key]) ?? null
 
   const tabs: Tab[] = [
     { key: 'today', to: '/', label: t('nav.today'), icon: House },

@@ -14,7 +14,6 @@ const TOP_LEVEL = new Set([
   '/',
   '/progress',
   '/more',
-  '/habits',
   '/train',
   '/flow',
   '/reflect',

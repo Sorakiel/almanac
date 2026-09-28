@@ -20,7 +20,6 @@ const VARIANTS = [
 
 const STATIC_ROUTES = [
   '/',
-  '/habits',
   '/flow',
   '/train',
   '/progress',

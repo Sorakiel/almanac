@@ -66,7 +66,8 @@ vi.mock('@/features/reading/api/ratings.api', () => ({
   logBookRatingEvent: vi.fn(async () => undefined),
 }))
 vi.mock('@/features/reading/api/sessions.api', () => ({
-  createReadingSession: vi.fn(async () => ({ id: 'new-session' })),
+  createReadingSession: vi.fn(async () => undefined),
+  deleteReadingSession: vi.fn(async () => undefined),
 }))
 vi.mock('@/features/social/api/social.api', () => ({
   emitActivity: vi.fn(async () => undefined),

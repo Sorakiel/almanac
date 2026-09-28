@@ -57,7 +57,7 @@ function ProgressPage() {
           <Button
             size="sm"
             onClick={() => {
-              navigate('/habits')
+              navigate('/')
               openNewHabit()
             }}
           >

@@ -47,7 +47,16 @@ async function openBook(page: Page, id: string): Promise<void> {
   await expect(page.getByRole('heading', { name: BOOK_TITLE })).toBeVisible({ timeout: 20_000 })
 }
 
-test('one tap logs today’s goal, and the page moves before the server answers', async ({
+async function sessionCount(id: string): Promise<number> {
+  const db = await e2eClient()
+  const { count } = await db
+    .from('reading_sessions')
+    .select('id', { count: 'exact', head: true })
+    .eq('book_id', id)
+  return count ?? 0
+}
+
+test('one tap logs today’s goal, moves the page at once, and Undo takes it back', async ({
   page,
 }) => {
   const errors = watchConsole(page)
@@ -57,13 +66,19 @@ test('one tap logs today’s goal, and the page moves before the server answers'
 
   // Nothing read today yet, so the button offers the whole daily goal.
   await page.getByRole('button', { name: '+20 pages' }).click()
-  await expect(page.getByText(/30\s+of\s+200/)).toBeVisible({ timeout: 1_000 })
+  await expect(page.getByText('page of 200 · 15%')).toBeVisible({ timeout: 1_000 })
   await expect.poll(() => currentUnit(id), { timeout: 15_000 }).toBe(30)
+  await expect.poll(() => sessionCount(id), { timeout: 15_000 }).toBe(1)
 
-  // The stepper changes what the next tap logs.
-  await page.getByRole('button', { name: 'Less' }).click()
-  await page.getByRole('button', { name: '+15 pages' }).click()
-  await expect.poll(() => currentUnit(id), { timeout: 15_000 }).toBe(45)
+  // Undo puts the page back and removes the session the tap wrote.
+  await page.getByRole('button', { name: 'Undo' }).click()
+  await expect(page.getByText('page of 200 · 5%')).toBeVisible({ timeout: 1_000 })
+  await expect.poll(() => currentUnit(id), { timeout: 15_000 }).toBe(10)
+  await expect.poll(() => sessionCount(id), { timeout: 15_000 }).toBe(0)
+
+  // The stepper moves one page at a time.
+  await page.getByRole('button', { name: 'One forward' }).click()
+  await expect.poll(() => currentUnit(id), { timeout: 15_000 }).toBe(11)
   expect(errors).toEqual([])
 })
 
@@ -78,9 +93,9 @@ test('a tap made offline survives a reload and lands once back online', async ({
 
   await shell.offline()
   await page.getByRole('button', { name: '+20 pages' }).click()
-  await expect(page.getByText(/30\s+of\s+200/)).toBeVisible()
+  await expect(page.getByText('page of 200 · 15%')).toBeVisible()
   await page.reload()
-  await expect(page.getByText(/30\s+of\s+200/)).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByText('page of 200 · 15%')).toBeVisible({ timeout: 20_000 })
 
   await shell.online()
   await expect.poll(() => currentUnit(id), { timeout: 15_000 }).toBe(30)
@@ -91,9 +106,9 @@ test('an exact page is set from Edit, not from the page itself', async ({ page }
   await signIn(page)
   await openBook(page, id)
 
-  await page.getByRole('button', { name: /^edit$/i }).click()
+  await page.getByRole('button', { name: /^edit book$/i }).click()
   await page.getByLabel('Current page').fill('120')
   await page.getByRole('button', { name: /save changes/i }).click()
-  await expect(page.getByText(/120\s+of\s+200/)).toBeVisible()
+  await expect(page.getByText('page of 200 · 60%')).toBeVisible()
   await expect.poll(() => currentUnit(id), { timeout: 15_000 }).toBe(120)
 })

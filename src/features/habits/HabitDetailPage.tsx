@@ -11,7 +11,7 @@ function HabitDetailPage() {
 
   // Back to wherever the row was tapped (Today or Habits); a deep link has no
   // history in the app, so it lands on the list.
-  const back = () => (location.key === 'default' ? navigate('/habits') : navigate(-1))
+  const back = () => (location.key === 'default' ? navigate('/') : navigate(-1))
 
   return (
     <div className="lg:mx-auto lg:w-full lg:max-w-[560px]">
@@ -24,7 +24,7 @@ function HabitDetailPage() {
         {t('habits.back')}
       </button>
 
-      <HabitDetailPanel id={id} onGone={() => navigate('/habits')} />
+      <HabitDetailPanel id={id} onGone={() => navigate('/')} />
     </div>
   )
 }

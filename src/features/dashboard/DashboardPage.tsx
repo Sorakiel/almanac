@@ -1,6 +1,7 @@
 import { ErrorState } from '@/components/common/ErrorState'
 import { DayRings } from '@/features/dashboard/components/DayRings'
 import { TodayDoneDisclosure } from '@/features/dashboard/components/TodayDoneDisclosure'
+import { TodayHabitInspector } from '@/features/dashboard/components/TodayHabitInspector'
 import { TodayHabitList } from '@/features/dashboard/components/TodayHabitList'
 import { TodayHeader } from '@/features/dashboard/components/TodayHeader'
 import { TodayNudge } from '@/features/dashboard/components/TodayNudge'
@@ -98,6 +99,7 @@ function DashboardPage() {
           </div>
         </div>
       </div>
+      <TodayHabitInspector />
     </div>
   )
 }
