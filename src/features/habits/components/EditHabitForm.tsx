@@ -21,7 +21,6 @@ import { ensureReminderDelivery } from '@/features/habits/lib/reminderDelivery'
 import type { Habit, HabitTimeOfDay } from '@/features/habits/types'
 import { useSession } from '@/hooks/useSession'
 import { useT } from '@/hooks/useT'
-import { toastWithUndo } from '@/lib/undoToast'
 import { toUserError } from '@/lib/userError'
 
 const NAME_MAX = 60
@@ -36,12 +35,13 @@ interface EditHabitFormProps {
  * The quick form's layout (prototype `openSheet('habit')`) filled with a
  * habit: name, «Как часто», «Когда», and «Ещё параметры» for amount, colour,
  * icon, note, reminder and checklist. «Своё» keeps the cadences the four
- * chips don't cover. Saving and archiving are never awaited.
+ * chips don't cover. Saving is never awaited. Archiving lives in the habit's
+ * detail, next to «Изменить» — not here too.
  */
 export function EditHabitForm({ habit, onDone }: EditHabitFormProps) {
   const { t } = useT()
   const { user } = useSession()
-  const { update, archive, restore } = useHabitMutations()
+  const { update } = useHabitMutations()
   const [name, setName] = useState(habit.name)
   const [cadence, setCadence] = useState<Cadence | 'custom'>(
     cadenceOf(habit.frequency, habit.target_count),
@@ -83,14 +83,6 @@ export function EditHabitForm({ habit, onDone }: EditHabitFormProps) {
     if (reminder !== null && reminder !== habit.reminder_at && user) {
       void ensureReminderDelivery(user.id, t)
     }
-    onDone()
-  }
-
-  const onArchive = () => {
-    archive.mutate(habit.id, {
-      onError: (error) => toast.error(toUserError(error, t, 'habits.archiveFailed')),
-    })
-    toastWithUndo(t('habits.archived'), t('common.undo'), () => restore.mutate(habit))
     onDone()
   }
 
@@ -157,13 +149,6 @@ export function EditHabitForm({ habit, onDone }: EditHabitFormProps) {
         className="mt-4 h-12 w-full rounded-pill bg-accent-solid text-body font-semibold text-on-accent-solid transition-opacity disabled:opacity-40"
       >
         {t('habits.form.save')}
-      </button>
-      <button
-        type="button"
-        onClick={onArchive}
-        className="mt-2 min-h-12 w-full rounded-pill text-body text-danger hover:bg-foreground/5"
-      >
-        {t('habits.archiveHabit')}
       </button>
     </form>
   )
