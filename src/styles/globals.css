@@ -86,6 +86,74 @@
   .hero-glow-accent {
     --hero-tint: var(--color-accent);
   }
+  .hero-glow-amber {
+    --hero-tint: var(--color-amber);
+  }
+
+  /* A generated book cover (the prototype's `.m-cover`). The gradient comes
+     inline per book (lib/cover); the ink is white on artwork in both themes. */
+  .book-cover {
+    position: relative;
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 6px 12px 12px 6px;
+    color: #fff;
+    box-shadow:
+      0 12px 24px -10px rgb(0 0 0 / 0.55),
+      inset 3px 0 0 rgb(255 255 255 / 0.18),
+      inset 6px 0 8px -4px rgb(0 0 0 / 0.35);
+  }
+  .book-cover > b {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .book-cover > small {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 500;
+    font-size: 9.5px;
+    opacity: 0.8;
+  }
+  .book-cover-xs {
+    width: 34px;
+    height: 50px;
+  }
+  .book-cover-sm {
+    width: 64px;
+    height: 94px;
+    padding: 8px 6px 6px 10px;
+  }
+  .book-cover-sm > b {
+    font-size: 10px;
+  }
+  .book-cover-sm > small {
+    display: none;
+  }
+  .book-cover-md {
+    width: 92px;
+    height: 136px;
+    padding: 12px 10px 10px 16px;
+  }
+  .book-cover-lg {
+    width: 132px;
+    height: 196px;
+    padding: 12px 10px 10px 16px;
+  }
+  .book-cover-lg > b {
+    font-size: 17px;
+  }
+  .book-cover-lg > small {
+    font-size: 11px;
+  }
 
   /* A toast: one glass capsule, sans, 44px tall (the redesign's .p-toast). */
   .toast-capsule {
@@ -822,4 +890,121 @@
     transparent 60%
   );
   transform: translateX(-120%);
+}
+
+/* ── Liveliness layer (HANDOFF §3.1) ───────────────────────────────────────
+   Aurora: every hero card (`.hero-glow`, the prototype's `.m-hero`) gets its
+   glow drifting (16 s) plus a second soft blob from the bottom-left in
+   `--hero-tint2` (20 s), both alternate — `.m-hero::before/::after`. A
+   session stage takes `.aurora-stage` (`.m-stage::before`, 14 s). Tints are
+   RGB triplets: `--hero-tint` (teal by default), `--hero-tint2` (amber). */
+.hero-glow::before {
+  inset: -20%;
+  animation: aurora-drift 16s ease-in-out infinite alternate;
+}
+.hero-glow::after {
+  content: '';
+  position: absolute;
+  width: 70%;
+  aspect-ratio: 1;
+  left: -25%;
+  bottom: -55%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(var(--hero-tint2, var(--color-amber)) / 0.14),
+    transparent 68%
+  );
+  pointer-events: none;
+  animation: aurora-drift-2 20s ease-in-out infinite alternate;
+}
+.aurora-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.aurora-stage > * {
+  position: relative;
+}
+.aurora-stage::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(
+      50% 40% at 80% 10%,
+      rgb(var(--hero-tint, var(--color-teal)) / 0.2),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 35% at 10% 90%,
+      rgb(var(--hero-tint2, var(--color-accent)) / 0.12),
+      transparent 70%
+    );
+  pointer-events: none;
+  animation: aurora-drift 14s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-8%, 6%) scale(1.12);
+  }
+  100% {
+    transform: translate(4%, -4%) scale(0.95);
+  }
+}
+@keyframes aurora-drift-2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(30%, -18%) scale(1.2);
+  }
+}
+
+/* Sparkle burst (`MOD.burst`): 12 dots fly 46–80 px out of a completed
+   control and fade in 0.8 s. Mounted by lib/burst on <body>, fixed at the
+   control's centre, so a card's `overflow: hidden` never clips it. */
+.burst {
+  position: fixed;
+  /* The celebration layer: above sheets and toasts, never blocking input. */
+  z-index: 60;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.burst > i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  animation: burst-fly 0.8s cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
+}
+@keyframes burst-fly {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow::before,
+  .hero-glow::after,
+  .aurora-stage::before,
+  .burst > i {
+    animation: none !important;
+  }
+  .burst {
+    display: none;
+  }
 }

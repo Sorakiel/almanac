@@ -126,7 +126,7 @@ test('a book deleted offline leaves at once and is gone once back online', async
   await expect(page.getByRole('heading', { name: BOOK_TITLE })).toBeVisible({ timeout: 20_000 })
 
   await shell.offline()
-  await page.getByRole('button', { name: /^edit$/i }).click()
+  await page.getByRole('button', { name: /^edit book$/i }).click()
   await page.getByRole('button', { name: /remove book/i }).click()
   await page
     .getByRole('dialog')

@@ -33,7 +33,8 @@ export function ReflectHistory({ past }: ReflectHistoryProps) {
 
   return (
     <section aria-label={t('reflect.pastLabel')}>
-      <h2 className="mx-1.5 mb-2 text-callout font-semibold text-muted">
+      {/* The prototype's `.p-sec-h`, as on the other module screens. */}
+      <h2 className="mx-1 mb-2 text-headline font-semibold tracking-title">
         {t('reflect.pastLabel')}
       </h2>
 

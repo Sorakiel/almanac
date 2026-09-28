@@ -41,7 +41,13 @@ test('the reflect editor saves itself — text, then mood and energy, on one row
   await expect.poll(savedEntry, { timeout: 15_000 }).not.toBeNull()
 
   await page.getByRole('button', { name: /^good$/i }).click()
-  await page.getByRole('button', { name: /energy 3 of 5/i }).click()
+  // Energy is a battery slider: Home puts it at 1, two steps right land on 3.
+  const energy = page.getByRole('slider', { name: /^energy$/i })
+  await energy.focus()
+  await energy.press('Home')
+  await energy.press('ArrowRight')
+  await energy.press('ArrowRight')
+  await expect(energy).toHaveAttribute('aria-valuenow', '3')
   await expect.poll(savedEntry, { timeout: 15_000 }).toEqual({ mood: 4, energy: 3 })
   await expect(page.getByText(/^saved$/i)).toBeVisible()
 

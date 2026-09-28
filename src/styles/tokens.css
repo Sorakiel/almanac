@@ -45,6 +45,12 @@
   --color-mood-3: 154 154 160; /* #9A9AA0 */
   --color-mood-4: 63 184 168; /* #3FB8A8 */
   --color-mood-5: 224 170 69; /* #E0AA45 */
+  /* Reflect energy, 1 (drained) → 5 (charged): the prototype's battery, red to green. */
+  --color-energy-1: 229 84 74; /* #E5544A */
+  --color-energy-2: 224 135 58; /* #E0873A */
+  --color-energy-3: 224 170 69; /* #E0AA45 */
+  --color-energy-4: 156 203 90; /* #9CCB5A */
+  --color-energy-5: 82 196 138; /* #52C48A */
   /* The session medal's light middle stop, between amber and the accent. */
   --color-gold-light: 243 211 138; /* #F3D38A */
   /* Red is destructive + errors only — never the accent (handoff §0 #4). Bright
@@ -113,6 +119,12 @@
   --color-mood-3: 154 154 160; /* #9A9AA0 */
   --color-mood-4: 63 184 168; /* #3FB8A8 */
   --color-mood-5: 224 170 69; /* #E0AA45 */
+  /* Reflect energy, 1 (drained) → 5 (charged): the prototype's battery, red to green. */
+  --color-energy-1: 229 84 74; /* #E5544A */
+  --color-energy-2: 224 135 58; /* #E0873A */
+  --color-energy-3: 224 170 69; /* #E0AA45 */
+  --color-energy-4: 156 203 90; /* #9CCB5A */
+  --color-energy-5: 82 196 138; /* #52C48A */
   /* The session medal's light middle stop, between amber and the accent. */
   --color-gold-light: 243 211 138; /* #F3D38A */
   /* A step deeper than the handoff's #C8372C, which reads 4.1:1 on the card
