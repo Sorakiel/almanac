@@ -1266,7 +1266,7 @@ export const ru: Translations = {
       color: 'Цвет',
       repeats: 'Повторять',
       daily: 'Ежедневно',
-      weekdays: 'По будням',
+      weekdays: 'Будни',
       weekly: 'Еженедельно',
       custom: 'Своё',
       every: 'Каждые',
