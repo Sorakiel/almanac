@@ -1191,7 +1191,6 @@ export const ru: Translations = {
     },
     editHabit: 'Изменить привычку',
     deleteForever: 'Удалить навсегда',
-    archiveHabit: 'Архивировать привычку',
     back: 'Назад',
     backToHabits: 'Назад к привычкам',
     edit: 'Изменить',
