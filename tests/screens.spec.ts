@@ -393,9 +393,9 @@ for (const v of VARIANTS) {
     await page.waitForTimeout(700)
     await focus.screenshot({ path: `${OUT}/${v.name}-progress-focus.png` })
 
-    // The custom-length stepper only exists once "custom" is picked.
+    // The custom-length stepper only exists once «Своё» is picked.
     await page.goto('/flow')
-    await page.getByRole('radio', { name: v.locale === 'ru' ? 'Своя' : 'Custom' }).click()
+    await page.getByRole('button', { name: v.locale === 'ru' ? 'Своё' : 'Custom' }).click()
     await expect(
       page.getByRole('spinbutton', {
         name: v.locale === 'ru' ? 'Своя длительность в минутах' : 'Custom length in minutes',

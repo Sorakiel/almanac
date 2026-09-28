@@ -4,7 +4,7 @@ import { Timer } from 'lucide-react'
 import { useLogFocusSession } from '@/features/flow/hooks/useLogFocusSession'
 import { useNow } from '@/hooks/useNow'
 import { useT } from '@/hooks/useT'
-import { useFocusStore } from '@/stores/focus'
+import { focusMsLeft, useFocusStore } from '@/stores/focus'
 import { ModuleCard } from './ModuleCard'
 
 /** The block Today starts — the Flow screen keeps the other lengths. */
@@ -24,20 +24,20 @@ function clock(ms: number): string {
  */
 export function FocusModuleCard() {
   const { t } = useT()
-  const { endsAt, durationMin, label, start, stop } = useFocusStore()
+  const { endsAt, durationMin, label, pausedAt, start, stop } = useFocusStore()
   const logFocus = useLogFocusSession()
   const running = endsAt !== null && durationMin !== null
-  const now = useNow(running)
-  const msLeft = running ? endsAt - now : QUICK_FOCUS_MIN * 60_000
+  const now = useNow(running && pausedAt === null)
+  const msLeft = running ? focusMsLeft({ endsAt, pausedAt }, now) : QUICK_FOCUS_MIN * 60_000
 
   // Ran to the end while Today was open: log the whole block, as Flow does.
   useEffect(() => {
-    if (running && endsAt - now <= 0) {
+    if (running && pausedAt === null && endsAt - now <= 0) {
       logFocus(durationMin, label)
       stop()
       toast.success(t('flow.done'))
     }
-  }, [running, endsAt, now, durationMin, label, logFocus, stop, t])
+  }, [running, pausedAt, endsAt, now, durationMin, label, logFocus, stop, t])
 
   const end = () => {
     if (!running) return
