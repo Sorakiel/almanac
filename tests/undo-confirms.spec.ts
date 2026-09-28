@@ -96,8 +96,8 @@ test('a habit archives with Undo, and deletes for good only after a confirm', as
   await page.getByRole('button', { name: /^archive$/i }).click()
   await expect(page).toHaveURL(/\/$/)
   await undo(page).click()
-  // On the phone layout a list row opens through a button, not a link.
-  await expect(page.getByRole('button', { name: `Open ${HABIT_NAME}` })).toBeVisible()
+  // Back on Today, where the habit's row is a link to it again.
+  await expect(page.getByRole('link', { name: new RegExp(HABIT_NAME) })).toBeVisible()
   await expect.poll(() => archivedAt(id), { timeout: 15_000 }).toBeNull()
 
   await page.goto(`/habits/${id}`)
