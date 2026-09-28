@@ -94,7 +94,7 @@ test('a habit archives with Undo, and deletes for good only after a confirm', as
   await page.goto(`/habits/${id}`)
   await expect(page.getByRole('heading', { name: HABIT_NAME })).toBeVisible({ timeout: 20_000 })
   await page.getByRole('button', { name: /^archive$/i }).click()
-  await expect(page).toHaveURL(/\/habits$/)
+  await expect(page).toHaveURL(/\/$/)
   await undo(page).click()
   // On the phone layout a list row opens through a button, not a link.
   await expect(page.getByRole('button', { name: `Open ${HABIT_NAME}` })).toBeVisible()
@@ -107,7 +107,7 @@ test('a habit archives with Undo, and deletes for good only after a confirm', as
   const sheet = page.getByRole('dialog', { name: /delete .* for good/i })
   await expect(sheet.getByRole('button', { name: /cancel/i })).toBeFocused()
   await sheet.getByRole('button', { name: /delete forever/i }).click()
-  await expect(page).toHaveURL(/\/habits$/)
+  await expect(page).toHaveURL(/\/$/)
   await expect.poll(() => rowExists('habits', id), { timeout: 15_000 }).toBe(false)
   expect(errors).toEqual([])
 })

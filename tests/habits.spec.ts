@@ -45,7 +45,8 @@ async function runHabitJourney(page: Page): Promise<void> {
 
   // Create through "Create" → Habit: the one create path, on any account
   // (there is no separate habits screen any more — habits are Today, S2).
-  await page.getByRole('button', { name: 'Create', exact: true }).click()
+  // The sidebar's «Create» and the toolbar's «+» share the name; either opens the sheet.
+  await page.getByRole('button', { name: 'Create', exact: true }).first().click()
   await page
     .getByRole('dialog', { name: 'Create' })
     .getByRole('button', { name: /^habit/i })
