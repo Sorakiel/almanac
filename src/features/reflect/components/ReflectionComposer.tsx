@@ -1,12 +1,14 @@
 import { Check } from 'lucide-react'
 import { useDailyQuote } from '@/features/dashboard/hooks/useDailyQuote'
 import { useAutosaveReflection } from '@/features/reflect/hooks/useAutosaveReflection'
-import { MOODS } from '@/features/reflect/lib/moods'
+import { EnergyBattery } from '@/features/reflect/components/EnergyBattery'
+import { MoodPicker } from '@/features/reflect/components/MoodPicker'
 import type { Reflection } from '@/features/reflect/types'
 import { useT } from '@/hooks/useT'
 import { dateFromKey } from '@/lib/date'
 import { intlLocale } from '@/lib/dateLocale'
 import { cn } from '@/lib/utils'
+import '@/features/reflect/reflect.css'
 
 interface ReflectionComposerProps {
   /** The user's local date key — the day this entry belongs to. */
@@ -15,11 +17,9 @@ interface ReflectionComposerProps {
   today: Reflection | null
 }
 
-const ENERGY_LEVELS = [1, 2, 3, 4, 5] as const
-
 /**
  * Today's entry, the prototype's reflect editor: "How was the day?", five
- * mood buttons, energy as five dots, the text — and no Save button: it
+ * mood faces, energy as a battery, the text — and no Save button: it
  * writes itself (see useAutosaveReflection).
  */
 export function ReflectionComposer({ dateKey, today }: ReflectionComposerProps) {
@@ -38,51 +38,8 @@ export function ReflectionComposer({ dateKey, today }: ReflectionComposerProps) 
       <p className="text-footnote font-medium text-muted first-letter:uppercase">{dateLabel}</p>
       <h2 className="-mt-1 text-headline font-semibold tracking-title">{t('reflect.prompt')}</h2>
 
-      <div role="group" aria-label={t('reflect.ratings.mood')} className="grid grid-cols-5 gap-1.5">
-        {MOODS.map((m) => {
-          const on = draft.mood === m.value
-          return (
-            <button
-              key={m.value}
-              type="button"
-              aria-pressed={on}
-              onClick={() => update({ mood: on ? null : m.value })}
-              className={cn(
-                'grid min-w-0 justify-items-center gap-1.5 rounded-2xl px-0.5 pb-2 pt-2.5 text-caption font-medium transition-transform',
-                on ? '-translate-y-0.5 bg-foreground text-bg' : 'bg-sheet-fill text-foreground',
-              )}
-            >
-              <i aria-hidden="true" className={cn('h-6.5 w-6.5 rounded-full', m.dot)} />
-              <span className="max-w-full truncate">{t(`dashboard.modules.moods.${m.key}`)}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      <div className="flex items-center gap-2.5 text-callout font-medium text-muted">
-        {t('reflect.ratings.energy')}
-        <div role="group" aria-label={t('reflect.ratings.energy')} className="flex gap-1.5">
-          {ENERGY_LEVELS.map((level) => (
-            // A 30px dot, as drawn, inside a 44px-tall hit area.
-            <button
-              key={level}
-              type="button"
-              aria-label={t('reflect.energyLevel', { value: level })}
-              aria-pressed={draft.energy !== null && level <= draft.energy}
-              onClick={() => update({ energy: draft.energy === level ? null : level })}
-              className="grid h-11 w-7.5 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            >
-              <span
-                aria-hidden="true"
-                className={cn(
-                  'h-7.5 w-7.5 rounded-full transition-colors',
-                  draft.energy !== null && level <= draft.energy ? 'bg-amber' : 'bg-sheet-fill',
-                )}
-              />
-            </button>
-          ))}
-        </div>
-      </div>
+      <MoodPicker value={draft.mood} onChange={(mood) => update({ mood })} />
+      <EnergyBattery value={draft.energy} onChange={(energy) => update({ energy })} />
 
       <textarea
         value={draft.body}

@@ -271,7 +271,14 @@ export const en = {
     delete: 'Delete',
     moodMonth: 'mood',
     prompt: 'How was the day?',
-    energyLevel: 'Energy {value} of 5',
+    energyNames: {
+      drained: 'Drained',
+      low: 'Low',
+      okay: 'Okay',
+      good: 'Good',
+      charged: 'Charged',
+    },
+    energyUnset: 'Not set',
     autosave: {
       saving: 'Saving…',
       saved: 'Saved',

@@ -1,0 +1,188 @@
+/* Reflect editor: the mood faces and the energy battery, ported from the
+   prototype's `.m-moods` and `.m-batt` (prototype.html, rev. 4). */
+
+.reflect-moods {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+.reflect-mood {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 2px 8px;
+  border-radius: 16px;
+  background: rgb(var(--color-sheet-fill));
+  color: rgb(var(--color-foreground));
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition:
+    transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1),
+    background 0.2s,
+    box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.reflect-mood:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 2px;
+}
+.reflect-mood svg {
+  display: block;
+  width: 36px;
+  height: 36px;
+  transition:
+    transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1),
+    filter 0.2s,
+    opacity 0.2s;
+}
+@media (hover: hover) {
+  .reflect-mood:hover svg {
+    transform: translateY(-2px) rotate(-6deg);
+  }
+}
+.reflect-mood.is-on {
+  transform: translateY(-3px);
+  background: color-mix(in srgb, var(--fc) 26%, rgb(var(--color-sheet-fill)));
+  box-shadow:
+    0 0 0 1.5px color-mix(in srgb, var(--fc) 70%, transparent),
+    0 10px 22px -12px var(--fc);
+}
+.reflect-mood.is-on svg {
+  transform: scale(1.12);
+}
+.reflect-mood.is-pop svg {
+  animation: reflect-face 0.6s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.reflect-mood.is-dim svg {
+  opacity: 0.5;
+  filter: grayscale(0.6);
+}
+/* The face's features: the same dark ink on every tint. */
+.reflect-face-ink {
+  stroke: rgb(20 16 12 / 0.78);
+  stroke-width: 2.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.reflect-face-dot {
+  fill: rgb(20 16 12 / 0.78);
+  stroke: none;
+}
+@keyframes reflect-face {
+  0% {
+    transform: scale(0.7) rotate(-12deg);
+  }
+  60% {
+    transform: scale(1.28) rotate(6deg);
+  }
+  100% {
+    transform: scale(1.12);
+  }
+}
+
+.reflect-energy {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgb(var(--color-muted));
+}
+.reflect-energy-label {
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+.reflect-batt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  /* 34px body inside a 44px hit area. */
+  padding: 5px 0;
+  cursor: pointer;
+  touch-action: none;
+  border-radius: 12px;
+  -webkit-tap-highlight-color: transparent;
+}
+.reflect-batt:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 2px;
+}
+.reflect-batt-body {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3px;
+  width: 132px;
+  height: 34px;
+  padding: 3px;
+  border: 2px solid rgb(var(--color-foreground) / 0.3);
+  border-radius: 10px;
+  transition: box-shadow 0.3s;
+}
+.reflect-batt-cell {
+  border-radius: 5px;
+  background: rgb(var(--color-foreground) / 0.07);
+  transition:
+    background 0.25s var(--d),
+    transform 0.25s var(--d);
+}
+.reflect-batt-cell.is-on {
+  background: var(--bc);
+}
+.reflect-batt:active .reflect-batt-cell.is-on {
+  transform: scaleY(0.85);
+}
+.reflect-batt-nub {
+  width: 4px;
+  height: 14px;
+  margin-left: 2px;
+  border-radius: 0 3px 3px 0;
+  background: rgb(var(--color-foreground) / 0.3);
+}
+.reflect-batt-bolt {
+  position: absolute;
+  left: 58px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  fill: #fff;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+  animation: reflect-bolt 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  pointer-events: none;
+}
+.reflect-batt[aria-valuenow='5'] .reflect-batt-body {
+  box-shadow: 0 0 18px -2px color-mix(in srgb, var(--bc) 70%, transparent);
+}
+.reflect-batt[aria-valuenow='1'] .reflect-batt-cell.is-on {
+  animation: reflect-low 1.4s ease-in-out infinite;
+}
+@keyframes reflect-bolt {
+  from {
+    transform: scale(0) rotate(-30deg);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes reflect-low {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reflect-mood,
+  .reflect-mood svg,
+  .reflect-batt-cell {
+    transition: none;
+  }
+  .reflect-mood.is-pop svg,
+  .reflect-batt-bolt,
+  .reflect-batt[aria-valuenow='1'] .reflect-batt-cell.is-on {
+    animation: none;
+  }
+}
