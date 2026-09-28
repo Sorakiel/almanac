@@ -1,10 +1,17 @@
 import { useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 import { ChipGroup } from '@/features/habits/components/ChipGroup'
+import { CustomCadenceRow } from '@/features/habits/components/CustomCadenceRow'
 import { HabitExtraFields, type HabitExtras } from '@/features/habits/components/HabitExtraFields'
 import { useHabitMutations } from '@/features/habits/hooks/useHabitMutations'
 import { ONCE, normalizeUnit } from '@/features/habits/lib/goal'
-import { CADENCES, CADENCE_ORDER, TIME_ORDER, type Cadence } from '@/features/habits/lib/cadence'
+import {
+  CADENCES,
+  CADENCE_ORDER,
+  TIME_ORDER,
+  type Cadence,
+  type CadenceValue,
+} from '@/features/habits/lib/cadence'
 import type { HabitTimeOfDay } from '@/features/habits/types'
 import { useT } from '@/hooks/useT'
 import { toastWithUndo } from '@/lib/undoToast'
@@ -25,7 +32,8 @@ export function NewHabitForm({ onDone }: NewHabitFormProps) {
   const { t } = useT()
   const { create, archive } = useHabitMutations()
   const [name, setName] = useState('')
-  const [cadence, setCadence] = useState<Cadence>('daily')
+  const [cadence, setCadence] = useState<Cadence | 'custom'>('daily')
+  const [custom, setCustom] = useState<CadenceValue>({ frequency: 'every_n_days', target_count: 3 })
   const [time, setTime] = useState<HabitTimeOfDay>('morning')
   const [extras, setExtras] = useState<HabitExtras | null>(null)
 
@@ -42,7 +50,7 @@ export function NewHabitForm({ onDone }: NewHabitFormProps) {
         description: extras?.description.trim() || null,
         icon: extras?.icon ?? 'sparkles',
         color: extras?.color ?? 'accent',
-        ...CADENCES[cadence],
+        ...(cadence === 'custom' ? custom : CADENCES[cadence]),
         time_of_day: time,
         daily_goal: extras?.goal.goal ?? 1,
         unit: normalizeUnit(extras?.goal.unit ?? null),
@@ -78,8 +86,12 @@ export function NewHabitForm({ onDone }: NewHabitFormProps) {
         label={t('create.howOften')}
         value={cadence}
         onChange={setCadence}
-        options={CADENCE_ORDER.map((value) => ({ value, label: t(`create.cadence.${value}`) }))}
+        options={[
+          ...CADENCE_ORDER.map((value) => ({ value, label: t(`create.cadence.${value}`) })),
+          { value: 'custom' as const, label: t('habits.form.custom') },
+        ]}
       />
+      {cadence === 'custom' ? <CustomCadenceRow value={custom} onChange={setCustom} /> : null}
 
       <span className="mx-1 mb-2 mt-4 text-footnote font-medium text-muted">
         {t('create.when')}
