@@ -2,8 +2,12 @@ import { useState, type CSSProperties } from 'react'
 import { MoodFace } from '@/features/reflect/components/MoodFace'
 import { MOODS } from '@/features/reflect/lib/moods'
 import { useT } from '@/hooks/useT'
+import { burst } from '@/lib/burst'
 import { haptic } from '@/lib/platform/haptics'
 import { cn } from '@/lib/utils'
+
+/** «Хорошо» and «Отлично» burst; the lower three just pop. */
+const BURST_FROM = 4
 
 interface MoodPickerProps {
   value: number | null
@@ -28,11 +32,18 @@ export function MoodPicker({ value, onChange }: MoodPickerProps) {
             key={m.value}
             type="button"
             aria-pressed={on}
-            onClick={() => {
+            onClick={(event) => {
               haptic('light')
               if (on) return onChange(null)
               setPop((n) => n + 1)
               onChange(m.value)
+              // A good day earns sparks in its own colour (prototype `rfmood`).
+              if (m.value >= BURST_FROM) {
+                burst(event.currentTarget, [
+                  `rgb(var(--color-mood-${m.value}))`,
+                  'rgb(var(--color-amber))',
+                ])
+              }
             }}
             className={cn(
               'reflect-mood',
