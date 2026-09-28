@@ -20,7 +20,10 @@ export function HabitFormSheet() {
   const { habits } = useHabits()
   const [detent, setDetent] = useState<Detent>('large')
   const editing = habitForm ? (habits.find((h) => h.id === habitForm) ?? null) : null
-  const shown = useLastValue(editing)
+  // By id: `useHabits` hands back a fresh object every render, and remembering
+  // the object itself would set state on every render.
+  const shownId = useLastValue(editing?.id)
+  const shown = shownId ? (habits.find((h) => h.id === shownId) ?? null) : null
 
   return (
     <DetentSheet
