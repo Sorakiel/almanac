@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ChevronRight, Sparkles } from 'lucide-react'
 import { ErrorState } from '@/components/common/ErrorState'
-import { SectionHead } from '@/features/workouts/components/SectionHead'
+import { SectionHead } from '@/components/common/SectionHead'
 import { DurationControls } from '@/features/flow/components/DurationControls'
 import { FlowReadingRunner } from '@/features/flow/components/FlowReadingRunner'
 import { FocusDial } from '@/features/flow/components/FocusDial'
