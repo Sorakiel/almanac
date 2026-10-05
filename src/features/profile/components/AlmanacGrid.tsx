@@ -1,9 +1,11 @@
 import { useMemo } from 'react'
 import { ErrorState } from '@/components/common/ErrorState'
 import { Skeleton } from '@/components/common/Skeleton'
-import type { AlmanacCell, AlmanacLevel } from '@/features/profile/lib/almanacGrid'
-import { dateFromKey } from '@/lib/date'
-import { intlLocale } from '@/lib/dateLocale'
+import {
+  almanacMonths,
+  type AlmanacCell,
+  type AlmanacLevel,
+} from '@/features/profile/lib/almanacGrid'
 import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
 
@@ -14,6 +16,21 @@ interface AlmanacGridProps {
   onRetry: () => void
   className?: string
 }
+
+const MONTH_KEYS = [
+  'jan',
+  'feb',
+  'mar',
+  'apr',
+  'may',
+  'jun',
+  'jul',
+  'aug',
+  'sep',
+  'oct',
+  'nov',
+  'dec',
+] as const
 
 const LEVEL: Record<AlmanacLevel, string> = {
   0: 'bg-foreground/[0.07]',
@@ -27,18 +44,11 @@ const LEVEL: Record<AlmanacLevel, string> = {
  * brand motif, and the one place the profile shows history rather than totals.
  */
 export function AlmanacGrid({ grid, isLoading, isError, onRetry, className }: AlmanacGridProps) {
-  const { t, locale } = useT()
+  const { t } = useT()
 
-  // One label per month, under the week its 1st falls in.
-  const months = useMemo(() => {
-    const fmt = new Intl.DateTimeFormat(intlLocale(locale), { month: 'short', timeZone: 'UTC' })
-    return grid.flatMap((week, i) => {
-      const first = week.find((c) => c.date.endsWith('-01'))
-      return first && i > 0 && i <= grid.length - 3
-        ? [{ key: first.date, i, label: fmt.format(dateFromKey(first.date)) }]
-        : []
-    })
-  }, [grid, locale])
+  // Every month the half-year touches, spread evenly under the grid — the
+  // prototype's `.pf-months` (апр май июн июл авг сент).
+  const months = useMemo(() => almanacMonths(grid), [grid])
 
   return (
     <section
@@ -58,33 +68,27 @@ export function AlmanacGrid({ grid, isLoading, isError, onRetry, className }: Al
           <div
             role="img"
             aria-label={t('profile.almanacAria')}
-            className="grid grid-flow-col grid-rows-7 justify-between gap-x-0.5 gap-y-1"
+            className="grid grid-flow-col grid-rows-7 justify-between gap-0.75"
           >
             {grid.flatMap((week) =>
               week.map((cell) => (
                 <i
                   key={cell.date}
                   className={cn(
-                    'block h-2 w-2 rounded-sm',
+                    'block h-2.25 w-2.25 rounded-cell',
                     cell.future ? 'bg-transparent' : LEVEL[cell.level],
-                    cell.today && 'outline outline-2 outline-offset-1 outline-foreground',
+                    cell.today && 'outline outline-1.5 outline-offset-1 outline-foreground',
                   )}
                 />
               )),
             )}
           </div>
           <div
-            className="relative mx-0.5 mt-1.5 h-3.5 text-caption text-muted-strong"
+            className="mx-0.5 mt-1.5 flex justify-between text-caption text-muted-strong"
             aria-hidden="true"
           >
             {months.map((m) => (
-              <span
-                key={m.key}
-                className="absolute"
-                style={{ left: `${(m.i / grid.length) * 100}%` }}
-              >
-                {m.label.replace('.', '')}
-              </span>
+              <span key={m}>{t(`profile.monthsShort.${MONTH_KEYS[m] ?? 'jan'}`)}</span>
             ))}
           </div>
         </>

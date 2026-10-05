@@ -54,7 +54,10 @@ export function HabitDetailView({ habit, stats, ...handlers }: HabitDetailViewPr
           className="h-[60px] w-[60px] rounded-[18px] [&>svg]:h-[30px] [&>svg]:w-[30px]"
         />
         <div className="min-w-0">
-          <h1 className="text-title font-bold" style={habitHeaderTransition(habit.id)}>
+          <h1
+            className="habit-detail-title text-title font-bold"
+            style={habitHeaderTransition(habit.id)}
+          >
             {habit.name}
           </h1>
           {subtitle ? <p className="mt-[3px] text-callout text-muted">{subtitle}</p> : null}

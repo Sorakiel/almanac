@@ -31,15 +31,20 @@ export function almanacStartKey(todayKey: string, weeks = ALMANAC_WEEKS): string
   return addDaysToKey(weekStartKey(todayKey), -(weeks - 1) * 7)
 }
 
+/** Upper bounds, in percent of the day's schedule kept, of tints 1 and 2. */
+const LEVEL_1_MAX = 33
+const LEVEL_2_MAX = 66
+
 /**
  * How a day reads on the grid. Any check-off lights the cell — the grid is about
- * showing up — and the tint deepens with the share of the day's schedule kept.
+ * showing up — and the tint deepens with the share of the day's schedule kept:
+ * 1–33 %, 34–66 %, 67–100 %.
  */
 export function levelOf(done: number, due: number): AlmanacLevel {
   if (done <= 0) return 0
-  const ratio = due > 0 ? done / due : 1
-  if (ratio >= 1) return 3
-  if (ratio >= 0.5) return 2
+  const pct = due > 0 ? Math.round((done / due) * 100) : 100
+  if (pct > LEVEL_2_MAX) return 3
+  if (pct > LEVEL_1_MAX) return 2
   return 1
 }
 
@@ -91,4 +96,26 @@ export function countActiveDays(
     active: inRange.filter((s) => s.done > 0).length,
     total: Math.max(1, daysBetween(from, todayKey) + 1),
   }
+}
+
+/** A month needs this many days on the grid to get a label (the current one always does). */
+const MONTH_LABEL_MIN_DAYS = 7
+
+/**
+ * The months (0–11) under the grid, oldest first — its labels. A sliver of a
+ * month at the left edge (two days of March) gets none, so half a year reads
+ * as six names, as in the prototype; the current month always has one.
+ */
+export function almanacMonths(grid: AlmanacCell[][]): number[] {
+  const counts = new Map<number, number>()
+  let current = -1
+  for (const cell of grid.flat()) {
+    if (cell.future) continue
+    const month = Number(cell.date.slice(5, 7)) - 1
+    counts.set(month, (counts.get(month) ?? 0) + 1)
+    current = month
+  }
+  return [...counts]
+    .filter(([month, days]) => month === current || days >= MONTH_LABEL_MIN_DAYS)
+    .map(([month]) => month)
 }
