@@ -770,9 +770,10 @@ const NOT_REPLAYABLE = new Set<string>([
  * absolute values, upserts, client ids, deletes by id — so the few that are
  * not (NOT_REPLAYABLE) are kept only while paused.
  */
-export function shouldPersistMutation(
-  mutation: Pick<Mutation<unknown, Error, unknown, unknown>, 'state' | 'options'>,
-): boolean {
+export function shouldPersistMutation(mutation: {
+  state: Pick<Mutation['state'], 'isPaused' | 'status'>
+  options: Pick<Mutation['options'], 'mutationKey'>
+}): boolean {
   const key = mutation.options.mutationKey
   if (key?.[0] !== OFFLINE_MUTATION_ROOT) return false
   if (mutation.state.isPaused) return true
