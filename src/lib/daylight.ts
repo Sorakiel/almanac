@@ -12,33 +12,40 @@ interface Anchor {
  * The canvas glow through the day.
  *
  * The app answers "where am I now?", and the cheapest honest signal of *now* is
- * the light in the room. These are the four anchors the glow passes through —
- * cold before dawn, warm as it breaks, near-neutral at midday, amber at dusk —
- * interpolated by the minute so it never visibly steps.
+ * the light in the room: cold at night, the warm ember of dawn and dusk, a
+ * softer warmth at midday — interpolated by the minute so it never visibly steps.
  *
- * Kept deliberately dim. This sits behind everything the user reads, so it can
- * carry a mood but must never cost contrast; the night anchors in particular
- * are barely above the base canvas, because the people most likely to notice
- * this are the ones using the app in the dark.
+ * Visible on purpose, at every hour. Dawn and dusk hold for hours, not minutes
+ * (6–9 and 17–21), at the desktop prototype's `--p-glow` — its ember at 20 %
+ * over #111113, its peach over #F2EADB at 50 % rather than 55 %: the extra
+ * step took muted text to 4.48:1, just under AA. Midday keeps ~60 % of that
+ * warmth, night turns a cool blue on dark and grey on paper. The prototype has
+ * no clock; the plateaus, midday and night are ours (the owner asked for a glow
+ * that reads all day). It still never costs contrast: body and muted text keep
+ * AA over the brightest part of every anchor.
  */
 const ANCHORS: Record<Theme, Anchor[]> = {
-  // Dawn and dusk are the desktop prototype's `--p-glow` exactly — its ember at
-  // 20% over the #111113 canvas, its peach at 55% over #F2EADB — so the window
-  // reads as the prototype at the two hours it was drawn for. Midday keeps a
-  // softer warmth; the night anchor (cold, dim) is ours, the prototype has no clock.
   dark: [
-    { hour: 3, rgb: [22, 24, 38] }, // deep night — cold, almost ink
-    { hour: 7, rgb: [61, 41, 33] }, // dawn — the prototype's ember
-    { hour: 13, rgb: [46, 36, 31] }, // midday — warm, quieter than the edges of the day
-    { hour: 19, rgb: [61, 41, 33] }, // dusk — the prototype's ember
+    { hour: 3, rgb: [28, 34, 58] }, // deep night — a distinct cold blue
+    { hour: 6, rgb: [61, 41, 33] }, // dawn begins — the prototype's ember…
+    { hour: 9, rgb: [61, 41, 33] }, // …and holds through the morning
+    { hour: 13, rgb: [53, 38, 32] }, // midday — warm, a step quieter
+    { hour: 17, rgb: [61, 41, 33] }, // dusk begins — the ember again…
+    { hour: 21, rgb: [61, 41, 33] }, // …until it is properly evening
   ],
   coffee: [
-    { hour: 3, rgb: [228, 224, 214] }, // night — the paper goes grey-blue
-    { hour: 7, rgb: [244, 215, 187] }, // dawn — the prototype's peach
-    { hour: 13, rgb: [247, 230, 210] }, // midday — lighter, still warm
-    { hour: 19, rgb: [244, 215, 187] }, // dusk — the prototype's peach
+    { hour: 3, rgb: [224, 222, 218] }, // night — the paper goes grey
+    { hour: 6, rgb: [244, 217, 190] }, // dawn — the prototype's peach (a hair lighter, for AA)…
+    { hour: 9, rgb: [244, 217, 190] }, // …held through the morning
+    { hour: 13, rgb: [243, 223, 200] }, // midday — ~60 % of the peach
+    { hour: 17, rgb: [244, 217, 190] }, // dusk — the peach again…
+    { hour: 21, rgb: [244, 217, 190] }, // …until evening
   ],
 }
+
+/** Where the glow fades into the canvas: a touch wider than the prototype's 60 % / 46 %. */
+const VEIL_STOP = '70%'
+const GRADIENT_STOP = '55%'
 
 const DAY_MINUTES = 24 * 60
 
@@ -90,8 +97,7 @@ export function daylightColor(minutes: number, theme: Theme): string {
  * shape `tokens.css` ships — only its colour follows the clock now.
  */
 export function daylightGradient(minutes: number, theme: Theme): string {
-  const stop = theme === 'coffee' ? '48%' : '46%'
-  return `radial-gradient(120% 80% at 50% 0%, ${daylightColor(minutes, theme)} 0%, rgb(var(--color-bg)) ${stop})`
+  return `radial-gradient(120% 80% at 50% 0%, ${daylightColor(minutes, theme)} 0%, rgb(var(--color-bg)) ${GRADIENT_STOP})`
 }
 
 /**
@@ -100,7 +106,7 @@ export function daylightGradient(minutes: number, theme: Theme): string {
  * sidebar and the workspace read as lit by the same light.
  */
 export function daylightVeil(minutes: number, theme: Theme): string {
-  return `radial-gradient(120% 60% at 50% -10%, ${daylightColor(minutes, theme)} 0%, rgb(var(--color-bg)) 60%)`
+  return `radial-gradient(120% 60% at 50% -10%, ${daylightColor(minutes, theme)} 0%, rgb(var(--color-bg)) ${VEIL_STOP})`
 }
 
 /** Minutes since local midnight for an instant. */
