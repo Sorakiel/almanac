@@ -17,6 +17,12 @@ const LIFETIME_MS = 900
 export const BURST_COLORS = {
   default: ['rgb(var(--color-teal))', 'rgb(var(--color-accent))', 'rgb(var(--color-amber))'],
   reading: ['rgb(var(--color-amber))', '#E8C27A', 'rgb(var(--color-accent))'],
+  medal: [
+    'rgb(var(--color-amber))',
+    'rgb(var(--color-teal))',
+    'rgb(var(--color-accent))',
+    'rgb(var(--color-success))',
+  ],
 } as const
 
 /**
