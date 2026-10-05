@@ -5,7 +5,7 @@ import type {
   PersistQueryClientOptions,
 } from '@tanstack/react-query-persist-client'
 import { retryNetworkErrors, syncOnlineStateFromBrowser } from '@/lib/network'
-import { OFFLINE_MUTATION_ROOT, registerOfflineMutations } from '@/lib/offlineMutations'
+import { registerOfflineMutations, shouldPersistMutation } from '@/lib/offlineMutations'
 import { APP_VERSION } from '@/lib/version'
 
 /** How long a cached screen may be replayed offline before it is discarded. */
@@ -92,8 +92,10 @@ export const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
     // `queryClient.resumePausedMutations()` call, which is wired to the
     // browser's 'online' event and to the persisted-cache restore in
     // providers.tsx.
-    shouldDehydrateMutation: (mutation) =>
-      mutation.state.isPaused && mutation.options.mutationKey?.[0] === OFFLINE_MUTATION_ROOT,
+    //
+    // In-flight writes are kept too (see shouldPersistMutation): a reload in
+    // the second after a tap used to drop the request mid-air.
+    shouldDehydrateMutation: shouldPersistMutation,
   },
 }
 

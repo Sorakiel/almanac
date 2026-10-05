@@ -3,13 +3,13 @@ import { persist } from 'zustand/middleware'
 import {
   BarChart3,
   BookOpen,
-  Dumbbell,
   ListChecks,
   NotebookPen,
   Timer,
   Users,
   type LucideIcon,
 } from 'lucide-react'
+import { Dumbbell } from '@/components/common/icons'
 
 /** Modules the user can show/hide in the nav (Today + More are fixed). */
 export type ModuleKey =

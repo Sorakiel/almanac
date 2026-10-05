@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Dumbbell } from 'lucide-react'
+import { Dumbbell } from '@/components/common/icons'
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'
 import { useT } from '@/hooks/useT'
