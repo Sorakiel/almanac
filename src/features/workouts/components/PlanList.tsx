@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Dumbbell } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+import { Dumbbell } from '@/components/common/icons'
 import { IconTile } from '@/components/common/IconTile'
 import { useWorkoutDetail } from '@/features/workouts/hooks/useWorkoutDetail'
 import { recurrenceLabel } from '@/features/workouts/lib/recurrence'

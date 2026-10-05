@@ -2,7 +2,6 @@ import {
   BookOpen,
   Brain,
   Droplet,
-  Dumbbell,
   Flame,
   Heart,
   Moon,
@@ -62,3 +61,4 @@ export function resolveHabitColor(color: string | null): ColorStyle {
 export function resolveHabitIcon(icon: string | null): LucideIcon {
   return HABIT_ICONS[(icon as HabitIcon) ?? 'sparkles'] ?? HABIT_ICONS.sparkles
 }
+import { Dumbbell } from '@/components/common/icons'

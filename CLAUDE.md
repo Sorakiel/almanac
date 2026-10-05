@@ -164,7 +164,7 @@ Mirror the _Almanac_ spec board. All colors are **CSS variables** referenced thr
   `--color-accent-deep` (`#C2562A`) is likewise invariant (2nd gradient stop,
   "deep" hover shade on dark).
 
-**Shared category colors:** teal `#2A9D8F`, amber `#C79A3A`.
+**Shared category colors** (theme-adaptive, as in the v0.6 prototype): teal `#3FB8A8` dark / `#1F8578` coffee, amber `#E0AA45` dark / `#A26E14` coffee. White text on the dark-theme teal is ~2.4:1 — below AA, kept on purpose to match the prototype.
 
 **Semantic colors:** `danger` (destructive, errors), `warning` (amber — "at risk"), `success`. Orange is brand, primary action and progress only.
 
