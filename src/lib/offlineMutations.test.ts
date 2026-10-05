@@ -493,6 +493,78 @@ describe('offline mutation resume', () => {
     expect(client2.getMutationCache().getAll()[0]?.state.status).toBe('success')
   })
 
+  /** Start `key` online with a request that never answers, then "reload" into a fresh client. */
+  async function reloadMidRequest(
+    key: readonly unknown[],
+    variables: unknown,
+    hang: () => void,
+  ): Promise<QueryClient> {
+    hang()
+    const client1 = new QueryClient()
+    registerOfflineMutations(client1)
+    void client1
+      .getMutationCache()
+      .build(client1, { mutationKey: key })
+      .execute(variables as never)
+    await new Promise((r) => setTimeout(r, 10))
+    const client2 = new QueryClient()
+    registerOfflineMutations(client2)
+    hydrate(client2, dehydrate(client1, { shouldDehydrateMutation }))
+    await resumeRestoredMutations(client2)
+    return client2
+  }
+  const never = () => new Promise<never>(() => undefined)
+
+  it('replays an absolute write cut off mid-request (count, not +1)', async () => {
+    const client = await reloadMidRequest(
+      OFFLINE_MUTATION_KEYS.setHabitCount,
+      { userId: 'u1', habitId: 'h1', date: '2026-08-05', count: 3 },
+      () => vi.mocked(setHabitCount).mockImplementationOnce(never),
+    )
+    expect(setHabitCount).toHaveBeenLastCalledWith({
+      userId: 'u1',
+      habitId: 'h1',
+      date: '2026-08-05',
+      count: 3,
+    })
+    expect(client.getMutationCache().getAll()[0]?.state.status).toBe('success')
+  })
+
+  it('replays a delete by id and a dedup-guarded insert', async () => {
+    await reloadMidRequest(OFFLINE_MUTATION_KEYS.deleteReflection, { id: 'r1', userId: 'u1' }, () =>
+      vi.mocked(deleteReflection).mockImplementationOnce(never),
+    )
+    expect(deleteReflection).toHaveBeenLastCalledWith('r1')
+    await reloadMidRequest(
+      OFFLINE_MUTATION_KEYS.sendFriendRequest,
+      { requesterId: 'u1', addresseeId: 'u2' },
+      () => vi.mocked(sendFriendRequest).mockImplementationOnce(never),
+    )
+    expect(sendFriendRequest).toHaveBeenLastCalledWith('u1', 'u2')
+  })
+
+  it('persists every in-flight write except the ones a second send would duplicate', () => {
+    const client = new QueryClient()
+    const notReplayable = ['createSubtask', 'createBookNote', 'sendFeedback', 'rateBook']
+    for (const key of Object.values(OFFLINE_MUTATION_KEYS)) {
+      const inFlight = client
+        .getMutationCache()
+        .build(
+          client,
+          { mutationKey: key },
+          { ...client.getMutationCache().build(client, {}).state, status: 'pending' },
+        )
+      expect(shouldDehydrateMutation(inFlight), String(key[1])).toBe(
+        !notReplayable.includes(String(key[1])),
+      )
+      const paused = client
+        .getMutationCache()
+        .build(client, { mutationKey: key }, { ...inFlight.state, isPaused: true })
+      // Paused offline, nothing was sent: every write still survives a reload.
+      expect(shouldDehydrateMutation(paused), String(key[1])).toBe(true)
+    }
+  })
+
   it('a finished write is not persisted', async () => {
     const client = new QueryClient()
     registerOfflineMutations(client)
