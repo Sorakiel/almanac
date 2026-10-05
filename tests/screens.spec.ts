@@ -436,6 +436,15 @@ for (const v of VARIANTS) {
       if (path === '/') await shoot(page, `${v.name}-${slug}-fold`, false)
     }
 
+    // The hub in the prototype's order, ending on Achievements; Insights is
+    // «Прогресс» in the nav, not a tile.
+    await page.goto('/more')
+    const ru = v.locale === 'ru'
+    await expect(
+      page.getByRole('link', { name: ru ? /^Достижения/ : /^Achievements/ }),
+    ).toBeVisible()
+    await expect(page.getByRole('link', { name: ru ? /^Аналитика/ : /^Insights/ })).toHaveCount(0)
+
     // Progress with the habits card open — on the phone the year strip lives
     // inside it; the desktop card has none (desktop-prototype.html).
     await page.goto('/progress')
