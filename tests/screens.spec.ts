@@ -635,9 +635,13 @@ for (const v of VARIANTS) {
     if (await allSets.isVisible()) await allSets.click()
     await shoot(page, `${v.name}-session-sets`)
     // Through the rest of the plan to the medal.
+    // Each stage is waited for: a click that lands mid-transition is lost, and
+    // the walk then stops one set short of the medal.
     for (let n = 1; n < SESSION_TOTAL_SETS; n++) {
       await ready.click()
+      await expect(ready).toBeHidden()
       await setDone.click()
+      if (n < SESSION_TOTAL_SETS - 1) await expect(ready).toBeVisible()
     }
     await expect(
       page.getByText(v.locale === 'ru' ? 'Тренировка закрыта' : 'Workout closed'),
