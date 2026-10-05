@@ -21,7 +21,6 @@ export function BootSkeleton() {
           <div key={i} className="boot-b boot-row" />
         ))}
       </div>
-      <div className="boot-rail" />
       <div className="boot-nav" />
       <span className="sr-only">{t('common.loading')}</span>
     </div>

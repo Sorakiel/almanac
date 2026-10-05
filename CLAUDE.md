@@ -64,8 +64,7 @@ almanac/
 │  │  └─ hooks/            # app-wide effects: reminders, widget sync, celebration watchers
 │  ├─ components/
 │  │  ├─ ui/               # shadcn primitives (button, card, sheet, switch, segmented…)
-│  │  ├─ common/           # reusable composites used by 2+ features (LoadingState, ErrorState, EmptyState, Heatmap…)
-│  │  └─ rail/             # desktop context-rail kit: <Rail> portal, RailCard/RailRow/RailNote, RailIdentity
+│  │  └─ common/           # reusable composites used by 2+ features (LoadingState, ErrorState, EmptyState, Heatmap…)
 │  ├─ features/            # one folder per module; a component used by one feature lives in that feature
 │  │  ├─ habits/
 │  │  │  ├─ components/    # HabitCard, HabitFormSheet, HabitHeatmap
