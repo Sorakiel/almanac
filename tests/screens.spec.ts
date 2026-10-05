@@ -436,6 +436,15 @@ for (const v of VARIANTS) {
       if (path === '/') await shoot(page, `${v.name}-${slug}-fold`, false)
     }
 
+    // The hub in the prototype's order, ending on Achievements; Insights is
+    // «Прогресс» in the nav, not a tile.
+    await page.goto('/more')
+    const ru = v.locale === 'ru'
+    await expect(
+      page.getByRole('link', { name: ru ? /^Достижения/ : /^Achievements/ }),
+    ).toBeVisible()
+    await expect(page.getByRole('link', { name: ru ? /^Аналитика/ : /^Insights/ })).toHaveCount(0)
+
     // Progress with the habits card open — on the phone the year strip lives
     // inside it; the desktop card has none (desktop-prototype.html).
     await page.goto('/progress')
@@ -626,9 +635,13 @@ for (const v of VARIANTS) {
     if (await allSets.isVisible()) await allSets.click()
     await shoot(page, `${v.name}-session-sets`)
     // Through the rest of the plan to the medal.
+    // Each stage is waited for: a click that lands mid-transition is lost, and
+    // the walk then stops one set short of the medal.
     for (let n = 1; n < SESSION_TOTAL_SETS; n++) {
       await ready.click()
+      await expect(ready).toBeHidden()
       await setDone.click()
+      if (n < SESSION_TOTAL_SETS - 1) await expect(ready).toBeVisible()
     }
     await expect(
       page.getByText(v.locale === 'ru' ? 'Тренировка закрыта' : 'Workout closed'),
@@ -727,6 +740,40 @@ for (const theme of ['dark', 'coffee'] as const) {
       await done.click()
       await shoot(page, `desktop1280-${theme}-ru-dashboard-done`, false)
     }
+    expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
+  })
+}
+
+/**
+ * Focus during a session at the narrow desktop widths: with no right rail the
+ * dial must still sit inside its card where the module grid is tightest
+ * (1024 is the first desktop width; 940 is still the phone layout).
+ */
+for (const width of [940, 1024, 1280]) {
+  test(`screens · flow-session-${width}-dark-ru`, async ({ page }) => {
+    const errors = watchConsole(page)
+    await page.setViewportSize({ width, height: 800 })
+    await signIn(page)
+    await applyPrefs(page, 'dark', 'ru')
+    await page.goto('/flow')
+    // Starting only touches the device-local focus store; nothing is written
+    // until a session finishes, and this page is thrown away first.
+    await page.getByRole('button', { name: /^Начать · \d+ мин/ }).click()
+    const dial = page.locator('.flow-dial')
+    await expect(dial).toHaveClass(/is-run/)
+    await expectNoHorizontalScroll(page, `flow ${width}`)
+    const fits = await dial.evaluate((el) => {
+      const card = el.closest('.flow-dialbox')?.parentElement
+      if (!card) return false
+      const d = el.getBoundingClientRect()
+      const c = card.getBoundingClientRect()
+      const pad = getComputedStyle(card)
+      const left = c.left + parseFloat(pad.paddingLeft)
+      const right = c.right - parseFloat(pad.paddingRight)
+      return d.left >= left - 0.5 && d.right <= right + 0.5
+    })
+    expect(fits, `dial overflows its card at ${width}px`).toBe(true)
+    await shoot(page, `flow${width}-dark-ru-session`, false)
     expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
   })
 }

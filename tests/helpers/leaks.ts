@@ -11,6 +11,8 @@ export const LATIN_ALLOWED = new Set([
   'notifications',
   // A file format's name, like CSV (too short to be caught) — the export offers both.
   'json',
+  // A platform's name, as the prototype writes it in Russian: «…десктопе и Android».
+  'android',
 ])
 
 /** An English word: four or more Latin letters in a row. */

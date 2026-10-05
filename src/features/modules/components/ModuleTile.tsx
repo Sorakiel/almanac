@@ -1,33 +1,34 @@
 import type { CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
-import { MODULE_HUE } from '@/features/modules/lib/moduleHue'
 import { useT } from '@/hooks/useT'
 import { cn } from '@/lib/utils'
-import type { NavModule } from '@/stores/modules'
+import type { HubTile } from '@/features/modules/hub'
 
 interface ModuleTileProps {
-  module: NavModule
+  tile: HubTile
+  /** Live status line; null while its data loads (the row keeps its height). */
+  line: string | null
   /** Switched off in Customize: still opens, drawn faded, says so. */
   off: boolean
 }
 
 /** One module on the hub — the whole tile opens it. */
-export function ModuleTile({ module, off }: ModuleTileProps) {
+export function ModuleTile({ tile, line, off }: ModuleTileProps) {
   const { t } = useT()
-  const Icon = module.icon
+  const Icon = tile.icon
   return (
     <Link
-      to={module.to}
+      to={tile.to}
       viewTransition
       className={cn('mods-tile', off && 'is-off')}
-      style={{ '--hue': MODULE_HUE[module.key] } as CSSProperties}
+      style={{ '--hue': tile.hue } as CSSProperties}
     >
       <span className="mods-ic" aria-hidden="true">
         <Icon strokeWidth={1.9} />
       </span>
       <span>
-        <b>{t(`modules.${module.key}.label`)}</b>
-        <small>{off ? t('modulesPage.hidden') : t(`modules.${module.key}.description`)}</small>
+        <b>{t(`modules.${tile.key}.label`)}</b>
+        <small>{off ? t('modulesPage.hidden') : (line ?? ' ')}</small>
       </span>
     </Link>
   )
