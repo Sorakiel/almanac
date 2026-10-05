@@ -1,4 +1,4 @@
-import type { QueryClient, QueryKey } from '@tanstack/react-query'
+import type { Mutation, QueryClient, QueryKey } from '@tanstack/react-query'
 import {
   addFreeze,
   archiveHabit,
@@ -746,4 +746,52 @@ export function habitIdOfWrite(
   if (typeof v.habitId === 'string') return v.habitId
   if (HABIT_ROW_WRITES.has(String(mutationKey[1])) && typeof v.id === 'string') return v.id
   return null
+}
+
+/**
+ * Writes that are not safe to send twice: inserts without an id of their own
+ * (a second note, subtask or feedback row) and the rating event log. Cut off
+ * mid-request, these are dropped as before rather than risk a duplicate;
+ * paused offline they were never sent, so they still survive a reload.
+ */
+const NOT_REPLAYABLE = new Set<string>([
+  'createSubtask',
+  'createBookNote',
+  'sendFeedback',
+  'rateBook',
+])
+
+/**
+ * Which mutations the persisted cache keeps: ours (the 'offline' namespace,
+ * so the function exists to resume them) that have not finished — paused for
+ * the network, or still in flight. An in-flight write is the one a reload
+ * kills mid-request: a habit created and the app reloaded a second later was
+ * simply gone. Running one again whose first response was lost must be safe —
+ * absolute values, upserts, client ids, deletes by id — so the few that are
+ * not (NOT_REPLAYABLE) are kept only while paused.
+ */
+export function shouldPersistMutation(mutation: {
+  state: Pick<Mutation['state'], 'isPaused' | 'status'>
+  options: Pick<Mutation['options'], 'mutationKey'>
+}): boolean {
+  const key = mutation.options.mutationKey
+  if (key?.[0] !== OFFLINE_MUTATION_ROOT) return false
+  if (mutation.state.isPaused) return true
+  return mutation.state.status === 'pending' && !NOT_REPLAYABLE.has(String(key[1]))
+}
+
+/**
+ * After the persisted cache is restored: resume the writes that were paused,
+ * and run again the ones that were cut off in flight — those come back
+ * "pending" but not paused, which `resumePausedMutations` alone skips.
+ */
+export async function resumeRestoredMutations(client: QueryClient): Promise<void> {
+  const cutOff = client
+    .getMutationCache()
+    .getAll()
+    .filter((m) => m.state.status === 'pending' && !m.state.isPaused)
+  await Promise.all([
+    client.resumePausedMutations(),
+    ...cutOff.map((m) => m.continue().catch(() => undefined)),
+  ])
 }
