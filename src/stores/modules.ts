@@ -1,15 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import {
-  BarChart3,
-  BookOpen,
-  ListChecks,
-  NotebookPen,
-  Timer,
-  Users,
-  type LucideIcon,
-} from 'lucide-react'
-import { Dumbbell } from '@/components/common/icons'
+import { BarChart3, BookOpen, Timer, Users, type LucideIcon } from 'lucide-react'
+import { Dumbbell, HabitCheck, ReflectPen } from '@/components/common/icons'
 
 /** Modules the user can show/hide in the nav (Today + More are fixed). */
 export type ModuleKey =
@@ -39,7 +31,7 @@ export interface NavModule {
 export const NAV_MODULES: NavModule[] = [
   {
     key: 'habits',
-    icon: ListChecks,
+    icon: HabitCheck,
     // The hub tile goes to Today — there is no separate habits screen (S2).
     to: '/',
     core: true,
@@ -68,7 +60,7 @@ export const NAV_MODULES: NavModule[] = [
   },
   {
     key: 'reflect',
-    icon: NotebookPen,
+    icon: ReflectPen,
     to: '/reflect',
   },
   {
