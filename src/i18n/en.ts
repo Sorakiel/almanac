@@ -967,7 +967,6 @@ export const en = {
     loading: 'Loading…',
     focusSession: 'Focus session',
     done: 'done',
-    flowInSession: '◷ flow · in session',
     minLeft: { one: '{count} min left', other: '{count} min left' },
     habitUpdateFailed: 'Could not update habit',
     slots: {
@@ -1173,17 +1172,6 @@ export const en = {
     reflect: { label: 'Reflect', description: 'Daily journaling with mood and quotes.' },
     reading: { label: 'Reading', description: 'Track books, pages, and reading streaks.' },
     social: { label: 'Friends', description: "See how friends' streaks are going." },
-  },
-  rail: {
-    commandCenter: 'command center',
-    account: 'account',
-    role: 'role',
-    joined: 'joined',
-    timezone: 'timezone',
-    owner: 'Owner',
-    admin: 'Admin',
-    member: 'Member',
-    motto: 'Discipline is a practice, not a destination.',
   },
   settings: {
     profile: 'Profile',
@@ -1544,7 +1532,6 @@ export const en = {
       one: 'You still have {count} habit to finish today.',
       other: 'You still have {count} habits to finish today.',
     },
-    nowActive: '▶ now · active',
   },
   celebrate: {
     sealRim: 'DAY CLOSED · {date} · ALMANAC ·',

@@ -1,6 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { ChevronRight, Dumbbell, GripVertical, Repeat2, Trash2 } from 'lucide-react'
+import { ChevronRight, GripVertical, Repeat2, Trash2 } from 'lucide-react'
+import { Dumbbell } from '@/components/common/icons'
 import { IconTile } from '@/components/common/IconTile'
 import { SetEditorTable } from '@/features/workouts/components/edit/SetEditorTable'
 import {

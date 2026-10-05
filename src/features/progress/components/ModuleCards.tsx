@@ -1,4 +1,5 @@
-import { BookOpen, Dumbbell, ListChecks, NotebookPen, Timer } from 'lucide-react'
+import { BookOpen, ListChecks, NotebookPen, Timer } from 'lucide-react'
+import { Dumbbell } from '@/components/common/icons'
 import { ModuleCard } from '@/features/progress/components/ModuleCard'
 import { FocusDetail } from '@/features/progress/components/details/FocusDetail'
 import { HabitsDetail } from '@/features/progress/components/details/HabitsDetail'

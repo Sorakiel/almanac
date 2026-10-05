@@ -64,8 +64,7 @@ almanac/
 │  │  └─ hooks/            # app-wide effects: reminders, widget sync, celebration watchers
 │  ├─ components/
 │  │  ├─ ui/               # shadcn primitives (button, card, sheet, switch, segmented…)
-│  │  ├─ common/           # reusable composites used by 2+ features (LoadingState, ErrorState, EmptyState, Heatmap…)
-│  │  └─ rail/             # desktop context-rail kit: <Rail> portal, RailCard/RailRow/RailNote, RailIdentity
+│  │  └─ common/           # reusable composites used by 2+ features (LoadingState, ErrorState, EmptyState, Heatmap…)
 │  ├─ features/            # one folder per module; a component used by one feature lives in that feature
 │  │  ├─ habits/
 │  │  │  ├─ components/    # HabitCard, HabitFormSheet, HabitHeatmap
@@ -164,7 +163,7 @@ Mirror the _Almanac_ spec board. All colors are **CSS variables** referenced thr
   `--color-accent-deep` (`#C2562A`) is likewise invariant (2nd gradient stop,
   "deep" hover shade on dark).
 
-**Shared category colors:** teal `#2A9D8F`, amber `#C79A3A`.
+**Shared category colors** (theme-adaptive, as in the v0.6 prototype): teal `#3FB8A8` dark / `#1F8578` coffee, amber `#E0AA45` dark / `#A26E14` coffee. White text on the dark-theme teal is ~2.4:1 — below AA, kept on purpose to match the prototype.
 
 **Semantic colors:** `danger` (destructive, errors), `warning` (amber — "at risk"), `success`. Orange is brand, primary action and progress only.
 

@@ -259,15 +259,9 @@ button.flow-dial-time:focus-visible {
   white-space: nowrap;
 }
 .flow-target-go {
-  display: flex;
   flex: none;
-  align-items: center;
-  gap: 2px;
+  font-size: 13px;
   color: rgb(var(--color-muted-strong));
-}
-.flow-target-go svg {
-  width: 16px;
-  height: 16px;
 }
 
 .flow-cta {
@@ -406,13 +400,18 @@ button.flow-dial-time:focus-visible {
   .flow-dialbox {
     max-width: 520px;
   }
+  /* 320px as in the prototype's .dk-focus, but never wider than its card: at
+     1024–1080 the module grid leaves the card about 270px. The time scales
+     with the dial (72px at full size). */
   .flow-dial {
-    width: 320px;
-    height: 320px;
+    width: min(320px, 100%);
+    height: auto;
+    aspect-ratio: 1;
+    container-type: inline-size;
   }
   .flow-dial-time,
   .flow-dial-input {
-    font-size: 72px;
+    font-size: min(72px, 22.5cqi);
   }
 }
 
