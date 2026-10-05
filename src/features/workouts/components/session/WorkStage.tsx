@@ -1,3 +1,4 @@
+import { PopNumber } from '@/components/common/PopNumber'
 import { Trans } from '@/components/common/Trans'
 import {
   formatKg,
@@ -6,6 +7,7 @@ import {
   type SetValues,
 } from '@/features/workouts/lib/sessionRun'
 import { useT } from '@/hooks/useT'
+import { burst } from '@/lib/burst'
 import { intlLocale } from '@/lib/dateLocale'
 import { cn } from '@/lib/utils'
 
@@ -43,7 +45,7 @@ function Stepper({
   return (
     <div className="grid min-w-30 grid-cols-2 justify-items-center gap-2">
       <div className="col-span-2 grid justify-items-center">
-        <b className="num text-stage font-medium lg:text-stage-lg">{value}</b>
+        <PopNumber value={value} className="text-stage font-medium lg:text-stage-lg" />
         <small className="text-footnote font-medium text-muted">{unit}</small>
       </div>
       <button type="button" aria-label={less} onClick={onLess} className={btn}>
@@ -112,7 +114,10 @@ export function WorkStage({
       ) : null}
       <button
         type="button"
-        onClick={onDone}
+        onClick={(e) => {
+          burst(e.currentTarget)
+          onDone()
+        }}
         disabled={justDone}
         className={cn(
           'ws-done h-14.5 w-full rounded-full text-body font-semibold text-white transition duration-200 active:scale-97 lg:max-w-105',

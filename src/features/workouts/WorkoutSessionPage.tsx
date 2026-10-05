@@ -137,7 +137,7 @@ function WorkoutSessionPage() {
             key={stageKey}
             aria-live="polite"
             className={cn(
-              'mt-3 grid justify-items-center gap-3 overflow-hidden rounded-sheet bg-surface px-4.5 pb-4.5 pt-5.5 text-center lg:mt-0 lg:px-8.5 lg:pb-8.5 lg:pt-10',
+              'aurora-stage mt-3 grid justify-items-center gap-3 overflow-hidden rounded-sheet bg-surface px-4.5 pb-4.5 pt-5.5 text-center lg:mt-0 lg:px-8.5 lg:pb-8.5 lg:pt-10',
               stageKey !== 'rest' && stageKey !== 'fin' && 'ws-enter',
             )}
           >

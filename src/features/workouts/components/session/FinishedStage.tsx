@@ -1,6 +1,11 @@
+import { useEffect, useRef } from 'react'
 import { formatKg, formatTimer, type SetValues } from '@/features/workouts/lib/sessionRun'
 import { useT } from '@/hooks/useT'
+import { BURST_COLORS, burst } from '@/lib/burst'
 import { intlLocale } from '@/lib/dateLocale'
+
+// The prototype bursts once the medal has started spinning in.
+const MEDAL_BURST_DELAY_MS = 280
 
 interface FinishedStageProps {
   elapsedMs: number
@@ -14,6 +19,15 @@ interface FinishedStageProps {
 export function FinishedStage({ elapsedMs, sets, volume, record, onSave }: FinishedStageProps) {
   const { t, locale } = useT()
   const loc = intlLocale(locale)
+  const medal = useRef<HTMLDivElement>(null)
+  // A one-shot celebration as the stage appears — an animation, not data.
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => burst(medal.current, BURST_COLORS.medal),
+      MEDAL_BURST_DELAY_MS,
+    )
+    return () => window.clearTimeout(timer)
+  }, [])
   const stats = [
     { value: formatTimer(elapsedMs), label: t('workouts.session.time') },
     { value: String(sets), label: t('workouts.session.setsWord', { count: sets }) },
@@ -21,7 +35,11 @@ export function FinishedStage({ elapsedMs, sets, volume, record, onSave }: Finis
   ]
   return (
     <>
-      <div className="ws-medal grid h-23 w-23 place-items-center rounded-full" aria-hidden="true">
+      <div
+        ref={medal}
+        className="ws-medal grid h-23 w-23 place-items-center rounded-full"
+        aria-hidden="true"
+      >
         <svg viewBox="0 0 24 24" fill="none" strokeWidth="3" className="h-11 w-11 stroke-white">
           <path d="M5 12.5l4.5 4.5L19 7.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>

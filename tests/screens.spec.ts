@@ -669,6 +669,46 @@ for (const v of [VARIANTS[0], VARIANTS[4]]) {
 }
 
 /**
+ * The session stage alive, for the side-by-side with `MOD.session`: the
+ * aurora behind the stage for a full cycle, the numbers popping on − / +,
+ * sparks on "Set done", then through the plan to the medal and its sparks.
+ */
+for (const v of [VARIANTS[0], VARIANTS[4]]) {
+  test(`screens · ${v.name}-session-motion`, async ({ browser }) => {
+    test.setTimeout(90_000)
+    const size = { width: v.width, height: v.height }
+    const context = await browser.newContext({
+      viewport: size,
+      recordVideo: { dir: `test-results/video-session-${v.name}`, size },
+    })
+    const page = await context.newPage()
+    await signIn(page)
+    await applyPrefs(page, v.theme, v.locale)
+    await page.goto(`/train/${sessionId}/session`)
+    const setDone = page.getByRole('button', { name: 'Подход сделан' })
+    await expect(setDone).toBeVisible({ timeout: 20_000 })
+    await page.waitForTimeout(15_000)
+    await page.getByRole('button', { name: 'Больше вес' }).click()
+    await page.waitForTimeout(500)
+    await page.getByRole('button', { name: 'Больше повторов' }).click()
+    await page.waitForTimeout(800)
+    await setDone.click()
+    await page.waitForTimeout(1_500)
+    const ready = page.getByRole('button', { name: 'Я готов' })
+    for (let n = 1; n < SESSION_TOTAL_SETS; n++) {
+      await ready.click()
+      await setDone.click()
+      await page.waitForTimeout(800)
+    }
+    await expect(page.getByText('Тренировка закрыта')).toBeVisible()
+    await page.waitForTimeout(2_000)
+    const video = page.video()
+    await context.close()
+    await video?.saveAs(`${OUT}/${v.name}-session-motion.webm`)
+  })
+}
+
+/**
  * Today at the prototype's own desktop size (desktop-prototype.html is drawn at
  * 1280×800), for the side-by-side check — folded, then with "Done" open.
  */
