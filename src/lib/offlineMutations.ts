@@ -1,4 +1,4 @@
-import type { QueryClient, QueryKey } from '@tanstack/react-query'
+import type { Mutation, QueryClient, QueryKey } from '@tanstack/react-query'
 import {
   addFreeze,
   archiveHabit,
@@ -746,4 +746,35 @@ export function habitIdOfWrite(
   if (typeof v.habitId === 'string') return v.habitId
   if (HABIT_ROW_WRITES.has(String(mutationKey[1])) && typeof v.id === 'string') return v.id
   return null
+}
+
+/**
+ * Which mutations the persisted cache keeps: ours (the 'offline' namespace,
+ * so the function exists to resume them) that have not finished — paused for
+ * the network, or still in flight. An in-flight write is the one a reload
+ * kills mid-request: a habit created and the app reloaded a second later was
+ * simply gone. Every write here is idempotent (client ids, upserts), so
+ * running one again whose first response was lost is safe.
+ */
+export function shouldPersistMutation(
+  mutation: Pick<Mutation<unknown, Error, unknown, unknown>, 'state' | 'options'>,
+): boolean {
+  if (mutation.options.mutationKey?.[0] !== OFFLINE_MUTATION_ROOT) return false
+  return mutation.state.isPaused || mutation.state.status === 'pending'
+}
+
+/**
+ * After the persisted cache is restored: resume the writes that were paused,
+ * and run again the ones that were cut off in flight — those come back
+ * "pending" but not paused, which `resumePausedMutations` alone skips.
+ */
+export async function resumeRestoredMutations(client: QueryClient): Promise<void> {
+  const cutOff = client
+    .getMutationCache()
+    .getAll()
+    .filter((m) => m.state.status === 'pending' && !m.state.isPaused)
+  await Promise.all([
+    client.resumePausedMutations(),
+    ...cutOff.map((m) => m.continue().catch(() => undefined)),
+  ])
 }

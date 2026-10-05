@@ -20,6 +20,8 @@ import {
   OFFLINE_MUTATION_KEYS,
   habitIdOfWrite,
   registerOfflineMutations,
+  resumeRestoredMutations,
+  shouldPersistMutation,
 } from '@/lib/offlineMutations'
 import type { HabitWithTodayLog } from '@/features/habits/types'
 import type { Book } from '@/features/reading/types'
@@ -87,12 +89,7 @@ vi.mock('@/features/settings/api/profiles.api', () => ({
 
 const habit = { id: 'h1', isComplete: false, todayCount: 0 } as HabitWithTodayLog
 
-function shouldDehydrateMutation(mutation: {
-  state: { isPaused: boolean }
-  options: { mutationKey?: readonly unknown[] }
-}) {
-  return mutation.state.isPaused && mutation.options.mutationKey?.[0] === 'offline'
-}
+const shouldDehydrateMutation = shouldPersistMutation
 
 describe('offline mutation resume', () => {
   beforeEach(() => {
@@ -463,6 +460,47 @@ describe('offline mutation resume', () => {
     await pending
 
     expect(sendFriendRequest).toHaveBeenCalledWith('u1', 'u2')
+  })
+
+  it('survives a reload mid-request: an in-flight create is kept and runs again', async () => {
+    // Online, the create starts and its request never answers — then the page reloads.
+    vi.mocked(createHabit).mockImplementationOnce(() => new Promise(() => undefined))
+    const client1 = new QueryClient()
+    registerOfflineMutations(client1)
+    const variables = {
+      id: 'h-new',
+      userId: 'u1',
+      input: { name: 'Холодный душ' },
+    }
+    void client1
+      .getMutationCache()
+      .build(client1, { mutationKey: OFFLINE_MUTATION_KEYS.createHabit })
+      .execute(variables as never)
+    await new Promise((r) => setTimeout(r, 10))
+
+    const dehydrated = dehydrate(client1, { shouldDehydrateMutation })
+    expect(dehydrated.mutations).toHaveLength(1)
+    expect(dehydrated.mutations[0]?.state.isPaused).toBe(false)
+
+    const client2 = new QueryClient()
+    registerOfflineMutations(client2)
+    hydrate(client2, dehydrated)
+    await resumeRestoredMutations(client2)
+
+    expect(createHabit).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'h-new', user_id: 'u1', name: 'Холодный душ' }),
+    )
+    expect(client2.getMutationCache().getAll()[0]?.state.status).toBe('success')
+  })
+
+  it('a finished write is not persisted', async () => {
+    const client = new QueryClient()
+    registerOfflineMutations(client)
+    await client
+      .getMutationCache()
+      .build(client, { mutationKey: OFFLINE_MUTATION_KEYS.toggleHabit })
+      .execute({ habit, userId: 'u1', date: '2026-08-05' })
+    expect(dehydrate(client, { shouldDehydrateMutation }).mutations).toHaveLength(0)
   })
 
   it('a non-offline mutation key is never dehydrated, matching queryClient.ts', () => {
