@@ -1,5 +1,5 @@
-import { BookOpen, ListChecks, NotebookPen, Timer } from 'lucide-react'
-import { Dumbbell } from '@/components/common/icons'
+import { BookOpen, Timer } from 'lucide-react'
+import { Dumbbell, HabitCheck, ReflectPen } from '@/components/common/icons'
 import { ModuleCard } from '@/features/progress/components/ModuleCard'
 import { FocusDetail } from '@/features/progress/components/details/FocusDetail'
 import { HabitsDetail } from '@/features/progress/components/details/HabitsDetail'
@@ -34,7 +34,7 @@ export function ModuleCards({ data, yearDays, todayKey, days }: ModuleCardsProps
     <div className="grid gap-2.5 lg:grid-cols-3 lg:gap-3.5">
       {habits?.hasData ? (
         <ModuleCard
-          icon={ListChecks}
+          icon={HabitCheck}
           tone="accent"
           wide
           title={t('modules.habits.label')}
@@ -89,7 +89,7 @@ export function ModuleCards({ data, yearDays, todayKey, days }: ModuleCardsProps
       ) : null}
       {reflect ? (
         <ModuleCard
-          icon={NotebookPen}
+          icon={ReflectPen}
           tone="teal"
           title={t('modules.reflect.label')}
           summary={[

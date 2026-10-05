@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { NotebookPen } from 'lucide-react'
+import { ReflectPen } from '@/components/common/icons'
 import { useReflectionMutations } from '@/features/reflect/hooks/useReflectionMutations'
 import { useReflections } from '@/features/reflect/hooks/useReflections'
 import { useT } from '@/hooks/useT'
@@ -55,7 +55,7 @@ export function ReflectModuleCard() {
 
   return (
     <ModuleCard
-      icon={NotebookPen}
+      icon={ReflectPen}
       hue="teal"
       kicker={t('dashboard.modules.evening')}
       to="/reflect"
