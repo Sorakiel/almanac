@@ -6,6 +6,7 @@ import { checkForAndroidUpdate } from '@/lib/platform/androidUpdater'
 import { initDeepLinks } from '@/lib/platform/deepLink'
 import { checkForDesktopUpdate } from '@/lib/platform/desktopUpdater'
 import { applyRunInBackground } from '@/lib/platform/desktop'
+import { resumeRestoredMutations } from '@/lib/offlineMutations'
 import { clearQueryCache, persistOptions, queryClient } from '@/lib/queryClient'
 import { supabase } from '@/lib/supabase'
 import { useDaylight } from '@/app/hooks/useDaylight'
@@ -81,8 +82,9 @@ export function Providers({ children }: ProvidersProps) {
         queryClient.invalidateQueries()
         // Covers a mutation that paused before this session started (app
         // closed offline, reopened already online) — the 'online' listener
-        // in queryClient.ts only fires on a transition, not on load.
-        void queryClient.resumePausedMutations()
+        // in queryClient.ts only fires on a transition, not on load — and one
+        // the reload cut off mid-request.
+        void resumeRestoredMutations(queryClient)
       }}
     >
       {children}

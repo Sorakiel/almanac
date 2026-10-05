@@ -1,3 +1,4 @@
+import { isUniqueViolation } from '@/lib/pgErrors'
 import { supabase } from '@/lib/supabase'
 import type { Reflection, ReflectionInsert } from '@/features/reflect/types'
 
@@ -40,5 +41,7 @@ export async function deleteReflection(id: string): Promise<void> {
  */
 export async function restoreReflection(reflection: Reflection): Promise<void> {
   const { error } = await supabase.from('reflections').insert(reflection)
+  // Its own id again: the row is already back (a retry whose first answer was lost).
+  if (isUniqueViolation(error)) return
   if (error) throw error
 }
