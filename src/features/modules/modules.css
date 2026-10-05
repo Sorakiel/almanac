@@ -7,7 +7,7 @@
 
 .mods {
   --mods-card: rgb(var(--color-surface));
-  --mods-card2: color-mix(in srgb, rgb(var(--color-foreground)) 7%, var(--mods-card));
+  --mods-card2: rgb(var(--color-sheet-fill));
   --mods-ink2: rgb(var(--color-muted));
   --mods-ink3: rgb(var(--color-foreground) / 0.36);
   --mods-sep: rgb(var(--color-border) / var(--border-opacity));
@@ -193,6 +193,14 @@
   background: rgb(var(--color-accent));
 }
 
+/* "Soon" is the phone hub's last section; the desktop hub has none. */
+.mods-soon {
+  margin-top: 22px;
+}
+.mods-soon .mods-note {
+  margin: 0 4px;
+}
+
 /*
  * ---- wide: tiles in three, Customize as a card on the right ----
  * Keyed to the page's own width, not the window's, so a narrow desktop window
@@ -215,7 +223,8 @@
   .mods-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  .mods-link {
+  .mods-link,
+  .mods-soon {
     display: none;
   }
   .mods-customize-card {

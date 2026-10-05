@@ -436,6 +436,15 @@ for (const v of VARIANTS) {
       if (path === '/') await shoot(page, `${v.name}-${slug}-fold`, false)
     }
 
+    // The hub in the prototype's order, ending on Achievements; Insights is
+    // «Прогресс» in the nav, not a tile.
+    await page.goto('/more')
+    const ru = v.locale === 'ru'
+    await expect(
+      page.getByRole('link', { name: ru ? /^Достижения/ : /^Achievements/ }),
+    ).toBeVisible()
+    await expect(page.getByRole('link', { name: ru ? /^Аналитика/ : /^Insights/ })).toHaveCount(0)
+
     // Progress with the habits card open — on the phone the year strip lives
     // inside it; the desktop card has none (desktop-prototype.html).
     await page.goto('/progress')
@@ -626,9 +635,13 @@ for (const v of VARIANTS) {
     if (await allSets.isVisible()) await allSets.click()
     await shoot(page, `${v.name}-session-sets`)
     // Through the rest of the plan to the medal.
+    // Each stage is waited for: a click that lands mid-transition is lost, and
+    // the walk then stops one set short of the medal.
     for (let n = 1; n < SESSION_TOTAL_SETS; n++) {
       await ready.click()
+      await expect(ready).toBeHidden()
       await setDone.click()
+      if (n < SESSION_TOTAL_SETS - 1) await expect(ready).toBeVisible()
     }
     await expect(
       page.getByText(v.locale === 'ru' ? 'Тренировка закрыта' : 'Workout closed'),

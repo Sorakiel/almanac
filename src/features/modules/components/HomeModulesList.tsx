@@ -17,7 +17,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical } from 'lucide-react'
+import { Equal } from 'lucide-react'
 import { ListSwitch } from '@/features/profile/components/ListSwitch'
 import { MODULE_HUE } from '@/features/modules/lib/moduleHue'
 import { useT } from '@/hooks/useT'
@@ -25,7 +25,8 @@ import { cn } from '@/lib/utils'
 import { NAV_MODULES, useModulesStore, type OrderedModule } from '@/stores/modules'
 
 /**
- * "On Today": every toggleable module with its switch, in the account's order.
+ * "On Today": every module with a card on Today, with its switch, in the
+ * account's order. Friends have no card, so no switch — a hub tile only.
  * A switched-on module gets its card on Today and its place in the sidebar;
  * dragging by the handle (or arrow keys on it) sets the order of both.
  */
@@ -38,6 +39,8 @@ export function HomeModulesList() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
+  const rows = order.filter((key) => !NAV_MODULES.find((m) => m.key === key)?.hubOnly)
+
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return
     const from = order.indexOf(active.id as OrderedModule)
@@ -48,9 +51,9 @@ export function HomeModulesList() {
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-      <SortableContext items={order} strategy={verticalListSortingStrategy}>
+      <SortableContext items={rows} strategy={verticalListSortingStrategy}>
         <ul className="mods-group">
-          {order.map((key) => (
+          {rows.map((key) => (
             <HomeModuleRow key={key} moduleKey={key} />
           ))}
         </ul>
@@ -90,7 +93,7 @@ function HomeModuleRow({ moduleKey }: { moduleKey: OrderedModule }) {
         {...attributes}
         {...listeners}
       >
-        <GripVertical aria-hidden="true" />
+        <Equal aria-hidden="true" />
       </button>
       <span className="mods-ic is-small" aria-hidden="true">
         <Icon strokeWidth={1.9} />
