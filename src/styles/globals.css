@@ -461,18 +461,6 @@
     }
   }
 
-  /* Desktop context rail: only there when something is in it — the running
-     focus card or a page's <Rail> content. An empty rail was a dark strip
-     down the right of every screen that had nothing to say (D13). */
-  .context-rail {
-    display: none;
-  }
-  @media (min-width: 1024px) {
-    .context-rail:has(> :not(:empty)) {
-      display: flex;
-    }
-  }
-
   /* Inside the desktop inspector, cards step up to the nested tone — the
      panel itself is the card level (desktop-prototype.html `.dk-insp`). */
   .inspector-nest {

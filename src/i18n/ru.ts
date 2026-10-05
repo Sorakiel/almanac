@@ -1074,7 +1074,6 @@ export const ru: Translations = {
     loading: 'Загрузка…',
     focusSession: 'Сессия фокуса',
     done: 'готово',
-    flowInSession: '◷ фокус · идёт сессия',
     minLeft: {
       one: 'осталась {count} мин',
       few: 'осталось {count} мин',
@@ -1299,17 +1298,6 @@ export const ru: Translations = {
     reflect: { label: 'Рефлексия', description: 'Дневник с настроением и цитатами.' },
     reading: { label: 'Чтение', description: 'Книги, страницы и серии чтения.' },
     social: { label: 'Друзья', description: 'Как идут серии у друзей.' },
-  },
-  rail: {
-    commandCenter: 'командный центр',
-    account: 'аккаунт',
-    role: 'роль',
-    joined: 'с нами',
-    timezone: 'часовой пояс',
-    owner: 'Владелец',
-    admin: 'Админ',
-    member: 'Участник',
-    motto: 'Дисциплина — это практика, а не пункт назначения.',
   },
   settings: {
     profile: 'Профиль',
@@ -1718,7 +1706,6 @@ export const ru: Translations = {
       many: 'На сегодня осталось {count} привычек.',
       other: 'На сегодня осталось {count} привычки.',
     },
-    nowActive: '▶ сейчас · идёт',
   },
   celebrate: {
     sealRim: 'ДЕНЬ ЗАКРЫТ · {date} · ALMANAC ·',

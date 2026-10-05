@@ -15,7 +15,7 @@ export function reflectionDateLabel(dateKey: string, locale: string = 'en-GB'): 
 }
 
 /**
- * Compact label for a `YYYY-MM-DD` key, e.g. "MON · 07 JUL" — used in tight rail
+ * Compact label for a `YYYY-MM-DD` key, e.g. "MON · 07 JUL" — used in tight
  * cards where the full weekday/month name would wrap.
  */
 export function reflectionDateShortLabel(dateKey: string, locale: string = 'en-GB'): string {

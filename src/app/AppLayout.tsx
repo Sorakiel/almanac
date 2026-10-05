@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { BottomNav } from '@/app/shell/BottomNav'
 import { CelebrationHost } from '@/app/shell/CelebrationHost'
@@ -6,11 +5,9 @@ import { BootSkeleton } from '@/app/shell/BootSkeleton'
 import { SyncCapsule } from '@/app/shell/SyncCapsule'
 import { ReinstallBanner } from '@/app/shell/ReinstallBanner'
 import { Sidebar } from '@/app/shell/Sidebar'
-import { RailActive } from '@/app/shell/RailActive'
 import { CommandPalette } from '@/app/shell/CommandPalette'
 import { DesktopToolbar } from '@/app/shell/DesktopToolbar'
 import { ErrorState } from '@/components/common/ErrorState'
-import { RailTargetProvider } from '@/components/rail/Rail'
 import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
 import { CreateSheet } from '@/app/shell/CreateSheet'
 import { useCelebrationWatchers } from '@/app/hooks/useCelebrationWatchers'
@@ -31,14 +28,14 @@ import { cn } from '@/lib/utils'
 /**
  * Authenticated shell. One product, two shapes:
  *  - Mobile (`< lg`): a centered max-w-md column with the glass tab bar and "+".
- *  - Desktop (`lg+`): a floating glass sidebar, a scrolling workspace with the
- *    ⌘K toolbar, and a context rail fed per-page via `<Rail>` (see rail.tsx).
+ *  - Desktop (`lg+`): a floating glass sidebar and a scrolling workspace with the
+ *    ⌘K toolbar. No permanent right rail (desktop-prototype.html): a screen that
+ *    needs a side column lays it out itself.
  *
  * The routed page renders once; the chrome around it swaps by breakpoint.
  */
 export function AppLayout() {
   const { pathname } = useLocation()
-  const [railEl, setRailEl] = useState<HTMLDivElement | null>(null)
   const { profile, isError: profileFailed, isPaused: profilePaused, refetch } = useProfile()
   const { t } = useT()
   const { user } = useSession()
@@ -89,31 +86,30 @@ export function AppLayout() {
   if (!profile?.onboarded && !locallyOnboarded) return <Navigate to="/welcome" replace />
 
   // Focused mobile sub-pages hide the bottom nav (their CTAs own the bottom):
-  // the workout edit template. Desktop keeps its nav rail.
+  // the workout edit template. Desktop keeps its sidebar.
   const hideNav = /^\/train\/[^/]+\/edit$/.test(pathname)
 
   return (
-    <RailTargetProvider target={railEl}>
-      <div className="flex min-h-dvh flex-col lg:h-dvh lg:overflow-hidden">
-        <ReinstallBanner />
+    <div className="flex min-h-dvh flex-col lg:h-dvh lg:overflow-hidden">
+      <ReinstallBanner />
 
-        <div className="flex flex-1 lg:min-h-0">
-          {/* The sidebar floats (fixed, 8px inset); this keeps its column clear. */}
-          <div className="hidden w-[252px] flex-none lg:block">
-            <Sidebar />
-          </div>
+      <div className="flex flex-1 lg:min-h-0">
+        {/* The sidebar floats (fixed, 8px inset); this keeps its column clear. */}
+        <div className="hidden w-[252px] flex-none lg:block">
+          <Sidebar />
+        </div>
 
-          <main
-            className={cn(
-              // Clear the (edge-to-edge) Android status bar on mobile; desktop
-              // overrides padding via lg:py-8 where there's no system bar.
-              'mx-auto w-full max-w-md flex-1 px-5 pt-[max(env(safe-area-inset-top),1.5rem)]',
-              hideNav ? 'flex flex-col pb-6' : 'pb-28',
-              'app-scroll lg:mx-0 lg:max-w-none lg:overflow-y-auto lg:px-8 lg:pb-[60px] lg:pt-0',
-            )}
-          >
-            <DesktopToolbar title={compactTitle.title} compact={compactTitle.compact} />
-            {/* Not keyed by route: the move between screens is the View
+        <main
+          className={cn(
+            // Clear the (edge-to-edge) Android status bar on mobile; desktop
+            // overrides padding via lg:py-8 where there's no system bar.
+            'mx-auto w-full max-w-md flex-1 px-5 pt-[max(env(safe-area-inset-top),1.5rem)]',
+            hideNav ? 'flex flex-col pb-6' : 'pb-28',
+            'app-scroll lg:mx-0 lg:max-w-none lg:overflow-y-auto lg:px-8 lg:pb-[60px] lg:pt-0',
+          )}
+        >
+          <DesktopToolbar title={compactTitle.title} compact={compactTitle.compact} />
+          {/* Not keyed by route: the move between screens is the View
                 Transition (useRouteMotion + globals.css), and a screen's
                 entrance cascade plays on its first visit only. hideNav routes
                 stretch to fill main so their own `mt-auto` bottom CTA reaches
@@ -121,36 +117,26 @@ export function AppLayout() {
                 Every screen reads as one bounded column on desktop (1024px, the
                 prototype's 1280 workspace): dense dashboards stay readable on a
                 big monitor instead of running edge to edge. */}
-            <div
-              data-page-column
-              className={cn('lg:mx-auto lg:w-full lg:max-w-5xl', hideNav && 'flex flex-1 flex-col')}
-            >
-              <Outlet />
-            </div>
-          </main>
-
-          {/* Today carries its own aside (desktop-prototype.html); the shell's rail would be a
-              third column. Elsewhere the rail shows only when something is in it (.context-rail). */}
-          {pathname === '/' ? null : (
-            <aside className="context-rail app-scroll w-[340px] flex-none flex-col overflow-y-auto border-l bg-chrome px-6 py-6">
-              <RailActive />
-              <div ref={setRailEl} className="flex flex-1 flex-col" />
-            </aside>
-          )}
-        </div>
-
-        {hideNav ? null : (
-          <div className="lg:hidden">
-            <BottomNav />
+          <div
+            data-page-column
+            className={cn('lg:mx-auto lg:w-full lg:max-w-5xl', hideNav && 'flex flex-1 flex-col')}
+          >
+            <Outlet />
           </div>
-        )}
-        <CompactTitleBar title={compactTitle.title} visible={compactTitle.compact} />
-        <HabitFormSheet />
-        <CreateSheet />
-        <CommandPalette />
-        <SyncCapsule />
-        <CelebrationHost />
+        </main>
       </div>
-    </RailTargetProvider>
+
+      {hideNav ? null : (
+        <div className="lg:hidden">
+          <BottomNav />
+        </div>
+      )}
+      <CompactTitleBar title={compactTitle.title} visible={compactTitle.compact} />
+      <HabitFormSheet />
+      <CreateSheet />
+      <CommandPalette />
+      <SyncCapsule />
+      <CelebrationHost />
+    </div>
   )
 }
