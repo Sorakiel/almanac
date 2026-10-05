@@ -3,6 +3,7 @@ import {
   almanacStartKey,
   buildAlmanacGrid,
   countActiveDays,
+  almanacMonths,
   levelOf,
   weekStartKey,
 } from '@/features/profile/lib/almanacGrid'
@@ -92,5 +93,15 @@ describe('avatar colours', () => {
   it('draws one capital letter', () => {
     expect(monogram('  алекс ')).toBe('А')
     expect(monogram('')).toBe('?')
+  })
+})
+
+describe('almanacMonths', () => {
+  it('names every month the half-year touches, oldest first, none in the future', () => {
+    const grid = buildAlmanacGrid([], '2026-09-24')
+    // From Monday 2026-03-30: two days of March get no label — April…September.
+    expect(almanacMonths(grid)).toEqual([3, 4, 5, 6, 7, 8])
+    // Early in a month, the current one still gets its name.
+    expect(almanacMonths(buildAlmanacGrid([], '2026-10-02')).at(-1)).toBe(9)
   })
 })

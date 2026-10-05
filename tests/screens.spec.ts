@@ -566,6 +566,11 @@ for (const v of VARIANTS) {
       })
       await expect(page).toHaveURL(/\/$/)
       await page.waitForTimeout(600) // the slide-in
+      // The panel's name is a step smaller than the page's (prototype `h1` 24px).
+      await expect(inspector.getByRole('heading', { name: openHabit })).toHaveCSS(
+        'font-size',
+        '24px',
+      )
       await shoot(page, `${v.name}-habits-inspector`, false)
       await page.keyboard.press('Escape')
       await expect(inspector).toBeHidden()
