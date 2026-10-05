@@ -440,7 +440,7 @@ export const ru: Translations = {
         many: '{count} активных',
         other: '{count} активных',
       },
-      habitsDone: { one: '{count} выполнена', other: '{count} выполнено' },
+      habitsDone: { one: '{count} выполнено', other: '{count} выполнено' },
       workoutToday: 'Сегодня: {name}',
       workoutRest: 'Сегодня отдых',
       readingOf: { pages: '{current} из {total} стр', chapters: '{current} из {total} гл.' },
@@ -453,7 +453,7 @@ export const ru: Translations = {
         many: 'Серия {count} дней',
         other: 'Серия {count} дня',
       },
-      reflectStart: 'Запишите сегодняшний день',
+      reflectStart: 'Запишите день',
       friends: {
         one: '{count} друг',
         few: '{count} друга',

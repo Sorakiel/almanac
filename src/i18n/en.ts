@@ -383,7 +383,7 @@ export const en = {
       focusMinutes: { one: '{count} min this month', other: '{count} min this month' },
       focusHours: { one: '{count} h this month', other: '{count} h this month' },
       reflectStreak: { one: '{count}-day streak', other: '{count}-day streak' },
-      reflectStart: 'Write today down',
+      reflectStart: 'Write today',
       friends: { one: '{count} friend', other: '{count} friends' },
       inviteFriend: 'Invite a friend',
       achievements: '{done} of {total}',
