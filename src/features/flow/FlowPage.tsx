@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronRight, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import { ErrorState } from '@/components/common/ErrorState'
 import { SectionHead } from '@/components/common/SectionHead'
 import { DurationControls } from '@/features/flow/components/DurationControls'
@@ -84,8 +84,7 @@ function FlowPage() {
               <b>{target?.label ?? t('flow.targetNone')}</b>
             </span>
             <span className="flow-target-go">
-              {t('flow.targetChange')}
-              <ChevronRight aria-hidden="true" />
+              {t('flow.targetChange')} <span aria-hidden="true">›</span>
             </span>
           </button>
           <button

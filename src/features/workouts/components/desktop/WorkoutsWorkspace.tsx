@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Dumbbell, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
+import { Dumbbell } from '@/components/common/icons'
 import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
