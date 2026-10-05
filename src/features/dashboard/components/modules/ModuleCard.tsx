@@ -7,7 +7,7 @@ export type ModuleHue = 'accent' | 'teal' | 'amber'
 const HUE: Record<ModuleHue, string> = {
   accent: 'rgb(var(--color-accent))',
   teal: 'rgb(var(--color-teal))',
-  amber: 'rgb(var(--color-warning))',
+  amber: 'rgb(var(--color-amber))',
 }
 
 interface ModuleCardProps {

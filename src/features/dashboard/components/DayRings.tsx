@@ -80,7 +80,7 @@ export function DayRings({ habits, training, focus }: DayRingsProps) {
     rings.push({
       key: 'focus',
       label: t('dashboard.rings.focus'),
-      color: 'rgb(var(--color-warning))',
+      color: 'rgb(var(--color-amber))',
       value: focus,
       unit: t('dashboard.rings.minutes'),
     })

@@ -4,7 +4,6 @@ import {
   BookOpen,
   BookText,
   Bug,
-  Dumbbell,
   Flame,
   Highlighter,
   Hourglass,
@@ -20,6 +19,7 @@ import {
   Users,
   Zap,
 } from 'lucide-react'
+import { Dumbbell } from '@/components/common/icons'
 import type { AchievementDef } from '@/features/achievements/types'
 
 /** A single ★ tier — used by manual (owner-awarded) badges. */

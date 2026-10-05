@@ -259,15 +259,9 @@ button.flow-dial-time:focus-visible {
   white-space: nowrap;
 }
 .flow-target-go {
-  display: flex;
   flex: none;
-  align-items: center;
-  gap: 2px;
+  font-size: 13px;
   color: rgb(var(--color-muted-strong));
-}
-.flow-target-go svg {
-  width: 16px;
-  height: 16px;
 }
 
 .flow-cta {

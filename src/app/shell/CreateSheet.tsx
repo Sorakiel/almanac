@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Book, Check, Dumbbell, Pencil, Timer, type LucideIcon } from 'lucide-react'
+import { Book, Check, Pencil, Timer, type LucideIcon } from 'lucide-react'
+import { Dumbbell } from '@/components/common/icons'
 import { IconTile } from '@/components/common/IconTile'
 import { DetentSheet } from '@/components/ui/detent-sheet'
 import { NewHabitForm } from '@/features/habits/components/NewHabitForm'

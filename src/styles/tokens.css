@@ -37,8 +37,10 @@
   --color-on-accent-solid: 14 14 16;
   --color-accent-solid-hover: 194 86 42; /* #C2562A */
   --color-border: 255 255 255; /* used at low opacity for hairlines */
-  --color-teal: 42 157 143; /* #2A9D8F */
-  --color-amber: 199 154 58; /* #C79A3A */
+  /* Category colours, theme-adaptive as in the v0.6 prototype: brighter on dark,
+     deeper on paper. */
+  --color-teal: 63 184 168; /* #3FB8A8 */
+  --color-amber: 224 170 69; /* #E0AA45 */
   /* Reflect mood scale, 1 (rough) → 5 (great): the prototype's dots, shared by both themes. */
   --color-mood-1: 140 107 181; /* #8C6BB5 */
   --color-mood-2: 107 143 216; /* #6B8FD8 */
@@ -111,8 +113,8 @@
   --color-on-accent-solid: 244 236 221; /* #F4ECDD */
   --color-accent-solid-hover: 239 136 87; /* #EF8857 */
   --color-border: 42 32 24; /* espresso hairline on light */
-  --color-teal: 42 157 143;
-  --color-amber: 199 154 58;
+  --color-teal: 31 133 120; /* #1F8578 */
+  --color-amber: 162 110 20; /* #A26E14 */
   /* Reflect mood scale, 1 (rough) → 5 (great): the prototype's dots, shared by both themes. */
   --color-mood-1: 140 107 181; /* #8C6BB5 */
   --color-mood-2: 107 143 216; /* #6B8FD8 */
