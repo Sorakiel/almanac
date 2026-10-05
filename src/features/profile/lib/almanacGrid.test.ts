@@ -36,7 +36,7 @@ describe('buildAlmanacGrid', () => {
     const grid = buildAlmanacGrid(
       [
         { date: '2026-09-21', done: 1, due: 4 },
-        { date: '2026-09-22', done: 2, due: 3 },
+        { date: '2026-09-22', done: 1, due: 2 },
         { date: '2026-09-23', done: 3, due: 3 },
       ],
       '2026-09-24',
@@ -49,6 +49,14 @@ describe('levelOf', () => {
   it('lights any check-off, even on a day that asked for nothing', () => {
     expect(levelOf(0, 3)).toBe(0)
     expect(levelOf(1, 0)).toBe(3)
+  })
+
+  it('deepens in thirds of the day kept', () => {
+    expect(levelOf(1, 4)).toBe(1) // 25 %
+    expect(levelOf(1, 3)).toBe(1) // 33 %
+    expect(levelOf(1, 2)).toBe(2) // 50 %
+    expect(levelOf(2, 3)).toBe(3) // 67 %
+    expect(levelOf(3, 3)).toBe(3)
   })
 })
 

@@ -31,15 +31,20 @@ export function almanacStartKey(todayKey: string, weeks = ALMANAC_WEEKS): string
   return addDaysToKey(weekStartKey(todayKey), -(weeks - 1) * 7)
 }
 
+/** Upper bounds, in percent of the day's schedule kept, of tints 1 and 2. */
+const LEVEL_1_MAX = 33
+const LEVEL_2_MAX = 66
+
 /**
  * How a day reads on the grid. Any check-off lights the cell — the grid is about
- * showing up — and the tint deepens with the share of the day's schedule kept.
+ * showing up — and the tint deepens with the share of the day's schedule kept:
+ * 1–33 %, 34–66 %, 67–100 %.
  */
 export function levelOf(done: number, due: number): AlmanacLevel {
   if (done <= 0) return 0
-  const ratio = due > 0 ? done / due : 1
-  if (ratio >= 1) return 3
-  if (ratio >= 0.5) return 2
+  const pct = due > 0 ? Math.round((done / due) * 100) : 100
+  if (pct > LEVEL_2_MAX) return 3
+  if (pct > LEVEL_1_MAX) return 2
   return 1
 }
 

@@ -58,16 +58,16 @@ export function AlmanacGrid({ grid, isLoading, isError, onRetry, className }: Al
           <div
             role="img"
             aria-label={t('profile.almanacAria')}
-            className="grid grid-flow-col grid-rows-7 justify-between gap-x-0.5 gap-y-1"
+            className="grid grid-flow-col grid-rows-7 justify-between gap-0.75"
           >
             {grid.flatMap((week) =>
               week.map((cell) => (
                 <i
                   key={cell.date}
                   className={cn(
-                    'block h-2 w-2 rounded-sm',
+                    'block h-2.25 w-2.25 rounded-cell',
                     cell.future ? 'bg-transparent' : LEVEL[cell.level],
-                    cell.today && 'outline outline-2 outline-offset-1 outline-foreground',
+                    cell.today && 'outline outline-1.5 outline-offset-1 outline-foreground',
                   )}
                 />
               )),

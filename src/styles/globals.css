@@ -478,6 +478,12 @@
   .inspector-nest {
     --color-surface: var(--color-sheet-fill);
   }
+  /* The habit's name is a step smaller in the 392px panel than on its page
+     (the inspector's `h1 style="font-size:24px"`). */
+  .inspector-nest .habit-detail-title {
+    font-size: 24px;
+    line-height: 29px;
+  }
 
   /* Keyboard hint chip (⌘K, ⌘N) — the prototype's .kbd. */
   .kbd {
