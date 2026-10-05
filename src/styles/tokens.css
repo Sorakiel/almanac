@@ -63,7 +63,7 @@
   --color-warning: 224 170 69; /* #E0AA45 */
 
   /* Desktop shell surfaces (spec board "Almanac — Desktop"). Chrome is the
-     nav rail / top bar / context rail; panel is a workspace card sitting on
+     sidebar / top bar; panel is a workspace card sitting on
      the main canvas. Deeper than surface on dark, lighter on coffee. */
   --color-chrome: 21 21 23; /* #151517 */
   --color-panel: 36 36 39; /* #242427 */

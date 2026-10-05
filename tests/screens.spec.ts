@@ -690,3 +690,37 @@ for (const theme of ['dark', 'coffee'] as const) {
     expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
   })
 }
+
+/**
+ * Focus during a session at the narrow desktop widths: with no right rail the
+ * dial must still sit inside its card where the module grid is tightest
+ * (1024 is the first desktop width; 940 is still the phone layout).
+ */
+for (const width of [940, 1024, 1280]) {
+  test(`screens · flow-session-${width}-dark-ru`, async ({ page }) => {
+    const errors = watchConsole(page)
+    await page.setViewportSize({ width, height: 800 })
+    await signIn(page)
+    await applyPrefs(page, 'dark', 'ru')
+    await page.goto('/flow')
+    // Starting only touches the device-local focus store; nothing is written
+    // until a session finishes, and this page is thrown away first.
+    await page.getByRole('button', { name: /^Начать · \d+ мин/ }).click()
+    const dial = page.locator('.flow-dial')
+    await expect(dial).toHaveClass(/is-run/)
+    await expectNoHorizontalScroll(page, `flow ${width}`)
+    const fits = await dial.evaluate((el) => {
+      const card = el.closest('.flow-dialbox')?.parentElement
+      if (!card) return false
+      const d = el.getBoundingClientRect()
+      const c = card.getBoundingClientRect()
+      const pad = getComputedStyle(card)
+      const left = c.left + parseFloat(pad.paddingLeft)
+      const right = c.right - parseFloat(pad.paddingRight)
+      return d.left >= left - 0.5 && d.right <= right + 0.5
+    })
+    expect(fits, `dial overflows its card at ${width}px`).toBe(true)
+    await shoot(page, `flow${width}-dark-ru-session`, false)
+    expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
+  })
+}
