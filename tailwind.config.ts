@@ -75,6 +75,8 @@ export default {
         rest: ['52px', { lineHeight: '1', letterSpacing: '-0.04em' }],
       },
       spacing: {
+        // The profile's almanac grid (`.pf-grid`): cells 3px apart.
+        '0.75': '3px',
         // Floating layers above the phone's glass bottom nav (toasts, the sync
         // capsule) sit this far up; the capsule's height plus a gap lifts
         // toasts over it.
@@ -115,7 +117,11 @@ export default {
         inspector: '450ms',
       },
       // 28 sheets and containers · 20 cards and groups · 14 controls · 10 inner.
+      outlineWidth: {
+        '1.5': '1.5px',
+      },
       borderRadius: {
+        cell: '3px',
         sheet: '28px',
         card: '20px',
         tile: '14px',
