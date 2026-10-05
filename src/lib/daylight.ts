@@ -22,17 +22,21 @@ interface Anchor {
  * this are the ones using the app in the dark.
  */
 const ANCHORS: Record<Theme, Anchor[]> = {
+  // Dawn and dusk are the desktop prototype's `--p-glow` exactly — its ember at
+  // 20% over the #111113 canvas, its peach at 55% over #F2EADB — so the window
+  // reads as the prototype at the two hours it was drawn for. Midday keeps a
+  // softer warmth; the night anchor (cold, dim) is ours, the prototype has no clock.
   dark: [
     { hour: 3, rgb: [22, 24, 38] }, // deep night — cold, almost ink
-    { hour: 7, rgb: [46, 31, 24] }, // dawn — the original warm ember
-    { hour: 13, rgb: [33, 35, 40] }, // midday — neutral, the quietest of the four
-    { hour: 19, rgb: [48, 26, 30] }, // dusk — red-violet
+    { hour: 7, rgb: [61, 41, 33] }, // dawn — the prototype's ember
+    { hour: 13, rgb: [46, 36, 31] }, // midday — warm, quieter than the edges of the day
+    { hour: 19, rgb: [61, 41, 33] }, // dusk — the prototype's ember
   ],
   coffee: [
     { hour: 3, rgb: [228, 224, 214] }, // night — the paper goes grey-blue
-    { hour: 7, rgb: [246, 221, 199] }, // dawn — peach, as measured off the spec board
-    { hour: 13, rgb: [250, 243, 230] }, // midday — brightest paper
-    { hour: 19, rgb: [243, 217, 189] }, // dusk — amber
+    { hour: 7, rgb: [244, 215, 187] }, // dawn — the prototype's peach
+    { hour: 13, rgb: [247, 230, 210] }, // midday — lighter, still warm
+    { hour: 19, rgb: [244, 215, 187] }, // dusk — the prototype's peach
   ],
 }
 
