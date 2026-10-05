@@ -10,15 +10,18 @@ function channels(color: string): number[] {
 
 describe('daylightColor', () => {
   it('lands exactly on an anchor at its hour', () => {
-    expect(channels(daylightColor(7 * 60, 'dark'))).toEqual([46, 31, 24])
-    expect(channels(daylightColor(13 * 60, 'coffee'))).toEqual([250, 243, 230])
+    // Dawn and dusk are the desktop prototype's glow over each canvas.
+    expect(channels(daylightColor(7 * 60, 'dark'))).toEqual([61, 41, 33])
+    expect(channels(daylightColor(19 * 60, 'dark'))).toEqual([61, 41, 33])
+    expect(channels(daylightColor(7 * 60, 'coffee'))).toEqual([244, 215, 187])
+    expect(channels(daylightColor(13 * 60, 'coffee'))).toEqual([247, 230, 210])
   })
 
   it('interpolates between anchors', () => {
     const [r] = channels(daylightColor(10 * 60, 'dark'))
-    // Halfway from dawn (46) to midday (33).
-    expect(r).toBeGreaterThan(33)
-    expect(r).toBeLessThan(46)
+    // Halfway from dawn (61) to midday (46).
+    expect(r).toBeGreaterThan(46)
+    expect(r).toBeLessThan(61)
   })
 
   it('wraps across midnight instead of jumping', () => {
