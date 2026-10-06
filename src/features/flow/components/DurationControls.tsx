@@ -4,17 +4,18 @@ import { useT } from '@/hooks/useT'
 interface DurationControlsProps {
   minutes: number
   onChange: (minutes: number) => void
-  /** «Своё»: type a length on the dial's face. */
+  /** «Своё»: focus the field on the dial's face — the length itself stays. */
   onCustom: () => void
 }
 
 /**
  * 15 / 25 / 45 / 60 and «Своё» (prototype `.m-dur`). A length off the chips —
- * from the knob or typed on the dial — lights «Своё», which then reads it
- * («40 мин»); tapping «Своё» opens the field in the middle of the dial. Nothing
- * here appears or disappears while the knob turns, so the layout under the
- * dial keeps its height. The prototype's −5 / field / +5 stepper is gone at
- * the owner's request: it slid in and out under a dragging finger.
+ * from the knob or typed on the dial — lights «Своё»; the number itself shows
+ * on the dial and in «Начать · N мин», never in the chip, so no label ever
+ * changes and the row keeps every chip's width and place under a dragging
+ * finger. Tapping «Своё» opens the field in the middle of the dial. The
+ * prototype's −5 / field / +5 stepper is gone at the owner's request: it slid
+ * in and out while the knob turned.
  */
 export function DurationControls({ minutes, onChange, onCustom }: DurationControlsProps) {
   const { t } = useT()
@@ -35,7 +36,7 @@ export function DurationControls({ minutes, onChange, onCustom }: DurationContro
           </button>
         ))}
         <button type="button" className="flow-chip" aria-pressed={custom} onClick={onCustom}>
-          {custom ? t('flow.minutesShort', { count: minutes }) : t('flow.custom')}
+          {t('flow.custom')}
         </button>
       </div>
       <p className="flow-hint">{t('flow.dragHint')}</p>
