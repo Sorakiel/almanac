@@ -474,7 +474,6 @@ for (const v of VARIANTS) {
     // typed on the dial — lights «Своё» without relabelling it, so no chip
     // moves or resizes and nothing below the dial shifts (owner's request).
     await page.goto('/flow')
-    const ru = v.locale === 'ru'
     const start = page.getByRole('button', { name: ru ? /^Начать/ : /^Start/ })
     const chips = page.getByRole('group', { name: ru ? 'Длительность сессии' : 'Session length' })
     const custom = chips.getByRole('button', { name: ru ? 'Своё' : 'Custom' })
