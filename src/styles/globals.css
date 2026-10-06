@@ -270,10 +270,10 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-    -webkit-mask-image: linear-gradient(#000 35%, transparent);
-    mask-image: linear-gradient(#000 35%, transparent);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    -webkit-mask-image: linear-gradient(#000 70%, transparent);
+    mask-image: linear-gradient(#000 70%, transparent);
   }
   @media (prefers-reduced-transparency: reduce) {
     .toolbar-fade::before {
@@ -592,9 +592,10 @@
 }
 .shell-sidebar {
   view-transition-name: sidebar;
-  /* Only the glass rims, no drop shadow (prototype .dk-side). On the near-black
-     canvas the shadow faded over two 8-bit levels in ~10px and read as a hard
-     vertical line beside the sidebar, the whole height of the window. */
+  /* Only the glass rims, no drop shadow — a deliberate departure from the
+     prototype's .lg. On the near-black canvas the shadow darkened the window by
+     one or two 8-bit levels and ended in a hard edge that followed the panel,
+     round its corners too, the whole height of the window. */
   box-shadow:
     inset 0 1px 0 var(--glass-highlight),
     inset 0 -1px 1px rgba(0, 0, 0, 0.18),
