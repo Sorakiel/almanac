@@ -470,22 +470,62 @@ for (const v of VARIANTS) {
     await page.waitForTimeout(700)
     await focus.screenshot({ path: `${OUT}/${v.name}-progress-focus.png` })
 
-    // «Своё» opens the field in the middle of the dial — no stepper slides in
-    // under it, so nothing below the dial moves (owner's request).
+    // The chip row is fixed: a length off the chips — dragged on the knob or
+    // typed on the dial — lights «Своё» without relabelling it, so no chip
+    // moves or resizes and nothing below the dial shifts (owner's request).
     await page.goto('/flow')
-    const start = page.getByRole('button', { name: v.locale === 'ru' ? /^Начать/ : /^Start/ })
-    const before = await start.boundingBox()
-    await page.getByRole('button', { name: v.locale === 'ru' ? 'Своё' : 'Custom' }).click()
-    const field = page.getByRole('spinbutton', {
-      name: v.locale === 'ru' ? 'Минуты фокуса' : 'Focus minutes',
-    })
+    const start = page.getByRole('button', { name: ru ? /^Начать/ : /^Start/ })
+    const chips = page.getByRole('group', { name: ru ? 'Длительность сессии' : 'Session length' })
+    const custom = chips.getByRole('button', { name: ru ? 'Своё' : 'Custom' })
+    await expect(chips.getByRole('button')).toHaveCount(5)
+    await chips.getByRole('button', { name: ru ? '25 мин' : '25m' }).click()
+    await expect(start).toHaveText(/25/)
+    const layout = async (): Promise<string> =>
+      JSON.stringify([
+        ...(await chips.getByRole('button').evaluateAll((els) =>
+          els.map((el) => {
+            const r = el.getBoundingClientRect()
+            return [Math.round(r.x), Math.round(r.y), Math.round(r.width)]
+          }),
+        )),
+        Math.round((await start.boundingBox())?.y ?? -1),
+      ])
+    const before = await layout()
+    const dial = await page.locator('.flow-dial').boundingBox()
+    if (!dial) throw new Error('no dial')
+    const cx = dial.x + dial.width / 2
+    const cy = dial.y + dial.height / 2
+    const ring = (m: number): [number, number] => {
+      const a = ((m % 120) / 120) * 2 * Math.PI
+      const r = (dial.width / 2) * 0.86
+      return [cx + r * Math.sin(a), cy - r * Math.cos(a)]
+    }
+    // Drag the knob from 25 through 60 → 45 → 80 → 120, checking each stop.
+    await page.mouse.move(...ring(25))
+    await page.mouse.down()
+    let at = 25
+    for (const target of [60, 45, 80, 115, 120]) {
+      const step = target > at ? 5 : -5
+      for (let m = at + step; m !== target + step; m += step) await page.mouse.move(...ring(m))
+      at = target
+      if (target === 115) continue
+      const slider = page.getByRole('slider')
+      await expect(slider).toHaveAttribute('aria-valuenow', String(target))
+      await expect(custom).toHaveAttribute('aria-pressed', String(target === 80 || target === 120))
+      await expect(start).toHaveText(new RegExp(`${target}`))
+      expect(await layout(), `chips at ${target}`).toBe(before)
+    }
+    await page.mouse.up()
+    // «Своё» doesn't change the length; it opens the field on the dial.
+    await custom.click()
+    const field = page.getByRole('spinbutton', { name: ru ? 'Минуты фокуса' : 'Focus minutes' })
     await expect(field).toBeFocused()
     await field.fill('40')
     await field.press('Enter')
-    await expect(
-      page.getByRole('button', { name: v.locale === 'ru' ? '40 мин' : '40m', pressed: true }),
-    ).toBeVisible()
-    expect((await start.boundingBox())?.y).toBe(before?.y)
+    await expect(custom).toHaveAttribute('aria-pressed', 'true')
+    await expect(custom).toHaveText(ru ? 'Своё' : 'Custom')
+    await expect(start).toHaveText(/40/)
+    expect(await layout(), 'chips after typing 40').toBe(before)
     await shoot(page, `${v.name}-flow-custom`)
     // The narrowest phone and a mid-size window: chips, hint and «Начать» still fit.
     const viewport = page.viewportSize()
