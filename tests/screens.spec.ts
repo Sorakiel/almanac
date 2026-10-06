@@ -470,15 +470,33 @@ for (const v of VARIANTS) {
     await page.waitForTimeout(700)
     await focus.screenshot({ path: `${OUT}/${v.name}-progress-focus.png` })
 
-    // The custom-length stepper only exists once «Своё» is picked.
+    // «Своё» opens the field in the middle of the dial — no stepper slides in
+    // under it, so nothing below the dial moves (owner's request).
     await page.goto('/flow')
+    const start = page.getByRole('button', { name: v.locale === 'ru' ? /^Начать/ : /^Start/ })
+    const before = await start.boundingBox()
     await page.getByRole('button', { name: v.locale === 'ru' ? 'Своё' : 'Custom' }).click()
+    const field = page.getByRole('spinbutton', {
+      name: v.locale === 'ru' ? 'Минуты фокуса' : 'Focus minutes',
+    })
+    await expect(field).toBeFocused()
+    await field.fill('40')
+    await field.press('Enter')
     await expect(
-      page.getByRole('spinbutton', {
-        name: v.locale === 'ru' ? 'Своя длительность в минутах' : 'Custom length in minutes',
-      }),
+      page.getByRole('button', { name: v.locale === 'ru' ? '40 мин' : '40m', pressed: true }),
     ).toBeVisible()
+    expect((await start.boundingBox())?.y).toBe(before?.y)
     await shoot(page, `${v.name}-flow-custom`)
+    // The narrowest phone and a mid-size window: chips, hint and «Начать» still fit.
+    const viewport = page.viewportSize()
+    for (const width of [340, 940]) {
+      await page.setViewportSize({ width, height: viewport?.height ?? 800 })
+      await page.goto('/flow')
+      await expect(start).toBeVisible()
+      await expectNoHorizontalScroll(page, `${v.name} flow at ${width}`)
+      await shoot(page, `${v.name}-flow-${width}`)
+    }
+    if (viewport) await page.setViewportSize(viewport)
 
     // Password sheet: opened only, never submitted — the shared account's password stays put.
     await page.goto('/profile')

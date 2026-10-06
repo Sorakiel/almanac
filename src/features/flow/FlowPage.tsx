@@ -13,7 +13,7 @@ import {
 import { FocusWeek } from '@/features/flow/components/FocusWeek'
 import { useFinishFocus } from '@/features/flow/hooks/useFinishFocus'
 import { useFocusWeek } from '@/features/flow/hooks/useFocusWeek'
-import { FOCUS_GOAL_MIN, isFocusChip } from '@/features/flow/lib/duration'
+import { FOCUS_GOAL_MIN } from '@/features/flow/lib/duration'
 import { focusMinutesOn } from '@/features/flow/lib/week'
 import { useNow } from '@/hooks/useNow'
 import { useT } from '@/hooks/useT'
@@ -39,16 +39,13 @@ function FlowPage() {
   const { finishEarly } = useFinishFocus(now)
   const week = useFocusWeek()
   const [minutes, setMinutes] = useState(DEFAULT_MIN)
-  const [custom, setCustom] = useState(false)
+  const [editing, setEditing] = useState(false)
   const [target, setTarget] = useState<FocusTargetChoice | null>(null)
   const [picking, setPicking] = useState(false)
 
   const todayMin = focusMinutesOn(week.rows, dateKey)
   const secondsLeft = running ? focusMsLeft({ endsAt, pausedAt }, now) / 1000 : null
-  const pick = (next: number, isCustom: boolean) => {
-    setMinutes(next)
-    setCustom(isCustom || !isFocusChip(next))
-  }
+  const pick = (next: number) => setMinutes(next)
 
   const dialbox = (
     <div className="flow-dialbox w-full">
@@ -57,7 +54,9 @@ function FlowPage() {
         secondsLeft={secondsLeft}
         paused={pausedAt !== null}
         caption={label ?? t('flow.defaultSessionLabel')}
-        onPick={(m) => pick(m, !isFocusChip(m))}
+        onPick={pick}
+        editing={editing}
+        onEditingChange={setEditing}
       />
       {running ? (
         <div className="flow-row2">
@@ -74,7 +73,7 @@ function FlowPage() {
         </div>
       ) : (
         <>
-          <DurationControls minutes={minutes} custom={custom} onChange={pick} />
+          <DurationControls minutes={minutes} onChange={pick} onCustom={() => setEditing(true)} />
           <button type="button" className="flow-target" onClick={() => setPicking(true)}>
             <span className="flow-target-ic" aria-hidden="true">
               <Sparkles />

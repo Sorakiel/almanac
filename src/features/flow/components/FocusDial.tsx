@@ -38,6 +38,9 @@ interface FocusDialProps {
   caption: string
   /** Idle only: the knob or the typed-in time picked a length. */
   onPick: (minutes: number) => void
+  /** Idle: the time is a field (tap on it, or «Своё»). Owned by the page so «Своё» can open it. */
+  editing: boolean
+  onEditingChange: (editing: boolean) => void
 }
 
 /**
@@ -46,11 +49,18 @@ interface FocusDialProps {
  * a tap on the time turns it into a field (Enter or blur applies, Esc cancels).
  * Running, the arc drains and the time counts down.
  */
-export function FocusDial({ minutes, secondsLeft, paused, caption, onPick }: FocusDialProps) {
+export function FocusDial({
+  minutes,
+  secondsLeft,
+  paused,
+  caption,
+  onPick,
+  editing,
+  onEditingChange,
+}: FocusDialProps) {
   const { t } = useT()
   const ref = useRef<HTMLDivElement>(null)
   const [drag, setDrag] = useState(false)
-  const [editing, setEditing] = useState(false)
   const running = secondsLeft !== null
   const total = minutes * 60
   const frac = running ? secondsLeft / total : Math.min(1, minutes / DIAL_TURN_MIN)
@@ -166,7 +176,7 @@ export function FocusDial({ minutes, secondsLeft, paused, caption, onPick }: Foc
           <DialInput
             minutes={minutes}
             onDone={(next) => {
-              setEditing(false)
+              onEditingChange(false)
               if (next !== null) onPick(next)
             }}
           />
@@ -174,7 +184,7 @@ export function FocusDial({ minutes, secondsLeft, paused, caption, onPick }: Foc
           <button
             type="button"
             className="flow-dial-time"
-            onClick={() => setEditing(true)}
+            onClick={() => onEditingChange(true)}
             aria-label={t('flow.editMinutes', { count: minutes })}
           >
             {clock(total)}

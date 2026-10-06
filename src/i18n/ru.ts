@@ -232,9 +232,6 @@ export const ru: Translations = {
     logged: 'Фокус {count} мин · {label}',
     minutesShort: '{count} мин',
     custom: 'Своё',
-    customAria: 'Своя длительность в минутах',
-    minUnit: 'мин',
-    customRange: 'Любое время от {min} до {max} минут.',
     shorter: {
       one: 'На {count} минуту короче',
       few: 'На {count} минуты короче',
