@@ -5,7 +5,7 @@ import { useUiStore } from '@/stores/ui'
 
 /**
  * Desktop page toolbar (prototype .dk-tool): sticks to the top of the
- * workspace, fading the content that scrolls under it, with the ⌘K search pill
+ * workspace, blurring away the content that scrolls under it (`.toolbar-fade`), with the ⌘K search pill
  * and a "+" on the right. The screen's title fades in on the left once its
  * large heading has scrolled under the bar.
  */
@@ -21,7 +21,7 @@ export function DesktopToolbar({ title, compact }: DesktopToolbarProps) {
   const openCreate = useUiStore((s) => s.openCreate)
 
   return (
-    <div className="sticky top-0 z-20 -mx-8 hidden h-[60px] items-center gap-2.5 bg-gradient-to-b from-bg from-35% to-bg/0 pl-8 pr-6 lg:flex">
+    <div className="toolbar-fade sticky top-0 z-20 -mx-8 hidden h-[60px] items-center gap-2.5 pl-8 pr-6 lg:flex">
       <span aria-hidden="true" className={cn('toolbar-title truncate', compact && 'is-on')}>
         {title}
       </span>

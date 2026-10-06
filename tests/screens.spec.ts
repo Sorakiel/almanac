@@ -712,6 +712,31 @@ for (const v of VARIANTS) {
     await page.waitForTimeout(1400) // the medal lands, the check draws
     await shoot(page, `${v.name}-session-done`, false)
 
+    // Desktop: the sticky toolbar paints nothing over the daylight glow, so the
+    // top of the window has no seam where the sidebar ends. Shot at a few
+    // hours, at rest and scrolled (the title in the bar must stay readable).
+    if (v.width >= 1024) {
+      await page.goto('/')
+      await page.waitForLoadState('networkidle')
+      const bar = page.locator('.toolbar-fade')
+      await expect(bar).toBeVisible()
+      expect(await bar.evaluate((el) => getComputedStyle(el).backgroundImage)).toBe('none')
+      expect(await bar.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(
+        'rgba(0, 0, 0, 0)',
+      )
+      for (const hour of [7, 13, 21]) {
+        const at = new Date()
+        at.setHours(hour, 0, 0, 0)
+        await page.clock.setFixedTime(at)
+        // useDaylight re-reads the clock when the page becomes visible again.
+        await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))
+        await page.locator('main').evaluate((el) => el.scrollTo(0, 0))
+        await shoot(page, `${v.name}-glow-${hour}`, false)
+        await page.locator('main').evaluate((el) => el.scrollTo(0, 400))
+        await shoot(page, `${v.name}-glow-${hour}-scrolled`, false)
+      }
+    }
+
     expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
   })
 }
