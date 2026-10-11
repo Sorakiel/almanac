@@ -296,12 +296,11 @@ English and untranslated screens fall back to it, so a stage never regresses a s
 
 **v0.4 is closed:** timezone-correct days, bounded queries, e2e in CI, PostHog, a Grafana usage dashboard, Web Push reminders + weekly digest, PWA installability, offline reads _and_ writes, Russian across the member-facing UI, data export, passkeys (server-side off), and read-only Today widgets (Android AppWidget + macOS tray).
 
-**v0.5 «Альманах» is the current plan — see `../handoff.md`.** It finishes the almanac
-metaphor rather than adding a tenth life area: a real command line in the terminal header,
-a year strip, daylight-following background, a day seal replacing the perfect-day flash, a
-shareable day capsule, a typewriter narrator, and achievement stamps — plus the daily-loop
-fixes the 2026-08-06 audit found (action above the fold on mobile, 44px targets, the
-remaining i18n holes, eager-bundle chunking).
+**v0.6 is closed** (release v0.6.0, 2026-10-06): the redesign from the v0.6 prototype — three-level surfaces,
+theme-adaptive accent, Today / Progress / Modules navigation with the profile as the settings home, module
+screens and the motion layer — plus a rebuilt marketing landing in its own repo (`Sorakiel/almanac-landing`,
+with a phone layout). There is no active plan file: the history of what shipped is in git and the PR
+descriptions, and the next priorities come from the owner's own daily loop.
 
 Do **not** re-derive priorities from adoption numbers. There is one real user — the owner —
 so module-adoption counts measure nothing yet. Priority is judged by his own daily loop.
@@ -314,11 +313,10 @@ Keep the daily loop fast and low-friction above all — the #1 risk is still aba
 - After each slice: `prettier` → `tsc` → lint → unit tests → e2e → commit.
 - Work on a branch, open a PR, and **merge it yourself once CI is green**. Wait for an explicit yes only for migrations, auth/RLS changes, native builds, and data deletion.
 - Prefer **small PRs and frequent commits** over big drops.
-- **Verify before claiming.** Say which link you checked and which you could not — "works" without evidence is worse than "unproven". Two claims in this project turned out false on inspection; both are recorded in `../handoff.md` so they are not repeated.
+- **Verify before claiming.** Say which link you checked and which you could not — "works" without evidence is worse than "unproven". Two claims in this project turned out false on inspection — that is why this rule exists.
 - **Ask before destructive/irreversible actions:** deleting data, rewriting already-applied migrations, force-pushing, or changing auth/RLS in ways that could lock the owner out.
 - **Never handle the owner's credentials.** For GitHub/Vercel/Supabase auth, output the exact commands and pause for the owner to run them.
 - **You may sign in as the shared staging E2E account** to verify screens behind auth — but only through the e2e machinery (`tests/helpers/app.ts` `signIn`, credentials from CI secrets or an owner-provided `.env.e2e.local`), never by typing the password yourself. With no local credentials, verify through the CI `e2e` job: `tests/screens.spec.ts` uploads a `screens` artifact to `gh run download`.
 - **Never add AI/Claude attribution** anywhere — commits, PR bodies, release notes.
 - Reports to the owner are: what shipped · what they must do · how to see it. No narration of work in progress.
-- Keep `README.md`, this file and `../handoff.md` current when the architecture changes.
-- **v0.6 multi-chat resync.** When several named chats (Диспетчер/Планировщик/Вега/Орион/Лира) run in parallel, the owner restarts individual chats to reclaim context and resumes each with **"Продолжаем"**. Because this is the same message used for an ordinary mid-task nudge, treat any "Продолжаем" that opens a turn as a possible cold start: before acting on anything from the conversation history or a compaction summary (it can be stale or subtly wrong — this has happened), re-ground first — check your own worktree's `git status`/`git branch`/open PR, and re-read `../almanac-redesign-handoff/COORDINATION.md`'s latest "Ревизия" section for your name. If what you find matches what you were about to do, just continue — no need to announce it. If it doesn't match, or you can't tell what you were doing, message **Almanac · Диспетчер** with what you found and wait, rather than guessing or restarting the task from scratch.
+- Keep `README.md` and this file current when the architecture changes.
