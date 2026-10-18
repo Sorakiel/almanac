@@ -5,6 +5,7 @@ import { router } from '@/app/router'
 import { loadLocale } from '@/i18n'
 import { initAnalytics, trackError, trackPageView } from '@/lib/analytics'
 import { registerServiceWorker } from '@/lib/platform/serviceWorker'
+import { capturePendingRequest } from '@/features/connect/lib/pendingRequest'
 import { initPointerTracking } from '@/lib/viewTransition'
 import { useLocaleStore } from '@/stores/locale'
 import '@fontsource/inter/400.css'
@@ -13,6 +14,9 @@ import '@fontsource/inter/600.css'
 import '@fontsource/jetbrains-mono/400.css'
 import '@fontsource/jetbrains-mono/500.css'
 import '@/styles/globals.css'
+
+// An app's "Sign in with Almanac" request must survive the trip through /auth.
+capturePendingRequest()
 
 // Cache the app shell so a cold start works with no network. No-op in dev and
 // in the native shells, which serve their own copy of these files.

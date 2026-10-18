@@ -1,4 +1,4 @@
-import { AtSign, BarChart3, Heart, KeyRound, Lock, MessageSquare } from 'lucide-react'
+import { AppWindow, AtSign, BarChart3, Heart, KeyRound, Lock, MessageSquare } from 'lucide-react'
 import { ListSwitch } from '@/features/profile/components/ListSwitch'
 import { SettingsGroup } from '@/features/profile/components/SettingsGroup'
 import { SettingsItem } from '@/features/profile/components/SettingsItem'
@@ -45,6 +45,12 @@ export function AccountSettings({ email, supportVisible, onOpen }: AccountSettin
           icon={Lock}
           label={t('settings.password')}
           onClick={() => onOpen('password')}
+        />
+        <SettingsItem
+          icon={AppWindow}
+          tile="violet"
+          label={t('connect.appsTitle')}
+          onClick={() => onOpen('apps')}
         />
       </SettingsGroup>
 

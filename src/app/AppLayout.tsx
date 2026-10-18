@@ -10,6 +10,7 @@ import { DesktopToolbar } from '@/app/shell/DesktopToolbar'
 import { ErrorState } from '@/components/common/ErrorState'
 import { HabitFormSheet } from '@/features/habits/components/HabitFormSheet'
 import { CreateSheet } from '@/app/shell/CreateSheet'
+import { ConsentHost } from '@/features/connect/components/ConsentHost'
 import { useCelebrationWatchers } from '@/app/hooks/useCelebrationWatchers'
 import { useDailyReminder } from '@/app/hooks/useDailyReminder'
 import { useHabitReminders } from '@/app/hooks/useHabitReminders'
@@ -137,6 +138,7 @@ export function AppLayout() {
       <CommandPalette />
       <SyncCapsule />
       <CelebrationHost />
+      <ConsentHost />
     </div>
   )
 }

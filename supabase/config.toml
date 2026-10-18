@@ -16,3 +16,8 @@ enable_signup = true
 # Disable confirmation locally so the smoke test can sign in immediately.
 # Keep confirmations ON in production.
 enable_confirmations = false
+
+[functions.oauth]
+# A browser opening /authorize carries no token, and /token authenticates the
+# client itself (see supabase/functions/oauth/index.ts).
+verify_jwt = false
