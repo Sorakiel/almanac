@@ -1,4 +1,5 @@
 import type { Profile } from '@/features/settings/api/profiles.api'
+import { ConnectedAppsSheet } from '@/features/connect/components/ConnectedAppsSheet'
 import { BackgroundSheet } from '@/features/settings/components/BackgroundSheet'
 import { DigestSheet } from '@/features/settings/components/DigestSheet'
 import { DisplayNameSheet } from '@/features/settings/components/DisplayNameSheet'
@@ -25,6 +26,7 @@ export type SettingsSheetId =
   | 'export'
   | 'support'
   | 'background'
+  | 'apps'
 
 interface SettingsSheetsProps {
   open: SettingsSheetId | null
@@ -81,6 +83,7 @@ export function SettingsSheets({ open, onClose, profile, name, email }: Settings
       <ExportSheet key={key('export')} {...at('export')} />
       <SupportSheet key={key('support')} {...at('support')} />
       <BackgroundSheet key={key('background')} {...at('background')} />
+      <ConnectedAppsSheet key={key('apps')} {...at('apps')} />
     </>
   )
 }

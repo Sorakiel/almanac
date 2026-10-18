@@ -865,3 +865,50 @@ for (const width of [940, 1024, 1280]) {
     expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
   })
 }
+
+/**
+ * "Sign in with Almanac": the consent modal an app opens over Today, and the
+ * Connected apps sheet. The request comes from the real /authorize endpoint,
+ * as an app's would; nothing is approved, so it simply expires.
+ */
+for (const v of [VARIANTS[0], VARIANTS[1], VARIANTS[2], VARIANTS[3]]) {
+  test(`screens · ${v.name}-oauth-consent`, async ({ page }) => {
+    const errors = watchConsole(page)
+    await page.setViewportSize({ width: v.width, height: v.height })
+    await signIn(page)
+    await applyPrefs(page, v.theme, v.locale)
+
+    const challenge = 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM'
+    const authorize = new URL(`${process.env.VITE_SUPABASE_URL}/functions/v1/oauth/authorize`)
+    authorize.search = new URLSearchParams({
+      response_type: 'code',
+      client_id: 'almanac-notch',
+      redirect_uri: 'http://127.0.0.1:53124/oauth/callback',
+      scope: 'habits:read habits:write',
+      code_challenge: challenge,
+      code_challenge_method: 'S256',
+      state: 'screens',
+    }).toString()
+    const res = await fetch(authorize, { redirect: 'manual' })
+    const requestId = new URL(res.headers.get('location') ?? '', 'http://x').searchParams.get(
+      'oauth_request',
+    )
+    expect(requestId, `authorize answered ${res.status}`).toBeTruthy()
+
+    await page.goto(`/?oauth_request=${requestId}`)
+    const dialog = page.getByRole('dialog', { name: 'Вход в Almanac Notch' })
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByText('Видеть ваши привычки на сегодня')).toBeVisible()
+    await expect(dialog.getByRole('button', { name: 'Разрешить' })).toBeVisible()
+    await expect(page).not.toHaveURL(/oauth_request/)
+    await shoot(page, `${v.name}-oauth-consent`, false)
+
+    // Unanswered, the request would reopen over the next screen too.
+    await page.evaluate(() => localStorage.removeItem('almanac.oauthRequest'))
+    await page.goto('/profile')
+    await page.getByRole('button', { name: /Подключённые приложения/ }).click()
+    await expect(page.getByRole('dialog', { name: 'Подключённые приложения' })).toBeVisible()
+    await shoot(page, `${v.name}-connected-apps`, false)
+    expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([])
+  })
+}

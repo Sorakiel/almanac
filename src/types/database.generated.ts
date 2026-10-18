@@ -13,7 +13,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -939,6 +939,8 @@ export type Database = {
             }[]
           }
       admin_delete_user: { Args: { target: string }; Returns: undefined }
+      app_token_gate: { Args: never; Returns: undefined }
+      app_token_path_allowed: { Args: { p_path: string }; Returns: boolean }
       are_friends: { Args: { a: string; b: string }; Returns: boolean }
       ensure_workout_session: {
         Args: { p_date: string; p_workout_id: string }
@@ -967,6 +969,51 @@ export type Database = {
         }
         Returns: undefined
       }
+      oauth_connected_apps: { Args: never; Returns: Json }
+      oauth_decide: {
+        Args: { p_approve: boolean; p_request: string }
+        Returns: Json
+      }
+      oauth_disconnect: { Args: { p_client: string }; Returns: undefined }
+      oauth_request_details: { Args: { p_request: string }; Returns: Json }
+      oauth_svc_authorize: {
+        Args: {
+          p_client_id: string
+          p_code_challenge: string
+          p_code_challenge_method: string
+          p_redirect_uri: string
+          p_scope: string
+          p_state: string
+        }
+        Returns: Json
+      }
+      oauth_svc_exchange_code: {
+        Args: {
+          p_client_id: string
+          p_client_secret: string
+          p_code: string
+          p_code_verifier: string
+          p_redirect_uri: string
+        }
+        Returns: Json
+      }
+      oauth_svc_refresh: {
+        Args: {
+          p_client_id: string
+          p_client_secret: string
+          p_refresh_token: string
+        }
+        Returns: Json
+      }
+      oauth_svc_revoke: {
+        Args: { p_client_id: string; p_client_secret: string; p_token: string }
+        Returns: Json
+      }
+      oauth_svc_revoke_access: {
+        Args: { p_client_id: string; p_client_secret: string; p_user: string }
+        Returns: Json
+      }
+      require_app_scope: { Args: { p_scope: string }; Returns: undefined }
       search_profiles: {
         Args: { q: string }
         Returns: {
@@ -1002,6 +1049,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      today_habits: { Args: { p_date: string }; Returns: Json }
+      toggle_habit: { Args: { p_date: string; p_habit: string }; Returns: Json }
     }
     Enums: {
       book_progress_mode: "pages" | "chapters"
@@ -1033,12 +1082,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1062,11 +1111,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1087,11 +1136,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1112,11 +1161,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1129,11 +1178,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

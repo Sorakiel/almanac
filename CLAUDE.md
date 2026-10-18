@@ -137,6 +137,8 @@ All user-owned tables carry `user_id` and are protected by RLS. Use `timestamptz
 - **Wrap `auth.uid()` in a scalar subquery** in every policy — `user_id = (select auth.uid())`. Bare, it is re-evaluated per row; the planner hoists the subquery. This was worth 68 advisor warnings.
 - The **`analytics` schema crosses RLS on purpose** (owner-privileged views, no `security_invoker`) because a cross-user aggregate cannot work otherwise. Its column list is therefore the only thing between a Grafana dashboard and everyone's data: **counts and dates only — never a name, title or body.**
 
+**Sign in with Almanac (OAuth, `0040_oauth`).** Outside apps get a JWT with role `almanac_app`, which has **no table privileges**. Its state lives in the unexposed `oauth` schema (clients, scopes, requests, grants, refresh tokens). `public.app_token_gate` runs before every Data API request (`pgrst.db_pre_request` on `authenticator`) and lets that role reach only the functions in `oauth.api_functions`; each of those is `security definer`, filters by `auth.uid()` itself and calls `require_app_scope('<module>:<action>')`. A new app = a row in `oauth.clients`; a new API function for apps = a row in `oauth.api_functions` + the scope check + a grant to `almanac_app`. Never drop or break `app_token_gate` without clearing the role setting first — PostgREST would fail every request. Flow and endpoints: `docs/API.md`.
+
 **Timezone rule:** store instants in UTC; determine "today" from `profiles.timezone`; `habit_logs.date` is the user's _local_ calendar date, computed client-side. Getting this wrong silently corrupts streaks.
 
 ## 6. Design system
@@ -278,6 +280,7 @@ English and untranslated screens fall back to it, so a stage never regresses a s
 - **Backups:** a nightly GitHub Action pg_dumps the database, encrypts it, and uploads it as an artifact (90-day retention, same repo as the code). **A restore has never been rehearsed** — when it matters, restore into a scratch Supabase project, not a vanilla Postgres container.
 - **Two Supabase projects.** Prod `fddabnnsgfjmlgeoeksz`, staging `lahcyvybqqwkocrbtpyv`, both eu-west-2. **Every migration goes to staging first**, gets verified there, then to prod. There is no local stack — Docker is off the table by the owner's decision.
 - **Edge functions + pg_cron** run the daily reminder: an hourly-ish (`*/5`) tick invokes `daily-reminder`, which decides who is due from each profile's timezone and reminder time.
+- **`oauth` edge function** (verify_jwt off) signs app access tokens with `OAUTH_SIGNING_JWK`, a private key imported into the project's JWT signing keys as a **standby** key — that is what makes the Data API trust it. **Never press "Rotate" on it**: Auth would start signing every session with it. `APP_URL` is where it sends the user for consent (staging: `http://localhost:5173`). `supabase/tests/oauth_flow.mjs` checks the whole flow against staging.
 - **Vercel Hobby is personal/non-commercial** — fine for friends-and-family. If it ever earns money, move to Pro.
 
 ## 13. Definition of done (per feature)
