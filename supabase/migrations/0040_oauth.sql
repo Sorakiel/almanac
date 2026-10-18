@@ -56,8 +56,9 @@ create table oauth.clients (
   check ((client_type = 'confidential') = (secret_hash is not null))
 );
 
-insert into oauth.clients (id, name, redirect_uris, scopes) values
-  ('almanac-notch', 'Almanac Notch', array['http://127.0.0.1:*/oauth/callback'], array['habits:read', 'habits:write']);
+insert into oauth.clients (id, name, icon_url, redirect_uris, scopes) values
+  ('almanac-notch', 'Almanac Notch', 'https://almanac-sorakiels-projects.vercel.app/apps/almanac-notch.png',
+   array['http://127.0.0.1:*/oauth/callback'], array['habits:read', 'habits:write']);
 
 -- Functions an app token may call, and the scope each needs. The gate reads
 -- this; the function still checks its own scope.
