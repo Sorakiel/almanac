@@ -1,4 +1,4 @@
--- Checks for 0039_integration_api (today_habits / toggle_habit).
+-- Checks for 0039_integration_api (today_habits / toggle_habit) and 0041 (schedule, history).
 --
 -- There is no local stack, so this runs against staging as one statement that
 -- always ends in an exception: every fixture row is rolled back whether the
@@ -73,13 +73,37 @@ begin
   if r->>'date' <> '2026-10-17' then
     raise exception 'date: got %', r->>'date';
   end if;
-  if (select x from jsonb_array_elements(r->'habits') x where x->>'name' = 'water')
-     <> jsonb_build_object('id', h_water, 'name', 'water', 'icon', null, 'color', null, 'unit', null,
-                           'slot', 'evening', 'count', 1, 'goal', 3, 'done', false) then
+  if not (select x from jsonb_array_elements(r->'habits') x where x->>'name' = 'water')
+     @> jsonb_build_object('id', h_water, 'name', 'water', 'icon', null, 'color', null, 'unit', null,
+                           'slot', 'evening', 'count', 1, 'goal', 3, 'done', false,
+                           'frequency', 'daily', 'target', 1) then
     raise exception 'water row: got %', (select x from jsonb_array_elements(r->'habits') x where x->>'name' = 'water');
   end if;
   if (select x->>'slot' from jsonb_array_elements(r->'habits') x where x->>'name' = 'weekly') <> 'week' then
     raise exception 'weekly slot';
+  end if;
+
+  -- history (0041): 64 days, oldest first, today last; '1' done, 'f' frozen, '0' else
+  if exists (select 1 from jsonb_array_elements(r->'habits') x where length(x->>'history') <> 64) then
+    raise exception 'history length';
+  end if;
+  if (select right(x->>'history', 4) from jsonb_array_elements(r->'habits') x where x->>'name' = 'interval due') <> '1000' then
+    raise exception 'interval due history: got %',
+      (select right(x->>'history', 4) from jsonb_array_elements(r->'habits') x where x->>'name' = 'interval due');
+  end if;
+  if (select right(x->>'history', 1) from jsonb_array_elements(r->'habits') x where x->>'name' = 'frozen done') <> '1' then
+    raise exception 'frozen done history: done wins over frozen';
+  end if;
+  if (select right(x->>'history', 2) from jsonb_array_elements(r->'habits') x where x->>'name' = 'water') <> '00' then
+    raise exception 'water history: 1 of 3 is not done';
+  end if;
+  if (select x->>'frequency' || '/' || (x->>'target') from jsonb_array_elements(r->'habits') x where x->>'name' = 'interval due')
+     <> 'every_n_days/3' then
+    raise exception 'interval due schedule';
+  end if;
+  -- a frozen, not done day reads 'f': yesterday of the skipped habit, seen from tomorrow
+  if (select substr(x->>'history', 63, 1) from jsonb_array_elements(today_habits(d + 1)->'habits') x where x->>'name' = 'skipped') <> 'f' then
+    raise exception 'skipped history: frozen day';
   end if;
 
   -- Monday: the weekdays habit is back.
